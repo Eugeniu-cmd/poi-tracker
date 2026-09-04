@@ -1,0 +1,5 @@
+CLAUDE.local.md
+docs/inputs/*
+!docs/inputs/README.md
+*.log
+.DS_Store

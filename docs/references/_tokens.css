@@ -1,0 +1,83 @@
+/* POI Tracker — design tokens.
+   v0.2 — 2026-09-03
+   Version history (append-only, never rewrite old entries):
+   v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
+   v0.2 2026-09-03 — header translated to English; token values unchanged.
+   Rules: every reference imports this file; tokens are never edited in
+   passing — only by a dedicated decision. */
+
+:root {
+  --bg: #F4F5F2;
+  --panel: #FFFFFF;
+  --line: #DCDFD9;
+  --ink: #17191E;
+  --ink-2: #5B6068;
+  --ink-3: #9AA0A8;
+  --disc: #17191E;
+  --disc-glyph: #FFFFFF;
+  --side: #F2A81D;
+  --side-glyph: #17191E;
+  --side-ring: #C8860A;
+  --ok: #1E9E5A;
+  --ok-bg: #E4F5EA;
+  --err: #D8382F;
+  --err-bg: #FBE7E5;
+  --warn: #E08A00;
+  --warn-bg: #FFF1DB;
+  --active: #FFF3D6;
+  --active-line: #F2A81D;
+  --focus: #1F5EFF;
+  --shadow: 0 8px 24px rgba(23,25,30,.14);
+  --r-sm: 10px;
+  --r-md: 16px;
+  --font: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --tap-min: 44px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101216;
+    --panel: #181B21;
+    --line: #2B2F37;
+    --ink: #F1F2EE;
+    --ink-2: #A7ADB6;
+    --ink-3: #6D737C;
+    --disc: #F1F2EE;
+    --disc-glyph: #101216;
+    --side: #F2A81D;
+    --side-glyph: #101216;
+    --side-ring: #FFC85A;
+    --ok: #3ECC82;
+    --ok-bg: #16311F;
+    --err: #FF6B62;
+    --err-bg: #3B1B19;
+    --warn: #FFB13D;
+    --warn-bg: #3A2A10;
+    --active: #3A2C0F;
+    --active-line: #F2A81D;
+    --shadow: 0 8px 24px rgba(0,0,0,.45);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #101216;
+  --panel: #181B21;
+  --line: #2B2F37;
+  --ink: #F1F2EE;
+  --ink-2: #A7ADB6;
+  --ink-3: #6D737C;
+  --disc: #F1F2EE;
+  --disc-glyph: #101216;
+  --side: #F2A81D;
+  --side-glyph: #101216;
+  --side-ring: #FFC85A;
+  --ok: #3ECC82;
+  --ok-bg: #16311F;
+  --err: #FF6B62;
+  --err-bg: #3B1B19;
+  --warn: #FFB13D;
+  --warn-bg: #3A2A10;
+  --active: #3A2C0F;
+  --active-line: #F2A81D;
+  --shadow: 0 8px 24px rgba(0,0,0,.45);
+}
