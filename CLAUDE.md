@@ -27,5 +27,6 @@ Where to look:
 | Data model, Журнал sheet, mailbox contract | docs/data-model.md |
 | Screen decision registry | docs/screens.md |
 | Design tokens | docs/references/_tokens.css |
-| Project context, spreadsheets, known bugs | docs/inputs/handoff_v2.md |
+| Spreadsheet layouts, export procedure, bug rules | docs/spreadsheets.md |
+| Superseded planning dump (Russian, historical) | docs/inputs/ARCHIVE_handoff_v2_2026-09-02.md |
 | RECON snapshots | _recon/ |
