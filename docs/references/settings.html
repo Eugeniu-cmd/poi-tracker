@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<!--
+  ================================================================
+  POI Tracker — Settings Reference
+  File: docs/references/settings.html
+
+  Iteration plan:
+  v0.1 — 2026-09-05 — first reference: city list, city editor, route
+          editor. Follows screens.md v0.6 (items 20–24) and data-model.md
+          v0.4. Glass direction (_tokens.css v0.3), light appearance
+          forced. Reference device: Android tablet 10.6", 1000 × 600 px.
+  v0.2 — 2026-09-05 — city screen split: connection details moved to their
+          own screen behind a status row, so routes are what the city
+          screen shows. UI wording changed to "Connection", "Script URL"
+          and "Access key"; "Mailbox" no longer appears on screen.
+          Reference device: Android tablet 10.6", 1000 × 600 px.
+  v0.3 — 2026-09-05 — "Delete route" now uses the destructive style of
+          "Delete city", dimmed rather than greyed: colour carries the
+          role, opacity carries the state. Reference device: Android
+          tablet 10.6", 1000 × 600 px.
+  ================================================================
+-->
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<title>POI Tracker — Settings Reference v0.3</title>
+<link rel="stylesheet" href="_tokens.css">
+<style>
+  /* ============================================================
+     PAGE CHROME — not part of the product. Hardcoded colors are
+     deliberate here: this is the presentation board, and it must
+     contrast with the mockup so the frame reads as a device.
+     ============================================================ */
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 40px 44px 56px; background: #23262F; color: #E7E9F0;
+         font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .eyebrow { font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+             color: #8A90A6; margin: 0 0 10px; }
+  h1 { margin: 0 0 12px; font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
+  .meta { margin: 0 0 34px; font-size: 14px; line-height: 1.65; color: #A6ACC0;
+          max-width: 900px; }
+  .meta b { color: #E7E9F0; font-weight: 600; }
+  .rail { display: flex; align-items: flex-start; gap: 40px; }
+  .unit { display: flex; align-items: flex-start; gap: 26px; flex: none; }
+  .device { flex: none; }
+  .bezel { width: 1014px; height: 614px; padding: 7px; background: #0C0E14;
+           border-radius: 29px; box-shadow: 0 26px 60px rgba(0,0,0,.55),
+           0 0 0 1px rgba(255,255,255,.06) inset; }
+  .caption { margin: 14px 0 0; font-size: 11px; letter-spacing: .16em;
+             text-transform: uppercase; color: #8A90A6; }
+  .dmap { flex: none; width: 300px; background: #2B2F3A; border-radius: 14px;
+          padding: 20px 20px 8px; border: 1px solid #383D4B; }
+  .dmap-title { font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+                color: #8A90A6; margin-bottom: 14px; }
+  .dtopic { margin-bottom: 18px; }
+  .dtopic h3 { margin: 0 0 5px; font-size: 14px; font-weight: 700; color: #F2F4FA; }
+  .dtopic p { margin: 0; font-size: 12.5px; line-height: 1.55; color: #BFC5D6; }
+  .dtopic p.why { margin-top: 5px; color: #878DA1; }
+
+  /* ============================================================
+     SCREEN CONTENT: tokens only
+     Everything below styles what is inside the device frame.
+     No hardcoded colors, radii, fonts or shadows may appear here
+     — only var(--…) from _tokens.css v0.3.
+     ============================================================ */
+  .screen { width: 1000px; height: 600px; display: flex; flex-direction: column;
+            overflow: hidden; border-radius: 22px; background: var(--bg);
+            background-image: var(--bg-grad);
+            font-family: var(--font); color: var(--ink); }
+
+  /* ---- top bar: glass (blurred), panel level ---- */
+  .topbar { height: 64px; flex: none; display: flex; align-items: center; gap: 14px;
+            padding: 0 22px; background: var(--panel);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
+            border-bottom: 1px solid var(--line); }
+  .back { display: inline-flex; align-items: center; justify-content: center;
+          width: var(--tap-min); height: var(--tap-min); font-size: 20px;
+          color: var(--ink); background: var(--panel-strong);
+          border: 1px solid var(--panel-edge); border-radius: var(--r-sm); }
+  .ttl { font-size: 20px; font-weight: 700; color: var(--ink); }
+  .ttl-sub { font-size: 12px; color: var(--ink-2); margin-left: auto; }
+
+  /* ---- body ---- */
+  .body { flex: 1; display: flex; gap: 18px; padding: 18px 22px; overflow: hidden; }
+  .col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .col.narrow { flex: none; width: 420px; }
+  .col.side { flex: none; width: 360px; }
+
+  /* ---- panel: glass (blurred), panel level ---- */
+  .panel { background: var(--panel); backdrop-filter: blur(var(--blur));
+           -webkit-backdrop-filter: blur(var(--blur));
+           border: 1px solid var(--panel-edge); border-radius: var(--r-md);
+           box-shadow: var(--shadow); padding: 16px 18px; overflow: hidden; }
+  .panel + .panel { margin-top: 14px; }
+  .panel.grow { flex: 1; }
+  .sect { font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+          color: var(--ink-3); margin-bottom: 12px; }
+
+  /* ---- list rows: translucent, NEVER blurred ---- */
+  .crow { display: flex; align-items: center; gap: 12px; min-height: 60px;
+          padding: 10px 14px; background: var(--panel-strong);
+          border: 1px solid var(--line); border-radius: var(--r-sm); }
+  .crow + .crow { margin-top: 8px; }
+  .crow.active { background: var(--active);
+                 box-shadow: inset 3px 0 0 0 var(--active-line); }
+  .cname { font-size: 17px; font-weight: 700; color: var(--ink); }
+  .cmeta { font-size: 12px; color: var(--ink-2); margin-top: 3px; }
+  .chev { margin-left: auto; font-size: 16px; color: var(--ink-3); }
+
+  .rrow { display: flex; align-items: center; gap: 10px; height: var(--tap-min);
+          padding: 0 14px; background: var(--panel-strong);
+          border: 1px solid var(--line); border-radius: var(--r-sm); }
+  .rrow + .rrow { margin-top: 6px; }
+  .rcode { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .rpoi { font-size: 12px; color: var(--ink-2); }
+  .redit { margin-left: auto; font-size: 12px; color: var(--ink-2);
+           padding: 5px 10px; background: var(--panel);
+           border: 1px solid var(--line); border-radius: var(--r-sm); }
+
+  /* ---- form fields ---- */
+  .field { margin-bottom: 14px; }
+  .field.last { margin-bottom: 0; }
+  .flabel { font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+            color: var(--ink-3); margin-bottom: 5px; }
+  .fval { height: var(--tap-min); line-height: 42px; padding: 0 14px;
+          font-size: 15px; color: var(--ink); background: var(--panel-solid);
+          border: 1px solid var(--line); border-radius: var(--r-sm);
+          overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .fval.mask { letter-spacing: .22em; }
+  .fhint { font-size: 11px; color: var(--ink-3); margin-top: 5px; }
+  .ro { height: var(--tap-min); line-height: 42px; padding: 0 14px;
+        font-size: 15px; font-weight: 700; color: var(--ink-2);
+        background: var(--panel); border: 1px solid var(--line);
+        border-radius: var(--r-sm); }
+
+  /* ---- controls: solid, never glass ---- */
+  .row-btns { display: flex; gap: 10px; margin-top: 4px; }
+  .btn { display: inline-flex; align-items: center; height: var(--tap-min);
+         padding: 0 16px; font-size: 13px; font-weight: 600; color: var(--ink);
+         background: var(--panel-strong); border: 1px solid var(--panel-edge);
+         border-radius: var(--r-sm); }
+  .btn.primary { color: var(--side-glyph); background: var(--side);
+                 border-color: var(--side-ring); }
+  .btn.add { width: 100%; justify-content: center; margin-top: 10px;
+             color: var(--ink-2); background: var(--panel);
+             border: 1px solid var(--line); }
+  .btn.danger { color: var(--err); background: var(--err-bg);
+                border-color: var(--line); }
+  /* State, not role: an unavailable control keeps every colour it already
+     has and is only dimmed. Same rule as the maneuver discs on a finished
+     POI in main-screen.html. */
+  .btn.unavailable { opacity: .4; pointer-events: none; }
+  .danger-wrap { margin-top: auto; padding-top: 14px; }
+  .danger-note { font-size: 11px; color: var(--ink-3); margin-top: 6px; }
+  .statusline { font-size: 12px; color: var(--ok); font-weight: 600;
+                margin-top: 12px; }
+
+  /* ---- footer strip: glass (blurred), panel level ---- */
+  .footbar { height: 40px; flex: none; display: flex; align-items: center;
+             padding: 0 22px; font-size: 12px; color: var(--ink-2);
+             background: var(--panel); backdrop-filter: blur(var(--blur));
+             -webkit-backdrop-filter: blur(var(--blur));
+             border-top: 1px solid var(--line); }
+  /* ==================== END SCREEN CONTENT ==================== */
+</style>
+</head>
+<body>
+
+  <p class="eyebrow">Design Reference · docs/references/settings.html</p>
+  <h1>POI Tracker — Settings Reference</h1>
+  <p class="meta"><b>v0.3 — 2026-09-05.</b> An unavailable "Delete route" now
+     keeps the same red destructive styling as "Delete city" and is simply
+     dimmed with its reason captioned underneath, so colour carries the role of
+     a control and opacity carries its state.
+     <b>Reference device: Android tablet 10.6", 1000 × 600 px</b>
+     (2000 × 1200 physical at 2× density), landscape, full-screen.</p>
+
+  <div class="rail">
+
+    <div class="unit">
+      <div class="device">
+        <div class="bezel">
+          <div class="screen">
+
+            <div class="topbar">
+              <span class="back">‹</span>
+              <span class="ttl">Settings</span>
+            </div>
+
+            <div class="body">
+              <div class="col narrow">
+                <div class="panel grow">
+                  <div class="sect">Cities</div>
+
+                  <div class="crow active">
+                    <div>
+                      <div class="cname">Düsseldorf</div>
+                      <div class="cmeta">6 routes · Connected</div>
+                    </div>
+                    <span class="chev">›</span>
+                  </div>
+
+                  <div class="crow">
+                    <div>
+                      <div class="cname">Vienna</div>
+                      <div class="cmeta">0 routes · Connection not set</div>
+                    </div>
+                    <span class="chev">›</span>
+                  </div>
+
+                  <span class="btn add">Add city</span>
+                </div>
+              </div>
+              <div class="col"></div>
+            </div>
+
+            <div class="footbar">All sent · 12:41</div>
+
+          </div>
+          <!-- /screen -->
+        </div>
+        <p class="caption">Screen 1 · City list</p>
+      </div>
+
+      <aside class="dmap">
+        <div class="dmap-title">Decision map · Screen 1</div>
+
+        <div class="dtopic">
+          <h3>Cities are a list, not one address</h3>
+          <p>Settings holds a list that grows: Dortmund, then Düsseldorf, then
+             Vienna. Each entry carries its own connection details and its own
+             routes rather than overwriting a single global field.</p>
+          <p class="why"><em>Every city is a separate Google tracker, so a single
+             editable address would mean retyping it on every move and losing the
+             previous city's routes and baseline the moment the work
+             shifts.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>The active city is marked twice</h3>
+          <p>The row here carries the active highlight, and the same city name
+             sits beside the route picker on the working screen.</p>
+          <p class="why"><em>A tap writes into one specific tracker. Showing the
+             target only in Settings would mean the one screen where passes are
+             actually recorded never says which city it is filling.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>A city is never deleted automatically</h3>
+          <p>Finishing a city and moving to the next one adds an entry; nothing
+             is cleaned up on the way out. Removal is always an explicit act.</p>
+          <p class="why"><em>A finished city still holds its baseline and its
+             history, and may still hold passes that never reached the sheet.
+             Automatic tidying would throw those away silently.</em></p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="unit">
+      <div class="device">
+        <div class="bezel">
+          <div class="screen">
+
+            <div class="topbar">
+              <span class="back">‹</span>
+              <span class="ttl">Düsseldorf</span>
+              <span class="ttl-sub">City</span>
+            </div>
+
+            <div class="body">
+              <div class="col side">
+                <div class="panel">
+                  <div class="field last">
+                    <div class="flabel">City name</div>
+                    <div class="fval">Düsseldorf</div>
+                  </div>
+                </div>
+
+                <div class="panel">
+                  <div class="crow">
+                    <div>
+                      <div class="cname">Connection</div>
+                      <div class="cmeta">Connected · tested 12:38</div>
+                    </div>
+                    <span class="chev">›</span>
+                  </div>
+                </div>
+
+                <div class="danger-wrap">
+                  <span class="btn danger">Delete city</span>
+                </div>
+              </div>
+
+              <div class="col">
+                <div class="panel grow">
+                  <div class="sect">Routes</div>
+                  <div class="rrow"><span class="rcode">R20890-024</span><span class="rpoi">197 POIs</span><span class="redit">Edit</span></div>
+                  <div class="rrow"><span class="rcode">R20890-025</span><span class="rpoi">197 POIs</span><span class="redit">Edit</span></div>
+                  <div class="rrow"><span class="rcode">R20890-026</span><span class="rpoi">197 POIs</span><span class="redit">Edit</span></div>
+                  <div class="rrow"><span class="rcode">R20890-027</span><span class="rpoi">197 POIs</span><span class="redit">Edit</span></div>
+                  <div class="rrow"><span class="rcode">R20890-028</span><span class="rpoi">197 POIs</span><span class="redit">Edit</span></div>
+                  <div class="rrow"><span class="rcode">R20890-029</span><span class="rpoi">197 POIs</span><span class="redit">Edit</span></div>
+                  <span class="btn add">Add route</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <!-- /screen -->
+        </div>
+        <p class="caption">Screen 2 · City — Düsseldorf</p>
+      </div>
+
+      <aside class="dmap">
+        <div class="dmap-title">Decision map · Screen 2</div>
+
+        <div class="dtopic">
+          <h3>Connection is one row, not three fields</h3>
+          <p>The address and the key are entered once in the life of a city and
+             then never read again, so they collapse into a single row that
+             states its status and opens a screen of its own.</p>
+          <p class="why"><em>Ranking a screen by how often each thing is used
+             beats ranking it by setup order. Three setup fields at the top push
+             the routes — the reason the screen is opened at all — below a field
+             nobody looks at twice.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>Routes fill the screen</h3>
+          <p>The route list takes the largest region and shows all six at once,
+             each at full tap size, with adding a route at the end of the
+             list.</p>
+          <p class="why"><em>Routes are the working content of a city: they are
+             checked, corrected and added throughout a job. Content that changes
+             often deserves the space, and seeing the whole set at once is what
+             makes a missing or mistyped route obvious.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>Deleting a city is explicit and low</h3>
+          <p>The control sits at the bottom of the column in a muted destructive
+             style, away from the routes and the connection row.</p>
+          <p class="why"><em>It is the only action here that can lose field work
+             that never reached a spreadsheet. Distance and a quiet style are the
+             cheapest guard against a mis-tap while scrolling.</em></p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="unit">
+      <div class="device">
+        <div class="bezel">
+          <div class="screen">
+
+            <div class="topbar">
+              <span class="back">‹</span>
+              <span class="ttl">Connection</span>
+              <span class="ttl-sub">Düsseldorf</span>
+            </div>
+
+            <div class="body">
+              <div class="col narrow">
+                <div class="panel">
+                  <div class="field">
+                    <div class="flabel">Script URL</div>
+                    <div class="fval">https://script.google.com/…/exec</div>
+                    <div class="fhint">The address Apps Script gives you after deployment</div>
+                  </div>
+
+                  <div class="field">
+                    <div class="flabel">Access key</div>
+                    <div class="fval mask">••••••</div>
+                    <div class="fhint">Stored on this tablet only — never in the project</div>
+                  </div>
+
+                  <div class="row-btns">
+                    <span class="btn">Test connection</span>
+                    <span class="btn primary">Save</span>
+                  </div>
+
+                  <div class="statusline">Connected · tested 12:38</div>
+                </div>
+              </div>
+              <div class="col"></div>
+            </div>
+
+          </div>
+          <!-- /screen -->
+        </div>
+        <p class="caption">Screen 3 · Connection — Düsseldorf</p>
+      </div>
+
+      <aside class="dmap">
+        <div class="dmap-title">Decision map · Screen 3</div>
+
+        <div class="dtopic">
+          <h3>The key and the URL live on the tablet</h3>
+          <p>Both are entered here and saved to this device only. Neither ever
+             appears in a project file, a prompt or a chat message.</p>
+          <p class="why"><em>The address plus its key is write access to the
+             user's live tracker. Anything committed to the repository is
+             effectively published, and a deployment address cannot be rotated as
+             easily as a key.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>"Script URL" and "Access key", not "Mailbox" and "Password"</h3>
+          <p>The screen names each thing as the user meets it: the URL is
+             literally the link Apps Script hands back after deployment, and the
+             key is a secret this app invents for itself.</p>
+          <p class="why"><em>Mailbox is our internal word for the Apps Script and
+             means nothing to the person typing; password would suggest the
+             Google account credential and invite someone to paste it here. The
+             documentation may keep saying mailbox — the interface may not.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>Testing is a button, not an automatic act</h3>
+          <p>"Test connection" sits beside Save and is pressed deliberately; the
+             result appears as a status line under the buttons.</p>
+          <p class="why"><em>A test fired on every keystroke would hammer a live
+             spreadsheet with half-typed addresses and turn a normal edit into a
+             stream of failures. Pressing it is also the moment the user actually
+             wants an answer.</em></p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="unit">
+      <div class="device">
+        <div class="bezel">
+          <div class="screen">
+
+            <div class="topbar">
+              <span class="back">‹</span>
+              <span class="ttl">R20890-028</span>
+              <span class="ttl-sub">Route editor · Düsseldorf</span>
+            </div>
+
+            <div class="body">
+              <div class="col narrow">
+                <div class="panel">
+                  <div class="sect">Route</div>
+
+                  <div class="field">
+                    <div class="flabel">Route code</div>
+                    <div class="fval">R20890-028</div>
+                    <div class="fhint">Must match the sheet name in this city's tracker</div>
+                  </div>
+
+                  <div class="field">
+                    <div class="flabel">POI count</div>
+                    <div class="fval">197</div>
+                  </div>
+
+                  <div class="field">
+                    <div class="flabel">Passes per POI</div>
+                    <div class="ro">Passes per POI: 70</div>
+                    <div class="fhint">Fixed for the whole project</div>
+                  </div>
+
+                  <div class="row-btns">
+                    <span class="btn primary">Save</span>
+                    <span class="btn">Cancel</span>
+                  </div>
+                </div>
+
+                <div class="danger-wrap">
+                  <span class="btn danger unavailable">Delete route</span>
+                  <div class="danger-note">32 passes not yet sent</div>
+                </div>
+              </div>
+              <div class="col"></div>
+            </div>
+
+          </div>
+          <!-- /screen -->
+        </div>
+        <p class="caption">Screen 4 · Route editor — R20890-028</p>
+      </div>
+
+      <aside class="dmap">
+        <div class="dmap-title">Decision map · Screen 4</div>
+
+        <div class="dtopic">
+          <h3>Passes per POI is shown, not editable</h3>
+          <p>The figure sits in the form as a read-only line rather than being
+             hidden away or offered as an input.</p>
+          <p class="why"><em>70 is a project-wide constant, so an editable field
+             would invite a per-route value that nothing downstream honours. It
+             still has to be visible, because it is the number every "N of 70"
+             counter and every completion check is measured against.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>Deleting a route with unsent passes is refused, and looks it</h3>
+          <p>While the queue still holds passes for this route the control is
+             inert. It keeps the same red destructive colour as "Delete city"
+             and is only dimmed, with the caption underneath naming the count —
+             "32 passes not yet sent".</p>
+          <p class="why"><em>Recolouring it grey would make it a different
+             control: the eye stops recognising the one action on this screen
+             that destroys work. Dimming leaves the identity intact and reads as
+             "not now" rather than "not here", which is the truth — send the
+             passes and the same red control becomes available. A warning that
+             can be dismissed would destroy field work with one tap, and those
+             passes exist nowhere else yet.</em></p>
+        </div>
+      </aside>
+    </div>
+
+  </div>
+
+</body>
+</html>
