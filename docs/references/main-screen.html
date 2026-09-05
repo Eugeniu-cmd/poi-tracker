@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<!--
+  ================================================================
+  POI Tracker — Working Screen Reference
+  File: docs/references/main-screen.html
+
+  Iteration plan:
+  v0.1 — 2026-09-04 — first reference: variants A (default) and B
+          (compass open on Left). Data: real R20890-028 snapshot of
+          2026-09-02 (93 POIs, 590 passes). Canvas 1280 × 800 px, no
+          device frame, decision map in an HTML comment.
+  v0.2 — 2026-09-04 — rebuilt to the XBoard reference format: device
+          frame, visible decision-map columns, page header, captions.
+          Glass direction (_tokens.css v0.3): gradient background,
+          translucent panels, solid controls. Light appearance forced.
+          Reference device: Android tablet 10.6", 1000 × 600 px.
+  v0.3 — 2026-09-04 — UI copy translated to English; approach-side discs
+          moved from 124px to 150px so the East disc clears the raised
+          Straight disc (minimum 8px gap between discs is now a rule);
+          live-compass widget added to the top-right of the working area.
+          Reference device: Android tablet 10.6", 1000 × 600 px.
+  v0.3.1 — 2026-09-04 — recorded after the fact: v0.3 also widened the
+          maneuver trio from 250px to 266px and raised Straight from 100px
+          to 116px, without which the 8px minimum gap could not hold at any
+          side-disc distance. Centres: Left (200,200), Straight (333,84),
+          Right (466,200).
+  v0.4 — 2026-09-04 — approach sides pulled in from 150px to 124px;
+          maneuver glyphs replaced with official Lucide arrow-left,
+          arrow-up and arrow-right SVGs at stroke-width 2.6; approach-side
+          discs keep their letters, chosen for glance legibility in a
+          moving car. Reference device: Android tablet 10.6", 1000 × 600 px.
+  ================================================================
+-->
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<title>POI Tracker — Working Screen Reference v0.4</title>
+<link rel="stylesheet" href="_tokens.css">
+<style>
+  /* ============================================================
+     PAGE CHROME — not part of the product. Hardcoded colors are
+     deliberate here: this is the presentation board, and it must
+     contrast with the mockup so the frame reads as a device.
+     ============================================================ */
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 40px 44px 56px; background: #23262F; color: #E7E9F0;
+         font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .eyebrow { font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+             color: #8A90A6; margin: 0 0 10px; }
+  h1 { margin: 0 0 12px; font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
+  .meta { margin: 0 0 34px; font-size: 14px; line-height: 1.65; color: #A6ACC0;
+          max-width: 900px; }
+  .meta b { color: #E7E9F0; font-weight: 600; }
+  .rail { display: flex; align-items: flex-start; gap: 40px; }
+  .unit { display: flex; align-items: flex-start; gap: 26px; flex: none; }
+  .device { flex: none; }
+  .bezel { width: 1014px; height: 614px; padding: 7px; background: #0C0E14;
+           border-radius: 29px; box-shadow: 0 26px 60px rgba(0,0,0,.55),
+           0 0 0 1px rgba(255,255,255,.06) inset; }
+  .caption { margin: 14px 0 0; font-size: 11px; letter-spacing: .16em;
+             text-transform: uppercase; color: #8A90A6; }
+  .dmap { flex: none; width: 300px; background: #2B2F3A; border-radius: 14px;
+          padding: 20px 20px 8px; border: 1px solid #383D4B; }
+  .dmap-title { font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+                color: #8A90A6; margin-bottom: 14px; }
+  .dtopic { margin-bottom: 18px; }
+  .dtopic h3 { margin: 0 0 5px; font-size: 14px; font-weight: 700; color: #F2F4FA; }
+  .dtopic p { margin: 0; font-size: 12.5px; line-height: 1.55; color: #BFC5D6; }
+  .dtopic p.why { margin-top: 5px; color: #878DA1; }
+
+  /* ============================================================
+     SCREEN CONTENT: tokens only
+     Everything below styles what is inside the device frame.
+     No hardcoded colors, radii, fonts or shadows may appear here
+     — only var(--…) from _tokens.css v0.3.
+     ============================================================ */
+  .screen { width: 1000px; height: 600px; display: flex; overflow: hidden;
+            border-radius: 22px; background: var(--bg);
+            background-image: var(--bg-grad);
+            font-family: var(--font); color: var(--ink); }
+
+  /* ---- left column: glass panel (blurred) ---- */
+  .col-left { width: 330px; flex: none; height: 600px; display: flex;
+              flex-direction: column; background: var(--panel);
+              backdrop-filter: blur(var(--blur));
+              -webkit-backdrop-filter: blur(var(--blur));
+              border-right: 1px solid var(--line); }
+  .route { display: flex; align-items: center; justify-content: space-between;
+           margin: 12px; padding: 10px 14px; min-height: var(--tap-min);
+           font-size: 18px; font-weight: 700; color: var(--ink);
+           background: var(--panel-strong);
+           backdrop-filter: blur(var(--blur));
+           -webkit-backdrop-filter: blur(var(--blur));
+           border: 1px solid var(--panel-edge); border-radius: var(--r-sm);
+           box-shadow: var(--shadow); }
+  .route .chev { font-size: 13px; color: var(--ink-3); }
+
+  /* ---- POI list: translucent rows, NO blur (197 rows would stutter) ---- */
+  .list { flex: 1; overflow: hidden; border-top: 1px solid var(--line); }
+  .row { display: flex; align-items: center; gap: 10px; height: 34px;
+         padding: 0 14px; background: var(--panel);
+         border-bottom: 1px solid var(--line); }
+  .row .rn { width: 34px; text-align: right; font-size: 14px; font-weight: 600;
+             color: var(--ink); }
+  .row .rb { flex: 1; height: 5px; background: var(--line);
+             border-radius: var(--r-sm); overflow: hidden; }
+  .row .rb i { display: block; height: 100%; background: var(--ink-3); }
+  .row .rt { width: 86px; text-align: right; font-size: 12px; color: var(--ink-2); }
+  .row.done { background: var(--ok-bg); }
+  .row.done .rb i { background: var(--ok); }
+  .row.done .rt { color: var(--ok); font-weight: 700; }
+  .row.active { background: var(--active);
+                box-shadow: inset 3px 0 0 0 var(--active-line); }
+
+  .foot { padding: 10px 14px; border-top: 1px solid var(--line);
+          background: var(--panel-strong); }
+  .foot .f1 { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .foot .f2 { font-size: 12px; color: var(--ink-2); margin-top: 3px; }
+
+  /* ---- right column ---- */
+  .col-right { width: 670px; flex: none; height: 600px; display: flex;
+               flex-direction: column; padding: 18px 20px; position: relative; }
+  /* compass: top-right, above the stage, clear of the POI counters */
+  .compass { position: absolute; right: 20px; top: 14px; }
+  .head { height: 72px; display: flex; align-items: flex-end; gap: 14px; }
+  .big { font-size: 62px; line-height: .9; font-weight: 700; color: var(--ink); }
+  .plabel { font-size: 11px; letter-spacing: .18em; color: var(--ink-3); }
+  .cnt { font-size: 20px; font-weight: 700; color: var(--ink); }
+  .rest { font-size: 13px; color: var(--ink-2); }
+  .mini { height: 32px; display: flex; align-items: center; gap: 24px;
+          font-size: 13px; color: var(--ink-2); padding-right: 120px; }
+
+  /* ---- disc stage: controls are SOLID, never glass ---- */
+  .stage { position: relative; height: 404px; }
+  .disc { position: absolute; width: 118px; height: 118px; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          background: var(--disc); color: var(--disc-glyph);
+          box-shadow: var(--shadow-lift); }
+  /* Lucide arrows inherit the disc colour through stroke="currentColor" */
+  .glyph { display: block; }
+  .disc.dim { opacity: .16; }
+  .disc.locked { opacity: .28; box-shadow: var(--shadow); }
+  .side { position: absolute; width: 92px; height: 92px; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 30px; font-weight: 700; line-height: 1;
+          background: var(--side); color: var(--side-glyph);
+          border: 3px solid var(--side-ring); box-shadow: var(--shadow-lift); }
+  .locknote { position: absolute; left: 20px; top: 330px; font-size: 14px;
+              font-weight: 600; color: var(--ok); background: var(--ok-bg);
+              border-radius: var(--r-sm); padding: 8px 14px; }
+
+  /* ---- action bar: glass (blurred) ---- */
+  .bar { height: 56px; display: flex; align-items: center; gap: 10px;
+         padding: 0 12px; background: var(--panel);
+         backdrop-filter: blur(var(--blur));
+         -webkit-backdrop-filter: blur(var(--blur));
+         border: 1px solid var(--panel-edge); border-radius: var(--r-md);
+         box-shadow: var(--shadow); }
+  .btn { display: inline-flex; align-items: center; height: var(--tap-min);
+         padding: 0 16px; font-size: 13px; font-weight: 600; color: var(--ink);
+         background: var(--panel-strong); border: 1px solid var(--panel-edge);
+         border-radius: var(--r-sm); }
+  .btn.off { color: var(--ink-3); background: var(--panel); }
+  .sync { margin-left: auto; font-size: 12px; color: var(--ink-2); }
+  .sync .dot { color: var(--err); }
+  /* ==================== END SCREEN CONTENT ==================== */
+</style>
+</head>
+<body>
+
+  <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
+  <h1>POI Tracker — working screen</h1>
+  <p class="meta"><b>v0.4 — 2026-09-04.</b> The approach sides sit 124 px from
+     their maneuver disc instead of 150 px, and the three maneuver glyphs are
+     now official Lucide SVG arrows at stroke-width 2.6 rather than text
+     characters, while the approach-side discs keep their letters for glance
+     legibility. <b>Reference device: Android tablet 10.6", 1000 × 600 px</b>
+     (2000 × 1200 physical at 2× density), landscape, full-screen.</p>
+
+  <div class="rail">
+
+    <div class="unit">
+      <div class="device">
+        <div class="bezel">
+        <div class="screen">
+          <div class="col-left">
+            <div class="route"><span>R20890-028</span><span class="chev">▾</span></div>
+            <div class="list">
+            <div class="row done"><span class="rn">1</span><span class="rb"><i style="width:100%"></i></span><span class="rt">done</span></div>
+            <div class="row active"><span class="rn">2</span><span class="rb"><i style="width:80%"></i></span><span class="rt">14 to go</span></div>
+            <div class="row"><span class="rn">3</span><span class="rb"><i style="width:65.71%"></i></span><span class="rt">24 to go</span></div>
+            <div class="row"><span class="rn">4</span><span class="rb"><i style="width:35.71%"></i></span><span class="rt">45 to go</span></div>
+            <div class="row"><span class="rn">5</span><span class="rb"><i style="width:48.57%"></i></span><span class="rt">36 to go</span></div>
+            <div class="row"><span class="rn">6</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">7</span><span class="rb"><i style="width:27.14%"></i></span><span class="rt">51 to go</span></div>
+            <div class="row"><span class="rn">8</span><span class="rb"><i style="width:18.57%"></i></span><span class="rt">57 to go</span></div>
+            <div class="row"><span class="rn">9</span><span class="rb"><i style="width:24.29%"></i></span><span class="rt">53 to go</span></div>
+            <div class="row"><span class="rn">10</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">11</span><span class="rb"><i style="width:22.86%"></i></span><span class="rt">54 to go</span></div>
+            <div class="row"><span class="rn">12</span><span class="rb"><i style="width:17.14%"></i></span><span class="rt">58 to go</span></div>
+            <div class="row"><span class="rn">13</span><span class="rb"><i style="width:21.43%"></i></span><span class="rt">55 to go</span></div>
+            <div class="row"><span class="rn">14</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">15</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">16</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">17</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">18</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">19</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">20</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">21</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">22</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">23</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">24</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">25</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">26</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">27</span><span class="rb"><i style="width:10%"></i></span><span class="rt">63 to go</span></div>
+            <div class="row"><span class="rn">28</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">29</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">30</span><span class="rb"><i style="width:12.86%"></i></span><span class="rt">61 to go</span></div>
+            <div class="row"><span class="rn">31</span><span class="rb"><i style="width:12.86%"></i></span><span class="rt">61 to go</span></div>
+            <div class="row"><span class="rn">32</span><span class="rb"><i style="width:15.71%"></i></span><span class="rt">59 to go</span></div>
+            <div class="row"><span class="rn">33</span><span class="rb"><i style="width:12.86%"></i></span><span class="rt">61 to go</span></div>
+            <div class="row"><span class="rn">34</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">35</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">36</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">37</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">38</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">39</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">40</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">41</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">42</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">43</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">44</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">45</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">46</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">47</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">48</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">49</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">50</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">51</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">52</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">53</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">54</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">55</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">56</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">57</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">58</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">59</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">60</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">61</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">62</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">63</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">64</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">65</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">66</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">67</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">68</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">69</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">70</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">71</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">72</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">73</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">74</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">75</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">76</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">77</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">78</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">79</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">80</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">81</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">82</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">83</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">84</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">85</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">86</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">87</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">88</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">89</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">90</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">91</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">92</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">93</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">94</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">95</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">96</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">97</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">98</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">99</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">100</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">101</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">102</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">103</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">104</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">105</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">106</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">107</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">108</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">109</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">110</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">111</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">112</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">113</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">114</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">115</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">116</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">117</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">118</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">119</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">120</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">121</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">122</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">123</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">124</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">125</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">126</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">127</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">128</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">129</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">130</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">131</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">132</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">133</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">134</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">135</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">136</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">137</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">138</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">139</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">140</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">141</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">142</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">143</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">144</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">145</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">146</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">147</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">148</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">149</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">150</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">151</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">152</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">153</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">154</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">155</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">156</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">157</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">158</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">159</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">160</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">161</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">162</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">163</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">164</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">165</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">166</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">167</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">168</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">169</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">170</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">171</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">172</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">173</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">174</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">175</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">176</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">177</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">178</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">179</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">180</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">181</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">182</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">183</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">184</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">185</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">186</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">187</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">188</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">189</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">190</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">191</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">192</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">193</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">194</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">195</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">196</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">197</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            </div>
+            <div class="foot">
+              <div class="f1">Done 590 · 13 200 to go</div>
+              <div class="f2">1 of 197 POIs done</div>
+            </div>
+          </div>
+          <div class="col-right">
+            <svg class="compass" width="96" height="96" viewBox="0 0 96 96" role="img" aria-label="Heading">
+              <g stroke="var(--ink-2)" stroke-width="2" stroke-linecap="round" fill="none" opacity=".55">
+                <circle cx="48" cy="48" r="34"/>
+                <path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/>
+              </g>
+              <text x="48" y="12" text-anchor="middle" font-size="13" font-weight="800" fill="var(--ink)" font-family="var(--font)">N</text>
+              <g transform="rotate(40 48 48)">
+                <path d="M48 20 L57 55 L48 49 L39 55 Z" fill="var(--side)"/>
+                <path d="M48 20 L48 49 L39 55 Z" fill="var(--side-ring)"/>
+              </g>
+              <circle cx="48" cy="48" r="3.5" fill="var(--ink)"/>
+            </svg>
+            <div class="head">
+              <div class="big">2</div>
+              <div class="head-col">
+                <div class="plabel">POI</div>
+                <div class="cnt">56 of 70</div>
+                <div class="rest">14 to go</div>
+              </div>
+            </div>
+            <div class="mini"><span>N 28 · S 28 · W 0 · E 0</span><span>← 24 · ↑ 4 · → 28</span></div>
+            <div class="stage">
+              <div class="disc" style="left:141px;top:141px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></div>
+              <div class="disc" style="left:274px;top:25px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></div>
+              <div class="disc" style="left:407px;top:141px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+            </div>
+            <div class="bar">
+              <span class="btn off">Undo last</span>
+              <span class="btn">History</span>
+              <span class="sync"><span class="dot">●</span> Not connected to sheet</span>
+            </div>
+          </div>
+        </div>
+        <!-- /screen -->
+        </div>
+        <p class="caption">Screen 1 · Default — compass closed</p>
+      </div>
+      <aside class="dmap">
+        <div class="dmap-title">Decision map · Screen 1</div>
+        <div class="dtopic">
+          <h3>Two columns, always both</h3>
+          <p>The POI list keeps its own column on the left while the discs own the right. Choosing a POI never covers the input surface, and the passenger can check "which POI am I on" without leaving the tap flow.</p>
+          <p class="why"><em>A full-screen list that slides over the buttons costs a second tap and a second glance every time — in a moving car that is where entries get lost.</em></p>
+        </div>
+        <div class="dtopic">
+          <h3>The straight disc sits higher</h3>
+          <p>The ↑ disc is raised above ← and →, so the three form an arc rather than a row.</p>
+          <p class="why"><em>A thumb reaching across a tablet travels an arc, not a straight line. Three discs on one line put the two easiest mis-taps directly next to each other.</em></p>
+        </div>
+        <div class="dtopic">
+          <h3>Two colors, two roles</h3>
+          <p>Maneuvers are dark solid discs; approach sides are amber solid discs. The colors never swap and never appear on anything that is not tappable.</p>
+          <p class="why"><em>CarPlay rule: two interactive roles must not share a color. If maneuver and side looked alike, every tap would need a read instead of a glance.</em></p>
+        </div>
+        <div class="dtopic">
+          <h3>Glass on panels, solid on controls</h3>
+          <p>The left panel, the route picker and the action bar are translucent and blurred. The discs are fully opaque.</p>
+          <p class="why"><em>Translucency is decoration and belongs to chrome. A control that lets the background through loses contrast in direct sunlight, which is exactly when the passenger is tapping.</em></p>
+        </div>
+        <div class="dtopic">
+          <h3>The compass is real, not decoration</h3>
+          <p>The needle points to the heading of the car, not of the tablet, and the ring stays fixed with North at the top. It is there so the passenger can name the approach side without guessing which way the car came in.</p>
+          <p class="why"><em>It reads GPS course while the car moves and the magnetometer when it stands still, because neither source works alone: GPS goes blind at a standstill and the magnetometer is bent by the vehicle body. The mount holds the tablet at a fixed but unknown angle to the car, so that offset is measured once on a straight road and subtracted from every reading afterwards.</em></p>
+        </div>
+        <div class="dtopic">
+          <h3>The passenger taps</h3>
+          <p>Sizes assume a passenger holding the tablet, not a driver reaching sideways (screens.md v0.4).</p>
+          <p class="why"><em>It does not shrink the targets: the car still moves, so moving-car tolerances stay. It only removes the constraint that everything must be reachable from the driver seat.</em></p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="unit">
+      <div class="device">
+        <div class="bezel">
+        <div class="screen">
+          <div class="col-left">
+            <div class="route"><span>R20890-028</span><span class="chev">▾</span></div>
+            <div class="list">
+            <div class="row done"><span class="rn">1</span><span class="rb"><i style="width:100%"></i></span><span class="rt">done</span></div>
+            <div class="row active"><span class="rn">2</span><span class="rb"><i style="width:80%"></i></span><span class="rt">14 to go</span></div>
+            <div class="row"><span class="rn">3</span><span class="rb"><i style="width:65.71%"></i></span><span class="rt">24 to go</span></div>
+            <div class="row"><span class="rn">4</span><span class="rb"><i style="width:35.71%"></i></span><span class="rt">45 to go</span></div>
+            <div class="row"><span class="rn">5</span><span class="rb"><i style="width:48.57%"></i></span><span class="rt">36 to go</span></div>
+            <div class="row"><span class="rn">6</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">7</span><span class="rb"><i style="width:27.14%"></i></span><span class="rt">51 to go</span></div>
+            <div class="row"><span class="rn">8</span><span class="rb"><i style="width:18.57%"></i></span><span class="rt">57 to go</span></div>
+            <div class="row"><span class="rn">9</span><span class="rb"><i style="width:24.29%"></i></span><span class="rt">53 to go</span></div>
+            <div class="row"><span class="rn">10</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">11</span><span class="rb"><i style="width:22.86%"></i></span><span class="rt">54 to go</span></div>
+            <div class="row"><span class="rn">12</span><span class="rb"><i style="width:17.14%"></i></span><span class="rt">58 to go</span></div>
+            <div class="row"><span class="rn">13</span><span class="rb"><i style="width:21.43%"></i></span><span class="rt">55 to go</span></div>
+            <div class="row"><span class="rn">14</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">15</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">16</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">17</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">18</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">19</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">20</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">21</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">22</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">23</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">24</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">25</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">26</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">27</span><span class="rb"><i style="width:10%"></i></span><span class="rt">63 to go</span></div>
+            <div class="row"><span class="rn">28</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">29</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">30</span><span class="rb"><i style="width:12.86%"></i></span><span class="rt">61 to go</span></div>
+            <div class="row"><span class="rn">31</span><span class="rb"><i style="width:12.86%"></i></span><span class="rt">61 to go</span></div>
+            <div class="row"><span class="rn">32</span><span class="rb"><i style="width:15.71%"></i></span><span class="rt">59 to go</span></div>
+            <div class="row"><span class="rn">33</span><span class="rb"><i style="width:12.86%"></i></span><span class="rt">61 to go</span></div>
+            <div class="row"><span class="rn">34</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">35</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">36</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">37</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">38</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">39</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">40</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">41</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">42</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">43</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">44</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">45</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">46</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">47</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">48</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">49</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">50</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">51</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">52</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">53</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">54</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">55</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">56</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">57</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">58</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">59</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">60</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">61</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">62</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">63</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">64</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">65</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">66</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">67</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">68</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">69</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">70</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">71</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">72</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">73</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">74</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">75</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">76</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">77</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">78</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">79</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">80</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">81</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">82</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">83</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">84</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">85</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">86</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">87</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">88</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">89</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">90</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">91</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">92</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">93</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">94</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">95</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">96</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">97</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">98</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">99</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">100</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">101</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">102</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">103</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">104</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">105</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">106</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">107</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">108</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">109</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">110</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">111</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">112</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">113</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">114</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">115</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">116</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">117</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">118</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">119</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">120</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">121</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">122</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">123</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">124</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">125</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">126</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">127</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">128</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">129</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">130</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">131</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">132</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">133</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">134</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">135</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">136</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">137</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">138</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">139</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">140</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">141</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">142</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">143</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">144</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">145</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">146</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">147</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">148</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">149</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">150</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">151</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">152</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">153</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">154</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">155</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">156</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">157</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">158</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">159</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">160</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">161</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">162</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">163</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">164</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">165</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">166</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">167</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">168</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">169</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">170</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">171</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">172</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">173</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">174</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">175</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">176</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">177</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">178</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">179</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">180</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">181</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">182</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">183</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">184</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">185</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">186</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">187</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">188</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">189</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">190</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">191</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">192</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">193</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">194</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">195</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">196</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">197</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            </div>
+            <div class="foot">
+              <div class="f1">Done 590 · 13 200 to go</div>
+              <div class="f2">1 of 197 POIs done</div>
+            </div>
+          </div>
+          <div class="col-right">
+            <svg class="compass" width="96" height="96" viewBox="0 0 96 96" role="img" aria-label="Heading">
+              <g stroke="var(--ink-2)" stroke-width="2" stroke-linecap="round" fill="none" opacity=".55">
+                <circle cx="48" cy="48" r="34"/>
+                <path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/>
+              </g>
+              <text x="48" y="12" text-anchor="middle" font-size="13" font-weight="800" fill="var(--ink)" font-family="var(--font)">N</text>
+              <g transform="rotate(40 48 48)">
+                <path d="M48 20 L57 55 L48 49 L39 55 Z" fill="var(--side)"/>
+                <path d="M48 20 L48 49 L39 55 Z" fill="var(--side-ring)"/>
+              </g>
+              <circle cx="48" cy="48" r="3.5" fill="var(--ink)"/>
+            </svg>
+            <div class="head">
+              <div class="big">2</div>
+              <div class="head-col">
+                <div class="plabel">POI</div>
+                <div class="cnt">56 of 70</div>
+                <div class="rest">14 to go</div>
+              </div>
+            </div>
+            <div class="mini"><span>N 28 · S 28 · W 0 · E 0</span><span>← 24 · ↑ 4 · → 28</span></div>
+            <div class="stage">
+              <div class="disc" style="left:141px;top:141px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></div>
+              <div class="disc dim" style="left:274px;top:25px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></div>
+              <div class="disc dim" style="left:407px;top:141px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+              <div class="side" style="left:154px;top:30px">N</div>
+              <div class="side" style="left:154px;top:278px">S</div>
+              <div class="side" style="left:30px;top:154px">W</div>
+              <div class="side" style="left:278px;top:154px">E</div>
+            </div>
+            <div class="bar">
+              <span class="btn off">Undo last</span>
+              <span class="btn">History</span>
+              <span class="btn">Cancel</span>
+              <span class="sync"><span class="dot">●</span> Not connected to sheet</span>
+            </div>
+          </div>
+        </div>
+        <!-- /screen -->
+        </div>
+        <p class="caption">Screen 2 · Compass open on Left</p>
+      </div>
+      <aside class="dmap">
+        <div class="dmap-title">Decision map · Screen 2</div>
+        <div class="dtopic">
+          <h3>Compass, not a 12-button grid</h3>
+          <p>Tapping a maneuver blooms four approach sides around that disc: N above, S below, W left, E right. The pass is written on the second tap.</p>
+          <p class="why"><em>Twelve one-tap buttons would be faster per pass but each is a quarter of the size, and a half-entered pass becomes impossible only when both halves are written together. The 3×4 grid stays a step-2 candidate.</em></p>
+        </div>
+        <div class="dtopic">
+          <h3>The other maneuvers dim</h3>
+          <p>The ↑ and → discs drop to 16 % opacity while the compass is open.</p>
+          <p class="why"><em>They are not valid targets in this state. Leaving them at full strength invites a tap that would either do nothing or silently switch maneuver.</em></p>
+        </div>
+        <div class="dtopic">
+          <h3>"Cancel" appears only here</h3>
+          <p>The escape button is absent in the default state and appears in the action bar only while the compass is open.</p>
+          <p class="why"><em>A permanent cancel button trains the eye to ignore it. Showing it exactly when there is something to cancel makes it findable without reading.</em></p>
+        </div>
+        <div class="dtopic">
+          <h3>Auto-close after 12 seconds</h3>
+          <p>If no side is tapped, the compass closes on its own, records nothing and says so.</p>
+          <p class="why"><em>An abandoned compass left open would attach the next stray tap to a maneuver chosen a minute ago at a different intersection.</em></p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="unit">
+      <div class="device">
+        <div class="bezel">
+        <div class="screen">
+          <div class="col-left">
+            <div class="route"><span>R20890-028</span><span class="chev">▾</span></div>
+            <div class="list">
+            <div class="row done active"><span class="rn">1</span><span class="rb"><i style="width:100%"></i></span><span class="rt">done</span></div>
+            <div class="row"><span class="rn">2</span><span class="rb"><i style="width:80%"></i></span><span class="rt">14 to go</span></div>
+            <div class="row"><span class="rn">3</span><span class="rb"><i style="width:65.71%"></i></span><span class="rt">24 to go</span></div>
+            <div class="row"><span class="rn">4</span><span class="rb"><i style="width:35.71%"></i></span><span class="rt">45 to go</span></div>
+            <div class="row"><span class="rn">5</span><span class="rb"><i style="width:48.57%"></i></span><span class="rt">36 to go</span></div>
+            <div class="row"><span class="rn">6</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">7</span><span class="rb"><i style="width:27.14%"></i></span><span class="rt">51 to go</span></div>
+            <div class="row"><span class="rn">8</span><span class="rb"><i style="width:18.57%"></i></span><span class="rt">57 to go</span></div>
+            <div class="row"><span class="rn">9</span><span class="rb"><i style="width:24.29%"></i></span><span class="rt">53 to go</span></div>
+            <div class="row"><span class="rn">10</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">11</span><span class="rb"><i style="width:22.86%"></i></span><span class="rt">54 to go</span></div>
+            <div class="row"><span class="rn">12</span><span class="rb"><i style="width:17.14%"></i></span><span class="rt">58 to go</span></div>
+            <div class="row"><span class="rn">13</span><span class="rb"><i style="width:21.43%"></i></span><span class="rt">55 to go</span></div>
+            <div class="row"><span class="rn">14</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">15</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">16</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">17</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">18</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">19</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">20</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">21</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">22</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">23</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">24</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">25</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">26</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">27</span><span class="rb"><i style="width:10%"></i></span><span class="rt">63 to go</span></div>
+            <div class="row"><span class="rn">28</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">29</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">30</span><span class="rb"><i style="width:12.86%"></i></span><span class="rt">61 to go</span></div>
+            <div class="row"><span class="rn">31</span><span class="rb"><i style="width:12.86%"></i></span><span class="rt">61 to go</span></div>
+            <div class="row"><span class="rn">32</span><span class="rb"><i style="width:15.71%"></i></span><span class="rt">59 to go</span></div>
+            <div class="row"><span class="rn">33</span><span class="rb"><i style="width:12.86%"></i></span><span class="rt">61 to go</span></div>
+            <div class="row"><span class="rn">34</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">35</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">36</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">37</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">38</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">39</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">40</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">41</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">42</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">43</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">44</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">45</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">46</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">47</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">48</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">49</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">50</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">51</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">52</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">53</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">54</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">55</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">56</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">57</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">58</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">59</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">60</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">61</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">62</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">63</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">64</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">65</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">66</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">67</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">68</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">69</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">70</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">71</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">72</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">73</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">74</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">75</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">76</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">77</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">78</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">79</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">80</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">81</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">82</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">83</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">84</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">85</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">86</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">87</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">88</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">89</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">90</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">91</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">92</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">93</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">94</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">95</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">96</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">97</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">98</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">99</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">100</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">101</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">102</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">103</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">104</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">105</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">106</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">107</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">108</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">109</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">110</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">111</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">112</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">113</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">114</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">115</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">116</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">117</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">118</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">119</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">120</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">121</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">122</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">123</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">124</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">125</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">126</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">127</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">128</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">129</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">130</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">131</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">132</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">133</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">134</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">135</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">136</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">137</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">138</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">139</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">140</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">141</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">142</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">143</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">144</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">145</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">146</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">147</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">148</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">149</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">150</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">151</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">152</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">153</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">154</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">155</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">156</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">157</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">158</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">159</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">160</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">161</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">162</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">163</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">164</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">165</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">166</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">167</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">168</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">169</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">170</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">171</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">172</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">173</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">174</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">175</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">176</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">177</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">178</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">179</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">180</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">181</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">182</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">183</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">184</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">185</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">186</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">187</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">188</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">189</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">190</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">191</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">192</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">193</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">194</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">195</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">196</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">197</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            </div>
+            <div class="foot">
+              <div class="f1">Done 590 · 13 200 to go</div>
+              <div class="f2">1 of 197 POIs done</div>
+            </div>
+          </div>
+          <div class="col-right">
+            <svg class="compass" width="96" height="96" viewBox="0 0 96 96" role="img" aria-label="Heading">
+              <g stroke="var(--ink-2)" stroke-width="2" stroke-linecap="round" fill="none" opacity=".55">
+                <circle cx="48" cy="48" r="34"/>
+                <path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/>
+              </g>
+              <text x="48" y="12" text-anchor="middle" font-size="13" font-weight="800" fill="var(--ink)" font-family="var(--font)">N</text>
+              <g transform="rotate(152 48 48)">
+                <path d="M48 20 L57 55 L48 49 L39 55 Z" fill="var(--side)"/>
+                <path d="M48 20 L48 49 L39 55 Z" fill="var(--side-ring)"/>
+              </g>
+              <circle cx="48" cy="48" r="3.5" fill="var(--ink)"/>
+            </svg>
+            <div class="head">
+              <div class="big">1</div>
+              <div class="head-col">
+                <div class="plabel">POI</div>
+                <div class="cnt">70 of 70</div>
+                <div class="rest">0 to go</div>
+              </div>
+            </div>
+            <div class="mini"><span>N 0 · S 35 · W 35 · E 0</span><span>← 0 · ↑ 0 · → 70</span></div>
+            <div class="stage">
+              <div class="disc locked" style="left:141px;top:141px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></div>
+              <div class="disc locked" style="left:274px;top:25px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></div>
+              <div class="disc locked" style="left:407px;top:141px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+              <div class="locknote">This POI is done: 70 of 70</div>
+            </div>
+            <div class="bar">
+              <span class="btn">Undo last</span>
+              <span class="btn">History</span>
+              <span class="sync"><span class="dot">●</span> Not connected to sheet</span>
+            </div>
+          </div>
+        </div>
+        <!-- /screen -->
+        </div>
+        <p class="caption">Screen 3 · POI complete — controls locked</p>
+      </div>
+      <aside class="dmap">
+        <div class="dmap-title">Decision map · Screen 3</div>
+        <div class="dtopic">
+          <h3>A finished POI locks its controls</h3>
+          <p>At 70 / 70 the three maneuver discs stay visible but dimmed and inert.</p>
+          <p class="why"><em>Hiding them would make the screen jump and leave the passenger wondering whether the app broke. Dimming keeps the layout still and makes the state readable at a glance.</em></p>
+        </div>
+        <div class="dtopic">
+          <h3>The caption states the reason</h3>
+          <p>A short line next to the discs reads "This POI is done: 70 of 70" instead of a generic disabled look.</p>
+          <p class="why"><em>A dead button with no explanation is indistinguishable from a bug. Naming the reason turns a dead end into a confirmation that the POI is done.</em></p>
+        </div>
+        <div class="dtopic">
+          <h3>Undo stays available</h3>
+          <p>"Undo last" is the one control that stays enabled on a finished POI.</p>
+          <p class="why"><em>Reaching 70 is exactly when a miscount hurts most, and a wrong 70th pass must be removable without opening the spreadsheet. Undo removes a whole pass, never half of one.</em></p>
+        </div>
+      </aside>
+    </div>
+
+  </div>
+
+</body>
+</html>

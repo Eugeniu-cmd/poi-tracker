@@ -1,9 +1,11 @@
 # Spreadsheets
 
-v0.1 — 2026-09-04
+v0.2 — 2026-09-04
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-04 — extracted from docs/inputs/handoff_v2.md (Russian,
 2026-09-02) and verified against the two workbooks in docs/inputs/.
+v0.2 2026-09-04 — the sheet the mailbox creates is named `Log`; no other
+change. Russian names quoted from the user's spreadsheet stay verbatim.
 -->
 
 Two separate Google Sheets exist. The app writes to the user's tracker only,

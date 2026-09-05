@@ -24,7 +24,7 @@ Hard rules:
 Where to look:
 | What | Where |
 |---|---|
-| Data model, Журнал sheet, mailbox contract | docs/data-model.md |
+| Data model, Log sheet, mailbox contract | docs/data-model.md |
 | Screen decision registry | docs/screens.md |
 | Design tokens | docs/references/_tokens.css |
 | Spreadsheet layouts, export procedure, bug rules | docs/spreadsheets.md |

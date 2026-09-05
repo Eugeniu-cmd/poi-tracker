@@ -1,83 +1,104 @@
 /* POI Tracker — design tokens.
-   v0.2 — 2026-09-03
+   v0.3 — 2026-09-04
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
+   v0.3 2026-09-04 — "glass" direction: gradient page background,
+   translucent panels with a blur token, softer lines, cooler neutrals.
+   Controls stay SOLID on purpose (sunlight legibility; CarPlay rule that
+   interactive and non-interactive surfaces must not share a color).
+   --blur is a single knob: set it to 0px if the tablet GPU struggles.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
 :root {
-  --bg: #F4F5F2;
-  --panel: #FFFFFF;
-  --line: #DCDFD9;
-  --ink: #17191E;
-  --ink-2: #5B6068;
-  --ink-3: #9AA0A8;
-  --disc: #17191E;
+  --bg: #EFF3FA;
+  --bg-grad: linear-gradient(135deg, #EAF2FF 0%, #F6F0FF 45%, #FFF2E8 100%);
+  --panel: rgba(255, 255, 255, 0.62);
+  --panel-strong: rgba(255, 255, 255, 0.88);
+  --panel-solid: #FFFFFF;
+  --panel-edge: rgba(255, 255, 255, 0.85);
+  --blur: 14px;
+  --line: rgba(90, 110, 170, 0.16);
+  --ink: #1B2033;
+  --ink-2: #5C6580;
+  --ink-3: #8E96AC;
+  --disc: #1C2030;
   --disc-glyph: #FFFFFF;
   --side: #F2A81D;
-  --side-glyph: #17191E;
-  --side-ring: #C8860A;
-  --ok: #1E9E5A;
-  --ok-bg: #E4F5EA;
-  --err: #D8382F;
-  --err-bg: #FBE7E5;
-  --warn: #E08A00;
-  --warn-bg: #FFF1DB;
-  --active: #FFF3D6;
+  --side-glyph: #1B2033;
+  --side-ring: rgba(242, 168, 29, 0.45);
+  --ok: #11855A;
+  --ok-bg: rgba(214, 244, 228, 0.85);
+  --err: #C8342B;
+  --err-bg: rgba(255, 226, 223, 0.85);
+  --warn: #B87400;
+  --warn-bg: rgba(255, 238, 209, 0.85);
+  --active: rgba(255, 255, 255, 0.95);
   --active-line: #F2A81D;
   --focus: #1F5EFF;
-  --shadow: 0 8px 24px rgba(23,25,30,.14);
-  --r-sm: 10px;
-  --r-md: 16px;
+  --shadow: 0 6px 20px rgba(50, 65, 120, 0.14);
+  --shadow-lift: 0 10px 26px rgba(40, 50, 90, 0.26);
+  --r-sm: 12px;
+  --r-md: 18px;
   --font: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --tap-min: 44px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #101216;
-    --panel: #181B21;
-    --line: #2B2F37;
-    --ink: #F1F2EE;
-    --ink-2: #A7ADB6;
-    --ink-3: #6D737C;
-    --disc: #F1F2EE;
-    --disc-glyph: #101216;
+    --bg: #0F1420;
+    --bg-grad: linear-gradient(135deg, #121A2B 0%, #171526 50%, #1E1A16 100%);
+    --panel: rgba(255, 255, 255, 0.07);
+    --panel-strong: rgba(255, 255, 255, 0.13);
+    --panel-solid: #171C29;
+    --panel-edge: rgba(255, 255, 255, 0.14);
+    --line: rgba(255, 255, 255, 0.12);
+    --ink: #EEF1F8;
+    --ink-2: #A8B0C4;
+    --ink-3: #737C93;
+    --disc: #F1F3FA;
+    --disc-glyph: #101420;
     --side: #F2A81D;
-    --side-glyph: #101216;
-    --side-ring: #FFC85A;
+    --side-glyph: #10131C;
+    --side-ring: rgba(255, 200, 90, 0.5);
     --ok: #3ECC82;
-    --ok-bg: #16311F;
+    --ok-bg: rgba(22, 60, 40, 0.7);
     --err: #FF6B62;
-    --err-bg: #3B1B19;
+    --err-bg: rgba(70, 28, 25, 0.7);
     --warn: #FFB13D;
-    --warn-bg: #3A2A10;
-    --active: #3A2C0F;
+    --warn-bg: rgba(62, 44, 16, 0.7);
+    --active: rgba(255, 255, 255, 0.16);
     --active-line: #F2A81D;
-    --shadow: 0 8px 24px rgba(0,0,0,.45);
+    --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
   }
 }
 
 :root[data-theme="dark"] {
-  --bg: #101216;
-  --panel: #181B21;
-  --line: #2B2F37;
-  --ink: #F1F2EE;
-  --ink-2: #A7ADB6;
-  --ink-3: #6D737C;
-  --disc: #F1F2EE;
-  --disc-glyph: #101216;
+  --bg: #0F1420;
+  --bg-grad: linear-gradient(135deg, #121A2B 0%, #171526 50%, #1E1A16 100%);
+  --panel: rgba(255, 255, 255, 0.07);
+  --panel-strong: rgba(255, 255, 255, 0.13);
+  --panel-solid: #171C29;
+  --panel-edge: rgba(255, 255, 255, 0.14);
+  --line: rgba(255, 255, 255, 0.12);
+  --ink: #EEF1F8;
+  --ink-2: #A8B0C4;
+  --ink-3: #737C93;
+  --disc: #F1F3FA;
+  --disc-glyph: #101420;
   --side: #F2A81D;
-  --side-glyph: #101216;
-  --side-ring: #FFC85A;
+  --side-glyph: #10131C;
+  --side-ring: rgba(255, 200, 90, 0.5);
   --ok: #3ECC82;
-  --ok-bg: #16311F;
+  --ok-bg: rgba(22, 60, 40, 0.7);
   --err: #FF6B62;
-  --err-bg: #3B1B19;
+  --err-bg: rgba(70, 28, 25, 0.7);
   --warn: #FFB13D;
-  --warn-bg: #3A2A10;
-  --active: #3A2C0F;
+  --warn-bg: rgba(62, 44, 16, 0.7);
+  --active: rgba(255, 255, 255, 0.16);
   --active-line: #F2A81D;
-  --shadow: 0 8px 24px rgba(0,0,0,.45);
+  --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
 }
