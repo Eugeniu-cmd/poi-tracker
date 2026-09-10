@@ -18,12 +18,25 @@
           "Delete city", dimmed rather than greyed: colour carries the
           role, opacity carries the state. Reference device: Android
           tablet 10.6", 1000 × 600 px.
+  v0.4 — 2026-09-05 — Connection gains "Send now" and "Load from sheet"
+          with last-send and last-load times; sending remains automatic.
+          Reference device: Android tablet 10.6", 1000 × 600 px.
+  v0.5 — 2026-09-07 — consistency audit applied: the separate route "Edit"
+          control is removed and the whole route row is the tap target.
+          Reference device: Android tablet 10.6", 1000 × 600 px.
+  v0.6 — 2026-09-15 — the "Load from sheet" caption is rewritten in plain
+          language and says what it is for: carrying hand-entered numbers
+          into the app. Reference device: Android tablet 10.6",
+          1000 × 600 px.
+  v0.7 — 2026-09-09 — correction only: the v0.6 entry above is dated
+          2026-09-15 in error; that work was done on 2026-09-09. No
+          content change.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Settings Reference v0.3</title>
+<title>POI Tracker — Settings Reference v0.7</title>
 <link rel="stylesheet" href="_tokens.css">
 <style>
   /* ============================================================
@@ -114,9 +127,6 @@
   .rrow + .rrow { margin-top: 6px; }
   .rcode { font-size: 14px; font-weight: 700; color: var(--ink); }
   .rpoi { font-size: 12px; color: var(--ink-2); }
-  .redit { margin-left: auto; font-size: 12px; color: var(--ink-2);
-           padding: 5px 10px; background: var(--panel);
-           border: 1px solid var(--line); border-radius: var(--r-sm); }
 
   /* ---- form fields ---- */
   .field { margin-bottom: 14px; }
@@ -155,6 +165,8 @@
   .danger-note { font-size: 11px; color: var(--ink-3); margin-top: 6px; }
   .statusline { font-size: 12px; color: var(--ok); font-weight: 600;
                 margin-top: 12px; }
+  /* one sync control plus the caption that explains it (screen 3 only) */
+  .ctl { margin-top: 14px; }
 
   /* ---- footer strip: glass (blurred), panel level ---- */
   .footbar { height: 40px; flex: none; display: flex; align-items: center;
@@ -169,10 +181,9 @@
 
   <p class="eyebrow">Design Reference · docs/references/settings.html</p>
   <h1>POI Tracker — Settings Reference</h1>
-  <p class="meta"><b>v0.3 — 2026-09-05.</b> An unavailable "Delete route" now
-     keeps the same red destructive styling as "Delete city" and is simply
-     dimmed with its reason captioned underneath, so colour carries the role of
-     a control and opacity carries its state.
+  <p class="meta"><b>v0.7 — 2026-09-09.</b> The "Load from sheet" caption now says
+     in plain words what the control is for: it carries numbers that were entered
+     into the sheet by hand into the app, so tapping can continue from them.
      <b>Reference device: Android tablet 10.6", 1000 × 600 px</b>
      (2000 × 1200 physical at 2× density), landscape, full-screen.</p>
 
@@ -295,12 +306,12 @@
               <div class="col">
                 <div class="panel grow">
                   <div class="sect">Routes</div>
-                  <div class="rrow"><span class="rcode">R20890-024</span><span class="rpoi">197 POIs</span><span class="redit">Edit</span></div>
-                  <div class="rrow"><span class="rcode">R20890-025</span><span class="rpoi">197 POIs</span><span class="redit">Edit</span></div>
-                  <div class="rrow"><span class="rcode">R20890-026</span><span class="rpoi">197 POIs</span><span class="redit">Edit</span></div>
-                  <div class="rrow"><span class="rcode">R20890-027</span><span class="rpoi">197 POIs</span><span class="redit">Edit</span></div>
-                  <div class="rrow"><span class="rcode">R20890-028</span><span class="rpoi">197 POIs</span><span class="redit">Edit</span></div>
-                  <div class="rrow"><span class="rcode">R20890-029</span><span class="rpoi">197 POIs</span><span class="redit">Edit</span></div>
+                  <div class="rrow"><span class="rcode">R20890-024</span><span class="rpoi">197 POIs</span><span class="chev">›</span></div>
+                  <div class="rrow"><span class="rcode">R20890-025</span><span class="rpoi">197 POIs</span><span class="chev">›</span></div>
+                  <div class="rrow"><span class="rcode">R20890-026</span><span class="rpoi">197 POIs</span><span class="chev">›</span></div>
+                  <div class="rrow"><span class="rcode">R20890-027</span><span class="rpoi">197 POIs</span><span class="chev">›</span></div>
+                  <div class="rrow"><span class="rcode">R20890-028</span><span class="rpoi">197 POIs</span><span class="chev">›</span></div>
+                  <div class="rrow"><span class="rcode">R20890-029</span><span class="rpoi">197 POIs</span><span class="chev">›</span></div>
                   <span class="btn add">Add route</span>
                 </div>
               </div>
@@ -382,7 +393,24 @@
                   <div class="statusline">Connected · tested 12:38</div>
                 </div>
               </div>
-              <div class="col"></div>
+
+              <div class="col">
+                <div class="panel">
+                  <div class="sect">Sync</div>
+                  <div class="statusline">All sent · today 12:41</div>
+
+                  <div class="ctl">
+                    <span class="btn">Send now</span>
+                    <div class="fhint">Sending is automatic whenever there is network</div>
+                  </div>
+
+                  <div class="ctl">
+                    <span class="btn">Load from sheet</span>
+                    <div class="fhint">Reads the numbers this route already has in the sheet and continues from them</div>
+                    <div class="fhint">Use once, when you start tapping on a route that was filled in by hand · last used 04.09 19:20</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
           </div>
@@ -423,6 +451,36 @@
              spreadsheet with half-typed addresses and turn a normal edit into a
              stream of failures. Pressing it is also the moment the user actually
              wants an answer.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>Sending is automatic; the button only confirms</h3>
+          <p>Passes go out on their own as soon as there is network, and the
+             status line carries the time of the last successful send. "Send
+             now" changes nothing about that — it is there for the moment before
+             a shift ends, when the user wants to see it happen.</p>
+          <p class="why"><em>An offline-first app that waits to be told to sync
+             loses data the day someone forgets. Automatic delivery removes that
+             failure, but it leaves no moment of confirmation, and a driver
+             parking up wants to know the day's work landed before closing the
+             tablet. The button buys that certainty without becoming the
+             mechanism.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>"Load from sheet" is the bridge from hand entry</h3>
+          <p>It reads what a route already holds in the sheet so the app can carry
+             on from those numbers — the one way work done by hand becomes work
+             the app can continue. It warns first whenever passes are still
+             waiting to be sent, and it lives here rather than on the working
+             screen because it overwrites local counts.</p>
+          <p class="why"><em>The sheet keeps seven totals per POI, not the passes
+             that made them, so the app can continue from a hand-filled route but
+             can never show the individual passes behind those totals — which is
+             why History lists nothing for them. Loading before sending would
+             silently discard the queue, because the tracker cannot know about
+             passes that never reached it; and the working screen is tapped
+             without looking, so no overwriting action belongs there.</em></p>
         </div>
       </aside>
     </div>

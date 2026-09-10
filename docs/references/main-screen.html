@@ -29,6 +29,70 @@
           arrow-up and arrow-right SVGs at stroke-width 2.6; approach-side
           discs keep their letters, chosen for glance legibility in a
           moving car. Reference device: Android tablet 10.6", 1000 × 600 px.
+  v0.5 — 2026-09-07 — consistency audit applied: sync line shows a
+          documented state with a timestamp and is a full tap target;
+          "Undo last" carries its undo count and, when unavailable, keeps
+          its colour, dims and captions the reason; POI rows raised to the
+          minimum tap target; error count suppressed at zero; stale
+          version citation corrected. Reference device: Android tablet
+          10.6", 1000 × 600 px.
+  v0.6 — 2026-09-08 — "Undo last" now reflects the queue rather than POI
+          progress: dimmed with "Sent passes are corrected in History" on
+          screens 1 and 2, live as "Undo last (2)" on screen 3 where two
+          passes of that POI are still waiting. Fourth screen added: a POI
+          whose row reports a spreadsheet error. Reference device: Android
+          tablet 10.6", 1000 × 600 px.
+  v0.7 — 2026-09-08 — screen 4's figures corrected to a mismatch the
+          sheet would actually flag (sides 46, maneuvers 44, counter 46 of
+          70); screen 3's undo rationale rewritten to follow the queue
+          rather than POI completion; screen 4's compass set to 310°.
+          Reference device: Android tablet 10.6", 1000 × 600 px.
+  v0.8 — 2026-09-08 — screen 3 now shows the clean finished-POI case:
+          everything sent, undo dimmed with its caption, sync line "All
+          sent · 12:41". A finished POI still holding queued passes is
+          recorded in screens.md as a text state instead of being drawn,
+          so no screen shows a locked caption beside a live control.
+          Reference device: Android tablet 10.6", 1000 × 600 px.
+  v0.9 — 2026-09-09 — mini counters become role-coloured chips: amber
+          tint for sides, dark tint for maneuvers, zero-valued chips
+          faded. Two dedicated tokens (--side-soft, --man-soft) carry the
+          tints. Reference device: Android tablet 10.6", 1000 × 600 px.
+  v0.10 — 2026-09-09 — chip class names were colliding with the
+          approach-side disc class `side`, so the disc geometry applied to
+          the counters; chips renamed to a dedicated chip-* family that
+          appears nowhere else in the file. Reference device: Android
+          tablet 10.6", 1000 × 600 px.
+  v0.11 — 2026-09-09 — the active POI row now carries an amber tint, a
+          4px edge and a solid badge behind its number, so it is findable
+          with peripheral vision and survives a finger resting on the
+          list. Reference device: Android tablet 10.6", 1000 × 600 px.
+  v0.12 — 2026-09-09 — the badge behind the active POI number is dropped
+          after visual comparison; the row keeps its amber tint and 4px
+          edge, and the number takes the amber foreground token instead,
+          so the row reads as highlighted rather than as holding a
+          control. Reference device: Android tablet 10.6", 1000 × 600 px.
+  v0.13 — 2026-09-09 — the action bar loses the caption under "Undo last"
+          and its three items sit on one baseline; on screen 4 the line
+          under the counter takes the error colour, since it occupies the
+          slot where other screens show "N to go". Reference device:
+          Android tablet 10.6", 1000 × 600 px.
+  v0.14 — 2026-09-09 — undo now removes the last pass this tablet
+          recorded for the POI, delivered or not, so the button is live
+          wherever the app has recorded anything; the count in parentheses
+          is dropped. Screen 4 keeps its dimmed undo, captioned "Nothing
+          recorded on this tablet", and its counter line returns to the
+          muted colour. Reference device: Android tablet 10.6",
+          1000 × 600 px.
+  v0.15 — 2026-09-15 — screen 4 loses the dimmed undo and its caption:
+          under the current rule undo is dead only on a POI this tablet
+          never wrote to, which is a one-time state on a hand-filled
+          route and is recorded in screens.md rather than drawn. All four
+          bars share one height again. Reference device: Android tablet
+          10.6", 1000 × 600 px.
+  v0.16 — 2026-09-09 — screen 3's caption says INPUT LOCKED rather than
+          CONTROLS LOCKED: only the maneuver discs are inert, while Undo
+          last and History stay live. Correction: the v0.15 entry above is
+          dated 2026-09-15 in error; that work was done on 2026-09-09.
   ================================================================
 -->
 <html lang="en" data-theme="light">
@@ -97,7 +161,9 @@
 
   /* ---- POI list: translucent rows, NO blur (197 rows would stutter) ---- */
   .list { flex: 1; overflow: hidden; border-top: 1px solid var(--line); }
-  .row { display: flex; align-items: center; gap: 10px; height: 34px;
+  /* screens.md item 31: a POI row is a tap target, so it gets the full
+     minimum height. Fewer rows fit in the frame; that is the trade. */
+  .row { display: flex; align-items: center; gap: 10px; height: var(--tap-min);
          padding: 0 14px; background: var(--panel);
          border-bottom: 1px solid var(--line); }
   .row .rn { width: 34px; text-align: right; font-size: 14px; font-weight: 600;
@@ -109,8 +175,24 @@
   .row.done { background: var(--ok-bg); }
   .row.done .rb i { background: var(--ok); }
   .row.done .rt { color: var(--ok); font-weight: 700; }
+  /* screens.md item 40: the current POI must be findable with peripheral
+     vision and must survive a finger resting on the list, so the whole row
+     takes the amber tint and the edge thickens to 4px. The number is only
+     recoloured — a filled badge made the row read as holding a control.
+     --warn is the amber-family foreground token, the same one the side chips
+     use for their labels. The recolouring is scoped away from .err (and .done
+     for the text) so the red and green rows keep exactly what they had. */
   .row.active { background: var(--active);
-                box-shadow: inset 3px 0 0 0 var(--active-line); }
+                box-shadow: inset 4px 0 0 0 var(--active-line); }
+  .row.active:not(.done):not(.err) .rn { color: var(--warn); }
+  .row.active:not(.done):not(.err) .rt { color: var(--ink); font-weight: 700; }
+  /* screens.md item 10: a POI the sheet reports as inconsistent. Declared
+     after .active so the error edge wins when the POI is also active. */
+  .row.err { background: var(--err-bg);
+             box-shadow: inset 3px 0 0 0 var(--err); }
+  .row.err .rn { color: var(--err); }
+  .row.err .rt { color: var(--err); font-weight: 700; }
+  .row.err .rb i { background: var(--err); }
 
   .foot { padding: 10px 14px; border-top: 1px solid var(--line);
           background: var(--panel-strong); }
@@ -127,8 +209,26 @@
   .plabel { font-size: 11px; letter-spacing: .18em; color: var(--ink-3); }
   .cnt { font-size: 20px; font-weight: 700; color: var(--ink); }
   .rest { font-size: 13px; color: var(--ink-2); }
-  .mini { height: 32px; display: flex; align-items: center; gap: 24px;
-          font-size: 13px; color: var(--ink-2); padding-right: 120px; }
+  /* screens.md item 39: the counters speak the disc language at low volume —
+     amber tint for a side, dark tint for a maneuver — so the row is scannable
+     by role instead of being one flat run of grey. A zero chip fades toward
+     the background, leaving only what has been collected.
+     Every class below is chip-* and is used nowhere else in this file: v0.9
+     called them "chip side", which the 92px .side disc rule also matched. */
+  .chips { height: 32px; display: flex; align-items: center; gap: 24px;
+           padding-right: 120px; }
+  .chip-group { display: inline-flex; align-items: center; gap: 6px; }
+  .chip { display: inline-flex; align-items: baseline; gap: 6px;
+          padding: 4px 10px; border-radius: var(--r-sm); }
+  .chip-label { font-size: 11px; font-weight: 700; line-height: 1; }
+  .chip-value { font-size: 15px; font-weight: 700; line-height: 1;
+                color: var(--ink); }
+  .chip-side { background: var(--side-soft); }
+  .chip-side .chip-label { color: var(--warn); }
+  .chip-man { background: var(--man-soft); }
+  .chip-man .chip-label { color: var(--ink-2); }
+  .chip-zero { opacity: .45; }
+  .chip-zero .chip-label, .chip-zero .chip-value { color: var(--ink-3); }
 
   /* ---- disc stage: controls are SOLID, never glass ---- */
   .stage { position: relative; height: 404px; }
@@ -148,8 +248,11 @@
   .locknote { position: absolute; left: 20px; top: 330px; font-size: 14px;
               font-weight: 600; color: var(--ok); background: var(--ok-bg);
               border-radius: var(--r-sm); padding: 8px 14px; }
+  .locknote.err { color: var(--err); background: var(--err-bg); }
 
   /* ---- action bar: glass (blurred) ---- */
+  /* one row, one baseline: with the caption gone the three items are simply
+     centred against each other (screens.md item 42). */
   .bar { height: 56px; display: flex; align-items: center; gap: 10px;
          padding: 0 12px; background: var(--panel);
          backdrop-filter: blur(var(--blur));
@@ -160,9 +263,19 @@
          padding: 0 16px; font-size: 13px; font-weight: 600; color: var(--ink);
          background: var(--panel-strong); border: 1px solid var(--panel-edge);
          border-radius: var(--r-sm); }
-  .btn.off { color: var(--ink-3); background: var(--panel); }
-  .sync { margin-left: auto; font-size: 12px; color: var(--ink-2); }
-  .sync .dot { color: var(--err); }
+  /* State, not role: an unavailable control keeps every colour it already
+     has and is only dimmed (screens.md items 26-27). */
+  .btn.unavailable { opacity: .4; pointer-events: none; }
+  /* screens.md item 16: the status line is itself a tap target and opens
+     Connection for the active city, so it is sized like a control. */
+  .sync { margin-left: auto; display: inline-flex; align-items: center;
+          gap: 8px; height: var(--tap-min); padding: 0 14px;
+          font-size: 13px; font-weight: 600; color: var(--ink);
+          background: var(--panel-strong); border: 1px solid var(--panel-edge);
+          border-radius: var(--r-sm); }
+  .sync .chev { font-size: 14px; color: var(--ink-3); }
+  .sync.sent .dot { color: var(--ok); }
+  .sync.waiting .dot { color: var(--warn); }
   /* ==================== END SCREEN CONTENT ==================== */
 </style>
 </head>
@@ -170,11 +283,11 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.4 — 2026-09-04.</b> The approach sides sit 124 px from
-     their maneuver disc instead of 150 px, and the three maneuver glyphs are
-     now official Lucide SVG arrows at stroke-width 2.6 rather than text
-     characters, while the approach-side discs keep their letters for glance
-     legibility. <b>Reference device: Android tablet 10.6", 1000 × 600 px</b>
+  <p class="meta"><b>v0.16 — 2026-09-09.</b> Screen 3's caption now says that
+     input is what a finished POI stops, not every control: the discs go inert
+     while "Undo last" and "History" stay live, because a miscount is most
+     likely to be noticed exactly when the POI closes.
+     <b>Reference device: Android tablet 10.6", 1000 × 600 px</b>
      (2000 × 1200 physical at 2× density), landscape, full-screen.</p>
 
   <div class="rail">
@@ -410,16 +523,16 @@
                 <div class="rest">14 to go</div>
               </div>
             </div>
-            <div class="mini"><span>N 28 · S 28 · W 0 · E 0</span><span>← 24 · ↑ 4 · → 28</span></div>
+            <div class="chips"><span class="chip-group"><span class="chip chip-side"><span class="chip-label">N</span><span class="chip-value">28</span></span><span class="chip chip-side"><span class="chip-label">S</span><span class="chip-value">28</span></span><span class="chip chip-side chip-zero"><span class="chip-label">W</span><span class="chip-value">0</span></span><span class="chip chip-side chip-zero"><span class="chip-label">E</span><span class="chip-value">0</span></span></span><span class="chip-group"><span class="chip chip-man"><span class="chip-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="chip-value">24</span></span><span class="chip chip-man"><span class="chip-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span><span class="chip-value">4</span></span><span class="chip chip-man"><span class="chip-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="chip-value">28</span></span></span></div>
             <div class="stage">
               <div class="disc" style="left:141px;top:141px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></div>
               <div class="disc" style="left:274px;top:25px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></div>
               <div class="disc" style="left:407px;top:141px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
             </div>
             <div class="bar">
-              <span class="btn off">Undo last</span>
+              <span class="btn">Undo last</span>
               <span class="btn">History</span>
-              <span class="sync"><span class="dot">●</span> Not connected to sheet</span>
+              <span class="sync sent"><span class="dot">●</span> All sent · 12:41<span class="chev">›</span></span>
             </div>
           </div>
         </div>
@@ -456,7 +569,7 @@
         </div>
         <div class="dtopic">
           <h3>The passenger taps</h3>
-          <p>Sizes assume a passenger holding the tablet, not a driver reaching sideways (screens.md v0.4).</p>
+          <p>Sizes assume a passenger holding the tablet, not a driver reaching sideways (screens.md v0.3).</p>
           <p class="why"><em>It does not shrink the targets: the car still moves, so moving-car tolerances stay. It only removes the constraint that everything must be reachable from the driver seat.</em></p>
         </div>
       </aside>
@@ -693,7 +806,7 @@
                 <div class="rest">14 to go</div>
               </div>
             </div>
-            <div class="mini"><span>N 28 · S 28 · W 0 · E 0</span><span>← 24 · ↑ 4 · → 28</span></div>
+            <div class="chips"><span class="chip-group"><span class="chip chip-side"><span class="chip-label">N</span><span class="chip-value">28</span></span><span class="chip chip-side"><span class="chip-label">S</span><span class="chip-value">28</span></span><span class="chip chip-side chip-zero"><span class="chip-label">W</span><span class="chip-value">0</span></span><span class="chip chip-side chip-zero"><span class="chip-label">E</span><span class="chip-value">0</span></span></span><span class="chip-group"><span class="chip chip-man"><span class="chip-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="chip-value">24</span></span><span class="chip chip-man"><span class="chip-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span><span class="chip-value">4</span></span><span class="chip chip-man"><span class="chip-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="chip-value">28</span></span></span></div>
             <div class="stage">
               <div class="disc" style="left:141px;top:141px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></div>
               <div class="disc dim" style="left:274px;top:25px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></div>
@@ -704,10 +817,10 @@
               <div class="side" style="left:278px;top:154px">E</div>
             </div>
             <div class="bar">
-              <span class="btn off">Undo last</span>
+              <span class="btn">Undo last</span>
               <span class="btn">History</span>
               <span class="btn">Cancel</span>
-              <span class="sync"><span class="dot">●</span> Not connected to sheet</span>
+              <span class="sync sent"><span class="dot">●</span> All sent · 12:41<span class="chev">›</span></span>
             </div>
           </div>
         </div>
@@ -971,7 +1084,7 @@
                 <div class="rest">0 to go</div>
               </div>
             </div>
-            <div class="mini"><span>N 0 · S 35 · W 35 · E 0</span><span>← 0 · ↑ 0 · → 70</span></div>
+            <div class="chips"><span class="chip-group"><span class="chip chip-side chip-zero"><span class="chip-label">N</span><span class="chip-value">0</span></span><span class="chip chip-side"><span class="chip-label">S</span><span class="chip-value">35</span></span><span class="chip chip-side"><span class="chip-label">W</span><span class="chip-value">35</span></span><span class="chip chip-side chip-zero"><span class="chip-label">E</span><span class="chip-value">0</span></span></span><span class="chip-group"><span class="chip chip-man chip-zero"><span class="chip-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="chip-value">0</span></span><span class="chip chip-man chip-zero"><span class="chip-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span><span class="chip-value">0</span></span><span class="chip chip-man"><span class="chip-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="chip-value">70</span></span></span></div>
             <div class="stage">
               <div class="disc locked" style="left:141px;top:141px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></div>
               <div class="disc locked" style="left:274px;top:25px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></div>
@@ -981,13 +1094,13 @@
             <div class="bar">
               <span class="btn">Undo last</span>
               <span class="btn">History</span>
-              <span class="sync"><span class="dot">●</span> Not connected to sheet</span>
+              <span class="sync sent"><span class="dot">●</span> All sent · 12:41<span class="chev">›</span></span>
             </div>
           </div>
         </div>
         <!-- /screen -->
         </div>
-        <p class="caption">Screen 3 · POI complete — controls locked</p>
+        <p class="caption">SCREEN 3 · POI COMPLETE — INPUT LOCKED</p>
       </div>
       <aside class="dmap">
         <div class="dmap-title">Decision map · Screen 3</div>
@@ -1002,9 +1115,278 @@
           <p class="why"><em>A dead button with no explanation is indistinguishable from a bug. Naming the reason turns a dead end into a confirmation that the POI is done.</em></p>
         </div>
         <div class="dtopic">
-          <h3>Undo stays available</h3>
-          <p>"Undo last" is the one control that stays enabled on a finished POI.</p>
-          <p class="why"><em>Reaching 70 is exactly when a miscount hurts most, and a wrong 70th pass must be removable without opening the spreadsheet. Undo removes a whole pass, never half of one.</em></p>
+          <h3>Undo is dimmed here because everything has been sent</h3>
+          <p>Undo follows the queue rather than the POI's progress. On this screen every pass of this POI has reached the sheet, so there is nothing left to roll back and the button is dimmed with its reason captioned. The same button would be live on this same finished POI if any of its passes were still waiting to go out.</p>
+          <p class="why"><em>A pass that is already in the spreadsheet cannot be taken back by a tap without changing numbers the user may already have exported to the client. That is why History carries a deletion event instead: removing a delivered pass is a new record that travels to the sheet, not a silent local rollback.</em></p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="unit">
+      <div class="device">
+        <div class="bezel">
+        <div class="screen">
+          <div class="col-left">
+            <div class="route"><span>R20890-028</span><span class="chev">▾</span></div>
+            <div class="list">
+            <div class="row done"><span class="rn">1</span><span class="rb"><i style="width:100%"></i></span><span class="rt">done</span></div>
+            <div class="row"><span class="rn">2</span><span class="rb"><i style="width:80%"></i></span><span class="rt">14 to go</span></div>
+            <div class="row active err"><span class="rn">3</span><span class="rb"><i style="width:65.71%"></i></span><span class="rt">error</span></div>
+            <div class="row"><span class="rn">4</span><span class="rb"><i style="width:35.71%"></i></span><span class="rt">45 to go</span></div>
+            <div class="row"><span class="rn">5</span><span class="rb"><i style="width:48.57%"></i></span><span class="rt">36 to go</span></div>
+            <div class="row"><span class="rn">6</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">7</span><span class="rb"><i style="width:27.14%"></i></span><span class="rt">51 to go</span></div>
+            <div class="row"><span class="rn">8</span><span class="rb"><i style="width:18.57%"></i></span><span class="rt">57 to go</span></div>
+            <div class="row"><span class="rn">9</span><span class="rb"><i style="width:24.29%"></i></span><span class="rt">53 to go</span></div>
+            <div class="row"><span class="rn">10</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">11</span><span class="rb"><i style="width:22.86%"></i></span><span class="rt">54 to go</span></div>
+            <div class="row"><span class="rn">12</span><span class="rb"><i style="width:17.14%"></i></span><span class="rt">58 to go</span></div>
+            <div class="row"><span class="rn">13</span><span class="rb"><i style="width:21.43%"></i></span><span class="rt">55 to go</span></div>
+            <div class="row"><span class="rn">14</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">15</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">16</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">17</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">18</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">19</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">20</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">21</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">22</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">23</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">24</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">25</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">26</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">27</span><span class="rb"><i style="width:10%"></i></span><span class="rt">63 to go</span></div>
+            <div class="row"><span class="rn">28</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">29</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">30</span><span class="rb"><i style="width:12.86%"></i></span><span class="rt">61 to go</span></div>
+            <div class="row"><span class="rn">31</span><span class="rb"><i style="width:12.86%"></i></span><span class="rt">61 to go</span></div>
+            <div class="row"><span class="rn">32</span><span class="rb"><i style="width:15.71%"></i></span><span class="rt">59 to go</span></div>
+            <div class="row"><span class="rn">33</span><span class="rb"><i style="width:12.86%"></i></span><span class="rt">61 to go</span></div>
+            <div class="row"><span class="rn">34</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">35</span><span class="rb"><i style="width:11.43%"></i></span><span class="rt">62 to go</span></div>
+            <div class="row"><span class="rn">36</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">37</span><span class="rb"><i style="width:8.57%"></i></span><span class="rt">64 to go</span></div>
+            <div class="row"><span class="rn">38</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">39</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">40</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">41</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">42</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">43</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">44</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">45</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">46</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">47</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">48</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">49</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">50</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">51</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">52</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">53</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">54</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">55</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">56</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">57</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">58</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">59</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">60</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">61</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">62</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">63</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">64</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">65</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">66</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">67</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">68</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">69</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">70</span><span class="rb"><i style="width:7.14%"></i></span><span class="rt">65 to go</span></div>
+            <div class="row"><span class="rn">71</span><span class="rb"><i style="width:5.71%"></i></span><span class="rt">66 to go</span></div>
+            <div class="row"><span class="rn">72</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">73</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">74</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">75</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">76</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">77</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">78</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">79</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">80</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">81</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">82</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">83</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">84</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">85</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">86</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">87</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">88</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">89</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">90</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">91</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">92</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">93</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">94</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">95</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">96</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">97</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">98</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">99</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">100</span><span class="rb"><i style="width:1.43%"></i></span><span class="rt">69 to go</span></div>
+            <div class="row"><span class="rn">101</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">102</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">103</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">104</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">105</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">106</span><span class="rb"><i style="width:4.29%"></i></span><span class="rt">67 to go</span></div>
+            <div class="row"><span class="rn">107</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">108</span><span class="rb"><i style="width:2.86%"></i></span><span class="rt">68 to go</span></div>
+            <div class="row"><span class="rn">109</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">110</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">111</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">112</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">113</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">114</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">115</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">116</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">117</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">118</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">119</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">120</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">121</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">122</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">123</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">124</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">125</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">126</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">127</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">128</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">129</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">130</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">131</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">132</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">133</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">134</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">135</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">136</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">137</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">138</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">139</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">140</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">141</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">142</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">143</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">144</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">145</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">146</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">147</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">148</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">149</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">150</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">151</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">152</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">153</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">154</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">155</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">156</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">157</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">158</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">159</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">160</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">161</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">162</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">163</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">164</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">165</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">166</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">167</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">168</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">169</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">170</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">171</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">172</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">173</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">174</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">175</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">176</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">177</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">178</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">179</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">180</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">181</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">182</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">183</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">184</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">185</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">186</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">187</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">188</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">189</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">190</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">191</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">192</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">193</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">194</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">195</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">196</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            <div class="row"><span class="rn">197</span><span class="rb"><i style="width:0%"></i></span><span class="rt">70 to go</span></div>
+            </div>
+            <div class="foot">
+              <div class="f1">Done 590 · 13 200 to go</div>
+              <div class="f2">1 of 197 POIs done</div>
+            </div>
+          </div>
+          <div class="col-right">
+            <svg class="compass" width="96" height="96" viewBox="0 0 96 96" role="img" aria-label="Heading">
+              <g stroke="var(--ink-2)" stroke-width="2" stroke-linecap="round" fill="none" opacity=".55">
+                <circle cx="48" cy="48" r="34"/>
+                <path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/>
+              </g>
+              <text x="48" y="12" text-anchor="middle" font-size="13" font-weight="800" fill="var(--ink)" font-family="var(--font)">N</text>
+              <g transform="rotate(310 48 48)">
+                <path d="M48 20 L57 55 L48 49 L39 55 Z" fill="var(--side)"/>
+                <path d="M48 20 L48 49 L39 55 Z" fill="var(--side-ring)"/>
+              </g>
+              <circle cx="48" cy="48" r="3.5" fill="var(--ink)"/>
+            </svg>
+            <div class="head">
+              <div class="big">3</div>
+              <div class="head-col">
+                <div class="plabel">POI</div>
+                <div class="cnt">46 of 70</div>
+                <div class="rest">sides and maneuvers do not match</div>
+              </div>
+            </div>
+            <div class="chips"><span class="chip-group"><span class="chip chip-side"><span class="chip-label">N</span><span class="chip-value">9</span></span><span class="chip chip-side"><span class="chip-label">S</span><span class="chip-value">7</span></span><span class="chip chip-side"><span class="chip-label">W</span><span class="chip-value">24</span></span><span class="chip chip-side"><span class="chip-label">E</span><span class="chip-value">6</span></span></span><span class="chip-group"><span class="chip chip-man"><span class="chip-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="chip-value">3</span></span><span class="chip chip-man"><span class="chip-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span><span class="chip-value">12</span></span><span class="chip chip-man"><span class="chip-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="chip-value">29</span></span></span></div>
+            <div class="stage">
+              <div class="disc locked" style="left:141px;top:141px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></div>
+              <div class="disc locked" style="left:274px;top:25px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></div>
+              <div class="disc locked" style="left:407px;top:141px"><svg class="glyph" width="66" height="66" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div>
+              <div class="locknote err">Fix this POI in the sheet: sides 46, maneuvers 44</div>
+            </div>
+            <div class="bar">
+              <span class="btn">Undo last</span>
+              <span class="btn">History</span>
+              <span class="sync sent"><span class="dot">●</span> All sent · 12:41<span class="chev">›</span></span>
+            </div>
+          </div>
+        </div>
+        <!-- /screen -->
+        </div>
+        <p class="caption">Screen 4 · POI in spreadsheet error</p>
+      </div>
+      <aside class="dmap">
+        <div class="dmap-title">Decision map · Screen 4</div>
+        <div class="dtopic">
+          <h3>An error locks the discs, it does not hide the POI</h3>
+          <p>The row stays in the list in the error colour and the POI can still be opened; only the three maneuver discs go inert, in the same dimmed style used on a finished POI.</p>
+          <p class="why"><em>Removing the row would hide the one POI that needs attention, and the count of POIs would stop matching the route. Locking input instead stops the passenger adding passes on top of a number that is already wrong, while leaving the problem visible every time the list is scrolled.</em></p>
+        </div>
+        <div class="dtopic">
+          <h3>The caption names the two totals that disagree</h3>
+          <p>Instead of "error" the caption gives the two sums that are out of step: sides 46 against maneuvers 44. The line under the counter says "sides and maneuvers do not match" rather than a code.</p>
+          <p class="why"><em>The sheet's status column raises this error precisely because those two sums differ, so naming them says what is wrong and where to look in one line. The person reading it is about to open the spreadsheet and find the bad row, and 46 and 44 are the numbers they will search for; a bare error badge would send them hunting through 197 rows. Note that the figures on this screen are illustrative of the error state; they are not read from the workbook, where POI 3 of R20890-028 is consistent.</em></p>
+        </div>
+        <div class="dtopic">
+          <h3>The fix belongs in the sheet, not here</h3>
+          <p>The app offers no way to repair the row. It reports the mismatch and points at the tracker.</p>
+          <p class="why"><em>A mismatch means the sheet already disagrees with itself, and its own status column is the authority on that. An in-app repair would write over cells the app does not own, and the same error can come from a manual edit the app never saw. Correcting it where it happened keeps one source of truth.</em></p>
         </div>
       </aside>
     </div>

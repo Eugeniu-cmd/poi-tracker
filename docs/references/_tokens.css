@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.3 — 2026-09-04
+   v0.5 — 2026-09-09
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -8,6 +8,12 @@
    Controls stay SOLID on purpose (sunlight legibility; CarPlay rule that
    interactive and non-interactive surfaces must not share a color).
    --blur is a single knob: set it to 0px if the tablet GPU struggles.
+   v0.4 2026-09-09 — two soft chip tints added for the mini counters:
+   --side-soft and --man-soft. The counters adopt the disc language
+   (amber = side, dark = maneuver) at low volume; a dedicated decision.
+   v0.5 2026-09-09 — --active becomes an amber tint rather than white, so
+   the current POI row is findable at a glance on a glass panel; the badge
+   behind its number reuses --side.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -28,13 +34,15 @@
   --side: #F2A81D;
   --side-glyph: #1B2033;
   --side-ring: rgba(242, 168, 29, 0.45);
+  --side-soft: rgba(242, 168, 29, 0.16);
+  --man-soft: rgba(28, 32, 48, 0.08);
   --ok: #11855A;
   --ok-bg: rgba(214, 244, 228, 0.85);
   --err: #C8342B;
   --err-bg: rgba(255, 226, 223, 0.85);
   --warn: #B87400;
   --warn-bg: rgba(255, 238, 209, 0.85);
-  --active: rgba(255, 255, 255, 0.95);
+  --active: rgba(242, 168, 29, 0.18);
   --active-line: #F2A81D;
   --focus: #1F5EFF;
   --shadow: 0 6px 20px rgba(50, 65, 120, 0.14);
@@ -62,13 +70,15 @@
     --side: #F2A81D;
     --side-glyph: #10131C;
     --side-ring: rgba(255, 200, 90, 0.5);
+    --side-soft: rgba(242, 168, 29, 0.22);
+    --man-soft: rgba(255, 255, 255, 0.10);
     --ok: #3ECC82;
     --ok-bg: rgba(22, 60, 40, 0.7);
     --err: #FF6B62;
     --err-bg: rgba(70, 28, 25, 0.7);
     --warn: #FFB13D;
     --warn-bg: rgba(62, 44, 16, 0.7);
-    --active: rgba(255, 255, 255, 0.16);
+    --active: rgba(242, 168, 29, 0.22);
     --active-line: #F2A81D;
     --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
     --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
@@ -91,13 +101,15 @@
   --side: #F2A81D;
   --side-glyph: #10131C;
   --side-ring: rgba(255, 200, 90, 0.5);
+  --side-soft: rgba(242, 168, 29, 0.22);
+  --man-soft: rgba(255, 255, 255, 0.10);
   --ok: #3ECC82;
   --ok-bg: rgba(22, 60, 40, 0.7);
   --err: #FF6B62;
   --err-bg: rgba(70, 28, 25, 0.7);
   --warn: #FFB13D;
   --warn-bg: rgba(62, 44, 16, 0.7);
-  --active: rgba(255, 255, 255, 0.16);
+  --active: rgba(242, 168, 29, 0.22);
   --active-line: #F2A81D;
   --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
   --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);

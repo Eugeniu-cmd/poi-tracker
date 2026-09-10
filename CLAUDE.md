@@ -18,8 +18,9 @@ Hard rules:
 5. Secrets (mailbox URL, password) never enter project files.
 6. Columns B..H of tracker route sheets take numbers only; any text breaks
    the user's generator.
-7. App UI copy is Russian; all documentation and code identifiers are
-   English.
+7. App UI copy, documentation and code identifiers are all English. The
+   only exception is a verbatim quotation of a name or value that exists
+   in the user's spreadsheet.
 
 Where to look:
 | What | Where |
@@ -27,6 +28,12 @@ Where to look:
 | Data model, Log sheet, mailbox contract | docs/data-model.md |
 | Screen decision registry | docs/screens.md |
 | Design tokens | docs/references/_tokens.css |
+| Working screen reference | docs/references/main-screen.html |
+| Settings reference | docs/references/settings.html |
+| History reference | docs/references/history.html |
 | Spreadsheet layouts, export procedure, bug rules | docs/spreadsheets.md |
 | Superseded planning dump (Russian, historical) | docs/inputs/ARCHIVE_handoff_v2_2026-09-02.md |
 | RECON snapshots | _recon/ |
+
+This file carries no version tag or history on purpose: it is a config
+Claude Code reads at startup, not a registry of decisions.

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<!--
+  ================================================================
+  POI Tracker — History Reference
+  File: docs/references/history.html
+
+  Iteration plan:
+  v0.1 — 2026-09-09 — first reference: this POI, whole route, and a
+          confirmed deletion. Follows screens.md items 12–14 and item 9.
+          Glass direction (_tokens.css v0.5), light appearance forced.
+          Reference device: Android tablet 10.6", 1000 × 600 px.
+  v0.2 — 2026-09-09 — the background working screen shows a real numbered
+          POI list instead of blank bars; screen 2 hints at scrolling with
+          extra rows rather than a severed one; a deleted pass is shown as
+          temporary — it stays only while its removal is queued.
+          Reference device: Android tablet 10.6", 1000 × 600 px.
+  v0.3 — 2026-09-09 — the panel sub-header adopts the chip language of
+          the working screen: the fact that names where you are sits in
+          an amber chip, the rest stays quiet context, and a count gets a
+          neutral chip. Reference device: Android tablet 10.6",
+          1000 × 600 px.
+  v0.4 — 2026-09-09 — segmented control shortened to "POI" and "Route";
+          pass rows name the side alone, without "from". Reference
+          device: Android tablet 10.6", 1000 × 600 px.
+  v0.5 — 2026-09-15 — the POI list beside the panel becomes a live picker,
+          so another POI can be chosen without closing History; in each
+          row the side outweighs the time; the footer says plainly that
+          History shows only what this tablet recorded. Reference device:
+          Android tablet 10.6", 1000 × 600 px.
+  v0.6 — 2026-09-09 — the time in a pass row returns to its former size,
+          weight and colour; the side keeps the heavier treatment from
+          v0.5, which supplies the contrast on its own. Correction: the
+          v0.5 entry above is dated 2026-09-15 in error; that work was
+          done on 2026-09-09.
+  ================================================================
+-->
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<title>POI Tracker — History Reference v0.6</title>
+<link rel="stylesheet" href="_tokens.css">
+<style>
+  /* ============================================================
+     PAGE CHROME — not part of the product. Hardcoded colors are
+     deliberate here: this is the presentation board, and it must
+     contrast with the mockup so the frame reads as a device.
+     ============================================================ */
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 40px 44px 56px; background: #23262F; color: #E7E9F0;
+         font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .eyebrow { font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+             color: #8A90A6; margin: 0 0 10px; }
+  h1 { margin: 0 0 12px; font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
+  .meta { margin: 0 0 34px; font-size: 14px; line-height: 1.65; color: #A6ACC0;
+          max-width: 900px; }
+  .meta b { color: #E7E9F0; font-weight: 600; }
+  .rail { display: flex; align-items: flex-start; gap: 40px; }
+  .unit { display: flex; align-items: flex-start; gap: 26px; flex: none; }
+  .device { flex: none; }
+  .bezel { width: 1014px; height: 614px; padding: 7px; background: #0C0E14;
+           border-radius: 29px; box-shadow: 0 26px 60px rgba(0,0,0,.55),
+           0 0 0 1px rgba(255,255,255,.06) inset; }
+  .caption { margin: 14px 0 0; font-size: 11px; letter-spacing: .16em;
+             text-transform: uppercase; color: #8A90A6; }
+  .dmap { flex: none; width: 300px; background: #2B2F3A; border-radius: 14px;
+          padding: 20px 20px 8px; border: 1px solid #383D4B; }
+  .dmap-title { font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+                color: #8A90A6; margin-bottom: 14px; }
+  .dtopic { margin-bottom: 18px; }
+  .dtopic h3 { margin: 0 0 5px; font-size: 14px; font-weight: 700; color: #F2F4FA; }
+  .dtopic p { margin: 0; font-size: 12.5px; line-height: 1.55; color: #BFC5D6; }
+  .dtopic p.why { margin-top: 5px; color: #878DA1; }
+
+  /* ============================================================
+     SCREEN CONTENT: tokens only
+     Everything below styles what is inside the device frame.
+     No hardcoded colors, radii, fonts or shadows may appear here
+     — only var(--…) from _tokens.css v0.5.
+
+     Every class below is work-* or hist-* and is used for exactly one
+     purpose in this file; nothing reuses a name from another element.
+     ============================================================ */
+  .screen { width: 1000px; height: 600px; position: relative; overflow: hidden;
+            border-radius: 22px; background: var(--bg);
+            background-image: var(--bg-grad);
+            font-family: var(--font); color: var(--ink); }
+
+  /* ---- the working screen showing through, dimmed ---- */
+  .work-under { position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+                display: flex; opacity: .45; }
+  .work-col { width: 330px; flex: none; display: flex; flex-direction: column;
+              background: var(--panel); border-right: 1px solid var(--line); }
+  .work-route { display: flex; align-items: center; justify-content: space-between;
+                margin: 12px; padding: 10px 14px; min-height: var(--tap-min);
+                font-size: 18px; font-weight: 700; color: var(--ink);
+                background: var(--panel-strong); border: 1px solid var(--panel-edge);
+                border-radius: var(--r-sm); }
+  .work-chev { font-size: 13px; color: var(--ink-3); }
+  .work-list { flex: 1; overflow: hidden; border-top: 1px solid var(--line); }
+  .work-row { display: flex; align-items: center; gap: 10px;
+              height: var(--tap-min); padding: 0 14px; background: var(--panel);
+              border-bottom: 1px solid var(--line); }
+  .work-num { width: 30px; flex: none; text-align: right; font-size: 13px;
+              font-weight: 600; color: var(--ink); }
+  /* the active POI reads the same here as on the working screen itself:
+     tint, 4px edge, amber number, no badge (main-screen.html v0.12) */
+  .work-active { background: var(--active);
+                 box-shadow: inset 4px 0 0 0 var(--active-line); }
+  .work-active .work-num { color: var(--warn); }
+  .work-bar { flex: 1; height: 5px; background: var(--line);
+              border-radius: var(--r-sm); overflow: hidden; }
+  .work-bar i { display: block; height: 100%; background: var(--ink-3); }
+
+  /* ---- the History panel: glass, panel level ---- */
+  .hist-panel { position: absolute; right: 0; top: 0; width: 660px; height: 600px;
+                display: flex; flex-direction: column; padding: 16px 20px;
+                background: var(--panel-strong);
+                backdrop-filter: blur(var(--blur));
+                -webkit-backdrop-filter: blur(var(--blur));
+                border-left: 1px solid var(--line);
+                box-shadow: var(--shadow-lift); }
+  .hist-head { display: flex; align-items: center; gap: 14px; flex: none;
+               min-height: var(--tap-min); }
+  .hist-title { font-size: 20px; font-weight: 700; color: var(--ink); }
+  .hist-seg { margin-left: auto; display: inline-flex; align-items: center;
+              padding: 3px; background: var(--panel); border: 1px solid var(--line);
+              border-radius: var(--r-sm); }
+  .hist-seg-on { display: inline-flex; align-items: center; height: var(--tap-min);
+                 padding: 0 16px; font-size: 13px; font-weight: 700;
+                 color: var(--side-glyph); background: var(--side);
+                 border-radius: var(--r-sm); }
+  .hist-seg-off { display: inline-flex; align-items: center; height: var(--tap-min);
+                  padding: 0 16px; font-size: 13px; font-weight: 600;
+                  color: var(--ink-2); }
+  .hist-close { display: inline-flex; align-items: center; justify-content: center;
+                width: var(--tap-min); height: var(--tap-min); font-size: 16px;
+                color: var(--ink); background: var(--panel);
+                border: 1px solid var(--panel-edge); border-radius: var(--r-sm); }
+  /* screens.md item 41: the sub-header ranks its facts instead of listing them,
+     in the same chip language the working screen uses for its counters — amber
+     for the thing that says where you are, quiet text for context, a neutral
+     chip for a total. */
+  .hist-sub { flex: none; margin-top: 10px; display: flex; align-items: center;
+              gap: 10px; }
+  .hist-chip { display: inline-flex; align-items: baseline; gap: 6px;
+               padding: 4px 10px; border-radius: var(--r-sm); }
+  .hist-chip-label { font-size: 11px; font-weight: 700; line-height: 1; }
+  .hist-chip-value { font-size: 15px; font-weight: 700; line-height: 1;
+                     color: var(--ink); }
+  .hist-chip-amber { background: var(--side-soft); }
+  .hist-chip-amber .hist-chip-label { color: var(--warn); }
+  .hist-chip-neutral { background: var(--man-soft); }
+  .hist-chip-neutral .hist-chip-label { color: var(--ink-2); }
+  .hist-context { font-size: 13px; color: var(--ink-3); }
+  .hist-note { flex: none; margin-top: 10px; padding: 8px 14px; font-size: 13px;
+               font-weight: 700; color: var(--warn); background: var(--warn-bg);
+               border-radius: var(--r-sm); }
+
+  /* ---- the list: translucent rows, NEVER blurred ---- */
+  .hist-list { flex: none; margin-top: 12px; overflow: hidden; }
+  /* whole-route scope: the height is an exact multiple of the row pitch, so the
+     strip always ends on a complete row while further rows sit beyond the clip.
+     8 rows x 48px + 7 gaps x 5px = 419px — one row fewer than before, to make
+     room for the footer this scope now carries too. */
+  .hist-list-tall { height: 419px; }
+  .hist-row { display: flex; align-items: center; gap: 12px;
+              height: 48px; padding: 0 14px; background: var(--panel);
+              border: 1px solid var(--line); border-radius: var(--r-sm); }
+  .hist-row + .hist-row { margin-top: 5px; }
+  /* the side carries the extra weight and size; the time keeps its own, because
+     it is the left edge of every row and holds the list's rhythm. Weakening it
+     (v0.5) left the rows without an anchor. */
+  .hist-time { width: 46px; flex: none; font-size: 14px; font-weight: 700;
+               color: var(--ink); }
+  .hist-poi { width: 56px; flex: none; font-size: 13px; font-weight: 700;
+              color: var(--ink-2); }
+  .hist-arrow { flex: none; display: inline-flex; align-items: center;
+                color: var(--ink); }
+  .hist-side { flex: 1; font-size: 16px; font-weight: 700; color: var(--ink); }
+  .hist-state { flex: none; font-size: 12px; font-weight: 700; }
+  .hist-waiting { color: var(--warn); }
+  .hist-sent { color: var(--ink-3); }
+  .hist-del { display: inline-flex; align-items: center; flex: none;
+              height: var(--tap-min); padding: 0 16px; font-size: 13px;
+              font-weight: 600; color: var(--err); background: var(--err-bg);
+              border: 1px solid var(--line); border-radius: var(--r-sm); }
+  .hist-gone { opacity: .5; }
+  .hist-gone .hist-side, .hist-gone .hist-time { text-decoration: line-through; }
+  .hist-deleted { flex: none; font-size: 13px; font-weight: 700;
+                  color: var(--ink-3); }
+  .hist-queued { flex: none; font-size: 11px; color: var(--ink-3); }
+  .hist-foot { flex: none; margin-top: auto; padding-top: 12px; font-size: 12px;
+               color: var(--ink-3); }
+  /* ==================== END SCREEN CONTENT ==================== */
+</style>
+</head>
+<body>
+
+  <p class="eyebrow">Design Reference · docs/references/history.html</p>
+  <h1>POI Tracker — History Reference</h1>
+  <p class="meta"><b>v0.6 — 2026-09-09.</b> The panel where any recorded pass can
+     be deleted, not only the most recent one — scoped to one POI or the whole
+     route, showing for each pass whether it has reached the sheet, and keeping a
+     deleted pass visible only for as long as its removal is still queued. Labels
+     are pared back: the scope control reads "POI" and "Route", and a row names
+     its side alone.
+     <b>Reference device: Android tablet 10.6", 1000 × 600 px</b>
+     (2000 × 1200 physical at 2× density), landscape, full-screen.</p>
+
+  <div class="rail">
+
+    <div class="unit">
+      <div class="device">
+        <div class="bezel">
+          <div class="screen">
+
+            <div class="work-under">
+              <div class="work-col">
+                <div class="work-route"><span>R20890-028</span><span class="work-chev">▾</span></div>
+                <div class="work-list">
+                  <div class="work-row"><span class="work-num">1</span><span class="work-bar"><i style="width:100%"></i></span></div>
+                  <div class="work-row work-active"><span class="work-num">2</span><span class="work-bar"><i style="width:80%"></i></span></div>
+                  <div class="work-row"><span class="work-num">3</span><span class="work-bar"><i style="width:65.71%"></i></span></div>
+                  <div class="work-row"><span class="work-num">4</span><span class="work-bar"><i style="width:35.71%"></i></span></div>
+                  <div class="work-row"><span class="work-num">5</span><span class="work-bar"><i style="width:48.57%"></i></span></div>
+                  <div class="work-row"><span class="work-num">6</span><span class="work-bar"><i style="width:11.43%"></i></span></div>
+                  <div class="work-row"><span class="work-num">7</span><span class="work-bar"><i style="width:27.14%"></i></span></div>
+                  <div class="work-row"><span class="work-num">8</span><span class="work-bar"><i style="width:18.57%"></i></span></div>
+                  <div class="work-row"><span class="work-num">9</span><span class="work-bar"><i style="width:24.29%"></i></span></div>
+                  <div class="work-row"><span class="work-num">10</span><span class="work-bar"><i style="width:8.57%"></i></span></div>
+                  <div class="work-row"><span class="work-num">11</span><span class="work-bar"><i style="width:22.86%"></i></span></div>
+                  <div class="work-row"><span class="work-num">12</span><span class="work-bar"><i style="width:17.14%"></i></span></div>
+                  <div class="work-row"><span class="work-num">13</span><span class="work-bar"><i style="width:21.43%"></i></span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hist-panel">
+              <div class="hist-head">
+                <span class="hist-title">History</span>
+                <span class="hist-seg"><span class="hist-seg-on">POI</span><span class="hist-seg-off">Route</span></span>
+                <span class="hist-close">✕</span>
+              </div>
+              <div class="hist-sub"><span class="hist-chip hist-chip-amber"><span class="hist-chip-label">POI</span><span class="hist-chip-value">2</span></span><span class="hist-context">R20890-028 · Düsseldorf</span></div>
+              <div class="hist-list">
+                <div class="hist-row"><span class="hist-time">12:44</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">South</span><span class="hist-state hist-waiting">waiting</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:41</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">North</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:39</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span><span class="hist-side">West</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:36</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">South</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:31</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">East</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:28</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">North</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+              </div>
+              <div class="hist-foot">History shows only what this tablet recorded</div>
+            </div>
+
+          </div>
+          <!-- /screen -->
+        </div>
+        <p class="caption">Screen 1 · This POI</p>
+      </div>
+
+      <aside class="dmap">
+        <div class="dmap-title">Decision map · Screen 1</div>
+
+        <div class="dtopic">
+          <h3>Any pass can be deleted, not only the last</h3>
+          <p>Every row carries its own Delete. This is the reason the panel exists:
+             "Undo last" walks backwards from the end, and a mistake noticed three
+             intersections later is not the last thing recorded.</p>
+          <p class="why"><em>Passes are entered at speed and errors surface late —
+             often only when the counters stop matching what the shift actually
+             drove. Forcing a correction to unwind every good pass recorded after
+             the bad one would make people leave the error in rather than lose
+             the work.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>Each row says whether it was delivered</h3>
+          <p>A pass reads "waiting" while it is still on the tablet and "sent" once
+             it has reached the sheet, in the warning colour and the muted colour
+             respectively.</p>
+          <p class="why"><em>The two states delete differently: one disappears
+             locally, the other has to travel to the sheet as a removal. Showing
+             the state before the tap is what makes the difference in outcome
+             predictable instead of surprising.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>The POI list stays live behind the panel</h3>
+          <p>Another POI is chosen straight from the list already on screen beside
+             the panel; the panel reloads in place for it, and History never
+             closes.</p>
+          <p class="why"><em>Putting a second picker inside the panel would
+             duplicate a control the screen already carries, and closing the panel
+             to change POI would cost two taps for something done often — check
+             one POI, correct it, move to the next.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>The sub-header ranks its three facts</h3>
+          <p>The POI or route you are actually looking at sits in an amber chip;
+             the route and the city stay behind it as quiet context, and a total
+             like the route's pass count gets a neutral chip of its own.</p>
+          <p class="why"><em>Three facts set in one weight force the eye to read
+             all three to find the one that changes between screens. Amber already
+             means "where I am" everywhere else in the app — the active POI row,
+             the approach-side discs, the side chips — so reusing it here costs
+             nothing to learn.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>Hand-typed passes never appear</h3>
+          <p>Only passes recorded on this tablet are listed. Numbers typed straight
+             into the spreadsheet are absent, and the footer says so.</p>
+          <p class="why"><em>The app knows its own events; it does not know how a
+             cell reached its value. Inventing rows for numbers it never recorded
+             would promise a delete it cannot perform — those corrections belong
+             in the sheet.</em></p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="unit">
+      <div class="device">
+        <div class="bezel">
+          <div class="screen">
+
+            <div class="work-under">
+              <div class="work-col">
+                <div class="work-route"><span>R20890-028</span><span class="work-chev">▾</span></div>
+                <div class="work-list">
+                  <div class="work-row"><span class="work-num">1</span><span class="work-bar"><i style="width:100%"></i></span></div>
+                  <div class="work-row work-active"><span class="work-num">2</span><span class="work-bar"><i style="width:80%"></i></span></div>
+                  <div class="work-row"><span class="work-num">3</span><span class="work-bar"><i style="width:65.71%"></i></span></div>
+                  <div class="work-row"><span class="work-num">4</span><span class="work-bar"><i style="width:35.71%"></i></span></div>
+                  <div class="work-row"><span class="work-num">5</span><span class="work-bar"><i style="width:48.57%"></i></span></div>
+                  <div class="work-row"><span class="work-num">6</span><span class="work-bar"><i style="width:11.43%"></i></span></div>
+                  <div class="work-row"><span class="work-num">7</span><span class="work-bar"><i style="width:27.14%"></i></span></div>
+                  <div class="work-row"><span class="work-num">8</span><span class="work-bar"><i style="width:18.57%"></i></span></div>
+                  <div class="work-row"><span class="work-num">9</span><span class="work-bar"><i style="width:24.29%"></i></span></div>
+                  <div class="work-row"><span class="work-num">10</span><span class="work-bar"><i style="width:8.57%"></i></span></div>
+                  <div class="work-row"><span class="work-num">11</span><span class="work-bar"><i style="width:22.86%"></i></span></div>
+                  <div class="work-row"><span class="work-num">12</span><span class="work-bar"><i style="width:17.14%"></i></span></div>
+                  <div class="work-row"><span class="work-num">13</span><span class="work-bar"><i style="width:21.43%"></i></span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hist-panel">
+              <div class="hist-head">
+                <span class="hist-title">History</span>
+                <span class="hist-seg"><span class="hist-seg-off">POI</span><span class="hist-seg-on">Route</span></span>
+                <span class="hist-close">✕</span>
+              </div>
+              <div class="hist-sub"><span class="hist-chip hist-chip-amber"><span class="hist-chip-label">ROUTE</span><span class="hist-chip-value">028</span></span><span class="hist-context">Düsseldorf</span><span class="hist-chip hist-chip-neutral"><span class="hist-chip-value">590</span><span class="hist-chip-label">passes</span></span></div>
+              <div class="hist-list hist-list-tall">
+                <div class="hist-row"><span class="hist-time">12:44</span><span class="hist-poi">POI 2</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">South</span><span class="hist-state hist-waiting">waiting</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:41</span><span class="hist-poi">POI 2</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">North</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:39</span><span class="hist-poi">POI 2</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span><span class="hist-side">West</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:36</span><span class="hist-poi">POI 7</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">South</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:31</span><span class="hist-poi">POI 7</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">East</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:28</span><span class="hist-poi">POI 16</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">North</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:24</span><span class="hist-poi">POI 16</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">East</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:19</span><span class="hist-poi">POI 16</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span><span class="hist-side">West</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:15</span><span class="hist-poi">POI 16</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">South</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:11</span><span class="hist-poi">POI 16</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">North</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:06</span><span class="hist-poi">POI 16</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span><span class="hist-side">West</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:02</span><span class="hist-poi">POI 16</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">East</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+              </div>
+              <div class="hist-foot">History shows only what this tablet recorded</div>
+            </div>
+
+          </div>
+          <!-- /screen -->
+        </div>
+        <p class="caption">Screen 2 · Whole route</p>
+      </div>
+
+      <aside class="dmap">
+        <div class="dmap-title">Decision map · Screen 2</div>
+
+        <div class="dtopic">
+          <h3>One panel, two scopes</h3>
+          <p>The same list switches between this POI and the whole route through a
+             segmented control in its header, rather than living in two separate
+             panels reached from different places.</p>
+          <p class="why"><em>The two views answer one question — "what did I
+             record?" — at two zoom levels, and the row, its states and its Delete
+             behave identically in both. Splitting them would duplicate every rule
+             and force the passenger to guess which panel holds the pass they are
+             hunting for.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>Newest first</h3>
+          <p>The most recent pass is at the top, and the list runs backwards in
+             time from there.</p>
+          <p class="why"><em>Corrections are overwhelmingly about what just
+             happened: a wrong side, a double tap at the last intersection. Putting
+             the newest row where the eye lands makes the common case a glance
+             rather than a scroll through the whole shift.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>The POI is named only in this scope</h3>
+          <p>Whole-route rows carry a POI column; the this-POI rows do not, because
+             the line under the header already names it.</p>
+          <p class="why"><em>Repeating "POI 2" on six consecutive rows spends width
+             on a constant and pushes the side and the delete control together.
+             Across the route the POI is the column that actually varies, so that
+             is where it earns its place.</em></p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="unit">
+      <div class="device">
+        <div class="bezel">
+          <div class="screen">
+
+            <div class="work-under">
+              <div class="work-col">
+                <div class="work-route"><span>R20890-028</span><span class="work-chev">▾</span></div>
+                <div class="work-list">
+                  <div class="work-row"><span class="work-num">1</span><span class="work-bar"><i style="width:100%"></i></span></div>
+                  <div class="work-row work-active"><span class="work-num">2</span><span class="work-bar"><i style="width:80%"></i></span></div>
+                  <div class="work-row"><span class="work-num">3</span><span class="work-bar"><i style="width:65.71%"></i></span></div>
+                  <div class="work-row"><span class="work-num">4</span><span class="work-bar"><i style="width:35.71%"></i></span></div>
+                  <div class="work-row"><span class="work-num">5</span><span class="work-bar"><i style="width:48.57%"></i></span></div>
+                  <div class="work-row"><span class="work-num">6</span><span class="work-bar"><i style="width:11.43%"></i></span></div>
+                  <div class="work-row"><span class="work-num">7</span><span class="work-bar"><i style="width:27.14%"></i></span></div>
+                  <div class="work-row"><span class="work-num">8</span><span class="work-bar"><i style="width:18.57%"></i></span></div>
+                  <div class="work-row"><span class="work-num">9</span><span class="work-bar"><i style="width:24.29%"></i></span></div>
+                  <div class="work-row"><span class="work-num">10</span><span class="work-bar"><i style="width:8.57%"></i></span></div>
+                  <div class="work-row"><span class="work-num">11</span><span class="work-bar"><i style="width:22.86%"></i></span></div>
+                  <div class="work-row"><span class="work-num">12</span><span class="work-bar"><i style="width:17.14%"></i></span></div>
+                  <div class="work-row"><span class="work-num">13</span><span class="work-bar"><i style="width:21.43%"></i></span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hist-panel">
+              <div class="hist-head">
+                <span class="hist-title">History</span>
+                <span class="hist-seg"><span class="hist-seg-on">POI</span><span class="hist-seg-off">Route</span></span>
+                <span class="hist-close">✕</span>
+              </div>
+              <div class="hist-sub"><span class="hist-chip hist-chip-amber"><span class="hist-chip-label">POI</span><span class="hist-chip-value">2</span></span><span class="hist-context">R20890-028 · Düsseldorf</span></div>
+              <div class="hist-note">1 pass queued for removal</div>
+              <div class="hist-list">
+                <div class="hist-row"><span class="hist-time">12:44</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">South</span><span class="hist-state hist-waiting">waiting</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row hist-gone"><span class="hist-time">12:41</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">North</span><span class="hist-deleted">deleted</span><span class="hist-queued">queued · disappears once removed from the sheet</span></div>
+                <div class="hist-row"><span class="hist-time">12:39</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span><span class="hist-side">West</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:36</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">South</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:31</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">East</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+                <div class="hist-row"><span class="hist-time">12:28</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">North</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
+              </div>
+              <div class="hist-foot">History shows only what this tablet recorded</div>
+            </div>
+
+          </div>
+          <!-- /screen -->
+        </div>
+        <p class="caption">Screen 3 · A deleted pass</p>
+      </div>
+
+      <aside class="dmap">
+        <div class="dmap-title">Decision map · Screen 3</div>
+
+        <div class="dtopic">
+          <h3>A deleted pass stays visible until the removal lands</h3>
+          <p>The row is struck through, dimmed and labelled "deleted" while its
+             removal is still queued. Once that removal has reached the sheet the
+             row leaves the list for good.</p>
+          <p class="why"><em>A row still on screen is the evidence that something
+             has not yet been delivered — it is the same promise the sync line
+             makes, shown against the specific pass it concerns. Keeping every
+             deletion for ever would turn that signal into decoration: after a
+             full shift the struck-through rows outnumber the live ones and bury
+             the passes that still matter.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>Deleting a delivered pass is queued, not refused</h3>
+          <p>The pass had already reached the sheet, so its removal becomes an
+             event of its own, waiting in the queue like any pass. The note above
+             the list counts what is pending.</p>
+          <p class="why"><em>Refusing would send the passenger to the spreadsheet
+             for the one correction the app is best placed to make, and doing it
+             silently on the tablet would leave the sheet holding a pass that no
+             longer exists. Queueing a removal keeps both sides converging on the
+             same answer through the one channel that already works offline.</em></p>
+        </div>
+
+        <div class="dtopic">
+          <h3>How this differs from "Undo last"</h3>
+          <p>"Undo last" only ever removes a pass that is still waiting on the
+             tablet, and only from the end. Anything already sent is corrected
+             here instead, which is why that button dims once the queue is
+             empty.</p>
+          <p class="why"><em>Two controls with one job each stay predictable: undo
+             is the quick fix for the tap you just made, History is the considered
+             fix for anything older. Merging them would give a single button two
+             very different consequences depending on state the passenger cannot
+             see at a glance.</em></p>
+        </div>
+      </aside>
+    </div>
+
+  </div>
+
+</body>
+</html>
