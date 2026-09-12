@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.22 — 2026-09-09
+v0.23 — 2026-09-12
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -69,6 +69,9 @@ the panel; "Load from sheet" is described as the bridge from hand entry.
 v0.22 2026-09-09 — a finished POI locks input, not every control: undo and
 History stay available. Correction: the v0.21 entry above is dated
 2026-09-15 in error; that work was done on 2026-09-09.
+v0.23 2026-09-12 — consistency audit applied: item 12 takes the "POI" /
+"Route" wording of v0.19; item 36 names the side alone; item 37 drops
+the count in parentheses and follows the v0.20 undo rule.
 -->
 
 The app is one working screen (10.6" tablet, landscape, two columns) plus
@@ -124,7 +127,7 @@ two slide-in panels. All UI copy is English.
     error is named, and two red lines in one column compete.
 
 ## "History" panel
-12. Pass list: "this POI / whole route" toggle; each entry shows time and
+12. Pass list: "POI" / "Route" scope control; each entry shows time and
     "maneuver + side".
 13. Every pass has "Delete". A pass still waiting on the tablet is removed
     outright. A pass already in the sheet stays in the list, struck
@@ -212,12 +215,12 @@ two slide-in panels. All UI copy is English.
     the POI list is replaced by a single line "Add routes in Settings",
     and the discs are dimmed and inert.
 36. A pass has just been recorded: a toast appears over the working area
-    for about two seconds, reading "Saved: ← from South · 57 of 70", then
+    for about two seconds, reading "Saved: ← South · 57 of 70", then
     fades. The screen beneath does not move.
 37. A finished POI whose passes have not all been sent: the discs stay
-    locked with their "This POI is done" caption, while "Undo last (N)"
-    stays live, because undo follows the queue and not the POI's progress.
-    The sync control reads "N passes waiting for network".
+    locked with their "This POI is done" caption, while "Undo last" stays
+    live, because undo follows what this tablet recorded, not the POI's
+    progress. The sync control reads "N passes waiting for network".
    These states change a line of text or a colour, never the layout, and
    so are specified here rather than drawn.
 

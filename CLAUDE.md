@@ -21,6 +21,9 @@ Hard rules:
 7. App UI copy, documentation and code identifiers are all English. The
    only exception is a verbatim quotation of a name or value that exists
    in the user's spreadsheet.
+8. Your own output is English too: chat replies, task reports,
+   acceptance-check output, notes and commit messages. This holds
+   whatever language the prompt or the user writes in.
 
 Where to look:
 | What | Where |
