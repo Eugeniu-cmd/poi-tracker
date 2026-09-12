@@ -1,0 +1,7 @@
+# Line endings: LF in the index and in the working tree, on every
+# machine. Without this, core.autocrlf on Windows rewrites files on
+# checkout and every SHA-256 recorded in _recon/ stops matching.
+* text=auto eol=lf
+
+# Never let git convert the user's workbooks.
+*.xlsx binary
