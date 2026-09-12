@@ -32,12 +32,14 @@
           v0.5, which supplies the contrast on its own. Correction: the
           v0.5 entry above is dated 2026-09-15 in error; that work was
           done on 2026-09-09.
+  v0.7 2026-09-12 — audit fix: the undo paragraph states the v0.20 rule
+          instead of the retired queue rule.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.6</title>
+<title>POI Tracker — History Reference v0.7</title>
 <link rel="stylesheet" href="_tokens.css">
 <style>
   /* ============================================================
@@ -198,7 +200,7 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History Reference</h1>
-  <p class="meta"><b>v0.6 — 2026-09-09.</b> The panel where any recorded pass can
+  <p class="meta"><b>v0.7 — 2026-09-09.</b> The panel where any recorded pass can
      be deleted, not only the most recent one — scoped to one POI or the whole
      route, showing for each pass whether it has reached the sheet, and keeping a
      deleted pass visible only for as long as its removal is still queued. Labels
@@ -494,10 +496,10 @@
 
         <div class="dtopic">
           <h3>How this differs from "Undo last"</h3>
-          <p>"Undo last" only ever removes a pass that is still waiting on the
-             tablet, and only from the end. Anything already sent is corrected
-             here instead, which is why that button dims once the queue is
-             empty.</p>
+          <p>"Undo last" removes the last pass this tablet recorded for the
+             active POI, delivered or not; a delivered one has its removal
+             queued, exactly as this panel does. This panel is where any pass
+             can be deleted, not only the most recent.</p>
           <p class="why"><em>Two controls with one job each stay predictable: undo
              is the quick fix for the tap you just made, History is the considered
              fix for anything older. Merging them would give a single button two

@@ -93,12 +93,15 @@
           CONTROLS LOCKED: only the maneuver discs are inert, while Undo
           last and History stay live. Correction: the v0.15 entry above is
           dated 2026-09-15 in error; that work was done on 2026-09-09.
+  v0.17 2026-09-12 — audit fixes: the stale <title> now matches the
+          version; screen 3's caption states the v0.20 undo rule instead of the
+          retired queue rule.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.4</title>
+<title>POI Tracker — Working Screen Reference v0.17</title>
 <link rel="stylesheet" href="_tokens.css">
 <style>
   /* ============================================================
@@ -283,7 +286,7 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.16 — 2026-09-09.</b> Screen 3's caption now says that
+  <p class="meta"><b>v0.17 — 2026-09-09.</b> Screen 3's caption now says that
      input is what a finished POI stops, not every control: the discs go inert
      while "Undo last" and "History" stay live, because a miscount is most
      likely to be noticed exactly when the POI closes.
@@ -1115,8 +1118,8 @@
           <p class="why"><em>A dead button with no explanation is indistinguishable from a bug. Naming the reason turns a dead end into a confirmation that the POI is done.</em></p>
         </div>
         <div class="dtopic">
-          <h3>Undo is dimmed here because everything has been sent</h3>
-          <p>Undo follows the queue rather than the POI's progress. On this screen every pass of this POI has reached the sheet, so there is nothing left to roll back and the button is dimmed with its reason captioned. The same button would be live on this same finished POI if any of its passes were still waiting to go out.</p>
+          <h3>Undo stays live on a finished POI</h3>
+          <p>Undo follows what this tablet recorded, not the POI's progress. A finished POI locks its maneuver discs; undo and History stay live, because a miscount is most likely to be noticed exactly when the POI closes. The same button would be live on this same finished POI if any of its passes were still waiting to go out.</p>
           <p class="why"><em>A pass that is already in the spreadsheet cannot be taken back by a tap without changing numbers the user may already have exported to the client. That is why History carries a deletion event instead: removing a delivered pass is a new record that travels to the sheet, not a silent local rollback.</em></p>
         </div>
       </aside>
