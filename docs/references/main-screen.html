@@ -286,10 +286,9 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.17 — 2026-09-09.</b> Screen 3's caption now says that
-     input is what a finished POI stops, not every control: the discs go inert
-     while "Undo last" and "History" stay live, because a miscount is most
-     likely to be noticed exactly when the POI closes.
+  <p class="meta"><b>v0.17 — 2026-09-12.</b> The page title now matches the
+     version, and screen 3's caption states the current undo rule: undo follows
+     what this tablet recorded, not the delivery queue.
      <b>Reference device: Android tablet 10.6", 1000 × 600 px</b>
      (2000 × 1200 physical at 2× density), landscape, full-screen.</p>
 
@@ -1119,7 +1118,7 @@
         </div>
         <div class="dtopic">
           <h3>Undo stays live on a finished POI</h3>
-          <p>Undo follows what this tablet recorded, not the POI's progress. A finished POI locks its maneuver discs; undo and History stay live, because a miscount is most likely to be noticed exactly when the POI closes. The same button would be live on this same finished POI if any of its passes were still waiting to go out.</p>
+          <p>Undo follows what this tablet recorded, not the POI's progress. A finished POI locks its maneuver discs; undo and History stay live, because a miscount is most likely to be noticed exactly when the POI closes.</p>
           <p class="why"><em>A pass that is already in the spreadsheet cannot be taken back by a tap without changing numbers the user may already have exported to the client. That is why History carries a deletion event instead: removing a delivered pass is a new record that travels to the sheet, not a silent local rollback.</em></p>
         </div>
       </aside>
