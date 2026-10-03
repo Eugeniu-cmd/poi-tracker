@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.23 — 2026-09-12
+v0.24 — 2026-10-03
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -72,6 +72,11 @@ History stay available. Correction: the v0.21 entry above is dated
 v0.23 2026-09-12 — consistency audit applied: item 12 takes the "POI" /
 "Route" wording of v0.19; item 36 names the side alone; item 37 drops
 the count in parentheses and follows the v0.20 undo rule.
+v0.24 2026-10-03 — targets per POI: 70 / 40 / 0 by type, set from the POI
+list on the working screen; done, lock and counters follow the target
+(items 2, 4, 10, 22, 46). Sync decisions recorded: "Load from sheet" per
+route and without discarding (item 30); deleted rows per item 13 (item
+38); rejected events (item 47); History limit (item 48).
 -->
 
 The app is one working screen (10.6" tablet, landscape, two columns) plus
@@ -80,14 +85,15 @@ two slide-in panels. All UI copy is English.
 ## Working screen — left
 1. Active city and route picker, side by side. The city name is always
    visible so it is obvious which tracker a tap is written into.
-2. POI list 1…197: number, progress bar, "N to go". Row turns green at
-   70/70, red on error, active POI highlighted.
+2. POI list 1…N for the route's POI count: number, progress bar, "N to
+   go". Row turns green at its target, red on error, closed POI in a
+   state of its own (item 46), active POI highlighted.
 3. Bottom summary: "Done N · M to go" and the count of finished POIs. The
    error count appears only when it is not zero.
 
 ## Working screen — right
-4. Large active POI number, "N of 70" counter, small N/S/W/E and ←/↑/→
-   counters.
+4. Large active POI number, "N of T" counter where T is the POI's target
+   (70, or 40 on a straight), small N/S/W/E and ←/↑/→ counters.
 5. Three big round maneuver buttons ← ↑ →; "straight" sits higher than
    its neighbors.
 6. Tap a maneuver → four approach sides bloom around that button as a
@@ -105,10 +111,10 @@ two slide-in panels. All UI copy is English.
    History does.
    The button is dimmed only on a POI this tablet has never written to —
    a one-time state on a route filled in by hand before the app was used.
-10. A POI at 70/70 or with a spreadsheet error has its maneuver discs
-    locked, with a caption saying why. Input is what stops: "Undo last"
-    and "History" stay available, because a miscount is most likely to be
-    noticed exactly when the POI closes.
+10. A POI that has reached its target, or has a spreadsheet error, has
+    its maneuver discs locked, with a caption saying why. Input is what
+    stops: "Undo last" and "History" stay available, because a miscount
+    is most likely to be noticed exactly when the POI closes.
 11. The screen stays awake while the app is open.
 19. A compass sits in the top-right corner: a fixed ring with a North tick
     and a needle that rotates to the car's heading. Minimum gap between
@@ -125,6 +131,13 @@ two slide-in panels. All UI copy is English.
     "N to go" and states the mismatch in words. It stays in the ordinary
     muted colour; the red caption beside the locked discs is where the
     error is named, and two red lines in one column compete.
+46. Every POI has a type with three positions — intersection (70 passes),
+    straight (40) or closed (0) — and the passenger sets it from the POI
+    list on the working screen, looking at the intersection, without
+    leaving the screen. How the control looks is a reference decision
+    still to be drawn. A closed POI has its discs locked at once with a
+    caption, is never counted among POIs "to go", and must read as
+    neither done nor in error.
 
 ## "History" panel
 12. Pass list: "POI" / "Route" scope control; each entry shows time and
@@ -138,8 +151,9 @@ two slide-in panels. All UI copy is English.
     are corrected in the spreadsheet.
 38. A pass that has already reached the sheet can still be deleted here;
     the removal is queued and sent like any other event. A pass still
-    waiting on the tablet is removed outright. Either way the row stays in
-    the list, struck through and labelled.
+    waiting on the tablet is removed outright and leaves the list at
+    once. The struck-through row of item 13 is for delivered passes
+    only.
 41. The panel's sub-header ranks its facts rather than listing them: the
     POI or route in view sits in an amber chip, the route and city stay
     as quiet context, and a total appears in a neutral chip.
@@ -150,6 +164,13 @@ two slide-in panels. All UI copy is English.
     the sheet by hand have no individual passes behind them — the sheet
     holds seven totals per POI — so they can be continued from, through
     "Load from sheet", but never listed.
+47. An event the mailbox refused stays on the tablet as "rejected", with
+    the mailbox's reason. History shows it in its row, and the working
+    screen's sync control counts rejected events alongside waiting ones.
+    Exact wording and look are still to be drawn.
+48. History holds the newest 3,000 events this tablet recorded. Older
+    delivered events drop off the list; nothing still waiting is ever
+    dropped, whatever its age.
 
 ## Connection, sync status and tablet data
 16. Sync status is always visible on the working screen and carries a
@@ -169,8 +190,8 @@ two slide-in panels. All UI copy is English.
     "Connection" row shows the status (connected / not set) and opens the
     connection screen. A "Delete city" control sits at the bottom.
 22. Route editor inside a city: route code (must match the sheet name in
-    that city's tracker) and POI count. Passes per POI is fixed at 70 and
-    is not editable.
+    that city's tracker) and POI count. The target per POI is not set
+    here; it is set per POI from the working screen (item 46).
 23. Adding a city or a route never touches any spreadsheet; the tracker
     for a new city is created by the user in Google Sheets first.
 24. Deleting a city warns that its queued, undelivered passes will be lost
@@ -184,9 +205,10 @@ two slide-in panels. All UI copy is English.
     of the last successful send and the last load. Sending is automatic
     whenever the network is up; the button exists to confirm before a
     shift ends, not to run the sync.
-30. "Load from sheet" replaces this city's counts with what the tracker
-    currently holds. It warns first when passes are still waiting to be
-    sent, because loading before sending would discard them.
+30. "Load from sheet" replaces the active route's counts and targets with
+    what the tracker currently holds. Passes still waiting on the tablet
+    are kept and sent as usual: they are not in the sheet yet, so the
+    loaded numbers plus the waiting passes are exactly right.
 
 ## Control states (applies to every screen)
 26. A control that is unavailable keeps its normal colour and is dimmed,

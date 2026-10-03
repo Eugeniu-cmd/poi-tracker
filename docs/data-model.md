@@ -1,6 +1,6 @@
 # Data model
 
-v0.4 — 2026-09-05
+v0.5 — 2026-10-03
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -12,34 +12,63 @@ alignment, smoothing).
 v0.4 2026-09-05 — cities: the app holds a list of cities, each with its
 own tracker, mailbox and routes; events carry a city id; routes are
 entered by hand (code + POI count); 70 passes per POI is a constant.
+v0.5 2026-10-03 — mailbox contract and tablet arithmetic settled:
+delivered events fold into the baseline and stay for History only;
+History keeps 3,000 events; a pass is applied whole or not at all; push
+answers with applied / duplicate / rejected; pull and "Load from sheet"
+work per route. Targets per POI: 70 / 40 / 0 by type, set from the
+working screen, stored in a tracker column; "70 is a constant" retired.
 -->
 
 ## Pass (one crossing of an intersection)
 - Approach side: N / S / W / E.
 - Maneuver: L (left) / St (straight) / R (right).
-- Belongs to a route (R20890-024…029) and a POI (number 1…197, 70 passes
-  each).
+- Belongs to a route and a POI. Each POI has its own target (see
+  "Targets per POI").
 - Recorded atomically: maneuver + side in one action after the second tap.
   Neither exists alone.
 
 ## Event — the unit of storage and transfer
-{ id, ts, city, route, poi, side, man, delta, ref? }
+{ id, ts, city, route, poi, kind, side?, man?, delta?, ref?, target? }
 - id — unique, generated on the tablet at tap time (UUID).
-- city — id of the city this pass belongs to. The queue may hold passes
+- city — id of the city this event belongs to. The queue may hold events
   from more than one city; each event goes to its own city's mailbox.
 - ts — tap time (Unix, milliseconds).
-- delta — +1 (pass recorded) or −1 (pass deleted).
-- ref — only when delta = −1: id of the event being deleted.
-- Events are append-only. Never edited, never erased.
+- kind — 'pass' or 'target'.
+- A pass event carries side, man and delta: +1 (pass recorded) or −1
+  (pass deleted); ref — only when delta = −1: id of the pass being
+  deleted.
+- A target event carries target: 70, 40 or 0 — the POI's new target (see
+  "Targets per POI").
+- Events are never edited. An event still waiting on the tablet may be
+  dropped from the queue before delivery (it never reached the sheet, so
+  there is nothing to reverse); a delivered event is never changed, only
+  countered by a later event, and may be trimmed from the tablet by the
+  History limit below.
 
 ## Tablet storage (localStorage)
-- baseline — 7 numbers per POI, per route, per city (snapshot pulled from
-  that city's tracker).
-- events — all events, each with a sent flag (delivered to the mailbox or
-  waiting). Every event names its city and its route, so one queue can
-  hold passes from more than one city.
-- Numbers on screen = baseline + sum of events. Empty storage = clean
-  start; the app must work correctly in that state.
+- baseline — per POI, per route, per city: the 7 counts and the target,
+  as last pulled from that city's tracker and as advanced by delivered
+  events (next bullet).
+- events — the events this tablet recorded, each in one of three states:
+  waiting (not yet delivered), delivered (the mailbox confirmed it) or
+  rejected (the mailbox refused it, with the reason). Every event names
+  its city and its route, so one queue can hold events from more than
+  one city.
+- When the mailbox confirms an event, the tablet folds it into the
+  baseline: a pass adds its delta to the two matching counts, a target
+  event replaces the POI's target. From then on the event is kept for
+  History only and takes no part in the arithmetic.
+- Numbers on screen = baseline + sum of waiting pass events. Loading from
+  the sheet replaces the baseline and cannot count anything twice,
+  because delivered events are already inside the sheet's numbers.
+- History limit: the tablet keeps the newest 3,000 events. Only delivered
+  or rejected events are ever trimmed, oldest first; a waiting event —
+  a pass or a removal — is never trimmed, whatever its age. If the
+  browser refuses to store more, the app trims delivered events beyond
+  the limit and says so, and never drops a waiting event.
+- Empty storage = clean start; the app must work correctly in that
+  state.
 
 ## User's Google tracker (POI_tracker_Dusseldorf_v1)
 - Existing sheets are NOT modified. Route sheet layout: row = POI, number
@@ -47,18 +76,30 @@ entered by hand (code + POI count); 70 passes per POI is a constant.
   Right; I..S are formulas — hands off. B..H take numbers only.
 - NEW sheet `Log` (created by the mailbox on first run): row = event,
   append-only. Columns: A id · B time · C route · D POI · E side ·
-  F maneuver · G delta · H ref.
+  F maneuver · G delta · H ref · I target. A pass row leaves I empty; a
+  target row leaves E..H empty.
 - The client's spreadsheet (Duesseldorf_Tracking_RoadNet_v1) is never
   touched.
 
 ## Mailbox (Apps Script inside the tracker, no UI)
-- POST {token, action:'push', events:[…]} → {ok:true, applied:[ids]}
-  For each event: if its id already exists in `Log` — skip it (guard
-  against double delivery on retries); otherwise append a row to `Log`
-  and add delta to the two matching B..H cells of the route sheet. Never
-  drive a cell below 0.
+- POST {token, action:'push', events:[…]} → {ok:true, applied:[ids],
+  duplicate:[ids], rejected:[{id, reason}]}
+  For each event: if its id already exists in `Log` — report it under
+  duplicate and change nothing (guard against double delivery on
+  retries). Otherwise apply it and report it under applied, or refuse it
+  and report it under rejected with a reason. The tablet treats applied
+  and duplicate alike as delivered.
+- Applying a pass: add delta to the two matching B..H cells of the route
+  sheet and append a row to `Log`. The event is applied whole or not at
+  all: if either cell would go below 0, neither cell changes, no `Log`
+  row is written, and the event is rejected (reason 'below-zero').
+- Applying a target event: write target into the POI's cell of the
+  target column (see "Targets per POI") and append a row to `Log`.
+- A route sheet or POI row that does not exist → rejected (reason
+  'no-route' / 'no-poi').
 - POST {token, action:'pull', route} → {ok:true,
-  counts:{poi:[N,S,W,E,L,St,R]}}
+  counts:{poi:[N,S,W,E,L,St,R]}, targets:{poi:target}} — one route per
+  call; a missing target cell reads as 70.
 - POST {token, action:'ping'} → {ok:true}
 - Wrong token → {ok:false, error:'auth'}.
 
@@ -72,6 +113,12 @@ entered by hand (code + POI count); 70 passes per POI is a constant.
 - Manual edits to B..H in the tracker remain allowed; `Log` and B..H
   can then drift apart. A "Log = B..H" consistency check is an open
   decision.
+- "Load from sheet" pulls one route — the active one — and replaces that
+  route's baseline (counts and targets) with what the tracker holds.
+  Passes still waiting on the tablet are kept and sent as usual: they
+  are not in the sheet yet, so the loaded numbers plus the waiting
+  passes are exactly right. Nothing is discarded and no warning is
+  needed.
 
 ## Heading (compass)
 - Two sources, because neither alone is trustworthy in a car:
@@ -94,8 +141,30 @@ entered by hand (code + POI count); 70 passes per POI is a constant.
 - A route = { code, poiCount }. Both are typed in by hand. The route code
   must match the sheet name in that city's tracker exactly, or the mailbox
   finds nothing to write to.
-- Passes per POI is the constant 70 for every POI of every route.
+- The target per POI is not a route setting: see "Targets per POI".
 - Cities are never deleted automatically. Moving from one city to the next
   adds a city; the previous one keeps its routes and its baseline.
 - mailboxUrl and token live on the tablet only. They never enter project
   files, prompts or chat.
+
+## Targets per POI
+- The client's rule: an intersection takes 70 passes; a POI on a straight
+  road takes 40; a POI that cannot be driven (private property, closed)
+  takes 0.
+- Each POI therefore carries a type with three positions — intersection
+  (70) / straight (40) / closed (0) — and the target follows from the
+  type. The passenger sets it from the working screen, looking at the
+  intersection, without leaving the screen. New POIs start as
+  intersection.
+- "Done", the "N of T" counter, the disc lock and the progress bar follow
+  the POI's own target, never a fixed 70. A closed POI is locked at once.
+- A change of type is a target event: stored on the tablet instantly,
+  delivered through the same queue as passes, written by the mailbox into
+  the tracker.
+- In the tracker the target lives in one dedicated column per route
+  sheet, appended to the right of the existing layout, never inserted
+  between existing columns. Its letter is fixed per tracker when the
+  mailbox is installed and recorded in docs/spreadsheets.md. "To go",
+  the БОЛЬШЕ status and the summary's Норма read from it instead of the
+  fixed 70. The Generator is unchanged: it already emits empty rows
+  beyond the passes driven, so a POI at 40 fills 40 of its 70 rows.
