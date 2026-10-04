@@ -15,7 +15,8 @@ is docs/data-model.md, section "Mailbox".
 - Columns B..H on every route sheet: N, S, W, E, Left, Straight, Right.
   Numbers only.
 - Column X free on every route sheet. The mailbox keeps each POI's target
-  there (70, 40 or 0). An empty or non-numeric cell reads as 70.
+  there (70, 40 or 0). An empty or non-numeric cell reads as 70. You may
+  also type 40 or 0 there by hand.
 - No sheet named Log. The mailbox creates it on the first push, at the
   end of the tab list, and only ever appends to it.
 - File > Settings > Time zone set to the city's time zone. The Log's
@@ -27,19 +28,25 @@ is docs/data-model.md, section "Mailbox".
 1. Open the tracker. Extensions > Apps Script.
 2. Delete everything in the editor's Code.gs. Paste the whole of
    mailbox/Code.gs. Save.
-3. Project Settings (gear icon) > Script properties > Add script
+3. Once per tracker: pick setupTargetColumn in the function list next to
+   Debug, press Run, allow the permission prompt if one appears. It
+   switches "To go" (column I), the status (column S) and the summary's
+   norm from the fixed 70 to the target in column X. The Execution log
+   lists every sheet and how many cells changed. Running it again
+   changes nothing. File > Version history restores the sheet if needed.
+4. Project Settings (gear icon) > Script properties > Add script
    property. Property: TOKEN. Value: the access key you made up. Save.
    The key never goes into any file of this project, a prompt or a chat.
-4. Deploy > New deployment > Select type: Web app.
+5. Deploy > New deployment > Select type: Web app.
    Execute as: Me. Who has access: Anyone. Deploy.
    The Romanian interface shows two entries both named "Oricine": the
    first is "Anyone with Google account", the last is "Anyone". Pick the
    last.
-5. The first deployment asks for permission. Allow it. If Google shows
+6. The first deployment asks for permission. Allow it. If Google shows
    "Google hasn't verified this app", choose Advanced, then Go to the
    project. It is your own script, running under your own account.
-6. Copy the Web app URL. It ends with /exec.
-7. On the tablet: Settings > the city > Connection. Paste the URL into
+7. Copy the Web app URL. It ends with /exec.
+8. On the tablet: Settings > the city > Connection. Paste the URL into
    Script URL and the key into Access key. Test connection, then Save.
 
 Each city has its own tracker, so its own copy of the script, its own
@@ -79,6 +86,7 @@ code.
    > Version: New version > Deploy.
 
 The URL stays the same. ping answers with the new version number.
+Running setupTargetColumn after an update is always safe.
 
 ## Notes for the app
 

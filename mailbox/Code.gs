@@ -9,7 +9,7 @@
  * Project Settings > Script properties, under the name TOKEN.
  */
 
-var VERSION = '1.1';
+var VERSION = '1.2';
 var LOG_SHEET = 'Log';
 var LOG_HEADER = ['id', 'time', 'route', 'poi', 'side', 'maneuver', 'delta', 'ref', 'target'];
 var TARGET_COL = 24;            // column X
@@ -18,6 +18,7 @@ var MAN_COL = { L: 6, St: 7, R: 8 };         // columns F..H
 var TARGETS = [70, 40, 0];
 var DEFAULT_TARGET = 70;
 var LOCK_WAIT_MS = 30000;
+var FIXED_TARGET = 'Generator!$B$4';   // the old fixed 70 in tracker formulas
 
 function doGet() {
   return reply_({ ok: false, error: 'use-post', version: VERSION });
@@ -242,4 +243,100 @@ function existingIds_(log) {
     }
   }
   return seen;
+}
+
+/* ---------- one-time setup, run from the editor ---------- */
+
+/**
+ * Run once per tracker: in the Apps Script editor pick setupTargetColumn
+ * in the function list and press Run. It switches "To go" (column I), the
+ * status (column S) and the summary's norm from the fixed 70 to each
+ * POI's target in column X. Running it again changes nothing: cells that
+ * already read column X are left alone. The result is in the Execution log.
+ */
+function setupTargetColumn() {
+  var sheets = SpreadsheetApp.getActiveSpreadsheet().getSheets();
+  var report = [];
+  for (var i = 0; i < sheets.length; i++) {
+    var sheet = sheets[i];
+    var name = sheet.getName();
+    if (name === LOG_SHEET || name === 'Generator') continue;
+    if (sheet.getRange(1, 1).getValue() === 'POI') {
+      report.push(name + ': ' + switchRouteSheet_(sheet) + ' cells now read column X');
+    } else {
+      var n = switchSummarySheet_(sheet);
+      if (n > 0) report.push(name + ': ' + n + ' norm cells now read column X');
+    }
+  }
+  for (var j = 0; j < report.length; j++) Logger.log(report[j]);
+  return report;
+}
+
+/** The target of the POI in a given row, as a formula: 40 or 0 from X, else 70. */
+function targetExpr_(row) {
+  var x = '$X' + row;
+  return 'IF(OR(' + x + '=40,AND(ISNUMBER(' + x + '),' + x + '=0)),' + x + ',' + FIXED_TARGET + ')';
+}
+
+function switchRouteSheet_(sheet) {
+  if (sheet.getRange(1, TARGET_COL).getValue() === '') sheet.getRange(1, TARGET_COL).setValue('Target');
+  var last = sheet.getLastRow();
+  if (last < 2) return 0;
+  var n = last - 1;
+  var pois = sheet.getRange(2, 1, n, 1).getValues();
+  var count = 0;
+  var cols = [9, 19];   // I: To go, S: status
+  for (var c = 0; c < cols.length; c++) {
+    var range = sheet.getRange(2, cols[c], n, 1);
+    var formulas = range.getFormulas();
+    var values = range.getValues();
+    var out = [];
+    var changed = [];
+    var batchSafe = true;
+    for (var r = 0; r < n; r++) {
+      var f = formulas[r][0];
+      if (isPoiNumber_(pois[r][0]) && f.indexOf(FIXED_TARGET) !== -1 && f.indexOf('$X') === -1) {
+        out.push([f.split(FIXED_TARGET).join(targetExpr_(r + 2))]);
+        changed.push(r);
+      } else {
+        out.push([f]);
+        if (f === '' && values[r][0] !== '') batchSafe = false;
+      }
+    }
+    if (changed.length === 0) continue;
+    if (batchSafe) {
+      range.setFormulas(out);
+    } else {
+      for (var k = 0; k < changed.length; k++) {
+        sheet.getRange(changed[k] + 2, cols[c]).setFormula(out[changed[k]][0]);
+      }
+    }
+    count += changed.length;
+  }
+  return count;
+}
+
+/** The summary: "=$B4*Generator!$B$4" next to "=SUM('<route>'!$J$2:$J$198)". */
+function switchSummarySheet_(sheet) {
+  var rows = Math.min(sheet.getLastRow(), 100);
+  var cols = Math.min(sheet.getLastColumn(), 26);
+  if (rows < 1 || cols < 2) return 0;
+  var formulas = sheet.getRange(1, 1, rows, cols).getFormulas();
+  var norm = /^=\$B(\d+)\*Generator!\$B\$4$/;
+  var done = /^=SUM\('((?:[^']|'')+)'!\$J\$(\d+):\$J\$(\d+)\)$/;
+  var count = 0;
+  for (var r = 0; r < rows; r++) {
+    for (var c = 0; c < cols - 1; c++) {
+      if (!norm.test(formulas[r][c])) continue;
+      var m = done.exec(formulas[r][c + 1]);
+      if (!m) continue;
+      var x = "'" + m[1] + "'!$X$" + m[2] + ':$X$' + m[3];
+      var f = formulas[r][c] +
+        '-COUNTIF(' + x + ',40)*(' + FIXED_TARGET + '-40)' +
+        '-COUNTIF(' + x + ',0)*' + FIXED_TARGET;
+      sheet.getRange(r + 1, c + 1).setFormula(f);
+      count++;
+    }
+  }
+  return count;
 }
