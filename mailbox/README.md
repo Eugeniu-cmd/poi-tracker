@@ -32,8 +32,11 @@ is docs/data-model.md, section "Mailbox".
    Debug, press Run, allow the permission prompt if one appears. It
    switches "To go" (column I), the status (column S) and the summary's
    norm from the fixed 70 to the target in column X. The Execution log
-   lists every sheet and how many cells changed. Running it again
-   changes nothing. File > Version history restores the sheet if needed.
+   lists every sheet and how many cells changed. It reads the
+   spreadsheet's own argument separator ("," or ";", which depends on the
+   locale) and repairs cells written by v1.2 with the wrong one. Running
+   it again changes nothing. File > Version history restores the sheet if
+   needed.
 4. Project Settings (gear icon) > Script properties > Add script
    property. Property: TOKEN. Value: the access key you made up. Save.
    The key never goes into any file of this project, a prompt or a chat.

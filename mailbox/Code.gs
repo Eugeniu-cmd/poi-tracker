@@ -9,7 +9,7 @@
  * Project Settings > Script properties, under the name TOKEN.
  */
 
-var VERSION = '1.2';
+var VERSION = '1.3';
 var LOG_SHEET = 'Log';
 var LOG_HEADER = ['id', 'time', 'route', 'poi', 'side', 'maneuver', 'delta', 'ref', 'target'];
 var TARGET_COL = 24;            // column X
@@ -252,33 +252,63 @@ function existingIds_(log) {
  * in the function list and press Run. It switches "To go" (column I), the
  * status (column S) and the summary's norm from the fixed 70 to each
  * POI's target in column X. Running it again changes nothing: cells that
- * already read column X are left alone. The result is in the Execution log.
+ * already read column X correctly are left alone, and cells written by
+ * v1.2 with the wrong argument separator are repaired.
+ * The result is in the Execution log.
  */
 function setupTargetColumn() {
   var sheets = SpreadsheetApp.getActiveSpreadsheet().getSheets();
-  var report = [];
+  var sep = separator_(sheets);
+  var report = ['Argument separator of this spreadsheet: "' + sep + '"'];
   for (var i = 0; i < sheets.length; i++) {
     var sheet = sheets[i];
     var name = sheet.getName();
     if (name === LOG_SHEET || name === 'Generator') continue;
     if (sheet.getRange(1, 1).getValue() === 'POI') {
-      report.push(name + ': ' + switchRouteSheet_(sheet) + ' cells now read column X');
+      report.push(name + ': ' + switchRouteSheet_(sheet, sep) + ' cells written');
     } else {
-      var n = switchSummarySheet_(sheet);
-      if (n > 0) report.push(name + ': ' + n + ' norm cells now read column X');
+      var n = switchSummarySheet_(sheet, sep);
+      if (n > 0) report.push(name + ': ' + n + ' norm cells written');
     }
   }
   for (var j = 0; j < report.length; j++) Logger.log(report[j]);
   return report;
 }
 
-/** The target of the POI in a given row, as a formula: 40 or 0 from X, else 70. */
-function targetExpr_(row) {
-  var x = '$X' + row;
-  return 'IF(OR(' + x + '=40,AND(ISNUMBER(' + x + '),' + x + '=0)),' + x + ',' + FIXED_TARGET + ')';
+/**
+ * Formulas come back from the spreadsheet in its own locale: "," between
+ * arguments in some locales, ";" in others (Romanian, German). Read it off
+ * the existing "To go" formulas, ignoring text inside quotes.
+ */
+function separator_(sheets) {
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].getRange(1, 1).getValue() !== 'POI') continue;
+    var last = sheets[i].getLastRow();
+    if (last < 2) continue;
+    var f = sheets[i].getRange(2, 9, Math.min(last - 1, 20), 1).getFormulas();
+    for (var r = 0; r < f.length; r++) {
+      var bare = f[r][0].replace(/"[^"]*"/g, '');
+      if (bare.indexOf(';') !== -1) return ';';
+      if (bare.indexOf(',') !== -1) return ',';
+    }
+  }
+  return ',';
 }
 
-function switchRouteSheet_(sheet) {
+/** The target of the POI in a given row, as a formula: 40 or 0 from X, else 70. */
+function targetExpr_(row, sep) {
+  var x = '$X' + row;
+  return 'IF(OR(' + x + '=40' + sep + 'AND(ISNUMBER(' + x + ')' + sep + x + '=0))' +
+         sep + x + sep + FIXED_TARGET + ')';
+}
+
+/** A formula back in its original fixed-70 form, whatever was inserted before. */
+function original_(f, row) {
+  return f.split(targetExpr_(row, ',')).join(FIXED_TARGET)
+          .split(targetExpr_(row, ';')).join(FIXED_TARGET);
+}
+
+function switchRouteSheet_(sheet, sep) {
   if (sheet.getRange(1, TARGET_COL).getValue() === '') sheet.getRange(1, TARGET_COL).setValue('Target');
   var last = sheet.getLastRow();
   if (last < 2) return 0;
@@ -295,8 +325,10 @@ function switchRouteSheet_(sheet) {
     var batchSafe = true;
     for (var r = 0; r < n; r++) {
       var f = formulas[r][0];
-      if (isPoiNumber_(pois[r][0]) && f.indexOf(FIXED_TARGET) !== -1 && f.indexOf('$X') === -1) {
-        out.push([f.split(FIXED_TARGET).join(targetExpr_(r + 2))]);
+      var base = original_(f, r + 2);
+      var want = base.split(FIXED_TARGET).join(targetExpr_(r + 2, sep));
+      if (isPoiNumber_(pois[r][0]) && base.indexOf(FIXED_TARGET) !== -1 && want !== f) {
+        out.push([want]);
         changed.push(r);
       } else {
         out.push([f]);
@@ -317,26 +349,35 @@ function switchRouteSheet_(sheet) {
 }
 
 /** The summary: "=$B4*Generator!$B$4" next to "=SUM('<route>'!$J$2:$J$198)". */
-function switchSummarySheet_(sheet) {
+function switchSummarySheet_(sheet, sep) {
   var rows = Math.min(sheet.getLastRow(), 100);
   var cols = Math.min(sheet.getLastColumn(), 26);
   if (rows < 1 || cols < 2) return 0;
   var formulas = sheet.getRange(1, 1, rows, cols).getFormulas();
-  var norm = /^=\$B(\d+)\*Generator!\$B\$4$/;
+  var norm = /^=\$B(\d+)\*Generator!\$B\$4/;
   var done = /^=SUM\('((?:[^']|'')+)'!\$J\$(\d+):\$J\$(\d+)\)$/;
   var count = 0;
   for (var r = 0; r < rows; r++) {
     for (var c = 0; c < cols - 1; c++) {
-      if (!norm.test(formulas[r][c])) continue;
+      var f = formulas[r][c];
+      var head = norm.exec(f);
+      if (!head) continue;
       var m = done.exec(formulas[r][c + 1]);
       if (!m) continue;
       var x = "'" + m[1] + "'!$X$" + m[2] + ':$X$' + m[3];
-      var f = formulas[r][c] +
-        '-COUNTIF(' + x + ',40)*(' + FIXED_TARGET + '-40)' +
-        '-COUNTIF(' + x + ',0)*' + FIXED_TARGET;
-      sheet.getRange(r + 1, c + 1).setFormula(f);
+      var base = head[0];
+      var known = [base, base + normTail_(x, ','), base + normTail_(x, ';')];
+      if (known.indexOf(f) === -1) continue;   // hand-edited: leave it alone
+      var want = base + normTail_(x, sep);
+      if (want === f) continue;
+      sheet.getRange(r + 1, c + 1).setFormula(want);
       count++;
     }
   }
   return count;
+}
+
+function normTail_(x, sep) {
+  return '-COUNTIF(' + x + sep + '40)*(' + FIXED_TARGET + '-40)' +
+         '-COUNTIF(' + x + sep + '0)*' + FIXED_TARGET;
 }
