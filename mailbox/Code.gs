@@ -9,7 +9,7 @@
  * Project Settings > Script properties, under the name TOKEN.
  */
 
-var VERSION = '1.0';
+var VERSION = '1.1';
 var LOG_SHEET = 'Log';
 var LOG_HEADER = ['id', 'time', 'route', 'poi', 'side', 'maneuver', 'delta', 'ref', 'target'];
 var TARGET_COL = 24;            // column X
@@ -158,8 +158,8 @@ function applyEvent_(ev, ctx) {
 
     ctx.log.appendRow([ev.id, time, ev.route, ev.poi, ev.side, ev.man, ev.delta,
                        typeof ev.ref === 'string' ? ev.ref : '', '']);
-    sheet.getRange(row, sideCol).setValue(ns);
-    sheet.getRange(row, manCol).setValue(nm);
+    sheet.getRange(row, sideCol).setValue(cellValue_(ns));
+    sheet.getRange(row, manCol).setValue(cellValue_(nm));
     ctx.seen[ev.id] = true;
     return 'applied';
   }
@@ -180,6 +180,11 @@ function isPoiNumber_(v) {
 
 function isCount_(v) {
   return v === '' || (typeof v === 'number' && isFinite(v));
+}
+
+/** A count of 0 is written as an empty cell: 0 by hand means "impossible maneuver". */
+function cellValue_(n) {
+  return n === 0 ? '' : n;
 }
 
 function readTarget_(v) {

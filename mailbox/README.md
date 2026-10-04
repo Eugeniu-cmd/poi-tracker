@@ -18,6 +18,9 @@ is docs/data-model.md, section "Mailbox".
   there (70, 40 or 0). An empty or non-numeric cell reads as 70.
 - No sheet named Log. The mailbox creates it on the first push, at the
   end of the tab list, and only ever appends to it.
+- File > Settings > Time zone set to the city's time zone. The Log's
+  time column is shown in that zone; with the default GMT a tap at 16:43
+  in Vienna reads 14:43.
 
 ## Install (once per city)
 
@@ -29,6 +32,9 @@ is docs/data-model.md, section "Mailbox".
    The key never goes into any file of this project, a prompt or a chat.
 4. Deploy > New deployment > Select type: Web app.
    Execute as: Me. Who has access: Anyone. Deploy.
+   The Romanian interface shows two entries both named "Oricine": the
+   first is "Anyone with Google account", the last is "Anyone". Pick the
+   last.
 5. The first deployment asks for permission. Allow it. If Google shows
    "Google hasn't verified this app", choose Advanced, then Go to the
    project. It is your own script, running under your own account.
@@ -38,6 +44,29 @@ is docs/data-model.md, section "Mailbox".
 
 Each city has its own tracker, so its own copy of the script, its own
 URL and its own key.
+
+## Check it from a computer
+
+In the VS Code terminal, type powershell and press Enter, then:
+
+1. $u = Read-Host "URL"   then paste the URL at the URL: prompt.
+2. $k = Read-Host "Key"   then paste the key at the Key: prompt.
+   Paste at these prompts with a right-click: Ctrl+V types ^V there.
+3. cls
+4. function mb($b) { $b.token = $k; Invoke-RestMethod -Uri $u -Method Post -ContentType 'text/plain' -Body ($b | ConvertTo-Json -Depth 5 -Compress) }
+5. mb @{action='ping'}   must answer True and the version.
+6. (mb @{action='pull'; route='R20890-058'}).counts.'3' -join ' '
+   must print the seven numbers of POI 3 as the sheet shows them.
+
+A page of HTML mentioning a Google sign-in instead of an answer means
+Who has access is not "Anyone". Fix it in Deploy > Manage deployments
+> pencil icon; the URL does not change.
+
+## Changing the key
+
+Project Settings > Script properties > Edit script properties > new
+value for TOKEN > Save. No new deployment is needed: the key is read on
+every request. Enter the new key on the tablet too.
 
 ## Updating the code later
 
@@ -49,7 +78,7 @@ code.
 2. Deploy > Manage deployments > pencil icon on the existing deployment
    > Version: New version > Deploy.
 
-The URL stays the same.
+The URL stays the same. ping answers with the new version number.
 
 ## Notes for the app
 
@@ -63,3 +92,5 @@ The URL stays the same.
 - Rejection reasons for a single event in push: bad-request, no-route,
   no-poi, text-in-cell, below-zero, bad-target, error.
 - The tablet treats applied and duplicate alike as delivered.
+- A count that a removal brings to 0 is left as an empty cell, because
+  a 0 typed by hand means "impossible maneuver".

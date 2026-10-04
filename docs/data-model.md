@@ -1,6 +1,6 @@
 # Data model
 
-v0.6 — 2026-10-04
+v0.7 — 2026-10-04
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -22,6 +22,9 @@ v0.6 2026-10-04 — mailbox written (mailbox/Code.gs v1.0): side and
 maneuver codes fixed, full list of rejection reasons, ping returns the
 script version, busy on a held lock, the target column is X in every
 tracker.
+v0.7 2026-10-04 — mailbox v1.1 after the live install in Vienna: a count
+that a removal brings to 0 is left empty, since a hand-typed 0 marks an
+impossible maneuver.
 -->
 
 ## Pass (one crossing of an intersection)
@@ -97,7 +100,9 @@ tracker.
 - Applying a pass: add delta to the two matching B..H cells of the route
   sheet and append a row to `Log`. The event is applied whole or not at
   all: if either cell would go below 0, neither cell changes, no `Log`
-  row is written, and the event is rejected (reason 'below-zero').
+  row is written, and the event is rejected (reason 'below-zero'). A
+  cell that comes to 0 is left empty, not written as 0: a 0 typed by
+  hand marks an impossible maneuver.
 - Applying a target event: write target into the POI's cell of the
   target column (see "Targets per POI") and append a row to `Log`.
 - Rejection reasons, one per event: 'bad-request' (malformed event or
