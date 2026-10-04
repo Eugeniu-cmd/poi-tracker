@@ -1,6 +1,6 @@
 # Data model
 
-v0.7 — 2026-10-04
+v0.8 — 2026-10-04
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -25,6 +25,8 @@ tracker.
 v0.7 2026-10-04 — mailbox v1.1 after the live install in Vienna: a count
 that a removal brings to 0 is left empty, since a hand-typed 0 marks an
 impossible maneuver.
+v0.8 2026-10-04 — no Log = B..H consistency check: Log holds only tablet
+passes, B..H also holds hand-entered counts.
 -->
 
 ## Pass (one crossing of an intersection)
@@ -127,8 +129,10 @@ impossible maneuver.
 - Sending groups the queue by city and posts each group to that city's
   mailbox. A city with no mailbox configured simply keeps queuing.
 - Manual edits to B..H in the tracker remain allowed; `Log` and B..H
-  can then drift apart. A "Log = B..H" consistency check is an open
-  decision.
+  can then drift apart. A "Log = B..H" consistency check was dropped on
+  2026-10-04: Log holds only tablet passes while B..H also holds
+  hand-entered counts, so the two never match on a route started by hand,
+  and column S already flags text, mismatched halves and overruns.
 - "Load from sheet" pulls one route — the active one — and replaces that
   route's baseline (counts and targets) with what the tracker holds.
   Passes still waiting on the tablet are kept and sent as usual: they

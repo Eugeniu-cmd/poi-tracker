@@ -1,6 +1,6 @@
 # Spreadsheets
 
-v0.3 — 2026-09-12
+v0.4 — 2026-10-04
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-04 — extracted from docs/inputs/handoff_v2.md (Russian,
 2026-09-02) and verified against the two workbooks in docs/inputs/.
@@ -10,6 +10,8 @@ v0.3 2026-09-12 — correction to the v0.1 entry above: the source file it
 names as docs/inputs/handoff_v2.md is in the project as
 docs/inputs/ARCHIVE_handoff_v2_2026-09-02.md. The entry itself stays as
 written; no other change.
+v0.4 2026-10-04 — Vienna tracker documented after the mailbox install:
+sheets, target column X, formulas switched to it, locale, time zone, Log.
 -->
 
 Two separate Google Sheets exist. The app writes to the user's tracker only,
@@ -125,3 +127,40 @@ them, and never assume their numbers are ours.**
    set is identical across all eight route sheets including 030/031, so it
    looks like template residue rather than per-POI data. Confirm before
    relying on it.
+
+## Vienna tracker (POI_tracker_Vienna_v1)
+
+The user's tracker for Vienna, built by hand from the Düsseldorf one. A
+native Google Sheets file. Mailbox v1.3 installed on 2026-10-04.
+Snapshot: docs/inputs/POI_tracker_Vienna_v1.xlsx.
+
+- Sheets, in order: Readme, Сводка, R20890-054, R20890-055, R20890-056,
+  R20890-057❌, R20890-058, R20890-059, R20890-060❌, R20890-061❌,
+  Generator, Log.
+- The three sheets marked ❌ are routes another vehicle drove. Their
+  names differ from the plain route codes, so the mailbox answers
+  no-route for R20890-057, R20890-060 and R20890-061. Rename such a sheet,
+  and fix the Generator's references to it, only if that route ever
+  becomes the user's.
+- Route sheet layout as in Düsseldorf: A the POI number (shown as P1, P2
+  by number format), B..E N/S/W/E, F..H Left/Straight/Right, I To go,
+  J..R helper sums (J hidden), S status, T1:V1 the maneuver balance
+  28 / 14 / 28.
+- Column X, header Target in X1, holds the POI's target. Empty means 70.
+  40 marks a POI on a straight road, 0 a closed POI. The mailbox writes
+  it, and the user may type it by hand.
+- I (To go) and S (status) read the target from X: 40 or 0 when X holds
+  that number, otherwise Generator!$B$4 (70). The summary's Норма is the
+  number of POIs times 70, minus 30 for each POI at 40 and minus 70 for
+  each POI at 0. The mailbox function setupTargetColumn switched these
+  formulas on 2026-10-04.
+- Locale: Romanian. In the live file, function arguments are separated
+  by ";". An .xlsx export shows the same formulas with ",". Test any
+  formula change in the live file, never on an export alone.
+- Time zone: (GMT+02:00) Vienna since 2026-10-04. The two Log rows
+  written before that show GMT time (14:43 for a tap at 16:43).
+- Log: created by the mailbox on 2026-10-04. Its first four rows are
+  tests on R20890-058 POI 12, two +1 / -1 pairs that cancel out.
+- There is no automatic Log = B..H check. Log holds only tablet passes,
+  while B..H also holds counts entered by hand. Column S already flags
+  text, mismatched halves and overruns.

@@ -29,7 +29,9 @@ is docs/data-model.md, section "Mailbox".
 2. Delete everything in the editor's Code.gs. Paste the whole of
    mailbox/Code.gs. Save.
 3. Once per tracker: pick setupTargetColumn in the function list next to
-   Debug, press Run, allow the permission prompt if one appears. It
+   Debug, press Run, allow the permission prompt if one appears. After
+   new code is pasted the list jumps back to doGet, and Run on doGet
+   does nothing, so pick setupTargetColumn again every time. It
    switches "To go" (column I), the status (column S) and the summary's
    norm from the fixed 70 to the target in column X. The Execution log
    lists every sheet and how many cells changed. It reads the
