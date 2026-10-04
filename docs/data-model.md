@@ -1,6 +1,6 @@
 # Data model
 
-v0.5 — 2026-10-03
+v0.6 — 2026-10-04
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -18,6 +18,10 @@ History keeps 3,000 events; a pass is applied whole or not at all; push
 answers with applied / duplicate / rejected; pull and "Load from sheet"
 work per route. Targets per POI: 70 / 40 / 0 by type, set from the
 working screen, stored in a tracker column; "70 is a constant" retired.
+v0.6 2026-10-04 — mailbox written (mailbox/Code.gs v1.0): side and
+maneuver codes fixed, full list of rejection reasons, ping returns the
+script version, busy on a held lock, the target column is X in every
+tracker.
 -->
 
 ## Pass (one crossing of an intersection)
@@ -35,6 +39,7 @@ working screen, stored in a tracker column; "70 is a constant" retired.
   from more than one city; each event goes to its own city's mailbox.
 - ts — tap time (Unix, milliseconds).
 - kind — 'pass' or 'target'.
+- side — 'N' | 'S' | 'W' | 'E'; man — 'L' | 'St' | 'R'.
 - A pass event carries side, man and delta: +1 (pass recorded) or −1
   (pass deleted); ref — only when delta = −1: id of the pass being
   deleted.
@@ -95,12 +100,18 @@ working screen, stored in a tracker column; "70 is a constant" retired.
   row is written, and the event is rejected (reason 'below-zero').
 - Applying a target event: write target into the POI's cell of the
   target column (see "Targets per POI") and append a row to `Log`.
-- A route sheet or POI row that does not exist → rejected (reason
-  'no-route' / 'no-poi').
+- Rejection reasons, one per event: 'bad-request' (malformed event or
+  unknown side, maneuver or delta), 'no-route' (no sheet of that exact
+  name with "POI" in A1), 'no-poi' (no row with that number in column
+  A), 'text-in-cell' (one of the two cells holds text), 'below-zero',
+  'bad-target' (not 70, 40 or 0), 'error' (anything else failed for
+  that event; the rest of the batch still runs).
+- A push waits up to 30 s for the script lock; if another push still
+  holds it → {ok:false, error:'busy'}, and the tablet retries later.
 - POST {token, action:'pull', route} → {ok:true,
   counts:{poi:[N,S,W,E,L,St,R]}, targets:{poi:target}} — one route per
   call; a missing target cell reads as 70.
-- POST {token, action:'ping'} → {ok:true}
+- POST {token, action:'ping'} → {ok:true, version}
 - Wrong token → {ok:false, error:'auth'}.
 
 ## Sync
@@ -161,10 +172,10 @@ working screen, stored in a tracker column; "70 is a constant" retired.
 - A change of type is a target event: stored on the tablet instantly,
   delivered through the same queue as passes, written by the mailbox into
   the tracker.
-- In the tracker the target lives in one dedicated column per route
-  sheet, appended to the right of the existing layout, never inserted
-  between existing columns. Its letter is fixed per tracker when the
-  mailbox is installed and recorded in docs/spreadsheets.md. "To go",
-  the БОЛЬШЕ status and the summary's Норма read from it instead of the
-  fixed 70. The Generator is unchanged: it already emits empty rows
-  beyond the passes driven, so a POI at 40 fills 40 of its 70 rows.
+- In the tracker the target lives in column X of every route sheet, in
+  every city's tracker: the first column free of the existing layout,
+  never inserted between existing columns. A new tracker must keep X
+  free. An empty or non-numeric X reads as 70. "To go", the БОЛЬШЕ
+  status and the summary's Норма read from it instead of the fixed 70.
+  The Generator is unchanged: it already emits empty rows beyond the
+  passes driven, so a POI at 40 fills 40 of its 70 rows.

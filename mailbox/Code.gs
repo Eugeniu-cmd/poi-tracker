@@ -1,0 +1,240 @@
+/**
+ * POI Tracker mailbox.
+ * Apps Script bound to one city's tracker spreadsheet. No UI.
+ * The tablet app talks to it with three actions: ping, pull, push.
+ * Contract: docs/data-model.md, section "Mailbox".
+ * Install steps: mailbox/README.md.
+ *
+ * The access key is NOT in this file. It lives in
+ * Project Settings > Script properties, under the name TOKEN.
+ */
+
+var VERSION = '1.0';
+var LOG_SHEET = 'Log';
+var LOG_HEADER = ['id', 'time', 'route', 'poi', 'side', 'maneuver', 'delta', 'ref', 'target'];
+var TARGET_COL = 24;            // column X
+var SIDE_COL = { N: 2, S: 3, W: 4, E: 5 };   // columns B..E
+var MAN_COL = { L: 6, St: 7, R: 8 };         // columns F..H
+var TARGETS = [70, 40, 0];
+var DEFAULT_TARGET = 70;
+var LOCK_WAIT_MS = 30000;
+
+function doGet() {
+  return reply_({ ok: false, error: 'use-post', version: VERSION });
+}
+
+function doPost(e) {
+  var body;
+  try {
+    body = JSON.parse(e && e.postData ? e.postData.contents : '');
+  } catch (err) {
+    return reply_({ ok: false, error: 'bad-request' });
+  }
+  if (!body || typeof body !== 'object') {
+    return reply_({ ok: false, error: 'bad-request' });
+  }
+
+  var expected = PropertiesService.getScriptProperties().getProperty('TOKEN');
+  if (!expected || body.token !== expected) {
+    return reply_({ ok: false, error: 'auth' });
+  }
+
+  try {
+    if (body.action === 'ping') return reply_({ ok: true, version: VERSION });
+    if (body.action === 'pull') return reply_(pull_(body.route));
+    if (body.action === 'push') return reply_(push_(body.events));
+    return reply_({ ok: false, error: 'bad-request' });
+  } catch (err) {
+    return reply_({ ok: false, error: 'error', message: String(err) });
+  }
+}
+
+function reply_(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/* ---------- pull ---------- */
+
+function pull_(route) {
+  var sheet = routeSheet_(route);
+  if (!sheet) return { ok: false, error: 'no-route' };
+
+  var counts = {};
+  var targets = {};
+  var last = sheet.getLastRow();
+  if (last >= 2) {
+    var rows = sheet.getRange(2, 1, last - 1, TARGET_COL).getValues();
+    for (var i = 0; i < rows.length; i++) {
+      var poi = rows[i][0];
+      if (!isPoiNumber_(poi)) continue;
+      var seven = [];
+      for (var c = 1; c <= 7; c++) {
+        var v = rows[i][c];
+        seven.push(typeof v === 'number' ? v : 0);
+      }
+      counts[poi] = seven;
+      targets[poi] = readTarget_(rows[i][TARGET_COL - 1]);
+    }
+  }
+  return { ok: true, counts: counts, targets: targets };
+}
+
+/* ---------- push ---------- */
+
+function push_(events) {
+  if (!Array.isArray(events)) return { ok: false, error: 'bad-request' };
+
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(LOCK_WAIT_MS)) return { ok: false, error: 'busy' };
+
+  try {
+    var log = logSheet_();
+    var seen = existingIds_(log);
+    var ctx = { log: log, seen: seen, sheets: {}, rows: {} };
+    var applied = [];
+    var duplicate = [];
+    var rejected = [];
+
+    for (var i = 0; i < events.length; i++) {
+      var ev = events[i];
+      var id = ev && typeof ev.id === 'string' ? ev.id : null;
+      var result;
+      try {
+        result = applyEvent_(ev, ctx);
+      } catch (err) {
+        result = 'error';
+      }
+      if (result === 'applied') applied.push(id);
+      else if (result === 'duplicate') duplicate.push(id);
+      else rejected.push({ id: id, reason: result });
+    }
+
+    SpreadsheetApp.flush();
+    return { ok: true, applied: applied, duplicate: duplicate, rejected: rejected };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Returns 'applied', 'duplicate' or a rejection reason.
+ * Order of writes: the Log row first, then the cells.
+ */
+function applyEvent_(ev, ctx) {
+  if (!ev || typeof ev !== 'object') return 'bad-request';
+  if (typeof ev.id !== 'string' || ev.id === '') return 'bad-request';
+  if (typeof ev.route !== 'string' || ev.route === '') return 'bad-request';
+  if (!isPoiNumber_(ev.poi)) return 'bad-request';
+  if (ev.kind !== 'pass' && ev.kind !== 'target') return 'bad-request';
+
+  if (ctx.seen[ev.id]) return 'duplicate';
+
+  var sheet = cachedSheet_(ev.route, ctx);
+  if (!sheet) return 'no-route';
+
+  var row = cachedRow_(ev.route, sheet, ev.poi, ctx);
+  if (!row) return 'no-poi';
+
+  var time = isFinite(Number(ev.ts)) && ev.ts !== null && ev.ts !== '' ? new Date(Number(ev.ts)) : new Date();
+
+  if (ev.kind === 'pass') {
+    var sideCol = SIDE_COL.hasOwnProperty(ev.side) ? SIDE_COL[ev.side] : 0;
+    var manCol = MAN_COL.hasOwnProperty(ev.man) ? MAN_COL[ev.man] : 0;
+    if (!sideCol || !manCol) return 'bad-request';
+    if (ev.delta !== 1 && ev.delta !== -1) return 'bad-request';
+
+    var seven = sheet.getRange(row, 2, 1, 7).getValues()[0];
+    var sv = seven[sideCol - 2];
+    var mv = seven[manCol - 2];
+    if (!isCount_(sv) || !isCount_(mv)) return 'text-in-cell';
+    sv = sv === '' ? 0 : sv;
+    mv = mv === '' ? 0 : mv;
+
+    var ns = sv + ev.delta;
+    var nm = mv + ev.delta;
+    if (ns < 0 || nm < 0) return 'below-zero';
+
+    ctx.log.appendRow([ev.id, time, ev.route, ev.poi, ev.side, ev.man, ev.delta,
+                       typeof ev.ref === 'string' ? ev.ref : '', '']);
+    sheet.getRange(row, sideCol).setValue(ns);
+    sheet.getRange(row, manCol).setValue(nm);
+    ctx.seen[ev.id] = true;
+    return 'applied';
+  }
+
+  // kind === 'target'
+  if (TARGETS.indexOf(ev.target) === -1) return 'bad-target';
+  ctx.log.appendRow([ev.id, time, ev.route, ev.poi, '', '', '', '', ev.target]);
+  sheet.getRange(row, TARGET_COL).setValue(ev.target);
+  ctx.seen[ev.id] = true;
+  return 'applied';
+}
+
+/* ---------- helpers ---------- */
+
+function isPoiNumber_(v) {
+  return typeof v === 'number' && v > 0 && Math.floor(v) === v;
+}
+
+function isCount_(v) {
+  return v === '' || (typeof v === 'number' && isFinite(v));
+}
+
+function readTarget_(v) {
+  return TARGETS.indexOf(v) === -1 ? DEFAULT_TARGET : v;
+}
+
+/** A route sheet is any sheet with that exact name and "POI" in A1. */
+function routeSheet_(route) {
+  if (typeof route !== 'string' || route === '' || route === LOG_SHEET) return null;
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(route);
+  if (!sheet) return null;
+  if (sheet.getRange(1, 1).getValue() !== 'POI') return null;
+  return sheet;
+}
+
+function cachedSheet_(route, ctx) {
+  if (!ctx.sheets.hasOwnProperty(route)) ctx.sheets[route] = routeSheet_(route);
+  return ctx.sheets[route];
+}
+
+/** Row number of a POI on its sheet, from column A. 0 if absent. */
+function cachedRow_(route, sheet, poi, ctx) {
+  if (!ctx.rows.hasOwnProperty(route)) {
+    var map = {};
+    var last = sheet.getLastRow();
+    if (last >= 2) {
+      var col = sheet.getRange(2, 1, last - 1, 1).getValues();
+      for (var i = 0; i < col.length; i++) {
+        if (isPoiNumber_(col[i][0]) && !map[col[i][0]]) map[col[i][0]] = i + 2;
+      }
+    }
+    ctx.rows[route] = map;
+  }
+  return ctx.rows[route][poi] || 0;
+}
+
+function logSheet_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var log = ss.getSheetByName(LOG_SHEET);
+  if (!log) {
+    log = ss.insertSheet(LOG_SHEET, ss.getNumSheets());
+    log.getRange(1, 1, 1, LOG_HEADER.length).setValues([LOG_HEADER]);
+    log.setFrozenRows(1);
+  }
+  return log;
+}
+
+function existingIds_(log) {
+  var seen = {};
+  var last = log.getLastRow();
+  if (last >= 2) {
+    var ids = log.getRange(2, 1, last - 1, 1).getValues();
+    for (var i = 0; i < ids.length; i++) {
+      if (ids[i][0] !== '') seen[String(ids[i][0])] = true;
+    }
+  }
+  return seen;
+}
