@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.24 — 2026-10-03
+v0.25 — 2026-10-05
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -77,10 +77,56 @@ list on the working screen; done, lock and counters follow the target
 (items 2, 4, 10, 22, 46). Sync decisions recorded: "Load from sheet" per
 route and without discarding (item 30); deleted rows per item 13 (item
 38); rejected events (item 47); History limit (item 48).
+v0.25 2026-10-05 — screen size and layout rule recorded from a
+measurement of the user's tablet (tools/viewport.html): measured sizes,
+supported devices and minimum size, layout chosen by available width,
+fixed element sizes, the bottom gesture area and rubber references
+(items 49 to 54). The intro line no longer pins the app to landscape and
+two columns.
 -->
 
-The app is one working screen (10.6" tablet, landscape, two columns) plus
-two slide-in panels. All UI copy is English.
+The app is one working screen plus two slide-in panels, on a tablet held
+either way. Its size and layout follow "Screen size, orientation and
+layout" below. All UI copy is English.
+
+## Screen size, orientation and layout (applies to every screen)
+49. The user's tablet, measured on 2026-10-05 with tools/viewport.html:
+    2000 × 1200 physical pixels at a device pixel ratio of 1.5, which is
+    1333 × 800 CSS px in landscape and 800 × 1333 in portrait. In a
+    Chrome tab the browser bars take about 120px at the top, leaving
+    1333 × 680 and 800 × 1213. Android's "Display size" setting changes
+    these numbers, so the tablet is measured again if it ever changes.
+50. Any tablet is supported, phones are not. The smallest visible area
+    the app guarantees is 1000 × 600 in landscape and 720 × 1000 in
+    portrait, browser tab included. Below that the app still opens, but
+    nothing is promised.
+51. The layout follows the width the app actually has, not the way the
+    tablet is held: two columns (POI list beside the discs) from 1000px
+    wide, one column below. On the user's tablet that gives two columns
+    in landscape and one in portrait. The layout switches live when the
+    tablet turns and loses nothing: an open compass, the active POI and
+    an open panel stay as they were. A compact layout for split screen
+    (about 660px wide) may come later as one more width step, without
+    changing the two layouts.
+52. Discs, the compass, text sizes and tap targets keep their size in px
+    on every screen. A larger screen shows more, not bigger: extra space
+    goes into the length of lists (more POI rows at once) and into the
+    gaps between blocks. Nothing is scaled as a whole.
+53. The bottom edge of the screen is shared with the system: on Android a
+    sideways swipe along the bottom handle switches apps. Nothing
+    tappable or swipeable sits inside that area. Its height is taken from
+    the browser (the safe-area inset), never typed in as a guess.
+54. References are rubber. Each reference page shows the app screen in a
+    frame whose size can change: preset buttons for 1333 × 800,
+    1000 × 600, 800 × 1333 and 720 × 1000, plus a frame corner the mouse
+    can drag. The layout inside reacts to the frame's size with the same
+    rules the app will use (CSS container queries). A reference is drawn
+    at the user's full screen and checked at the minimum sizes. The frame
+    and its buttons are a checking tool and never appear in the app.
+   The references drawn before v0.25 (main-screen.html v0.17,
+   settings.html v0.8, history.html v0.7) are still fixed 1000 × 600
+   pictures. Their meta lines describe the frame they were drawn at and
+   stay until each reference is redrawn.
 
 ## Working screen — left
 1. Active city and route picker, side by side. The city name is always

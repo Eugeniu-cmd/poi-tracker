@@ -39,6 +39,7 @@ Where to look:
 | Superseded planning dump (Russian, historical) | docs/inputs/ARCHIVE_handoff_v2_2026-09-02.md |
 | RECON snapshots | _recon/ |
 | Mailbox (Apps Script) | mailbox/Code.gs, mailbox/README.md |
+| Measure a tablet's viewport | tools/viewport.html |
 
 This file carries no version tag or history on purpose: it is a config
 Claude Code reads at startup, not a registry of decisions.
