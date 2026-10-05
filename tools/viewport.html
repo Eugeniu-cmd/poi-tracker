@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>POI Tracker - viewport probe</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #10131c; color: #eef1f8;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { display: flex; align-items: center; justify-content: center; }
+  main { padding: 24px; }
+  h1 { font-size: 20px; margin: 0 0 16px; color: #f2a81d; }
+  table { border-collapse: collapse; font-size: 22px; }
+  td { padding: 6px 16px 6px 0; }
+  td:first-child { color: #a8b0c4; }
+  td:last-child { font-weight: 700; font-variant-numeric: tabular-nums; }
+  p { font-size: 14px; color: #a8b0c4; max-width: 520px; }
+  .edge { position: fixed; inset: 0; border: 4px solid #3ecc82; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="edge"></div>
+<main>
+  <h1>Viewport probe</h1>
+  <table id="t"></table>
+  <p>The green frame marks the visible area. Take one screenshot in
+  landscape and one in portrait. Values update when the tablet turns.</p>
+</main>
+<script>
+  function row(name, value) {
+    return '<tr><td>' + name + '</td><td>' + value + '</td></tr>';
+  }
+  function show() {
+    var vv = window.visualViewport;
+    var standalone = window.matchMedia('(display-mode: standalone)').matches ||
+                     window.matchMedia('(display-mode: fullscreen)').matches;
+    var o = (screen.orientation && screen.orientation.type) ||
+            (window.innerWidth > window.innerHeight ? 'landscape' : 'portrait');
+    document.getElementById('t').innerHTML =
+      row('Viewport (CSS px)', window.innerWidth + ' x ' + window.innerHeight) +
+      row('Visual viewport', vv ? Math.round(vv.width) + ' x ' + Math.round(vv.height) : 'n/a') +
+      row('Screen (CSS px)', screen.width + ' x ' + screen.height) +
+      row('Available screen', screen.availWidth + ' x ' + screen.availHeight) +
+      row('Device pixel ratio', window.devicePixelRatio) +
+      row('Physical pixels', Math.round(window.innerWidth * window.devicePixelRatio) + ' x ' +
+                             Math.round(window.innerHeight * window.devicePixelRatio)) +
+      row('Orientation', o) +
+      row('Installed app mode', standalone ? 'yes' : 'no (browser tab)') +
+      row('User agent', '<span style="font-size:12px;font-weight:400">' +
+                        navigator.userAgent.replace(/</g, '&lt;') + '</span>');
+  }
+  show();
+  window.addEventListener('resize', show);
+  window.addEventListener('orientationchange', function () { setTimeout(show, 300); });
+</script>
+</body>
+</html>
