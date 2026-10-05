@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.25 — 2026-10-05
+v0.26 — 2026-10-06
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -83,6 +83,12 @@ supported devices and minimum size, layout chosen by available width,
 fixed element sizes, the bottom gesture area and rubber references
 (items 49 to 54). The intro line no longer pins the app to landscape and
 two columns.
+v0.26 2026-10-06 — layout decisions taken on the portrait drawings.
+Portrait is primary. The POI list stays a column beside the discs in both
+layouts, narrow in portrait, with an index rail, a mini-map and a grid of
+all POIs. The POI type is set from the counter of the active POI (items
+46, 51, 55 to 61). Correction to v0.25: below 1000px the layout keeps the
+POI column, only narrower, instead of a single column (item 51).
 -->
 
 The app is one working screen plus two slide-in panels, on a tablet held
@@ -101,13 +107,14 @@ layout" below. All UI copy is English.
     portrait, browser tab included. Below that the app still opens, but
     nothing is promised.
 51. The layout follows the width the app actually has, not the way the
-    tablet is held: two columns (POI list beside the discs) from 1000px
-    wide, one column below. On the user's tablet that gives two columns
-    in landscape and one in portrait. The layout switches live when the
-    tablet turns and loses nothing: an open compass, the active POI and
-    an open panel stay as they were. A compact layout for split screen
-    (about 660px wide) may come later as one more width step, without
-    changing the two layouts.
+    tablet is held. The POI list is always a column beside the main area
+    (item 56): from 1000px wide the column is wide (330px on the current
+    landscape references), below 1000px it is narrow. On the user's
+    tablet that gives the wide column in landscape and the narrow one in
+    portrait. The layout switches live when the tablet turns and loses
+    nothing: an open compass, the active POI and an open panel stay as
+    they were. A compact layout for split screen (about 660px wide) may
+    come later as one more width step, without changing the two layouts.
 52. Discs, the compass, text sizes and tap targets keep their size in px
     on every screen. A larger screen shows more, not bigger: extra space
     goes into the length of lists (more POI rows at once) and into the
@@ -127,6 +134,43 @@ layout" below. All UI copy is English.
    settings.html v0.8, history.html v0.7) are still fixed 1000 × 600
    pictures. Their meta lines describe the frame they were drawn at and
    stay until each reference is redrawn.
+
+## POI column, mini-map and grid (applies to both layouts)
+55. The portrait layout is the primary one. The user works with the
+    tablet upright, so portrait is designed first and wins when the two
+    layouts conflict. Landscape stays fully supported (item 51).
+56. The POI list of item 2 is always a column on the left, beside the
+    main area that holds the POI number, the counters, the discs and the
+    action bar. In portrait the column is narrow, about 184px, and its
+    final width is set when the reference is drawn. Every row keeps the
+    minimum tap height (item 31). Nothing about choosing a POI ever moves
+    the discs.
+57. An index rail runs along the right edge of the column, marked from 1
+    to the route's POI count. Sliding a finger along it scrolls the
+    column to that part of the route and shows the number under the
+    finger in a bubble. The POI is then chosen by tapping its row: the
+    rail scrolls, it never selects.
+58. A mini-map of the route sits at the top of the column in both
+    layouts: one small square per POI, coloured by state (current, done,
+    in progress, spreadsheet error, closed), with the number of finished
+    POIs and the word "Open". It works for any POI count (item 22). How it
+    scales for a small or a large count is settled when the reference is
+    drawn.
+59. Tapping the mini-map opens a grid of all POIs of the route over the
+    whole screen, ten to a row, coloured like the mini-map, with a
+    legend. Tapping a tile makes that POI active, closes the grid and
+    scrolls the column to it. "Close" or a tap outside the grid closes it
+    and changes nothing.
+60. The POI type of item 46 is set from the counter beside the big POI
+    number. The counter ("41 of 70") carries a small chevron. Tapping it
+    opens a short menu with three choices, Intersection (70 passes),
+    Straight (40 passes) and Closed (not counted), the current one
+    marked. The menu changes the active POI only. Two taps are deliberate:
+    a stray touch while driving cannot change a type.
+61. In portrait the History panel covers the main area while the POI
+    column stays live beside it, so item 44 holds unchanged. The compass
+    keeps its place at the top right of the main area in both layouts
+    (item 19).
 
 ## Working screen — left
 1. Active city and route picker, side by side. The city name is always
@@ -178,11 +222,10 @@ layout" below. All UI copy is English.
     muted colour; the red caption beside the locked discs is where the
     error is named, and two red lines in one column compete.
 46. Every POI has a type with three positions — intersection (70 passes),
-    straight (40) or closed (0) — and the passenger sets it from the POI
-    list on the working screen, looking at the intersection, without
-    leaving the screen. How the control looks is a reference decision
-    still to be drawn. A closed POI has its discs locked at once with a
-    caption, is never counted among POIs "to go", and must read as
+    straight (40) or closed (0) — and the passenger sets it for the
+    active POI from its counter (item 60), looking at the intersection,
+    without leaving the screen. A closed POI has its discs locked at once
+    with a caption, is never counted among POIs "to go", and must read as
     neither done nor in error.
 
 ## "History" panel
