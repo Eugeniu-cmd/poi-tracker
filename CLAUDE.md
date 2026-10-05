@@ -4,7 +4,8 @@ Project: tablet PWA. One tap = one intersection pass (POI), written into
 the user's Google Sheets tracker via an Apps Script mailbox. The client's
 (German) spreadsheet is NEVER touched by this project.
 
-Stage: documentation skeleton. No app code yet.
+Stage: the mailbox (mailbox/) is built and runs in the Vienna tracker.
+The tablet app is not built yet: references first, then app/index.html.
 
 Stack: one self-contained page app/index.html (vanilla JS, CSS and JS
 inside the file, no build step, no frameworks) + Google Apps Script inside

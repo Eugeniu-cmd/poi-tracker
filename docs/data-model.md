@@ -1,6 +1,6 @@
 # Data model
 
-v0.8 — 2026-10-04
+v0.9 — 2026-10-05
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -27,6 +27,9 @@ that a removal brings to 0 is left empty, since a hand-typed 0 marks an
 impossible maneuver.
 v0.8 2026-10-04 — no Log = B..H consistency check: Log holds only tablet
 passes, B..H also holds hand-entered counts.
+v0.9 2026-10-05 — tracker section brought in line with the mailbox: one
+tracker per city, what the mailbox writes, the no-route and use-post
+answers, text in B..H read as 0 by pull.
 -->
 
 ## Pass (one crossing of an intersection)
@@ -80,10 +83,14 @@ passes, B..H also holds hand-entered counts.
 - Empty storage = clean start; the app must work correctly in that
   state.
 
-## User's Google tracker (POI_tracker_Dusseldorf_v1)
-- Existing sheets are NOT modified. Route sheet layout: row = POI, number
-  in column A, data from row 2; B,C,D,E = N,S,W,E; F,G,H = Left, Straight,
-  Right; I..S are formulas — hands off. B..H take numbers only.
+## User's Google tracker (one per city)
+- Route sheet layout: row = POI, number in column A, data from row 2;
+  B,C,D,E = N,S,W,E; F,G,H = Left, Straight, Right; I..S are formulas;
+  X holds the POI's target. B..H take numbers only.
+- Software writes only B..H and X of route sheets, and appends to `Log`.
+  The one exception is the mailbox's setupTargetColumn, run once per
+  tracker from the editor: it rewrites the formulas of I, S and the
+  summary's Норма to read X (see "Targets per POI").
 - NEW sheet `Log` (created by the mailbox on first run): row = event,
   append-only. Columns: A id · B time · C route · D POI · E side ·
   F maneuver · G delta · H ref · I target. A pass row leaves I empty; a
@@ -117,9 +124,12 @@ passes, B..H also holds hand-entered counts.
   holds it → {ok:false, error:'busy'}, and the tablet retries later.
 - POST {token, action:'pull', route} → {ok:true,
   counts:{poi:[N,S,W,E,L,St,R]}, targets:{poi:target}} — one route per
-  call; a missing target cell reads as 70.
+  call; a missing target cell reads as 70. A route with no sheet of that
+  name → {ok:false, error:'no-route'}. Text in B..H reads as 0 and is not
+  reported; column S of the sheet shows it, the answer does not.
 - POST {token, action:'ping'} → {ok:true, version}
 - Wrong token → {ok:false, error:'auth'}.
+- GET → {ok:false, error:'use-post', version}.
 
 ## Sync
 - A tap is stored on the tablet instantly and works with no network.

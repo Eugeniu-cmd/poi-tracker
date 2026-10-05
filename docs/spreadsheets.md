@@ -1,6 +1,6 @@
 # Spreadsheets
 
-v0.4 — 2026-10-04
+v0.5 — 2026-10-05
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-04 — extracted from docs/inputs/handoff_v2.md (Russian,
 2026-09-02) and verified against the two workbooks in docs/inputs/.
@@ -12,6 +12,8 @@ docs/inputs/ARCHIVE_handoff_v2_2026-09-02.md. The entry itself stays as
 written; no other change.
 v0.4 2026-10-04 — Vienna tracker documented after the mailbox install:
 sheets, target column X, formulas switched to it, locale, time zone, Log.
+v0.5 2026-10-05 — "target" now means column X only: T1:V1 is called the
+maneuver balance everywhere; the Vienna section gets the letter F.
 -->
 
 Two separate Google Sheets exist. The app writes to the user's tracker only,
@@ -37,7 +39,7 @@ column A, 197 POIs per route.
 | L…O | running side thresholds: B, B+C, B+C+D, B+C+D+E |
 | P…R | running maneuver thresholds: F, F+G, F+G+H |
 | S | status: OK / ОШИБКА (J≠K) / БОЛЬШЕ (J>70) / ТЕКСТ! (non-number in B..H) |
-| T1, U1, V1 | per-POI targets 28 / 14 / 28 |
+| T1, U1, V1 | maneuver balance per POI: Left 28 / Straight 14 / Right 28 |
 | T (below row 1) | user's own notes |
 
 Columns I..S are formulas. The app writes to B..H only, numbers only.
@@ -128,7 +130,7 @@ them, and never assume their numbers are ours.**
    looks like template residue rather than per-POI data. Confirm before
    relying on it.
 
-## Vienna tracker (POI_tracker_Vienna_v1)
+## F. Vienna tracker (POI_tracker_Vienna_v1)
 
 The user's tracker for Vienna, built by hand from the Düsseldorf one. A
 native Google Sheets file. Mailbox v1.3 installed on 2026-10-04.

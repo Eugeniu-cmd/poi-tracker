@@ -100,8 +100,12 @@ Running setupTargetColumn after an update is always safe.
   answer the browser's preflight request, so application/json fails.
 - ping answers {ok:true, version}. Test connection uses it.
 - Errors for the whole request: auth (wrong or missing key),
-  bad-request (unreadable body or unknown action), busy (another push
-  held the lock for 30 seconds, retry later), error (anything else).
+  bad-request (unreadable body or unknown action), no-route (pull for a
+  route with no sheet of that name), busy (another push held the lock
+  for 30 seconds, retry later), error (anything else). A GET answers
+  use-post.
+- pull reads text in B..H as 0 and does not report it. Column S of the
+  sheet shows that error, the pull answer does not.
 - Rejection reasons for a single event in push: bad-request, no-route,
   no-poi, text-in-cell, below-zero, bad-target, error.
 - The tablet treats applied and duplicate alike as delivered.
