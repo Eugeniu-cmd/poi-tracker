@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.5 — 2026-09-09
+   v0.6 — 2026-10-06
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -14,6 +14,15 @@
    v0.5 2026-09-09 — --active becomes an amber tint rather than white, so
    the current POI row is findable at a glance on a glass panel; the badge
    behind its number reuses --side.
+   v0.6 2026-10-06 — canon for size C (screens.md items 67 and 68). Tap
+   targets grow to 56px. Sizes, type, spacing, radius, opacity and motion
+   get tokens, so references and the app carry no literal values. Token
+   oddities settled: --active-line now points to --side (one amber), the
+   dark --side-ring stays in the amber family, --focus gets a dark value,
+   and the 18px block gap is --gap, no longer a coincidence with --r-md.
+   References drawn before this version (main-screen v0.17, settings
+   v0.8, history v0.7) use 44px targets in a 1000 × 600 frame and may
+   look crowded until they are redrawn.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -43,14 +52,56 @@
   --warn: #B87400;
   --warn-bg: rgba(255, 238, 209, 0.85);
   --active: rgba(242, 168, 29, 0.18);
-  --active-line: #F2A81D;
+  --active-line: var(--side);
   --focus: #1F5EFF;
   --shadow: 0 6px 20px rgba(50, 65, 120, 0.14);
   --shadow-lift: 0 10px 26px rgba(40, 50, 90, 0.26);
   --r-sm: 12px;
   --r-md: 18px;
   --font: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --tap-min: 44px;
+  --tap-min: 56px;
+
+  /* Size C (screens.md item 67) */
+  --row-h: 66px;
+  --col-narrow: 208px;
+  --col-wide: 330px;
+  --gap: 18px;
+  --disc-man: 118px;
+  --disc-side: 92px;
+  --side-reach: 124px;
+  --compass: 96px;
+
+  /* Type */
+  --t-small: 14px;
+  --t-body: 17px;
+  --t-label: 19px;
+  --t-row: 23px;
+  --t-title: 26px;
+  --t-num: 92px;
+  --w-medium: 600;
+  --w-bold: 700;
+  --w-heavy: 800;
+  --lh-tight: 1;
+  --lh-body: 1.45;
+
+  /* Spacing */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+
+  /* Radius, opacity, motion */
+  --r-lg: 24px;
+  --o-locked: 0.28;
+  --o-off: 0.4;
+  --o-zero: 0.45;
+  --dur-fade: 160ms;
+  --dur-move: 260ms;
+  --dur-bounce: 420ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.3, 1.5, 0.5, 1);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -69,7 +120,7 @@
     --disc-glyph: #101420;
     --side: #F2A81D;
     --side-glyph: #10131C;
-    --side-ring: rgba(255, 200, 90, 0.5);
+    --side-ring: rgba(242, 168, 29, 0.5);
     --side-soft: rgba(242, 168, 29, 0.22);
     --man-soft: rgba(255, 255, 255, 0.10);
     --ok: #3ECC82;
@@ -79,7 +130,8 @@
     --warn: #FFB13D;
     --warn-bg: rgba(62, 44, 16, 0.7);
     --active: rgba(242, 168, 29, 0.22);
-    --active-line: #F2A81D;
+    --active-line: var(--side);
+    --focus: #7FA3FF;
     --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
     --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
   }
@@ -100,7 +152,7 @@
   --disc-glyph: #101420;
   --side: #F2A81D;
   --side-glyph: #10131C;
-  --side-ring: rgba(255, 200, 90, 0.5);
+  --side-ring: rgba(242, 168, 29, 0.5);
   --side-soft: rgba(242, 168, 29, 0.22);
   --man-soft: rgba(255, 255, 255, 0.10);
   --ok: #3ECC82;
@@ -110,7 +162,8 @@
   --warn: #FFB13D;
   --warn-bg: rgba(62, 44, 16, 0.7);
   --active: rgba(242, 168, 29, 0.22);
-  --active-line: #F2A81D;
+  --active-line: var(--side);
+  --focus: #7FA3FF;
   --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
   --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
 }

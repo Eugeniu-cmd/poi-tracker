@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.27 — 2026-10-06
+v0.28 — 2026-10-06
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -103,6 +103,11 @@ a sound switch in Settings (items 7, 62, 65). Removing a pass and a type
 change with consequences ask in a dialog (items 9, 13, 63, 64). Values
 from the user's spreadsheet are described in English in the interface,
 never quoted (intro).
+v0.28 2026-10-06 — canon. Overlays close with a round ✕ in their top-left
+corner, a tap on the dimmed background, or the Android back gesture
+(items 59, 66). Size C recorded with its values (item 67). Every visual
+value of the app screen comes from _tokens.css, no literals (item 68).
+The city name is as large as the route code (item 1).
 -->
 
 The app is one working screen plus two slide-in panels, on a tablet held
@@ -151,6 +156,25 @@ it ("The sheet will flag it as over target", not the sheet's own word).
    pictures. Their meta lines describe the frame they were drawn at and
    stay until each reference is redrawn.
 
+## Canon (applies to every screen)
+67. Size C is the app's size, chosen on the user's tablet on 2026-10-06
+    out of three drawn sizes: tap targets 56px, POI rows 66px, the narrow
+    POI column 208px, text 14 / 17 / 19px, POI numbers in the column
+    23px, titles 26px, the big POI number 92px, a block gap of 18px,
+    maneuver discs 118px and side discs 92px set 124px from the centre.
+    The values live in docs/references/_tokens.css (v0.6), and item 52
+    keeps them fixed on every screen.
+68. Every colour, font size and weight, size, spacing, radius, opacity,
+    shadow and motion value of the app screen comes from
+    docs/references/_tokens.css through var(). A value the canon lacks is
+    first added to _tokens.css by a dedicated decision, then used. This
+    holds for every reference and later for app/index.html. Plain zero,
+    1px hairlines, 50% for round shapes and percentages of a layout are
+    not canon values and may stay literal. The page chrome of a reference
+    around the app frame (titles, notes, the checking tool) is exempt.
+    Every reference prompt checks it: no other literal colour, size or
+    spacing inside the app frame.
+
 ## POI column, mini-map and grid (applies to both layouts)
 55. The portrait layout is the primary one. The user works with the
     tablet upright, so portrait is designed first and wins when the two
@@ -175,8 +199,8 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 59. Tapping the mini-map opens a grid of all POIs of the route over the
     whole screen, ten to a row, coloured like the mini-map, with a
     legend. Tapping a tile makes that POI active, closes the grid and
-    scrolls the column to it. "Close" or a tap outside the grid closes it
-    and changes nothing.
+    scrolls the column to it. The ✕ of item 66 or a tap outside the grid
+    closes it and changes nothing.
 60. The POI type of item 46 is shown and set by the type pill, a
     full-width control under the big POI number: an icon, the type name
     and its passes with the split ("70 passes · ← 28 · ↑ 14 · → 28"). The
@@ -193,7 +217,8 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 
 ## Working screen — left
 1. Active city and route picker, side by side. The city name is always
-   visible so it is obvious which tracker a tap is written into.
+   visible so it is obvious which tracker a tap is written into. It is as
+   large as the route code, bold, in the ink colour.
 2. POI list 1…N for the route's POI count: number, progress bar, "N to
    go". Row turns green at its target, red on error, not-drivable POI in a
    state of its own (item 46), active POI highlighted.
@@ -409,6 +434,15 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     "Yes". A removing button is red (item 28). A type change button keeps
     the ordinary dark style, since nothing is deleted. A tap outside the
     dialog equals Cancel. There is no "don't ask again".
+66. An overlay that covers the screen or the main area (the grid of all
+    POIs, History, Settings) closes with a round ✕ button in its top-left
+    corner, as large as any tap target (item 31). There is no text
+    "Close": Apple's rule is the standard close symbol without a text
+    label, in the top-left corner. Where a dimmed background surrounds
+    the overlay, a tap on it closes the overlay too. The Android back
+    gesture closes the topmost open overlay instead of leaving the app.
+    Menus (type, route) close by a choice or a tap outside. Confirmation
+    dialogs keep "Cancel" (item 63).
 
 ## Working-screen states not drawn as separate reference screens
 32. Empty POI: counters read "0 of 70" and "70 to go", all mini counters

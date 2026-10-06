@@ -25,6 +25,11 @@ Hard rules:
 8. Your own output is English too: chat replies, task reports,
    acceptance-check output, notes and commit messages. This holds
    whatever language the prompt or the user writes in.
+9. Every visual value of the app screen (colour, font size and weight,
+   size, spacing, radius, opacity, shadow, motion) comes from
+   docs/references/_tokens.css through var(), in references and in
+   app/index.html alike. A value missing there is added to _tokens.css
+   first, never typed in as a literal (screens.md item 68).
 
 Where to look:
 | What | Where |
