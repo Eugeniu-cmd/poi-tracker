@@ -19,9 +19,9 @@ Hard rules:
 5. Secrets (mailbox URL, password) never enter project files.
 6. Columns B..H of tracker route sheets take numbers only; any text breaks
    the user's generator.
-7. App UI copy, documentation and code identifiers are all English. The
-   only exception is a verbatim quotation of a name or value that exists
-   in the user's spreadsheet.
+7. App UI copy, documentation and code identifiers are all English.
+   Documentation may quote a name or value from the user's spreadsheet
+   verbatim. The app UI never does: it describes such a value in English.
 8. Your own output is English too: chat replies, task reports,
    acceptance-check output, notes and commit messages. This holds
    whatever language the prompt or the user writes in.

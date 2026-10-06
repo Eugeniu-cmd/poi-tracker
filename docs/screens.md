@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.26 — 2026-10-06
+v0.27 — 2026-10-06
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -89,11 +89,27 @@ layouts, narrow in portrait, with an index rail, a mini-map and a grid of
 all POIs. The POI type is set from the counter of the active POI (items
 46, 51, 55 to 61). Correction to v0.25: below 1000px the layout keeps the
 POI column, only narrower, instead of a single column (item 51).
+v0.27 2026-10-06 — decisions taken on the working prototype tested in the
+car. Six POI types with their maneuver splits. A maneuver the type does
+not allow, or one whose share of the split is full, takes no more passes
+(items 39, 46). "Closed" is renamed "Not drivable", because "Closed"
+read like "done" (items 2, 4, 46, 58, 64). The type is shown and set by
+a type pill under the POI number, and the counter loses its chevron
+(items 4, 60). The row of chips becomes the "Still needed" card with the
+sides driven so far (item 39). The discs keep their height, the tapped
+disc moves to the centre and the sides bloom around it (items 5, 6). A
+chime, a bounce of the tapped side and of the counter on every pass, and
+a sound switch in Settings (items 7, 62, 65). Removing a pass and a type
+change with consequences ask in a dialog (items 9, 13, 63, 64). Values
+from the user's spreadsheet are described in English in the interface,
+never quoted (intro).
 -->
 
 The app is one working screen plus two slide-in panels, on a tablet held
 either way. Its size and layout follow "Screen size, orientation and
-layout" below. All UI copy is English.
+layout" below. All UI copy is English, values from the user's spreadsheet
+included: the interface describes such a value in English and never quotes
+it ("The sheet will flag it as over target", not the sheet's own word).
 
 ## Screen size, orientation and layout (applies to every screen)
 49. The user's tablet, measured on 2026-10-05 with tools/viewport.html:
@@ -152,7 +168,7 @@ layout" below. All UI copy is English.
     rail scrolls, it never selects.
 58. A mini-map of the route sits at the top of the column in both
     layouts: one small square per POI, coloured by state (current, done,
-    in progress, spreadsheet error, closed), with the number of finished
+    in progress, spreadsheet error, not drivable), with the number of finished
     POIs and the word "Open". It works for any POI count (item 22). How it
     scales for a small or a large count is settled when the reference is
     drawn.
@@ -161,12 +177,15 @@ layout" below. All UI copy is English.
     legend. Tapping a tile makes that POI active, closes the grid and
     scrolls the column to it. "Close" or a tap outside the grid closes it
     and changes nothing.
-60. The POI type of item 46 is set from the counter beside the big POI
-    number. The counter ("41 of 70") carries a small chevron. Tapping it
-    opens a short menu with three choices, Intersection (70 passes),
-    Straight (40 passes) and Closed (not counted), the current one
-    marked. The menu changes the active POI only. Two taps are deliberate:
-    a stray touch while driving cannot change a type.
+60. The POI type of item 46 is shown and set by the type pill, a
+    full-width control under the big POI number: an icon, the type name
+    and its passes with the split ("70 passes · ← 28 · ↑ 14 · → 28"). The
+    icon shows the allowed maneuvers as arrows, not the shape of the
+    road. Tapping the pill opens a menu with the six types, each with its
+    split, the current one marked. The menu changes the active POI only.
+    Two taps are deliberate: a stray touch while driving cannot change a
+    type. A change with consequences for passes already recorded asks
+    first (item 64). The counter beside the number carries no chevron.
 61. In portrait the History panel covers the main area while the POI
     column stays live beside it, so item 44 holds unchanged. The compass
     keeps its place at the top right of the main area in both layouts
@@ -176,29 +195,40 @@ layout" below. All UI copy is English.
 1. Active city and route picker, side by side. The city name is always
    visible so it is obvious which tracker a tap is written into.
 2. POI list 1…N for the route's POI count: number, progress bar, "N to
-   go". Row turns green at its target, red on error, closed POI in a
+   go". Row turns green at its target, red on error, not-drivable POI in a
    state of its own (item 46), active POI highlighted.
 3. Bottom summary: "Done N · M to go" and the count of finished POIs. The
    error count appears only when it is not zero.
 
 ## Working screen — right
-4. Large active POI number, "N of T" counter where T is the POI's target
-   (70, or 40 on a straight), small N/S/W/E and ←/↑/→ counters.
-5. Three big round maneuver buttons ← ↑ →; "straight" sits higher than
-   its neighbors.
-6. Tap a maneuver → four approach sides bloom around that button as a
-   compass: N above, S below, W left, E right. Other maneuvers dim
-   meanwhile.
-7. Tap a side → the pass is recorded as a whole, vibration, toast
-   "Saved: ← South · N of 70". Sides hide.
+4. Large active POI number with the "N of T" counter beside it, where T
+   is the POI's target (70 or 40, a not-drivable POI reads "Not
+   drivable"), and "N to go" under the counter. Below them, one ordinary
+   gap apart, come the type pill (item 60) and then the "Still needed"
+   card (item 39).
+5. Three big round maneuver buttons ← ↑ →, "straight" higher than its
+   neighbors. They sit in the middle of the free space under the "Still
+   needed" card, close to the passenger's hand, and keep that height. A
+   caption about them (items 10 and 46) sits under the discs and never
+   moves them.
+6. Tap a maneuver → that disc slides to the centre of the disc area, the
+   other two fade out of the way, and the four approach sides bloom
+   around it as a compass: N above, S below, W left, E right. No side
+   ever reaches the screen edge or covers the POI column. When the
+   compass closes, the disc slides back to its place.
+7. Tap a side → the pass is recorded as a whole: a short rising chime,
+   vibration, the tapped side bounces, the "N of T" counter bounces in
+   place, and the toast of item 36 appears ("Saved: ← South · N of T").
+   Then the sides hide and the disc slides back. Sound and motion follow
+   item 62.
 8. "Cancel" is visible only while the compass is open. Tapping the same
    maneuver again also closes it. Auto-close after 12 s — nothing
    recorded, with a notice.
-9. "Undo last" removes the whole most recent pass — maneuver and side
-   together — that this tablet recorded for the active POI, and can be
-   pressed repeatedly. A pass still waiting is dropped from the queue; a
-   pass already in the sheet has a removal queued for it, exactly as
-   History does.
+9. "Undo last" removes the whole most recent pass (maneuver and side
+   together) that this tablet recorded for the active POI, and can be
+   pressed repeatedly. Each press asks first (item 63). A pass still
+   waiting is dropped from the queue. A pass already in the sheet has a
+   removal queued for it, exactly as History does.
    The button is dimmed only on a POI this tablet has never written to —
    a one-time state on a route filled in by hand before the app was used.
 10. A POI that has reached its target, or has a spreadsheet error, has
@@ -209,10 +239,18 @@ layout" below. All UI copy is English.
 19. A compass sits in the top-right corner: a fixed ring with a North tick
     and a needle that rotates to the car's heading. Minimum gap between
     any two discs on the screen is 8px.
-39. The per-POI mini counters are chips in the disc language at low
-    volume: sides on a soft amber tint, maneuvers on a soft dark tint,
-    the value bolder than its label. A zero-valued chip fades toward the
-    background so only collected sides and maneuvers draw the eye.
+39. The per-POI mini counters live in the "Still needed" card under the
+    type pill. Its top row shows, per maneuver, what is still needed
+    against the split of the POI's type (item 46): a large "12 more", a
+    bar, and "16 of 28" under it. A maneuver whose share is full shows
+    "Done" in the done colour, and its disc locks (item 46). A count past
+    the share, possible only from numbers typed into the sheet or from a
+    type change, shows "+3 over" in the warning colour. A maneuver the
+    type does not allow shows a dash. The bottom row, "Sides so far",
+    shows the four approach sides driven, on the soft amber side tint, as
+    plain counts, because sides have no split. A zero value fades toward
+    the background. The card carries no separate "balance" line, since
+    the split already shows in the type pill and in the card itself.
 40. The active POI row carries an amber tint, a 4px left edge, its number
     in the amber foreground colour and its "N to go" darkened. It must be
     findable with peripheral vision and must not imitate the green done
@@ -221,21 +259,63 @@ layout" below. All UI copy is English.
     "N to go" and states the mismatch in words. It stays in the ordinary
     muted colour; the red caption beside the locked discs is where the
     error is named, and two red lines in one column compete.
-46. Every POI has a type with three positions — intersection (70 passes),
-    straight (40) or closed (0) — and the passenger sets it for the
-    active POI from its counter (item 60), looking at the intersection,
-    without leaving the screen. A closed POI has its discs locked at once
-    with a caption, is never counted among POIs "to go", and must read as
-    neither done nor in error.
+46. Every POI has one of six types. The passenger sets it for the active
+    POI from the type pill (item 60), looking at the intersection,
+    without leaving the screen. The type fixes the target and the
+    maneuvers that are possible, with the split the crew drives (field
+    rule, 2026-10-06):
+    - Intersection: Left 28, Straight 14, Right 28 (70 passes).
+    - No straight: Left 35, Right 35 (70).
+    - No left: Straight 14, Right 56 (70).
+    - No right: Left 56, Straight 14 (70).
+    - Straight only: Straight 40 (40). A POI on a straight road, or an
+      intersection where only Straight is possible. Usually 20 from each
+      direction, the side split is not tracked.
+    - Not drivable: not counted (0). A POI that cannot be driven at all
+      (private property, a road closed for good). Not called "Closed",
+      which reads like "done".
+    The split is a hard limit. A maneuver the type does not allow, and a
+    maneuver whose share is full, has its disc dimmed (item 26) with a
+    caption under the discs ("No left turn at this POI", "Left is done:
+    28 of 28") and takes no more passes. Undo last or Delete frees a full
+    share again. If a share cannot be reached in the field, the type is
+    changed instead. Approach sides have no limit. A not-drivable POI has
+    its discs locked at once with a caption, is never counted among POIs
+    "to go", and must read as neither done nor in error. New POIs start
+    as Intersection. "Only Left" and "only Right" are not types: they are
+    too rare to add.
+62. Sound and motion. Recording a pass plays a short rising two-note
+    chime, removing one (Undo last, Delete) a short falling one. The
+    tapped side bounces: a brief elastic scale that returns to rest,
+    Apple's "bounce" (SF Symbols), the motion that says an action
+    happened. The "N of T" counter bounces in place with it, and nothing
+    pops up over the POI number. The sides bloom out of the chosen disc
+    when the compass opens. All motion is skipped while the tablet's
+    "reduce motion" accessibility setting is on. Sound can be switched
+    off in Settings (item 65).
+64. A type can be changed at any time, also on a POI that already has
+    passes. The change applies at once when it has no consequence: on an
+    empty POI, upward from 40 to 70, or when no recorded pass conflicts
+    with the new type. Otherwise it asks first (item 63), and the dialog
+    states the consequence in plain words:
+    - Passes over the new target: "It already has 66 passes. Straight
+      only needs 40, so the POI becomes done with 26 passes over its
+      target. The sheet will flag it as over target."
+    - Passes on a POI turned Not drivable: they stay in the sheet, and the
+      app stops counting the POI.
+    - Passes of a maneuver the new type does not allow: they stay in the
+      sheet and can be deleted in History if they were a mistake.
+    A POI over its target reads "Done · 26 over target" under its
+    counter, and "done +26" in its row.
 
 ## "History" panel
 12. Pass list: "POI" / "Route" scope control; each entry shows time and
     "maneuver + side".
-13. Every pass has "Delete". A pass still waiting on the tablet is removed
-    outright. A pass already in the sheet stays in the list, struck
-    through and labelled "deleted", only until its removal has been
-    delivered; then it leaves the list. A line above the list counts the
-    removals still queued.
+13. Every pass has "Delete", which asks first (item 63). A pass still
+    waiting on the tablet is removed outright. A pass already in the
+    sheet stays in the list, struck through and labelled "deleted", only
+    until its removal has been delivered. Then it leaves the list. A line
+    above the list counts the removals still queued.
 14. Passes entered earlier by hand in the spreadsheet are not shown — they
     are corrected in the spreadsheet.
 38. A pass that has already reached the sheet can still be deleted here;
@@ -269,6 +349,8 @@ layout" below. All UI copy is English.
     Timestamps show the time alone for today and the date with the time
     when older: "All sent · 12:41", "last loaded 04.09 19:20".
 17. Theme: system / light / dark.
+65. Sound: on / off, on by default. It silences the chimes of item 62
+    only. Vibration and motion do not change.
 18. "Erase everything on this tablet" — with confirmation and a
     warning about undelivered passes; the spreadsheet is not touched.
 
@@ -314,6 +396,19 @@ layout" below. All UI copy is English.
     and that error surfaces only when reconciling with the client.
 42. Item 27 has one exception: a control may drop its caption when the
     reason is already stated beside it.
+63. Removing a pass (Undo last, item 9, and Delete, item 13) and a type
+    change with consequences (item 64) ask first, on the pattern Apple
+    and Google share. A dialog sits in the middle of the screen over a
+    dimmed background. Its title names the action: "Remove the last
+    pass?", "Delete this pass?", "Change POI 122 to Straight only?". A
+    removal shows the pass itself (POI, maneuver, side, time) and one
+    line on what happens: a waiting pass is simply dropped from this
+    tablet, a pass already in the sheet gets a removal sent with the
+    next sync. Two buttons side by side: "Cancel" on the left, the action
+    as a verb on the right ("Remove", "Delete", "Change"), never "OK" or
+    "Yes". A removing button is red (item 28). A type change button keeps
+    the ordinary dark style, since nothing is deleted. A tap outside the
+    dialog equals Cancel. There is no "don't ask again".
 
 ## Working-screen states not drawn as separate reference screens
 32. Empty POI: counters read "0 of 70" and "70 to go", all mini counters

@@ -1,6 +1,6 @@
 # Data model
 
-v0.9 — 2026-10-05
+v0.10 — 2026-10-06
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -30,6 +30,12 @@ passes, B..H also holds hand-entered counts.
 v0.9 2026-10-05 — tracker section brought in line with the mailbox: one
 tracker per city, what the mailbox writes, the no-route and use-post
 answers, text in B..H read as 0 by pull.
+v0.10 2026-10-06 — six POI types with their maneuver splits, the split a
+hard limit per maneuver, "Closed" renamed "Not drivable". The type
+lives on the tablet only and the tracker keeps only the target, so the
+mailbox and the trackers do not change. A type change sends a target
+event only when the target changes. Loading from the sheet keeps a type
+that matches the loaded target.
 -->
 
 ## Pass (one crossing of an intersection)
@@ -63,6 +69,9 @@ answers, text in B..H read as 0 by pull.
 - baseline — per POI, per route, per city: the 7 counts and the target,
   as last pulled from that city's tracker and as advanced by delivered
   events (next bullet).
+- types — per POI, per route, per city: the POI type (see "Targets per
+  POI"). Kept on the tablet only and outside the baseline, so loading
+  from the sheet never wipes it.
 - events — the events this tablet recorded, each in one of three states:
   waiting (not yet delivered), delivered (the mailbox confirmed it) or
   rejected (the mailbox refused it, with the reason). Every event names
@@ -181,16 +190,35 @@ answers, text in B..H read as 0 by pull.
 - The client's rule: an intersection takes 70 passes; a POI on a straight
   road takes 40; a POI that cannot be driven (private property, closed)
   takes 0.
-- Each POI therefore carries a type with three positions — intersection
-  (70) / straight (40) / closed (0) — and the target follows from the
-  type. The passenger sets it from the working screen, looking at the
-  intersection, without leaving the screen. New POIs start as
-  intersection.
+- Each POI carries one of six types, and the target follows from the
+  type. The type also fixes which maneuvers are possible and the split
+  the crew drives (field rule, 2026-10-06):
+  - Intersection: Left 28, Straight 14, Right 28 (target 70).
+  - No straight: Left 35, Right 35 (70).
+  - No left: Straight 14, Right 56 (70).
+  - No right: Left 56, Straight 14 (70).
+  - Straight only: Straight 40 (40). A POI on a straight road, or an
+    intersection where only Straight is possible.
+  - Not drivable: none (0). The name avoids "Closed", which reads like
+    "done".
+  The split is a hard limit: a maneuver whose share is full takes no
+  more passes, and a maneuver the type does not allow takes none.
+  Approach sides have no limit. The passenger sets the type from the
+  working screen, looking at the intersection, without leaving the
+  screen. New POIs start as Intersection.
 - "Done", the "N of T" counter, the disc lock and the progress bar follow
-  the POI's own target, never a fixed 70. A closed POI is locked at once.
-- A change of type is a target event: stored on the tablet instantly,
-  delivered through the same queue as passes, written by the mailbox into
-  the tracker.
+  the POI's own target, never a fixed 70. A not-drivable POI is locked at once.
+- The type itself lives on the tablet only (see "Tablet storage"). The
+  tracker holds only the target. A change of type that changes the
+  target is a target event: stored on the tablet instantly, delivered
+  through the same queue as passes, written by the mailbox into the
+  tracker. A change between types with the same target (the four types
+  at 70) sends no event.
+- Loading from the sheet keeps a stored type while its target equals the
+  tracker's. Otherwise the type follows the tracker's target: 70
+  Intersection, 40 Straight only, 0 Not drivable. If the tablet's data is
+  lost, No straight, No left and No right come back as Intersection and
+  are set again. Counts and passes are not affected.
 - In the tracker the target lives in column X of every route sheet, in
   every city's tracker: the first column free of the existing layout,
   never inserted between existing columns. A new tracker must keep X
