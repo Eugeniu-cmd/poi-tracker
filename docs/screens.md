@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.30 — 2026-10-09
+v0.31 — 2026-10-09
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -121,6 +121,14 @@ v0.30 2026-10-09 — fixes from the audit of main-screen v0.19. Each
 maneuver keeps its own place in the type icon (item 60). The active row
 keeps its amber tint and edge in every state (item 40). With no routes,
 a caption under the discs names the reason (item 35).
+v0.31 2026-10-09 — decisions from the user's review of main-screen
+v0.20. Straight is Lucide arrow-up, from the same Feather family as the
+turn arrows, because move-up looked thinner than its neighbours (item
+69). In landscape the action bar runs under the whole main area and holds
+the summary (items 3, 51). A short screen gets a compact step: smaller
+display numbers and a one-line button instead of the mini-map, while
+discs and tap targets keep their size (items 52, 58, 70). An open menu
+closes when the screen turns (item 66).
 -->
 
 The app is one working screen plus two slide-in panels, on a tablet held
@@ -145,8 +153,10 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     (item 56): from 1200px wide the column is wide (--col-wide), below
     1200px it is narrow (--col-narrow). The main area follows the shape
     of the app. When it is wider than tall, the number, the type pill and
-    the "Still needed" card stand on the left, the discs and the action
-    bar on the right. When it is taller than wide, they stack as items 4
+    the "Still needed" card stand on the left and the discs on the right,
+    and the action bar runs under both at the full width of the main
+    area, as a toolbar along the bottom edge. When it is taller than
+    wide, they stack as items 4
     and 5 describe. On the user's tablet that gives the wide column with
     the side-by-side main area in landscape and the narrow column with
     the stack in portrait. 1200px is also where Google's large window
@@ -158,7 +168,8 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 52. Discs, the compass, text sizes and tap targets keep their size in px
     on every screen. A larger screen shows more, not bigger: extra space
     goes into the length of lists (more POI rows at once) and into the
-    gaps between blocks. Nothing is scaled as a whole.
+    gaps between blocks. Nothing is scaled as a whole. The one exception
+    is the compact step of item 70 on a short screen.
 53. The bottom edge of the screen is shared with the system: on Android a
     sideways swipe along the bottom handle switches apps. Nothing
     tappable or swipeable sits inside that area. Its height is taken from
@@ -174,6 +185,16 @@ it ("The sheet will flag it as over target", not the sheet's own word).
    settings.html v0.8, history.html v0.7) are still fixed 1000 × 600
    pictures. Their meta lines describe the frame they were drawn at and
    stay until each reference is redrawn.
+70. Compact step. When the app is less than 700px tall (the 1000 × 600
+    minimum, and the user's tablet in landscape inside a Chrome tab at
+    1333 × 680), display-only text shrinks so more fits: the big POI
+    number takes --t-num-compact, the counter --t-label, "N to go"
+    --t-small, the values in the "Still needed" tiles and the side chips
+    --t-label. The mini-map becomes a one-line button at the top of the
+    column: the Lucide layout-grid icon, the count of finished POIs
+    ("79 of 197") and "Open", as tall as a tap target, so the column
+    shows more POI rows. Discs, the compass and every tap target keep
+    their size, since they are what the passenger hits in a moving car.
 
 ## Canon (applies to every screen)
 67. Size C is the app's size, chosen on the user's tablet on 2026-10-06
@@ -196,7 +217,7 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 69. Icons are Lucide icons only (CLAUDE.md rule 10), their path data
     copied verbatim, at stroke-width 2.6. One symbol stands for each
     maneuver everywhere in the app: Lucide corner-up-left for Left,
-    move-up for Straight and corner-up-right for Right, on the discs, in
+    arrow-up for Straight and corner-up-right for Right, on the discs, in
     the type icon, in the "Still needed" card, in split lines, dialogs
     and toasts. A text arrow (←, ↑, →, ›) never stands in for an icon.
     Manrope draws ↑ but not ← or →, so text arrows would mix two fonts.
@@ -232,7 +253,7 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     keep at least 12px from the column's edges, and a hairline divides
     the header from the rows. It works for any POI count (item 22). How
     it scales for a small or a large count is settled when the reference
-    is drawn.
+    is drawn. On a short screen it becomes a one-line button (item 70).
 59. Tapping the mini-map opens a grid of all POIs of the route over the
     whole screen, ten to a row, coloured like the mini-map, with a
     legend. Tapping a tile makes that POI active, closes the grid and
@@ -266,7 +287,9 @@ it ("The sheet will flag it as over target", not the sheet's own word).
    go". Row turns green at its target, red on error, not-drivable POI in a
    state of its own (item 46), active POI highlighted.
 3. Bottom summary: "Done N · M to go" and the count of finished POIs. The
-   error count appears only when it is not zero.
+   error count appears only when it is not zero. In portrait it sits
+   under the main area. In landscape it sits inside the action bar, so
+   the POI column runs down to the bottom (item 51).
 
 ## Working screen — right
 4. Large active POI number with the "N of T" counter beside it, where T
@@ -489,8 +512,8 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     label, in the top-left corner. Where a dimmed background surrounds
     the overlay, a tap on it closes the overlay too. The Android back
     gesture closes the topmost open overlay instead of leaving the app.
-    Menus (type, route) close by a choice or a tap outside. Confirmation
-    dialogs keep "Cancel" (item 63).
+    Menus (type, route) close by a choice, a tap outside, or when the
+    screen turns. Confirmation dialogs keep "Cancel" (item 63).
 
 ## Working-screen states not drawn as separate reference screens
 32. Empty POI: counters read "0 of 70" and "70 to go", all mini counters

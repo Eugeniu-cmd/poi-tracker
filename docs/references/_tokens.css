@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.8 — 2026-10-09
+   v0.9 — 2026-10-09
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -35,6 +35,10 @@
    cover, and read as holes. New --danger and --on-danger for the fill
    and the text of a destructive button. The dark --err is a text colour
    and looked coral as a fill. Light values stay as they were.
+   v0.9 2026-10-09 — a dedicated decision on the user's review of
+   main-screen v0.20. New --t-num-compact for the big POI number on a
+   short screen (screens.md item 70). Every other compact size reuses an
+   existing token.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -94,6 +98,7 @@
   --t-row: 23px;
   --t-title: 26px;
   --t-num: 92px;
+  --t-num-compact: 64px;
   --w-medium: 600;
   --w-bold: 700;
   --w-heavy: 800;
