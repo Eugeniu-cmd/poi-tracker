@@ -30,6 +30,12 @@ Hard rules:
    docs/references/_tokens.css through var(), in references and in
    app/index.html alike. A value missing there is added to _tokens.css
    first, never typed in as a literal (screens.md item 68).
+10. Every icon is an official Lucide icon (lucide.dev): its SVG path
+    data copied verbatim from the Lucide source, never drawn, merged,
+    cropped or edited. Allowed: size, colour, stroke-width 2.6, and
+    several icons side by side. A text character never stands in for an
+    icon (no ←, →, ↑, ›). The live compass is a drawn widget, not an
+    icon (screens.md item 69).
 
 Where to look:
 | What | Where |

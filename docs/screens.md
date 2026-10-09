@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.28 — 2026-10-06
+v0.29 — 2026-10-09
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -108,6 +108,15 @@ corner, a tap on the dimmed background, or the Android back gesture
 (items 59, 66). Size C recorded with its values (item 67). Every visual
 value of the app screen comes from _tokens.css, no literals (item 68).
 The city name is as large as the route code (item 1).
+v0.29 2026-10-09 — fixes from the pixel audit of main-screen v0.18 and
+the user's review. Icons are Lucide only, one symbol per maneuver
+everywhere (item 69). The column is wide from 1200px, and a landscape
+screen puts the discs beside the number and the card (item 51). The open
+compass may rise over the "Still needed" card on a short screen
+(item 6). The rail bubble sits inside the column (item 57). The mini-map
+is the column's header and the list shows whole rows at its top (items
+56, 58). Both menus mark the current choice with a check (item 60). "Add
+routes in Settings" is a button (item 35).
 -->
 
 The app is one working screen plus two slide-in panels, on a tablet held
@@ -127,15 +136,21 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     the app guarantees is 1000 × 600 in landscape and 720 × 1000 in
     portrait, browser tab included. Below that the app still opens, but
     nothing is promised.
-51. The layout follows the width the app actually has, not the way the
+51. The layout follows the space the app actually has, not the way the
     tablet is held. The POI list is always a column beside the main area
-    (item 56): from 1000px wide the column is wide (330px on the current
-    landscape references), below 1000px it is narrow. On the user's
-    tablet that gives the wide column in landscape and the narrow one in
-    portrait. The layout switches live when the tablet turns and loses
-    nothing: an open compass, the active POI and an open panel stay as
-    they were. A compact layout for split screen (about 660px wide) may
-    come later as one more width step, without changing the two layouts.
+    (item 56): from 1200px wide the column is wide (--col-wide), below
+    1200px it is narrow (--col-narrow). The main area follows the shape
+    of the app. When it is wider than tall, the number, the type pill and
+    the "Still needed" card stand on the left, the discs and the action
+    bar on the right. When it is taller than wide, they stack as items 4
+    and 5 describe. On the user's tablet that gives the wide column with
+    the side-by-side main area in landscape and the narrow column with
+    the stack in portrait. 1200px is also where Google's large window
+    class begins. At the 1000 × 600 minimum nothing is clipped. The
+    layout switches live when the tablet turns and loses nothing: an open
+    compass, the active POI and an open panel stay as they were. A
+    compact layout for split screen (about 660px wide) may come later as
+    one more width step, without changing the two layouts.
 52. Discs, the compass, text sizes and tap targets keep their size in px
     on every screen. A larger screen shows more, not bigger: extra space
     goes into the length of lists (more POI rows at once) and into the
@@ -174,6 +189,17 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     around the app frame (titles, notes, the checking tool) is exempt.
     Every reference prompt checks it: no other literal colour, size or
     spacing inside the app frame.
+69. Icons are Lucide icons only (CLAUDE.md rule 10), their path data
+    copied verbatim, at stroke-width 2.6. One symbol stands for each
+    maneuver everywhere in the app: Lucide corner-up-left for Left,
+    move-up for Straight and corner-up-right for Right, on the discs, in
+    the type icon, in the "Still needed" card, in split lines, dialogs
+    and toasts. A text arrow (←, ↑, →, ›) never stands in for an icon.
+    Manrope draws ↑ but not ← or →, so text arrows would mix two fonts.
+    An arrow written in this document stands for the Lucide icon of that
+    maneuver. Not drivable uses Lucide ban, the current menu choice
+    Lucide check, closing Lucide x, menus and links Lucide chevrons. The
+    live compass of item 19 is a drawn widget, not an icon.
 
 ## POI column, mini-map and grid (applies to both layouts)
 55. The portrait layout is the primary one. The user works with the
@@ -181,21 +207,28 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     layouts conflict. Landscape stays fully supported (item 51).
 56. The POI list of item 2 is always a column on the left, beside the
     main area that holds the POI number, the counters, the discs and the
-    action bar. In portrait the column is narrow, about 184px, and its
-    final width is set when the reference is drawn. Every row keeps the
-    minimum tap height (item 31). Nothing about choosing a POI ever moves
-    the discs.
+    action bar. In portrait the column is narrow (--col-narrow, item 67).
+    Every row keeps the minimum tap height (item 31). The list shows
+    whole rows at its top edge and fades the cut row at its bottom edge,
+    so no sliver of a row ever sits under the mini-map. Nothing about
+    choosing a POI ever moves the discs.
 57. An index rail runs along the right edge of the column, marked from 1
     to the route's POI count. Sliding a finger along it scrolls the
     column to that part of the route and shows the number under the
-    finger in a bubble. The POI is then chosen by tapping its row: the
-    rail scrolls, it never selects.
+    finger in a bubble. The bubble sits inside the column, over the rows
+    just left of the rail and level with the finger, so it never covers
+    the main area. The rail's touch area also takes in the gap beside the
+    column. The POI is then chosen by tapping its row: the rail scrolls,
+    it never selects.
 58. A mini-map of the route sits at the top of the column in both
     layouts: one small square per POI, coloured by state (current, done,
     in progress, spreadsheet error, not drivable), with the number of finished
-    POIs and the word "Open". It works for any POI count (item 22). How it
-    scales for a small or a large count is settled when the reference is
-    drawn.
+    POIs and the word "Open". It is the column's header, not a card
+    inside the column: the squares and the caption share one width and
+    keep at least 12px from the column's edges, and a hairline divides
+    the header from the rows. It works for any POI count (item 22). How
+    it scales for a small or a large count is settled when the reference
+    is drawn.
 59. Tapping the mini-map opens a grid of all POIs of the route over the
     whole screen, ten to a row, coloured like the mini-map, with a
     legend. Tapping a tile makes that POI active, closes the grid and
@@ -204,12 +237,16 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 60. The POI type of item 46 is shown and set by the type pill, a
     full-width control under the big POI number: an icon, the type name
     and its passes with the split ("70 passes · ← 28 · ↑ 14 · → 28"). The
-    icon shows the allowed maneuvers as arrows, not the shape of the
-    road. Tapping the pill opens a menu with the six types, each with its
-    split, the current one marked. The menu changes the active POI only.
-    Two taps are deliberate: a stray touch while driving cannot change a
-    type. A change with consequences for passes already recorded asks
-    first (item 64). The counter beside the number carries no chevron.
+    icon shows the allowed maneuvers, not the shape of the road: their
+    icons of item 69 side by side in the order left, straight, right, in
+    a tile wide enough for three, so the type name starts at the same
+    place for every type. Tapping the pill opens a menu with the six
+    types, each with its icon and split, the current one marked with a
+    check, as the route menu marks the active route. The menu changes
+    the active POI only. Two taps are deliberate: a stray touch while
+    driving cannot change a type. A change with consequences for passes
+    already recorded asks first (item 64). The counter beside the number
+    carries no chevron.
 61. In portrait the History panel covers the main area while the POI
     column stays live beside it, so item 44 holds unchanged. The compass
     keeps its place at the top right of the main area in both layouts
@@ -239,8 +276,11 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 6. Tap a maneuver → that disc slides to the centre of the disc area, the
    other two fade out of the way, and the four approach sides bloom
    around it as a compass: N above, S below, W left, E right. No side
-   ever reaches the screen edge or covers the POI column. When the
-   compass closes, the disc slides back to its place.
+   ever reaches the screen edge, covers the POI column or comes closer
+   than 8px to the action bar. On a screen too short for the open
+   compass, it rises over the bottom of the "Still needed" card instead,
+   since the card takes no taps. When the compass closes, the disc
+   slides back to its place.
 7. Tap a side → the pass is recorded as a whole: a short rising chime,
    vibration, the tapped side bounces, the "N of T" counter bounces in
    place, and the toast of item 36 appears ("Saved: ← South · N of T").
@@ -452,8 +492,8 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 34. No connection: the sync control reads "No connection" with the dot in
     the muted colour. Nothing is lost meanwhile.
 35. No routes yet in this city: the route picker reads "No routes yet",
-    the POI list is replaced by a single line "Add routes in Settings",
-    and the discs are dimmed and inert.
+    the POI list is replaced by a single button "Add routes in Settings"
+    that opens Settings, and the discs are dimmed and inert.
 36. A pass has just been recorded: a toast appears over the working area
     for about two seconds, reading "Saved: ← South · 57 of 70", then
     fades. The screen beneath does not move.

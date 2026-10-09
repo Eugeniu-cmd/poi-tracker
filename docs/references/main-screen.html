@@ -105,12 +105,20 @@
           Every value inside the app frames comes from the tokens; the
           prototype of 2026-10-06 (docs/inputs/prototype-v16.dc.html)
           was the visual target.
+  v0.19 2026-10-09 — pixel audit fixes and the user's review (_tokens.css
+          v0.7, screens.md v0.29). The button reset no longer overrides
+          the components. Lucide icons only, one symbol per maneuver.
+          The column is wide from 1200px and the main area follows the
+          frame's shape. Captions never move the discs. The mini-map is
+          the column's header. Even insets in pills, menus and chips,
+          tabular numbers, a scrim that darkens in both themes, and small
+          text that reads at 4.5:1.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.18</title>
+<title>POI Tracker — Working Screen Reference v0.19</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -126,23 +134,23 @@
   * { box-sizing: border-box; }
   body { margin: 0; padding: 40px 44px 56px; background: #23262F; color: #E7E9F0;
          font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  .eyebrow { font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+  .eyebrow { font-size: 12px; line-height: 16px; letter-spacing: .18em; text-transform: uppercase;
              color: #8A90A6; margin: 0 0 10px; }
-  h1 { margin: 0 0 12px; font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
-  .meta { margin: 0 0 26px; font-size: 14px; line-height: 1.65; color: #A6ACC0;
+  h1 { margin: 0 0 12px; font-size: 30px; line-height: 36px; font-weight: 700; letter-spacing: -.01em; }
+  .meta { margin: 0 0 26px; font-size: 14px; line-height: 23px; color: #A6ACC0;
           max-width: 900px; }
   .meta b { color: #E7E9F0; font-weight: 600; }
   .tool { position: sticky; top: 0; z-index: 100; display: flex; flex-wrap: wrap;
           align-items: center; gap: 8px; padding: 12px 0; margin: 0 0 34px;
           background: #23262F; border-bottom: 1px solid #383D4B; }
-  .tool .lbl { font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+  .tool .lbl { font-size: 11px; line-height: 14px; letter-spacing: .16em; text-transform: uppercase;
                color: #8A90A6; margin-right: 6px; }
   .tool .sep { width: 1px; height: 24px; background: #3A3F4D; margin: 0 10px; }
   .tool button { height: 34px; padding: 0 14px; border-radius: 9px; cursor: pointer;
                  border: 1px solid #3A3F4D; background: #2B2F3A; color: #E7E9F0;
                  font: inherit; font-size: 13px; font-weight: 600; }
   .tool button.on { background: #E7E9F0; color: #23262F; border-color: #E7E9F0; }
-  .tool .hint { font-size: 12px; color: #8A90A6; margin-left: auto; }
+  .tool .hint { font-size: 12px; line-height: 16px; color: #8A90A6; margin-left: auto; }
   .board { display: flex; flex-direction: column; gap: 56px; }
   .unit { display: flex; align-items: flex-start; gap: 26px; flex-wrap: wrap; }
   .device { flex: none; }
@@ -151,15 +159,15 @@
   .frame { box-sizing: content-box; width: 800px; height: 1333px; resize: both; overflow: hidden;
            background: #0C0E14; border-radius: 22px; border: 7px solid #0C0E14;
            box-shadow: 0 26px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06) inset; }
-  .caption { margin: 14px 0 0; font-size: 11px; letter-spacing: .16em;
+  .caption { margin: 14px 0 0; font-size: 11px; line-height: 14px; letter-spacing: .16em;
              text-transform: uppercase; color: #8A90A6; }
   .caption b { color: #F2F4FA; font-weight: 700; }
   .dmap { flex: none; width: 300px; background: #2B2F3A; border-radius: 14px;
           padding: 20px 20px 10px; border: 1px solid #383D4B; }
-  .dmap-title { font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+  .dmap-title { font-size: 11px; line-height: 14px; letter-spacing: .16em; text-transform: uppercase;
                 color: #8A90A6; margin-bottom: 12px; }
   .dmap ul { list-style: none; margin: 0; padding: 0; }
-  .dmap li { margin: 0 0 9px; font-size: 12.5px; line-height: 1.5; color: #BFC5D6; }
+  .dmap li { margin: 0 0 9px; font-size: 12.5px; line-height: 19px; color: #BFC5D6; }
   .dmap li b { display: inline-block; min-width: 26px; color: #F2F4FA; font-weight: 700; }
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
@@ -167,112 +175,117 @@
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.6 or a calc() over
+     line height below is a var() from _tokens.css v0.7 or a calc() over
      them. Literal values are limited to 0, 1px hairlines, 50% for round
-     shapes, percentages and fr of a layout, em ratios of a token font
-     size, SVG geometry and the 1000px breakpoint of item 51.
+     shapes, percentages and fr of a layout, em and ch ratios of a token
+     font size, keywords, SVG geometry and the 1200px breakpoint of
+     item 51. Icons are Lucide symbols (rule 10, item 69); an inline
+     icon is 1em of its text. A chevron's path ends inside its 24-unit
+     box (chevron-down at 18/24, chevron-right at 15/24, check at 20/24),
+     so a negative em margin of that remainder puts the drawn end, not
+     the box, on the padding.
      ============================================================ */
-  /* .app is the container the queries measure: no padding, so its content box
-     is the frame width. .scr inside it carries the padding and the stack. */
-  .app { position: relative; container-type: inline-size; width: 100%; height: 100%;
+  .app { position: relative; container-type: size; width: 100%; height: 100%;
          overflow: hidden; background: var(--bg); background-image: var(--bg-grad);
          font-family: var(--font); font-size: var(--t-body); font-weight: var(--w-medium);
          line-height: var(--lh-body); color: var(--ink); }
-  .scr { width: 100%; height: 100%; display: flex; flex-direction: column; gap: var(--gap);
+  /* .app is the container the queries measure: no padding, so its box is the
+     frame. .scr inside it carries the padding and the stack. */
+  .scr { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column;
+         gap: var(--gap);
          padding: var(--s-4) var(--s-5) calc(var(--s-5) + env(safe-area-inset-bottom, 0px)); }
   .app *, .app *::before, .app *::after { box-sizing: border-box; }
-  .app button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
-                margin: 0; cursor: pointer; text-align: left; }
+  :where(.app) button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
+                        margin: 0; cursor: pointer; text-align: left; }
   .app svg { display: block; }
   .ic { width: 1em; height: 1em; flex: none; }
+  .iw { display: inline-flex; align-items: center; gap: var(--s-1); white-space: nowrap; }
+  .big, .cnt, .rest, .rn, .rt, .nv, .nf, .svv, .cn, .summary, .rail span, .bubble,
+  .ritem small, .mcap, .tl small, .ol small, .spn, .dchip { font-variant-numeric: tabular-nums; }
 
   /* ---- top bar (items 1, 16) ---- */
   .topbar { display: flex; align-items: center; gap: var(--s-3); flex: none; }
   .city { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight);
           color: var(--ink); }
-  .pickwrap { position: relative; }
-  .route { display: inline-flex; align-items: center; gap: var(--s-2); height: var(--tap-min);
-           padding: 0 var(--s-4); font-size: var(--t-label); font-weight: var(--w-heavy);
-           background: var(--panel-strong); border: 1px solid var(--panel-edge);
-           border-radius: var(--r-sm); box-shadow: var(--shadow); white-space: nowrap; }
-  .sync { margin-left: auto; display: inline-flex; align-items: center; gap: var(--s-2);
-          height: var(--tap-min); padding: 0 var(--s-3); font-size: var(--t-body);
-          font-weight: var(--w-medium); background: var(--panel-strong);
-          border: 1px solid var(--panel-edge); border-radius: var(--r-sm); white-space: nowrap; }
+  .pickwrap { anchor-name: --pick; }
+  .route, .sync { display: inline-flex; align-items: center; gap: var(--s-2);
+                  height: var(--tap-min); padding: 0 var(--s-4); background: var(--panel-strong);
+                  border: 1px solid var(--panel-edge); border-radius: var(--r-sm);
+                  box-shadow: var(--shadow); white-space: nowrap; }
+  .route { font-size: var(--t-label); font-weight: var(--w-heavy); }
+  .sync { margin-left: auto; font-size: var(--t-body); font-weight: var(--w-medium); }
+  .route .ic { margin-right: -0.25em; }
+  .sync .ic { margin-right: -0.375em; }
   .dot { width: var(--s-2); height: var(--s-2); border-radius: 50%; background: var(--ok); flex: none; }
-  /* route menu (item 1): a list under the picker, the active route marked */
-  .rmenu { position: absolute; left: 0; top: calc(100% + var(--s-2)); z-index: 30;
-           width: var(--col-wide); background: var(--panel-solid); border-radius: var(--r-md);
-           box-shadow: var(--shadow-lift); padding: var(--s-2); }
-  .ritem { width: 100%; min-height: calc(var(--tap-min) + var(--s-2)); display: flex;
-           align-items: center; justify-content: space-between; gap: var(--s-3);
-           padding: 0 var(--s-3); border-radius: var(--r-sm); }
-  .ritem b { font-size: var(--t-label); font-weight: var(--w-heavy); }
+  /* route menu (item 1): under the picker, anchored to it and snapped to whole
+     pixels; the active route carries the check, every row reserves its slot */
+  .rmenu { position: absolute; z-index: 30; left: round(anchor(--pick left), 1px);
+           top: calc(anchor(--pick bottom) + var(--s-2)); bottom: var(--s-5); height: fit-content;
+           max-height: stretch; overflow-y: auto; width: var(--col-wide);
+           background: var(--panel-solid); border: 1px solid var(--panel-edge);
+           border-radius: var(--r-md); box-shadow: var(--shadow-lift); padding: var(--s-2); }
+  .ritem { width: 100%; min-height: var(--tap-min); display: flex;
+           align-items: center; gap: var(--s-3); padding: 0 var(--s-2); border-radius: var(--r-sm); }
+  .ritem b { flex: 1; font-size: var(--t-label); font-weight: var(--w-heavy); }
   .ritem small { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2); }
-  .ritem.on { background: var(--active); }
+  .chk { width: 1em; height: 1em; flex: none; font-size: var(--t-label); color: var(--ink);
+         visibility: hidden; margin-right: -0.167em; }
+  .ritem.on, .opt.on { background: var(--active); }
+  .ritem.on .chk, .opt.on .chk { visibility: visible; }
 
   /* ---- body: the POI column beside the main area (items 51, 56); the
-     summary under the main area in the narrow layout, under the column in
-     the wide one (item 3) ---- */
+     summary under the main area in portrait, under the column in landscape ---- */
   .body { position: relative; flex: 1; min-height: 0; display: grid; gap: var(--gap);
           grid-template-columns: var(--col-narrow) minmax(0, 1fr);
           grid-template-rows: minmax(0, 1fr) auto;
           grid-template-areas: "col main" "col sum"; }
   .colwrap { grid-area: col; position: relative; min-height: 0; display: flex; }
+  /* the rail's touch area also takes in the gap beside the column (item 57) */
+  .colwrap::after { content: ""; position: absolute; top: 0; bottom: 0; left: 100%;
+                    width: var(--gap); }
   .col { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column;
          background: var(--panel); border: 1px solid var(--panel-edge);
          border-radius: var(--r-md); box-shadow: var(--shadow); overflow: hidden; }
   .main { grid-area: main; position: relative; min-width: 0; min-height: 0;
           display: flex; flex-direction: column; gap: var(--gap); }
-  .summary { grid-area: sum; font-size: var(--t-small); font-weight: var(--w-medium);
-             color: var(--ink-2); text-align: center; line-height: var(--lh-body); }
-  .summary .err { color: var(--err); font-weight: var(--w-bold); white-space: nowrap; }
+  .mleft { flex: none; display: flex; flex-direction: column; gap: var(--gap); min-width: 0; }
+  .mright { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--gap); }
+  .summary { grid-area: sum; display: flex; flex-wrap: wrap; justify-content: center;
+             column-gap: var(--s-1); row-gap: var(--s-1); font-size: var(--t-small);
+             font-weight: var(--w-medium); color: var(--ink-2); line-height: var(--lh-tight); }
+  .summary span { white-space: nowrap; }
+  .summary .err { color: var(--err); font-weight: var(--w-bold); }
 
-  /* item 51: from 1000px the column is wide; the main area then puts the
-     number, the type pill and the card beside the discs, because the
-     portrait stack is taller than a landscape screen. */
-  @container (min-width: 1000px) {
-    .body { grid-template-columns: var(--col-wide) minmax(0, 1fr);
-            grid-template-areas: "col main" "sum main"; }
-    .main { display: grid; column-gap: var(--gap); row-gap: var(--gap);
-            grid-template-columns: minmax(0, 1fr) auto;
-            grid-template-rows: auto auto auto minmax(0, 1fr) auto;
-            grid-template-areas: "head zone" "pill zone" "card zone" "free zone" "free bar"; }
-    .head { grid-area: head; }
-    .typewrap { grid-area: pill; }
-    .card { grid-area: card; }
-    .stagezone { grid-area: zone; }
-    .bar { grid-area: bar; }
-  }
-
-  /* ---- mini-map (item 58): one square per POI, coloured by state ---- */
-  .mmap { flex: none; margin: var(--s-2); width: calc(100% - 2 * var(--s-2));
-          padding: var(--s-2) var(--s-1); border-radius: var(--r-sm);
-          background: var(--panel-solid); border: 1px solid var(--line);
-          box-shadow: var(--shadow); display: flex; flex-direction: column;
-          align-items: center; gap: var(--s-2); }
+  /* ---- mini-map, the column's header (item 58) ---- */
+  .mmap { flex: none; width: 100%; padding: var(--s-3); background: var(--panel-strong);
+          border-bottom: 1px solid var(--line); display: flex; flex-direction: column;
+          align-items: center; }
+  .mm { display: flex; flex-direction: column; gap: var(--s-2); }
   .dots { display: grid; grid-template-columns: repeat(20, var(--s-2)); gap: 1px; }
   .dots i { display: block; width: var(--s-2); height: var(--s-2); background: var(--line); }
   .dots i.done { background: var(--ok); }
   .dots i.err { background: var(--err); }
   .dots i.part { background: var(--ink-3); }
-  .dots i.nd { background: transparent; box-shadow: inset 0 0 0 1px var(--ink-3); }
+  .dots i.nd { background: transparent; box-shadow: inset 0 0 0 1px var(--ink-2); }
   .dots i.act { background: var(--side); box-shadow: 0 0 0 1px var(--side-ring); }
-  .mcap { width: 100%; padding: 0 var(--s-1); display: flex; justify-content: space-between;
+  .mcap { width: 100%; display: flex; justify-content: space-between; align-items: center;
           font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
           line-height: var(--lh-tight); }
+  .mcap .ic { margin-right: -0.375em; }
 
   /* ---- POI rows (items 2, 31, 40, 46, 56) and the index rail (57) ---- */
-  .colbody { flex: 1; display: flex; min-height: 0; border-top: 1px solid var(--line); }
-  .list { flex: 1; min-width: 0; overflow: hidden; }
+  .colbody { flex: 1; display: flex; min-height: 0; position: relative; }
+  .list { flex: 1; min-width: 0; overflow: hidden;
+          mask-image: linear-gradient(var(--ink) calc(100% - var(--s-5)), transparent); }
   .row { width: 100%; height: var(--row-h); display: flex; align-items: center; gap: var(--s-2);
-         padding: 0 var(--s-2); border-bottom: 1px solid var(--line); }
-  .rn { width: 2.2em; flex: none; text-align: right; font-size: var(--t-row);
+         padding: 0 var(--s-3); border-bottom: 1px solid var(--line); }
+  .rn { width: 3ch; flex: none; text-align: right; font-size: var(--t-row);
         font-weight: var(--w-heavy); line-height: var(--lh-tight); }
   .rc { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
   .rb { display: block; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
         overflow: hidden; }
-  .rb i { display: block; height: 100%; background: var(--ink-3); }
+  .rb i, .nb i, .cb i { display: block; height: 100%; background: var(--ink-3);
+                        border-radius: inherit; }
   .rt { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
         line-height: var(--lh-tight); white-space: nowrap; }
   .row.done { background: var(--ok-bg); }
@@ -281,7 +294,7 @@
   .row.err { background: var(--err-bg); box-shadow: inset var(--s-1) 0 0 0 var(--err); }
   .row.err .rn, .row.err .rt { color: var(--err); }
   .row.err .rb i { background: var(--err); }
-  .row.nd .rn, .row.nd .rt { color: var(--ink-3); }
+  .row.nd .rn, .row.nd .rt { color: var(--ink-2); }
   .row.nd .rb { opacity: var(--o-off); }
   /* item 40: amber tint, an edge of --s-1, the number in the amber foreground */
   .row.active { background: var(--active); box-shadow: inset var(--s-1) 0 0 0 var(--active-line); }
@@ -290,29 +303,32 @@
   .row.active.done .rn, .row.active.done .rt { color: var(--ok); }
   .row.active.err { box-shadow: inset var(--s-1) 0 0 0 var(--err); }
   .row.active.err .rn, .row.active.err .rt { color: var(--err); }
-  .rail { width: var(--s-6); flex: none; display: flex; flex-direction: column;
-          justify-content: space-between; align-items: center; padding: var(--s-2) 0;
-          border-left: 1px solid var(--line); background: var(--panel-strong); }
-  .rail span { font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
-               line-height: var(--lh-tight); }
-  .finger { position: absolute; right: 0; width: var(--s-6); height: var(--tap-min);
+  .rail { position: relative; width: var(--s-6); flex: none; border-left: 1px solid var(--line);
+          background: var(--panel-strong); }
+  .rail span { position: absolute; left: 0; right: 0; text-align: center;
+               transform: translateY(-50%); font-size: var(--t-small);
+               font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight); }
+  .finger { position: absolute; left: 0; width: var(--s-6); height: var(--tap-min);
             border-radius: var(--r-md); background: var(--man-soft);
-            box-shadow: inset 0 0 0 1px var(--line); transform: translateY(-50%); z-index: 11; }
-  .bubble { position: absolute; left: calc(100% + var(--s-4)); min-width: var(--tap-min);
+            box-shadow: inset 0 0 0 1px var(--line); transform: translateY(-50%); }
+  .bubble { position: absolute; right: calc(var(--s-6) + var(--s-2)); min-width: var(--tap-min);
             height: var(--tap-min); padding: 0 var(--s-4); border-radius: var(--r-md);
             background: var(--disc); color: var(--disc-glyph); font-size: var(--t-title);
             font-weight: var(--w-heavy); display: flex; align-items: center;
             justify-content: center; box-shadow: var(--shadow-lift);
             transform: translateY(-50%); z-index: 12; }
-  .colnote { padding: var(--s-5) var(--s-3); font-size: var(--t-body);
-             font-weight: var(--w-medium); color: var(--ink-2); }
+  .colbtn { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2);
+            width: 100%; min-height: var(--tap-min); padding: var(--s-3);
+            font-size: var(--t-body); font-weight: var(--w-bold); color: var(--ink);
+            border-bottom: 1px solid var(--line); }
+  .colbtn .ic { margin-right: -0.375em; }
 
   /* ---- head (items 4, 19, 43) ---- */
-  .head { position: relative; display: flex; flex-wrap: wrap; align-items: flex-end;
+  .head { position: relative; display: flex; flex-wrap: wrap; align-items: last baseline;
           gap: var(--s-4); min-height: var(--compass);
           padding-right: calc(var(--compass) + var(--s-2)); }
   .big { font-size: var(--t-num); line-height: var(--lh-tight); font-weight: var(--w-heavy); }
-  .hcol { display: flex; flex-direction: column; gap: var(--s-1); padding-bottom: var(--s-1); }
+  .hcol { display: flex; flex-direction: column; gap: var(--s-1); }
   .plabel { font-size: var(--t-small); letter-spacing: calc(var(--s-1) / 2);
             font-weight: var(--w-bold); color: var(--ink-2); line-height: var(--lh-tight); }
   .cnt { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight);
@@ -322,96 +338,106 @@
   .rest.ok { color: var(--ok); font-weight: var(--w-bold); }
   .compass { position: absolute; right: 0; top: 0; width: var(--compass); height: var(--compass);
              color: var(--ink); z-index: 2; }
-  .compass .ring { fill: none; stroke: var(--ink-3); }
+  .compass .ring { fill: none; stroke: var(--ink-2); }
   .compass text { font-size: var(--t-small); font-weight: var(--w-heavy); fill: currentColor; }
   .compass .needle { fill: var(--side); }
   .compass .needle2 { fill: var(--side-ring); }
   .compass .hub { fill: currentColor; }
 
-  /* ---- type pill and its menu (items 46, 60) ---- */
-  .typewrap { position: relative; }
+  /* ---- type pill and its menu (items 46, 60, 69) ---- */
+  .typewrap { anchor-name: --pill; }
   .typebtn { width: 100%; display: flex; align-items: center; gap: var(--s-3);
-             min-height: var(--tap-min); padding: var(--s-1) var(--s-4) var(--s-1) var(--s-1);
+             min-height: var(--tap-min); padding: var(--s-2) var(--s-4) var(--s-2) var(--s-2);
              background: var(--panel-strong); border: 1px solid var(--panel-edge);
-             border-radius: var(--r-sm); box-shadow: var(--shadow); }
-  .ticon { width: calc(var(--tap-min) - var(--s-3)); height: calc(var(--tap-min) - var(--s-3));
-           flex: none; border-radius: var(--r-sm); display: flex; align-items: center;
-           justify-content: center; background: var(--disc); color: var(--disc-glyph); }
-  .ticon svg { width: 60%; height: 60%; }
+             border-radius: var(--r-md); box-shadow: var(--shadow); }
+  /* the tile holds up to three maneuver icons side by side; one width for every
+     type, radius concentric with the pill's */
+  .ticon { flex: none; height: calc(var(--tap-min) - 2 * var(--s-2));
+           width: calc(3 * var(--t-row) + 2 * var(--s-1) + 2 * var(--s-2));
+           border-radius: calc(var(--r-md) - var(--s-2)); display: flex; align-items: center;
+           justify-content: center; gap: var(--s-1); background: var(--disc);
+           color: var(--disc-glyph); }
+  .typebtn .ticon { align-self: stretch; height: auto; min-height: calc(var(--tap-min) - 2 * var(--s-2)); }
+  .ticon svg { width: var(--t-row); height: var(--t-row); }
   .typebtn.nd { background: transparent; border: 1px dashed var(--ink-3); box-shadow: none; }
-  .typebtn.nd .ticon { background: transparent; box-shadow: inset 0 0 0 1px var(--ink-3);
-                       color: var(--ink-2); }
+  .typebtn.nd .ticon, .typebtn.off .ticon, .ticon.nd { background: transparent;
+                                            box-shadow: inset 0 0 0 1px var(--ink-3);
+                                            color: var(--ink-2); }
   .typebtn.off { opacity: var(--o-off); }
   .tl { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
-  .tl b { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight);
-          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tl small { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
-              line-height: var(--lh-tight); white-space: nowrap; overflow: hidden;
-              text-overflow: ellipsis; }
+  .tl b { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .tl small, .ol small { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--s-1);
+                         row-gap: var(--s-1); font-size: var(--t-small); font-weight: var(--w-bold);
+                         color: var(--ink-2); line-height: var(--lh-tight); }
   .tchg { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--t-small);
           font-weight: var(--w-heavy); color: var(--ink-2); white-space: nowrap; }
-  .pop { position: absolute; left: 0; right: 0; top: calc(100% + var(--s-2)); z-index: 9;
-         background: var(--panel-solid); border-radius: var(--r-md);
-         box-shadow: var(--shadow-lift); padding: var(--s-2); }
+  .tchg .ic { margin-right: -0.25em; }
+  .pop { position: absolute; z-index: 9; left: anchor(--pill left); right: anchor(--pill right);
+         top: calc(anchor(--pill bottom) + var(--s-2)); bottom: var(--s-5); height: fit-content;
+         max-height: stretch; overflow-y: auto;
+         background: var(--panel-solid); border: 1px solid var(--panel-edge);
+         border-radius: var(--r-md); box-shadow: var(--shadow-lift); padding: var(--s-1); }
   .pt { font-size: var(--t-small); letter-spacing: calc(var(--s-1) / 2);
         font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight);
-        padding: var(--s-2) var(--s-3) var(--s-1); }
-  .opt { width: 100%; min-height: calc(var(--tap-min) + var(--s-3)); display: flex;
-         align-items: center; gap: var(--s-3); padding: 0 var(--s-3); border-radius: var(--r-sm); }
-  .opt.on { background: var(--active); }
-  .radio { width: var(--s-5); height: var(--s-5); border-radius: 50%; flex: none;
-           box-shadow: inset 0 0 0 1px var(--ink-3); }
-  .opt.on .radio { box-shadow: inset 0 0 0 var(--s-2) var(--disc); }
-  .ol { display: flex; flex-direction: column; gap: var(--s-1); }
+        padding: var(--s-2) var(--s-1) var(--s-3); }
+  .opt { width: 100%; min-height: var(--tap-min); display: flex; align-items: center;
+         gap: var(--s-3); padding: var(--s-1);
+         border-radius: calc(var(--r-md) - var(--s-1)); }
+  .ol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
   .ol b { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
-  .ol small { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
-              line-height: var(--lh-tight); }
 
   /* ---- "Still needed" card (item 39) ---- */
   .card { background: var(--panel); border: 1px solid var(--panel-edge);
-          border-radius: var(--r-md); box-shadow: var(--shadow);
-          padding: var(--s-3) var(--s-4) var(--s-4); display: flex; flex-direction: column;
-          gap: var(--s-3); }
+          border-radius: var(--r-md); box-shadow: var(--shadow); padding: var(--s-4);
+          display: flex; flex-direction: column; gap: var(--s-3); }
   .sph { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-2); }
+  .sph.sides { margin-top: var(--s-3); }
   .spt { font-size: var(--t-small); letter-spacing: calc(var(--s-1) / 2);
          font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight); }
-  .spn { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-3);
+  .spn { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
          line-height: var(--lh-tight); }
   .need { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); }
   .nc { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; overflow: hidden;
-        padding: var(--s-2) var(--s-3) var(--s-3); border-radius: var(--r-sm);
-        background: var(--panel-strong); }
-  .nh { font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
-        line-height: var(--lh-tight); white-space: nowrap; }
+        padding: var(--s-3); border-radius: var(--r-sm); background: var(--panel-strong); }
+  .nh { display: flex; align-items: center; gap: var(--s-1); font-size: var(--t-small);
+        font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight);
+        white-space: nowrap; }
   .nv { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight);
         white-space: nowrap; }
   .nv small { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
               margin-left: var(--s-1); }
   .nb { display: block; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
         overflow: hidden; }
-  .nb i { display: block; height: 100%; background: var(--ink-3); }
   .nf { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
-        line-height: var(--lh-tight); white-space: nowrap; }
+        line-height: var(--lh-tight); white-space: nowrap; min-height: 1em; }
   .nc.ok .nv { color: var(--ok); }
   .nc.ok .nb i { background: var(--ok); }
   .nc.over .nv { color: var(--warn); }
   .nc.over .nb i { background: var(--warn); }
-  .nc.off { opacity: var(--o-zero); }
+  .nc.off .nv, .nc.off .nb { opacity: var(--o-zero); }
   .sides4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-2); }
   .sv { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-2);
-        min-width: 0; padding: var(--s-2) var(--s-3); border-radius: var(--r-sm);
+        min-width: 0; border-radius: var(--r-sm);
+        padding: calc(var(--s-2) - var(--s-1) / 4) var(--s-3) calc(var(--s-2) + var(--s-1) / 4);
         background: var(--side-soft); }
   .svl { font-size: var(--t-label); font-weight: var(--w-heavy); color: var(--warn);
          line-height: var(--lh-tight); }
   .svv { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
-  .sv.z { opacity: var(--o-zero); }
+  .sv.z .svv { opacity: var(--o-zero); }
 
-  /* ---- discs (items 5, 6, 10, 19, 26, 46): the stage holds the rest cluster;
-     open, it grows to the compass and the chosen disc sits at its centre ---- */
-  .stagezone { flex: 1; display: flex; align-items: center; justify-content: center;
-               min-height: calc(2 * var(--disc-man) + var(--s-2) + var(--tap-min)); }
-  .stagebox { display: flex; flex-direction: column; align-items: center; gap: var(--s-2); }
-  .stage { position: relative; flex: none;
+  /* ---- discs (items 5, 6, 10, 19, 26, 46). The stage holds the rest cluster
+     and reserves a slot under it for the caption, so a caption never moves a
+     disc. The zone centres the stage when it fits; when the open compass is
+     taller than the zone, the stage keeps its distance from the action bar
+     and rises over the card instead (auto margins centre it while it fits,
+     justify-content: flex-end packs it to the bottom once it overflows). ---- */
+  .stagezone { flex: 1; min-height: 0; display: flex; flex-direction: column;
+               align-items: center; justify-content: flex-end; }
+  .stagebox { position: relative; flex: none; margin-top: auto; margin-bottom: auto;
+              padding-bottom: calc(var(--s-4) + 2 * var(--t-body) * var(--lh-body) + 2 * var(--s-1)); }
+  .stagebox:has(.stage.open) {
+    padding-bottom: calc(var(--s-4) + var(--t-body) * var(--lh-body) + 2 * var(--s-1)); }
+  .stage { position: relative;
            width: calc(2 * var(--side-reach) + 2 * var(--s-2) + var(--disc-man));
            height: calc(2 * var(--disc-man)); }
   .stage.open { height: calc(2 * var(--side-reach) + var(--disc-side)); }
@@ -438,8 +464,11 @@
   .side-s { top: calc(50% + var(--side-reach)); }
   .side-w { left: calc(50% - var(--side-reach)); }
   .side-e { left: calc(50% + var(--side-reach)); }
-  .lock { font-size: var(--t-body); font-weight: var(--w-bold); border-radius: var(--r-sm);
-          padding: var(--s-2) var(--s-4); text-align: center; line-height: var(--lh-body); }
+  .lock { position: absolute; left: 50%; top: calc(2 * var(--disc-man) + var(--s-4));
+          transform: translateX(-50%); width: max-content; max-width: 100%;
+          font-size: var(--t-body); font-weight: var(--w-bold); border-radius: var(--r-sm);
+          padding: var(--s-1) var(--s-3); text-align: center; line-height: var(--lh-body); }
+  .stage.open + .lock { top: calc(2 * var(--side-reach) + var(--disc-side) + var(--s-4)); }
   .lock.ok { color: var(--ok); background: var(--ok-bg); }
   .lock.err { color: var(--err); background: var(--err-bg); }
   .lock.info { color: var(--ink-2); background: var(--panel-strong); }
@@ -451,36 +480,38 @@
          border-radius: var(--r-md); box-shadow: var(--shadow); }
   .btn { display: inline-flex; align-items: center; height: var(--tap-min);
          padding: 0 var(--s-4); font-size: var(--t-body); font-weight: var(--w-bold);
-         background: var(--panel-strong); border: 1px solid var(--panel-edge);
+         background: var(--panel-strong); border: 1px solid var(--line);
          border-radius: var(--r-sm); white-space: nowrap; }
   .btn.off { opacity: var(--o-off); }
-  .btn.cancel { margin-left: auto; background: var(--panel-solid); border-color: var(--line); }
+  .btn.cancel { margin-left: auto; }
 
-  /* ---- overlays: dimmed background, dialogs (item 63), the grid (59, 66) ---- */
-  .scrim { position: absolute; inset: 0; z-index: 25; background: var(--ink);
-           opacity: var(--o-locked); }
+  /* ---- overlays: dimmed background, dialogs (item 63), the grid (59, 66).
+     Dialogs snap to whole pixels: the half offsets are rounded. ---- */
+  .scrim { position: absolute; inset: 0; z-index: 25; background: var(--scrim); }
   .scrim.top { z-index: 50; }
-  .dlg { position: absolute; left: 50%; top: 50%; z-index: 51;
+  .dlg { position: absolute; z-index: 51; left: round(50%, 1px); top: round(50%, 1px);
+         translate: round(-50%, 1px) round(-50%, 1px);
          width: calc(100% - 2 * var(--s-6)); max-width: calc(var(--col-narrow) + var(--col-wide));
-         transform: translate(-50%, -50%); background: var(--panel-solid);
+         background: var(--panel-solid); border: 1px solid var(--panel-edge);
          border-radius: var(--r-lg); box-shadow: var(--shadow-lift); padding: var(--s-5);
          display: flex; flex-direction: column; gap: var(--s-4); }
   .dtitle { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
-  .dchip { align-self: flex-start; padding: var(--s-2) var(--s-3); border-radius: var(--r-sm);
-           background: var(--man-soft); font-size: var(--t-label); font-weight: var(--w-heavy);
-           line-height: var(--lh-tight); }
-  .dbody { font-size: var(--t-body); font-weight: var(--w-medium); line-height: var(--lh-body);
-           color: var(--ink-2); }
+  .dchip { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--s-1);
+           padding: var(--s-2) var(--s-3); border-radius: var(--r-sm); background: var(--man-soft);
+           font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .dbody { font-size: var(--t-body); font-weight: var(--w-medium);
+           line-height: calc(var(--t-body) + var(--s-2)); color: var(--ink-2); }
   .dbtns { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); margin-top: var(--s-2); }
   .dbtn { height: calc(var(--tap-min) + var(--s-2)); border-radius: var(--r-sm);
-          font-size: var(--t-label); font-weight: var(--w-heavy); background: var(--bg);
+          font-size: var(--t-label); font-weight: var(--w-heavy); background: var(--man-soft);
           border: 1px solid var(--line); display: inline-flex; align-items: center;
           justify-content: center; }
   .dbtn.danger { background: var(--err); border-color: var(--err); color: var(--disc-glyph); }
   .dbtn.primary { background: var(--disc); border-color: var(--disc); color: var(--disc-glyph); }
-  .sheet { position: absolute; inset: var(--s-5); z-index: 26; background: var(--panel-solid);
-           border-radius: var(--r-lg); box-shadow: var(--shadow-lift); padding: var(--s-4);
-           display: flex; flex-direction: column; gap: var(--s-3); }
+  .sheet { position: absolute; inset: var(--s-4); z-index: 26; background: var(--panel-solid);
+           border: 1px solid var(--panel-edge); border-radius: var(--r-lg);
+           box-shadow: var(--shadow-lift); padding: var(--s-5); display: flex;
+           flex-direction: column; gap: var(--s-3); }
   .shead { display: flex; align-items: center; gap: var(--s-3); }
   .xbtn { width: var(--tap-min); height: var(--tap-min); flex: none; display: flex;
           align-items: center; justify-content: center; border-radius: 50%;
@@ -492,23 +523,23 @@
   .legend { display: flex; gap: var(--s-4); flex-wrap: wrap; font-size: var(--t-small);
             font-weight: var(--w-bold); color: var(--ink-2); }
   .lg { display: inline-flex; align-items: center; gap: var(--s-2); }
+  /* each swatch is a miniature of its tile: same fill, same border */
   .sw { width: var(--t-small); height: var(--t-small); border-radius: calc(var(--r-sm) / 3);
-        display: inline-block; }
-  .sw.done { background: var(--ok-bg); box-shadow: inset 0 0 0 1px var(--ok); }
-  .sw.part { background: var(--panel-solid); box-shadow: inset 0 0 0 1px var(--ink-3); }
-  .sw.err { background: var(--err-bg); box-shadow: inset 0 0 0 1px var(--err); }
-  .sw.nd { background: transparent; box-shadow: inset 0 0 0 1px var(--ink-3); }
+        display: inline-block; background: var(--bg); border: 1px solid var(--line); }
+  .sw.done { background: var(--ok-bg); }
+  .sw.err { background: var(--err-bg); }
+  .sw.nd { background: transparent; border: 1px dashed var(--ink-3); }
   .sw.act { background: var(--active); box-shadow: inset 0 0 0 1px var(--active-line); }
   .grid { flex: 1; min-height: 0; overflow: hidden; display: grid; align-content: start;
           grid-template-columns: repeat(10, minmax(0, 1fr)); grid-auto-rows: var(--row-h);
-          gap: var(--s-2); }
+          gap: var(--s-2);
+          mask-image: linear-gradient(var(--ink) calc(100% - var(--s-5)), transparent); }
   .cell { border-radius: var(--r-sm); background: var(--bg); border: 1px solid var(--line);
           display: flex; flex-direction: column; align-items: center; justify-content: center;
           gap: var(--s-2); }
   .cn { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
   .cb { width: 60%; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
         overflow: hidden; display: block; }
-  .cb i { display: block; height: 100%; background: var(--ink-3); }
   .cell.done { background: var(--ok-bg); }
   .cell.done .cn { color: var(--ok); }
   .cell.done .cb i { background: var(--ok); }
@@ -519,41 +550,54 @@
   .cell.nd .cn { color: var(--ink-2); }
   .cell.active { background: var(--active); box-shadow: inset 0 0 0 var(--s-1) var(--active-line); }
   .cell.active .cn { color: var(--warn); }
+
+  /* ---- item 51: the column is wide from 1200px; the main area follows the
+     shape of the app: side by side when wider than tall, stacked when taller.
+     These rules come last so they win over the component rules above. ---- */
+  @container (min-width: 1200px) {
+    .body { grid-template-columns: var(--col-wide) minmax(0, 1fr); }
+  }
+  @container (orientation: landscape) {
+    .body { grid-template-areas: "col main" "sum main"; }
+    .main { flex-direction: row; }
+    .mleft { flex: 1; }
+    .mright { flex: none; width: calc(2 * var(--side-reach) + 2 * var(--s-2) + var(--disc-man)); }
+    .head { padding-right: 0; }
+    /* beside the discs the card is narrower: tile captions may wrap, and every
+       tile reserves two lines, so the card is the same height in every frame */
+    .nf { white-space: normal; min-height: 2em; }
+  }
   /* APP END */
 </style>
 </head>
 <body>
 
 <svg class="sprite" aria-hidden="true">
-  <!-- Lucide arrows (since v0.4) and x; stroke inherits the disc colour -->
-  <symbol id="i-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
-  <symbol id="i-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
-  <symbol id="i-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <!-- Lucide icons (CLAUDE.md rule 10, screens.md item 69): path data verbatim
+       from the Lucide source, stroke-width 2.6, colour from currentColor -->
+  <symbol id="i-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20v-7a4 4 0 0 0-4-4H4"/><path d="M9 14 4 9l5-5"/></symbol>
+  <symbol id="i-straight" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6L12 2L16 6"/><path d="M12 2V22"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></symbol>
+  <symbol id="i-ban" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.929 4.929 19.07 19.071"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
   <symbol id="i-chev-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-chev-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></symbol>
   <symbol id="i-chev-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
-  <!-- Type icons (item 60): one small arrow per allowed maneuver, side by
-       side and apart, so they never form a cross. Not drivable: Lucide ban. -->
-  <symbol id="t-int" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12H2M4.5 9.5 2 12l2.5 2.5"/><path d="M12 16V7M9.5 9.5 12 7l2.5 2.5"/><path d="M17 12h5M19.5 9.5 22 12l-2.5 2.5"/></symbol>
-  <symbol id="t-nost" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12H3M5.5 9.5 3 12l2.5 2.5"/><path d="M15 12h6M18.5 9.5 21 12l-2.5 2.5"/></symbol>
-  <symbol id="t-nol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 16V7M5.5 9.5 8 7l2.5 2.5"/><path d="M15 12h6M18.5 9.5 21 12l-2.5 2.5"/></symbol>
-  <symbol id="t-nor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12H3M5.5 9.5 3 12l2.5 2.5"/><path d="M16 16V7M13.5 9.5 16 7l2.5 2.5"/></symbol>
-  <symbol id="t-str" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M7 10l5-5 5 5"/></symbol>
-  <symbol id="t-nd" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></symbol>
 </svg>
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.18 — 2026-10-06.</b> Redrawn from scratch on the canon:
-     every value inside the frames is a token of <b>_tokens.css v0.6</b> (size C,
-     screens.md item 67) and every rule follows <b>screens.md v0.28</b>. The board is
-     rubber (item 54): presets <b>800 × 1333</b> (the user's tablet in portrait, the
-     default), <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and
+  <p class="meta"><b>v0.19 — 2026-10-09.</b> Pixel audit fixes and the user's review:
+     every value inside the frames is a token of <b>_tokens.css v0.7</b> (size C,
+     screens.md item 67) and every rule follows <b>screens.md v0.29</b>. Icons are
+     Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
+     presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
+     <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and
      <b>1000 × 600</b> (landscape minimum); every frame also drags at its bottom-right
-     corner. The POI column switches at 1000px (item 51). Fourteen states, A to N.
-     <b>Open question at 1000 × 600:</b> with the wide column, the main area keeps only
-     204px beside the 382px disc cluster for the number, the type pill and the card,
-     which need about 330px; that frame shows the conflict as drawn, for a decision.</p>
+     corner. The POI column is wide from 1200px and the main area follows the frame's
+     shape: side by side when wider than tall, stacked when taller (item 51).
+     Fourteen states, A to N.</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>
@@ -582,25 +626,29 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2" stroke-linecap="round"><circle cx="48" cy="48" r="34"/><path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/></g><text x="48" y="12" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 20 57 55 48 49 39 55Z"/><path class="needle2" d="M48 20v29l-9 6Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2"><circle cx="48" cy="48" r="40"/><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><text x="48" y="26" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 30 56 58 48 53 40 58Z"/><path class="needle2" d="M48 30v23l-8 5Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#t-int"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · ← 28 · ↑ 14 · → 28</small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#i-left"/></svg><svg><use href="#i-straight"/></svg><svg><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28</span> · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14</span> · <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh">← Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
-        <div class="nc"><span class="nh">↑ Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
-        <div class="nc"><span class="nh">→ Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
       </div>
-      <div class="sph"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
+    </div>
+    <div class="mright">
     <div class="stagezone"><div class="stagebox"><div class="stage">
       <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
-      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-up"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
       <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
     </div></div></div>
     <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button></div>
+    </div>
   </div>
   <div class="summary" data-summary></div>
 </div>
@@ -609,19 +657,19 @@
         <p class="caption"><b>A</b> · Default</p>
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
-        <li><b>1</b> City name as large as the route code, bold, ink; route picker beside it.</li>
+        <li><b>1</b> City name as large as the route code, bold, ink; route picker beside it. Chevrons are Lucide (item 69).</li>
         <li><b>16</b> Sync status always visible, with a timestamp; it is a tap target.</li>
-        <li><b>2, 56</b> POI column on the left: number, bar, "N to go"; rows 66px (--row-h).</li>
-        <li><b>58</b> Mini-map at the top of the column: one square per POI, coloured by state, "N/197 done", "Open ›".</li>
+        <li><b>2, 56</b> POI column on the left: number, bar, "N to go"; rows 66px (--row-h). A whole row sits at the top edge, the cut row at the bottom fades (item 56).</li>
+        <li><b>58</b> Mini-map as the column's header (item 58): one square per POI, coloured by state, "N/197 done", "Open" with a chevron; a hairline under it.</li>
         <li><b>57</b> Index rail along the column's right edge: 1, 40, 80, 120, 160, 197.</li>
         <li><b>40</b> Active row: amber tint, edge of --s-1, number in the amber foreground.</li>
         <li><b>4</b> Big POI number, "41 of 70" beside it, "29 to go" under the counter.</li>
         <li><b>19</b> Compass at the top right of the main area.</li>
-        <li><b>60</b> Type pill under the number: icon, name, split, "Change".</li>
-        <li><b>39</b> "Still needed" card: per maneuver "N more", bar, "N of T"; "Sides so far" with E at zero faded.</li>
-        <li><b>5</b> Three discs in the middle of the free space, Straight higher.</li>
+        <li><b>60</b> Type pill under the number (item 60): a tile with the allowed maneuvers as Lucide icons, name, split line with the same icons, "Change".</li>
+        <li><b>39</b> "Still needed" card: per maneuver its Lucide icon (item 69), "N more", bar, "N of T"; "Sides so far" with E at zero faded.</li>
+        <li><b>5</b> Three discs in the middle of the free space, Straight higher; Lucide corner-up-left, move-up, corner-up-right (item 69).</li>
         <li><b>9</b> "Undo last" live; "History" beside it.</li>
-        <li><b>3</b> Bottom summary under the main area (narrow layout); error count only when non-zero.</li>
+        <li><b>3</b> Bottom summary under the main area (portrait) or the column (landscape); error count only when non-zero. In landscape the discs stand beside the number and the card (item 51).</li>
         <li><b>53</b> Bottom padding adds env(safe-area-inset-bottom).</li>
         <li><b>67, 68</b> Size C; every value inside the frame is a token.</li>
       </ul></aside>
@@ -639,22 +687,25 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2" stroke-linecap="round"><circle cx="48" cy="48" r="34"/><path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/></g><text x="48" y="12" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 20 57 55 48 49 39 55Z"/><path class="needle2" d="M48 20v29l-9 6Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2"><circle cx="48" cy="48" r="40"/><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><text x="48" y="26" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 30 56 58 48 53 40 58Z"/><path class="needle2" d="M48 30v23l-8 5Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#t-int"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · ← 28 · ↑ 14 · → 28</small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#i-left"/></svg><svg><use href="#i-straight"/></svg><svg><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28</span> · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14</span> · <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh">← Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
-        <div class="nc"><span class="nh">↑ Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
-        <div class="nc"><span class="nh">→ Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
       </div>
-      <div class="sph"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
+    </div>
+    <div class="mright">
     <div class="stagezone"><div class="stagebox"><div class="stage open">
       <button class="disc l on" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
-      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-up"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
       <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
       <button class="side side-n" type="button" aria-label="North">N</button>
       <button class="side side-s" type="button" aria-label="South">S</button>
@@ -662,6 +713,7 @@
       <button class="side side-e" type="button" aria-label="East">E</button>
     </div></div></div>
     <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><button class="btn cancel" type="button">Cancel</button></div>
+    </div>
   </div>
   <div class="summary" data-summary></div>
 </div>
@@ -671,7 +723,7 @@
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>6</b> Left tapped: the disc slides to the centre of the disc area, the other two are out of the way, N above, S below, W left, E right.</li>
-        <li><b>6</b> Sides sit --side-reach from the centre; no side reaches the screen edge or the POI column.</li>
+        <li><b>6</b> Sides sit --side-reach from the centre; no side reaches the screen edge, the POI column or comes within 8px of the action bar. On a short screen (720 × 1000) the compass rises over the card (item 6).</li>
         <li><b>19</b> Minimum gap between any two discs is --s-2.</li>
         <li><b>8</b> "Cancel" visible only while the compass is open; tapping Left again also closes it.</li>
         <li><b>7, 62</b> A tap on a side records the pass (chime, vibration, bounce, toast): motion lives in the prototype, not here.</li>
@@ -691,25 +743,29 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="138"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2" stroke-linecap="round"><circle cx="48" cy="48" r="34"/><path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/></g><text x="48" y="12" text-anchor="middle">N</text><g transform="rotate(75 48 48)"><path class="needle" d="M48 20 57 55 48 49 39 55Z"/><path class="needle2" d="M48 20v29l-9 6Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2"><circle cx="48" cy="48" r="40"/><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><text x="48" y="26" text-anchor="middle">N</text><g transform="rotate(75 48 48)"><path class="needle" d="M48 30 56 58 48 53 40 58Z"/><path class="needle2" d="M48 30v23l-8 5Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
     <section class="head"><div class="big">138</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">30 of 70</div><div class="rest">40 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#t-nost"/></svg></span><span class="tl"><b>No straight</b><small>70 passes · ← 35 · → 35</small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#i-left"/></svg><svg><use href="#i-right"/></svg></span><span class="tl"><b>No straight</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>35</span> · <span class="iw"><svg class="ic"><use href="#i-right"/></svg>35</span></small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh">← Left</span><span class="nv">20<small>more</small></span><span class="nb"><i style="width: 43%"></i></span><span class="nf">15 of 35</span></div>
-        <div class="nc off"><span class="nh">↑ Straight</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf">not at this POI</span></div>
-        <div class="nc"><span class="nh">→ Right</span><span class="nv">20<small>more</small></span><span class="nb"><i style="width: 43%"></i></span><span class="nf">15 of 35</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">20<small>more</small></span><span class="nb"><i style="width: 43%"></i></span><span class="nf">15 of 35</span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf">not at this POI</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">20<small>more</small></span><span class="nb"><i style="width: 43%"></i></span><span class="nf">15 of 35</span></div>
       </div>
-      <div class="sph"><span class="spt">SIDES SO FAR</span><span class="spn">30 passes</span></div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">30 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">12</span></div><div class="sv"><span class="svl">S</span><span class="svv">9</span></div><div class="sv"><span class="svl">W</span><span class="svv">6</span></div><div class="sv"><span class="svl">E</span><span class="svv">3</span></div></div>
     </div>
+    </div>
+    <div class="mright">
     <div class="stagezone"><div class="stagebox"><div class="stage">
       <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
-      <button class="disc st locked" type="button" aria-label="Straight, not at this POI"><svg><use href="#i-up"/></svg></button>
+      <button class="disc st locked" type="button" aria-label="Straight, not at this POI"><svg><use href="#i-straight"/></svg></button>
       <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
     </div><div class="lock info">No straight at this POI</div></div></div>
     <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button></div>
+    </div>
   </div>
   <div class="summary" data-summary></div>
 </div>
@@ -722,7 +778,7 @@
         <li><b>26</b> The Straight disc keeps its colour and is dimmed (--o-locked), never recoloured or hidden.</li>
         <li><b>27, 5</b> The caption "No straight at this POI" sits under the discs and never moves them.</li>
         <li><b>39</b> The Straight tile shows a dash and "not at this POI", faded.</li>
-        <li><b>60</b> The pill icon shows the allowed maneuvers only: two arrows, apart.</li>
+        <li><b>60</b> The pill tile shows the allowed maneuvers only: Lucide corner-up-left and corner-up-right, apart (items 60, 69).</li>
       </ul></aside>
     </section>
 
@@ -738,25 +794,29 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="124"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2" stroke-linecap="round"><circle cx="48" cy="48" r="34"/><path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/></g><text x="48" y="12" text-anchor="middle">N</text><g transform="rotate(20 48 48)"><path class="needle" d="M48 20 57 55 48 49 39 55Z"/><path class="needle2" d="M48 20v29l-9 6Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2"><circle cx="48" cy="48" r="40"/><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><text x="48" y="26" text-anchor="middle">N</text><g transform="rotate(20 48 48)"><path class="needle" d="M48 30 56 58 48 53 40 58Z"/><path class="needle2" d="M48 30v23l-8 5Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
     <section class="head"><div class="big">124</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">68 of 70</div><div class="rest">2 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#t-int"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · ← 28 · ↑ 14 · → 28</small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#i-left"/></svg><svg><use href="#i-straight"/></svg><svg><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28</span> · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14</span> · <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc ok"><span class="nh">← Left</span><span class="nv">Done</span><span class="nb"><i style="width: 100%"></i></span><span class="nf">28 of 28</span></div>
-        <div class="nc"><span class="nh">↑ Straight</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 93%"></i></span><span class="nf">13 of 14</span></div>
-        <div class="nc"><span class="nh">→ Right</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 96%"></i></span><span class="nf">27 of 28</span></div>
+        <div class="nc ok"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">Done</span><span class="nb"><i style="width: 100%"></i></span><span class="nf">28 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 93%"></i></span><span class="nf">13 of 14</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 96%"></i></span><span class="nf">27 of 28</span></div>
       </div>
-      <div class="sph"><span class="spt">SIDES SO FAR</span><span class="spn">68 passes</span></div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">68 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">24</span></div><div class="sv"><span class="svl">S</span><span class="svv">20</span></div><div class="sv"><span class="svl">W</span><span class="svv">14</span></div><div class="sv"><span class="svl">E</span><span class="svv">10</span></div></div>
     </div>
+    </div>
+    <div class="mright">
     <div class="stagezone"><div class="stagebox"><div class="stage">
       <button class="disc l locked" type="button" aria-label="Left, done"><svg><use href="#i-left"/></svg></button>
-      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-up"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
       <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
     </div><div class="lock info">Left is done: 28 of 28</div></div></div>
     <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button></div>
+    </div>
   </div>
   <div class="summary" data-summary></div>
 </div>
@@ -785,25 +845,29 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="135"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2" stroke-linecap="round"><circle cx="48" cy="48" r="34"/><path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/></g><text x="48" y="12" text-anchor="middle">N</text><g transform="rotate(130 48 48)"><path class="needle" d="M48 20 57 55 48 49 39 55Z"/><path class="needle2" d="M48 20v29l-9 6Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2"><circle cx="48" cy="48" r="40"/><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><text x="48" y="26" text-anchor="middle">N</text><g transform="rotate(130 48 48)"><path class="needle" d="M48 30 56 58 48 53 40 58Z"/><path class="needle2" d="M48 30v23l-8 5Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
     <section class="head"><div class="big">135</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">70 of 70</div><div class="rest ok">Done</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#t-int"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · ← 28 · ↑ 14 · → 28</small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#i-left"/></svg><svg><use href="#i-straight"/></svg><svg><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28</span> · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14</span> · <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc ok"><span class="nh">← Left</span><span class="nv">Done</span><span class="nb"><i style="width: 100%"></i></span><span class="nf">28 of 28</span></div>
-        <div class="nc ok"><span class="nh">↑ Straight</span><span class="nv">Done</span><span class="nb"><i style="width: 100%"></i></span><span class="nf">14 of 14</span></div>
-        <div class="nc ok"><span class="nh">→ Right</span><span class="nv">Done</span><span class="nb"><i style="width: 100%"></i></span><span class="nf">28 of 28</span></div>
+        <div class="nc ok"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">Done</span><span class="nb"><i style="width: 100%"></i></span><span class="nf">28 of 28</span></div>
+        <div class="nc ok"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">Done</span><span class="nb"><i style="width: 100%"></i></span><span class="nf">14 of 14</span></div>
+        <div class="nc ok"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">Done</span><span class="nb"><i style="width: 100%"></i></span><span class="nf">28 of 28</span></div>
       </div>
-      <div class="sph"><span class="spt">SIDES SO FAR</span><span class="spn">70 passes</span></div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">70 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">25</span></div><div class="sv"><span class="svl">S</span><span class="svv">21</span></div><div class="sv"><span class="svl">W</span><span class="svv">14</span></div><div class="sv"><span class="svl">E</span><span class="svv">10</span></div></div>
     </div>
+    </div>
+    <div class="mright">
     <div class="stagezone"><div class="stagebox"><div class="stage">
       <button class="disc l locked" type="button" aria-label="Left, locked"><svg><use href="#i-left"/></svg></button>
-      <button class="disc st locked" type="button" aria-label="Straight, locked"><svg><use href="#i-up"/></svg></button>
+      <button class="disc st locked" type="button" aria-label="Straight, locked"><svg><use href="#i-straight"/></svg></button>
       <button class="disc r locked" type="button" aria-label="Right, locked"><svg><use href="#i-right"/></svg></button>
     </div><div class="lock ok">This POI is done: 70 of 70</div></div></div>
     <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button></div>
+    </div>
   </div>
   <div class="summary" data-summary></div>
 </div>
@@ -832,25 +896,29 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="57"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2" stroke-linecap="round"><circle cx="48" cy="48" r="34"/><path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/></g><text x="48" y="12" text-anchor="middle">N</text><g transform="rotate(310 48 48)"><path class="needle" d="M48 20 57 55 48 49 39 55Z"/><path class="needle2" d="M48 20v29l-9 6Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2"><circle cx="48" cy="48" r="40"/><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><text x="48" y="26" text-anchor="middle">N</text><g transform="rotate(310 48 48)"><path class="needle" d="M48 30 56 58 48 53 40 58Z"/><path class="needle2" d="M48 30v23l-8 5Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
     <section class="head"><div class="big">57</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">46 of 70</div><div class="rest">Sides 46 · maneuvers 44</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#t-int"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · ← 28 · ↑ 14 · → 28</small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#i-left"/></svg><svg><use href="#i-straight"/></svg><svg><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28</span> · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14</span> · <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh">← Left</span><span class="nv">10<small>more</small></span><span class="nb"><i style="width: 64%"></i></span><span class="nf">18 of 28</span></div>
-        <div class="nc"><span class="nh">↑ Straight</span><span class="nv">5<small>more</small></span><span class="nb"><i style="width: 64%"></i></span><span class="nf">9 of 14</span></div>
-        <div class="nc"><span class="nh">→ Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">10<small>more</small></span><span class="nb"><i style="width: 64%"></i></span><span class="nf">18 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">5<small>more</small></span><span class="nb"><i style="width: 64%"></i></span><span class="nf">9 of 14</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
       </div>
-      <div class="sph"><span class="spt">SIDES SO FAR</span><span class="spn">46 passes</span></div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">46 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">18</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">9</span></div><div class="sv"><span class="svl">E</span><span class="svv">5</span></div></div>
     </div>
+    </div>
+    <div class="mright">
     <div class="stagezone"><div class="stagebox"><div class="stage">
       <button class="disc l locked" type="button" aria-label="Left, locked"><svg><use href="#i-left"/></svg></button>
-      <button class="disc st locked" type="button" aria-label="Straight, locked"><svg><use href="#i-up"/></svg></button>
+      <button class="disc st locked" type="button" aria-label="Straight, locked"><svg><use href="#i-straight"/></svg></button>
       <button class="disc r locked" type="button" aria-label="Right, locked"><svg><use href="#i-right"/></svg></button>
     </div><div class="lock err">Spreadsheet error: sides and maneuvers disagree</div></div></div>
     <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button></div>
+    </div>
   </div>
   <div class="summary" data-summary></div>
 </div>
@@ -880,25 +948,29 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="168"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2" stroke-linecap="round"><circle cx="48" cy="48" r="34"/><path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/></g><text x="48" y="12" text-anchor="middle">N</text><g transform="rotate(200 48 48)"><path class="needle" d="M48 20 57 55 48 49 39 55Z"/><path class="needle2" d="M48 20v29l-9 6Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2"><circle cx="48" cy="48" r="40"/><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><text x="48" y="26" text-anchor="middle">N</text><g transform="rotate(200 48 48)"><path class="needle" d="M48 30 56 58 48 53 40 58Z"/><path class="needle2" d="M48 30v23l-8 5Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
     <section class="head"><div class="big">168</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">Not drivable</div><div class="rest">Not counted</div></div></section>
-    <div class="typewrap"><button class="typebtn nd" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#t-nd"/></svg></span><span class="tl"><b>Not drivable</b><small>Not counted</small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn nd" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#i-ban"/></svg></span><span class="tl"><b>Not drivable</b><small>Not counted</small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc off"><span class="nh">← Left</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf">Not counted</span></div>
-        <div class="nc off"><span class="nh">↑ Straight</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf">Not counted</span></div>
-        <div class="nc off"><span class="nh">→ Right</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf">Not counted</span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf"></span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf"></span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf"></span></div>
       </div>
-      <div class="sph"><span class="spt">SIDES SO FAR</span><span class="spn">0 passes</span></div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">0 passes</span></div>
       <div class="sides4"><div class="sv z"><span class="svl">N</span><span class="svv">0</span></div><div class="sv z"><span class="svl">S</span><span class="svv">0</span></div><div class="sv z"><span class="svl">W</span><span class="svv">0</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
+    </div>
+    <div class="mright">
     <div class="stagezone"><div class="stagebox"><div class="stage">
       <button class="disc l locked" type="button" aria-label="Left, locked"><svg><use href="#i-left"/></svg></button>
-      <button class="disc st locked" type="button" aria-label="Straight, locked"><svg><use href="#i-up"/></svg></button>
+      <button class="disc st locked" type="button" aria-label="Straight, locked"><svg><use href="#i-straight"/></svg></button>
       <button class="disc r locked" type="button" aria-label="Right, locked"><svg><use href="#i-right"/></svg></button>
     </div><div class="lock info">This POI is not drivable</div></div></div>
     <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button></div>
+    </div>
   </div>
   <div class="summary" data-summary></div>
 </div>
@@ -910,7 +982,7 @@
         <li><b>46</b> A not-drivable POI has its discs locked at once, with a caption, and is never counted among POIs "to go".</li>
         <li><b>46</b> It must read as neither done nor in error: quiet style, no green, no red.</li>
         <li><b>4</b> The counter reads "Not drivable", the line under it "Not counted".</li>
-        <li><b>60</b> The pill takes its own quiet style; the icon is a circle with a slash.</li>
+        <li><b>60</b> The pill takes its own quiet style; the tile holds Lucide ban (item 69).</li>
         <li><b>2, 58</b> The row and the mini-map square have a state of their own.</li>
         <li><b>64</b> The type can be changed back at any time from the pill.</li>
       </ul></aside>
@@ -928,35 +1000,39 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2" stroke-linecap="round"><circle cx="48" cy="48" r="34"/><path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/></g><text x="48" y="12" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 20 57 55 48 49 39 55Z"/><path class="needle2" d="M48 20v29l-9 6Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2"><circle cx="48" cy="48" r="40"/><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><text x="48" y="26" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 30 56 58 48 53 40 58Z"/><path class="needle2" d="M48 30v23l-8 5Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to close"><span class="ticon"><svg><use href="#t-int"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · ← 28 · ↑ 14 · → 28</small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to close"><span class="ticon"><svg><use href="#i-left"/></svg><svg><use href="#i-straight"/></svg><svg><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28</span> · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14</span> · <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-up"/></svg></span></button>
       <div class="pop" role="dialog" aria-label="POI type">
         <div class="pt">POI 136 TYPE</div>
-        <button class="opt on" type="button"><span class="radio"></span><span class="ol"><b>Intersection</b><small>70 passes · ← 28 · ↑ 14 · → 28</small></span></button>
-        <button class="opt" type="button"><span class="radio"></span><span class="ol"><b>No straight</b><small>70 passes · ← 35 · → 35</small></span></button>
-        <button class="opt" type="button"><span class="radio"></span><span class="ol"><b>No left</b><small>70 passes · ↑ 14 · → 56</small></span></button>
-        <button class="opt" type="button"><span class="radio"></span><span class="ol"><b>No right</b><small>70 passes · ← 56 · ↑ 14</small></span></button>
-        <button class="opt" type="button"><span class="radio"></span><span class="ol"><b>Straight only</b><small>40 passes · ↑ 40</small></span></button>
-        <button class="opt" type="button"><span class="radio"></span><span class="ol"><b>Not drivable</b><small>Not counted</small></span></button>
+        <button class="opt on" type="button"><span class="ticon"><svg><use href="#i-left"/></svg><svg><use href="#i-straight"/></svg><svg><use href="#i-right"/></svg></span><span class="ol"><b>Intersection</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28</span> · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14</span> · <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><svg class="chk"><use href="#i-check"/></svg></button>
+        <button class="opt" type="button"><span class="ticon"><svg><use href="#i-left"/></svg><svg><use href="#i-right"/></svg></span><span class="ol"><b>No straight</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>35</span> · <span class="iw"><svg class="ic"><use href="#i-right"/></svg>35</span></small></span><svg class="chk"><use href="#i-check"/></svg></button>
+        <button class="opt" type="button"><span class="ticon"><svg><use href="#i-straight"/></svg><svg><use href="#i-right"/></svg></span><span class="ol"><b>No left</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14</span> · <span class="iw"><svg class="ic"><use href="#i-right"/></svg>56</span></small></span><svg class="chk"><use href="#i-check"/></svg></button>
+        <button class="opt" type="button"><span class="ticon"><svg><use href="#i-left"/></svg><svg><use href="#i-straight"/></svg></span><span class="ol"><b>No right</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>56</span> · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14</span></small></span><svg class="chk"><use href="#i-check"/></svg></button>
+        <button class="opt" type="button"><span class="ticon"><svg><use href="#i-straight"/></svg></span><span class="ol"><b>Straight only</b><small>40 passes · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>40</span></small></span><svg class="chk"><use href="#i-check"/></svg></button>
+        <button class="opt" type="button"><span class="ticon nd"><svg><use href="#i-ban"/></svg></span><span class="ol"><b>Not drivable</b><small>Not counted</small></span><svg class="chk"><use href="#i-check"/></svg></button>
       </div>
     </div>
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh">← Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
-        <div class="nc"><span class="nh">↑ Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
-        <div class="nc"><span class="nh">→ Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
       </div>
-      <div class="sph"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
+    </div>
+    <div class="mright">
     <div class="stagezone"><div class="stagebox"><div class="stage">
       <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
-      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-up"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
       <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
     </div></div></div>
     <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button></div>
+    </div>
   </div>
   <div class="summary" data-summary></div>
 </div>
@@ -965,7 +1041,7 @@
         <p class="caption"><b>H</b> · Type menu</p>
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
-        <li><b>60</b> Tapping the pill opens a menu with the six types, each with its split, the current one marked.</li>
+        <li><b>60</b> Tapping the pill opens a menu with the six types, each with its icon tile and split, the current one marked with a check (item 60); the pill's chevron points up while it is open.</li>
         <li><b>46</b> Intersection 28/14/28 · No straight 35/35 · No left 14/56 · No right 56/14 · Straight only 40 · Not drivable, not counted.</li>
         <li><b>60</b> Two taps are deliberate: a stray touch cannot change a type. The menu changes the active POI only.</li>
         <li><b>66</b> A menu closes by a choice or a tap outside; no ✕.</li>
@@ -985,25 +1061,29 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="122"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2" stroke-linecap="round"><circle cx="48" cy="48" r="34"/><path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/></g><text x="48" y="12" text-anchor="middle">N</text><g transform="rotate(355 48 48)"><path class="needle" d="M48 20 57 55 48 49 39 55Z"/><path class="needle2" d="M48 20v29l-9 6Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2"><circle cx="48" cy="48" r="40"/><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><text x="48" y="26" text-anchor="middle">N</text><g transform="rotate(355 48 48)"><path class="needle" d="M48 30 56 58 48 53 40 58Z"/><path class="needle2" d="M48 30v23l-8 5Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
     <section class="head"><div class="big">122</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">66 of 70</div><div class="rest">4 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#t-int"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · ← 28 · ↑ 14 · → 28</small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#i-left"/></svg><svg><use href="#i-straight"/></svg><svg><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28</span> · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14</span> · <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh">← Left</span><span class="nv">2<small>more</small></span><span class="nb"><i style="width: 93%"></i></span><span class="nf">26 of 28</span></div>
-        <div class="nc"><span class="nh">↑ Straight</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 93%"></i></span><span class="nf">13 of 14</span></div>
-        <div class="nc"><span class="nh">→ Right</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 96%"></i></span><span class="nf">27 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">2<small>more</small></span><span class="nb"><i style="width: 93%"></i></span><span class="nf">26 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 93%"></i></span><span class="nf">13 of 14</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 96%"></i></span><span class="nf">27 of 28</span></div>
       </div>
-      <div class="sph"><span class="spt">SIDES SO FAR</span><span class="spn">66 passes</span></div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">66 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">24</span></div><div class="sv"><span class="svl">S</span><span class="svv">19</span></div><div class="sv"><span class="svl">W</span><span class="svv">13</span></div><div class="sv"><span class="svl">E</span><span class="svv">10</span></div></div>
     </div>
+    </div>
+    <div class="mright">
     <div class="stagezone"><div class="stagebox"><div class="stage">
       <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
-      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-up"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
       <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
     </div></div></div>
     <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button></div>
+    </div>
   </div>
   <div class="summary" data-summary></div>
 </div>
@@ -1039,25 +1119,29 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2" stroke-linecap="round"><circle cx="48" cy="48" r="34"/><path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/></g><text x="48" y="12" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 20 57 55 48 49 39 55Z"/><path class="needle2" d="M48 20v29l-9 6Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2"><circle cx="48" cy="48" r="40"/><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><text x="48" y="26" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 30 56 58 48 53 40 58Z"/><path class="needle2" d="M48 30v23l-8 5Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#t-int"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · ← 28 · ↑ 14 · → 28</small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#i-left"/></svg><svg><use href="#i-straight"/></svg><svg><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28</span> · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14</span> · <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh">← Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
-        <div class="nc"><span class="nh">↑ Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
-        <div class="nc"><span class="nh">→ Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
       </div>
-      <div class="sph"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
+    </div>
+    <div class="mright">
     <div class="stagezone"><div class="stagebox"><div class="stage">
       <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
-      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-up"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
       <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
     </div></div></div>
     <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button></div>
+    </div>
   </div>
   <div class="summary" data-summary></div>
 </div>
@@ -1065,7 +1149,7 @@
 <button class="scrim top" type="button" aria-label="Cancel"></button>
 <div class="dlg" role="alertdialog" aria-modal="true" aria-label="Remove the last pass?">
   <div class="dtitle">Remove the last pass?</div>
-  <div class="dchip">POI 136 · ← Left from South · 21:40</div>
+  <div class="dchip">POI 136 · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>Left from South</span> · 21:40</div>
   <div class="dbody">It is already in the sheet, so a removal is sent with the next sync.</div>
   <div class="dbtns"><button class="dbtn" type="button">Cancel</button><button class="dbtn danger" type="button">Remove</button></div>
 </div>
@@ -1093,25 +1177,29 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2" stroke-linecap="round"><circle cx="48" cy="48" r="34"/><path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/></g><text x="48" y="12" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 20 57 55 48 49 39 55Z"/><path class="needle2" d="M48 20v29l-9 6Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2"><circle cx="48" cy="48" r="40"/><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><text x="48" y="26" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 30 56 58 48 53 40 58Z"/><path class="needle2" d="M48 30v23l-8 5Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#t-int"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · ← 28 · ↑ 14 · → 28</small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#i-left"/></svg><svg><use href="#i-straight"/></svg><svg><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28</span> · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14</span> · <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh">← Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
-        <div class="nc"><span class="nh">↑ Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
-        <div class="nc"><span class="nh">→ Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
       </div>
-      <div class="sph"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
+    </div>
+    <div class="mright">
     <div class="stagezone"><div class="stagebox"><div class="stage">
       <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
-      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-up"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
       <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
     </div></div></div>
     <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button></div>
+    </div>
   </div>
   <div class="summary" data-summary></div>
 </div>
@@ -1132,11 +1220,11 @@
         <p class="caption"><b>K</b> · Grid of all POIs</p>
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
-        <li><b>59</b> Tapping the mini-map opens a grid of all POIs over the whole screen, ten to a row, coloured like the mini-map, with a legend.</li>
+        <li><b>59</b> Tapping the mini-map (item 58) opens a grid of all POIs over the whole screen, ten to a row, coloured like the mini-map, with a legend whose swatches are miniatures of the tiles.</li>
         <li><b>59</b> Tapping a tile makes that POI active, closes the grid and scrolls the column to it.</li>
         <li><b>66</b> Round ✕ in the top-left corner, as large as any tap target; no text "Close".</li>
         <li><b>66, 59</b> A tap on the dimmed background, or the Android back gesture, closes it and changes nothing.</li>
-        <li><b>58, 22</b> Works for any POI count; the grid scrolls, centred on the active POI.</li>
+        <li><b>58, 22</b> Works for any POI count; the grid scrolls, a whole tile row under the legend, the cut row faded at the bottom (item 59).</li>
       </ul></aside>
     </section>
 
@@ -1146,42 +1234,45 @@
         <div class="frame"><div class="app" data-state="L"><div class="scr">
 <header class="topbar">
   <span class="city">Vienna</span>
-  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-up"/></svg></button></span>
     <div class="rmenu" role="listbox" aria-label="Routes">
-      <button class="ritem" type="button"><b>R20890-054</b><small>197 of 197 done</small></button>
-      <button class="ritem" type="button"><b>R20890-055</b><small>197 of 197 done</small></button>
-      <button class="ritem" type="button"><b>R20890-056</b><small>141 of 197 done</small></button>
-      <button class="ritem" type="button"><b>R20890-057</b><small>88 of 197 done</small></button>
-      <button class="ritem on" type="button"><b>R20890-058</b><small data-donecount></small></button>
-      <button class="ritem" type="button"><b>R20890-059</b><small>0 of 197 done</small></button>
-      <button class="ritem" type="button"><b>R20890-060</b><small>0 of 197 done</small></button>
-      <button class="ritem" type="button"><b>R20890-061</b><small>0 of 197 done</small></button>
+      <button class="ritem" type="button"><b>R20890-054</b><small>197 of 197 done</small><svg class="chk"><use href="#i-check"/></svg></button>
+      <button class="ritem" type="button"><b>R20890-055</b><small>197 of 197 done</small><svg class="chk"><use href="#i-check"/></svg></button>
+      <button class="ritem" type="button"><b>R20890-056</b><small>141 of 197 done</small><svg class="chk"><use href="#i-check"/></svg></button>
+      <button class="ritem" type="button"><b>R20890-057</b><small>88 of 197 done</small><svg class="chk"><use href="#i-check"/></svg></button>
+      <button class="ritem on" type="button"><b>R20890-058</b><small data-donecount></small><svg class="chk"><use href="#i-check"/></svg></button>
+      <button class="ritem" type="button"><b>R20890-059</b><small>0 of 197 done</small><svg class="chk"><use href="#i-check"/></svg></button>
+      <button class="ritem" type="button"><b>R20890-060</b><small>0 of 197 done</small><svg class="chk"><use href="#i-check"/></svg></button>
+      <button class="ritem" type="button"><b>R20890-061</b><small>0 of 197 done</small><svg class="chk"><use href="#i-check"/></svg></button>
     </div>
-  </span>
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2" stroke-linecap="round"><circle cx="48" cy="48" r="34"/><path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/></g><text x="48" y="12" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 20 57 55 48 49 39 55Z"/><path class="needle2" d="M48 20v29l-9 6Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2"><circle cx="48" cy="48" r="40"/><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><text x="48" y="26" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 30 56 58 48 53 40 58Z"/><path class="needle2" d="M48 30v23l-8 5Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#t-int"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · ← 28 · ↑ 14 · → 28</small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#i-left"/></svg><svg><use href="#i-straight"/></svg><svg><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28</span> · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14</span> · <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh">← Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
-        <div class="nc"><span class="nh">↑ Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
-        <div class="nc"><span class="nh">→ Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
       </div>
-      <div class="sph"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
+    </div>
+    <div class="mright">
     <div class="stagezone"><div class="stagebox"><div class="stage">
       <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
-      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-up"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
       <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
     </div></div></div>
     <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button></div>
+    </div>
   </div>
   <div class="summary" data-summary></div>
 </div>
@@ -1190,7 +1281,7 @@
         <p class="caption"><b>L</b> · Route menu</p>
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
-        <li><b>1</b> The route picker opens the city's routes under itself; the active route is marked.</li>
+        <li><b>1</b> The route picker opens the city's routes under itself; the active route is marked with a check (item 60); the picker's chevron points up while it is open.</li>
         <li><b>1</b> Each row: the route code and "N of 197 done".</li>
         <li><b>22</b> Routes are typed in by hand in Settings: code and POI count; nothing here edits them.</li>
         <li><b>66</b> A menu closes by a choice or a tap outside.</li>
@@ -1208,27 +1299,31 @@
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
 </header>
 <div class="body">
-  <div class="colwrap"><div class="col" data-active="136" data-scroll="120"></div><div class="finger" style="top: 66%" aria-hidden="true"></div><div class="bubble" style="top: 66%" aria-hidden="true">120</div></div>
+  <div class="colwrap"><div class="col" data-active="136" data-scroll="120" data-finger="120"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2" stroke-linecap="round"><circle cx="48" cy="48" r="34"/><path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/></g><text x="48" y="12" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 20 57 55 48 49 39 55Z"/><path class="needle2" d="M48 20v29l-9 6Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2"><circle cx="48" cy="48" r="40"/><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><text x="48" y="26" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 30 56 58 48 53 40 58Z"/><path class="needle2" d="M48 30v23l-8 5Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#t-int"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · ← 28 · ↑ 14 · → 28</small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg><use href="#i-left"/></svg><svg><use href="#i-straight"/></svg><svg><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28</span> · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14</span> · <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh">← Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
-        <div class="nc"><span class="nh">↑ Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
-        <div class="nc"><span class="nh">→ Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
       </div>
-      <div class="sph"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
+    </div>
+    <div class="mright">
     <div class="stagezone"><div class="stagebox"><div class="stage">
       <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
-      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-up"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
       <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
     </div></div></div>
     <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button></div>
+    </div>
   </div>
   <div class="summary" data-summary></div>
 </div>
@@ -1237,10 +1332,10 @@
         <p class="caption"><b>M</b> · Index rail in use</p>
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
-        <li><b>57</b> A finger slides along the rail: the column scrolls to that part of the route and a bubble shows the number under the finger, "120".</li>
+        <li><b>57</b> A finger slides along the rail: the column scrolls to that part of the route and a bubble shows the number under the finger, "120". The bubble sits inside the column, left of the rail, level with the finger (item 57).</li>
         <li><b>57</b> The rail scrolls, it never selects: POI 136 stays active and the main area does not change.</li>
         <li><b>56</b> Nothing about choosing a POI ever moves the discs.</li>
-        <li><b>31</b> The bubble is as tall as a tap target; the finger is drawn as a translucent pad on the rail.</li>
+        <li><b>31</b> The bubble is as tall as a tap target; the finger is drawn as a translucent pad on the rail; the rail labels sit on a linear scale, and its touch area takes in the gap beside the column (item 57).</li>
       </ul></aside>
     </section>
 
@@ -1254,27 +1349,31 @@
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
 </header>
 <div class="body">
-  <div class="colwrap"><div class="col"><div class="colnote">Add routes in Settings</div></div></div>
+  <div class="colwrap"><div class="col"><button class="colbtn" type="button">Add routes in Settings<svg class="ic"><use href="#i-chev-right"/></svg></button></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2" stroke-linecap="round"><circle cx="48" cy="48" r="34"/><path d="M48 8.5v6M48 81.5v6M8.5 48h6M81.5 48h6"/></g><text x="48" y="12" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 20 57 55 48 49 39 55Z"/><path class="needle2" d="M48 20v29l-9 6Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="ring" stroke-width="2"><circle cx="48" cy="48" r="40"/><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><text x="48" y="26" text-anchor="middle">N</text><g transform="rotate(40 48 48)"><path class="needle" d="M48 30 56 58 48 53 40 58Z"/><path class="needle2" d="M48 30v23l-8 5Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
     <section class="head"><div class="hcol"><div class="plabel">POI</div><div class="cnt">—</div><div class="rest">No routes yet</div></div></section>
-    <div class="typewrap"><button class="typebtn off" type="button" aria-label="POI type, unavailable"><span class="ticon"><svg><use href="#t-int"/></svg></span><span class="tl"><b>Intersection</b><small>70 passes · ← 28 · ↑ 14 · → 28</small></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn off" type="button" aria-label="POI type, unavailable"><span class="ticon"></span><span class="tl"><b>No POI</b></span><span class="tchg">Change<svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc off"><span class="nh">← Left</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf">—</span></div>
-        <div class="nc off"><span class="nh">↑ Straight</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf">—</span></div>
-        <div class="nc off"><span class="nh">→ Right</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf">—</span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf"></span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf"></span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf"></span></div>
       </div>
-      <div class="sph"><span class="spt">SIDES SO FAR</span><span class="spn">0 passes</span></div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">0 passes</span></div>
       <div class="sides4"><div class="sv z"><span class="svl">N</span><span class="svv">0</span></div><div class="sv z"><span class="svl">S</span><span class="svv">0</span></div><div class="sv z"><span class="svl">W</span><span class="svv">0</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
+    </div>
+    <div class="mright">
     <div class="stagezone"><div class="stagebox"><div class="stage">
       <button class="disc l locked" type="button" aria-label="Left, unavailable"><svg><use href="#i-left"/></svg></button>
-      <button class="disc st locked" type="button" aria-label="Straight, unavailable"><svg><use href="#i-up"/></svg></button>
+      <button class="disc st locked" type="button" aria-label="Straight, unavailable"><svg><use href="#i-straight"/></svg></button>
       <button class="disc r locked" type="button" aria-label="Right, unavailable"><svg><use href="#i-right"/></svg></button>
     </div></div></div>
     <div class="bar"><button class="btn off" type="button">Undo last</button><button class="btn" type="button">History</button></div>
+    </div>
   </div>
   <div class="summary">No routes yet</div>
 </div>
@@ -1283,9 +1382,9 @@
         <p class="caption"><b>N</b> · No routes yet</p>
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
-        <li><b>35</b> The route picker reads "No routes yet", the POI list is replaced by the single line "Add routes in Settings", the discs are dimmed and inert.</li>
+        <li><b>35</b> The route picker reads "No routes yet", the POI list is replaced by the button "Add routes in Settings" that opens Settings, the discs are dimmed and inert (item 35).</li>
         <li><b>35</b> Listed under "states not drawn", but it changes the layout of the column, so it is drawn here.</li>
-        <li><b>26</b> Discs and the type pill keep their colour and are dimmed; nothing is hidden.</li>
+        <li><b>26</b> Discs and the type pill keep their colour and are dimmed; nothing is hidden. The pill reads "No POI" with an empty tile (item 26).</li>
         <li><b>9</b> "Undo last" is dimmed: nothing was ever recorded here.</li>
         <li><b>23</b> Routes are added in Settings; no spreadsheet is touched by that.</li>
       </ul></aside>
@@ -1296,13 +1395,14 @@
 <script>
 /* Checking-tool script (screens.md item 54) and sample-data generator.
    It fills the repeated markup of every frame (mini-map squares, POI rows,
-   grid tiles, the bottom summary) from one fixed table, so all fourteen
-   frames show the same route. No randomness: the same picture on every
-   load. It also wires the presets, the drag corner and the theme switch.
-   Nothing here runs in the app. */
+   rail labels, grid tiles, the bottom summary) from one fixed table, so all
+   fourteen frames show the same route. No randomness: the same picture on
+   every load. It also wires the presets, the drag corner and the theme
+   switch. Nothing here runs in the app. */
 (function () {
   var N = 197;
   var TARGET = { int: 70, nost: 70, nol: 70, nor: 70, str: 40, nd: 0 };
+  var ICON = function (id) { return '<svg class="ic"><use href="#' + id + '"/></svg>'; };
   // Route R20890-058: POIs 1 to 48 done, 57 in spreadsheet error, 168 not
   // drivable, the POIs of the frames fixed, the rest a fixed mix.
   function poi(n) {
@@ -1348,11 +1448,18 @@
     if (p.err) errs += 1;
   });
   function fmt(x) { return x.toLocaleString('en-US'); }
+  // rail labels on a linear scale: POI n sits at (n - 1) / (N - 1) of the track,
+  // the track being the rail minus --s-2 at each end
   var RAIL = [1, 40, 80, 120, 160, 197];
+  function railTop(n) {
+    var f = ((n - 1) / (N - 1)).toFixed(4);
+    return 'top: calc(var(--s-2) + ' + f + ' * (100% - 2 * var(--s-2)))';
+  }
   var each = function (sel, fn) { Array.prototype.forEach.call(document.querySelectorAll(sel), fn); };
 
   each('.col[data-active]', function (col) {
     var active = +col.getAttribute('data-active');
+    var finger = col.getAttribute('data-finger');
     var dots = '', rows = '';
     pois.forEach(function (p) {
       var s = status(p);
@@ -1361,14 +1468,16 @@
         '<span class="rn">' + p.n + '</span><span class="rc"><span class="rb"><i style="width: ' + pct(p) + '%"></i></span>' +
         '<span class="rt">' + tag(p) + '</span></span></button>';
     });
-    col.innerHTML = '<button class="mmap" type="button" aria-label="Open the grid of all POIs"><span class="dots">' + dots +
-      '</span><span class="mcap"><span>' + poisDone + '/' + N + ' done</span><span>Open ›</span></span></button>' +
-      '<div class="colbody"><div class="list">' + rows + '</div><div class="rail" aria-label="Jump through the POI list">' +
-      RAIL.map(function (r) { return '<span>' + r + '</span>'; }).join('') + '</div></div>';
+    var rail = RAIL.map(function (r) { return '<span style="' + railTop(r) + '">' + r + '</span>'; }).join('');
+    if (finger) rail += '<div class="finger" style="' + railTop(+finger) + '" aria-hidden="true"></div>';
+    var bubble = finger ? '<div class="bubble" style="' + railTop(+finger) + '" aria-hidden="true">' + finger + '</div>' : '';
+    col.innerHTML = '<button class="mmap" type="button" aria-label="Open the grid of all POIs"><span class="mm"><span class="dots">' + dots +
+      '</span><span class="mcap"><span>' + poisDone + '/' + N + ' done</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></span></button>' +
+      '<div class="colbody"><div class="list">' + rows + '</div><div class="rail" aria-label="Jump through the POI list">' + rail + '</div>' + bubble + '</div>';
   });
   each('[data-summary]', function (el) {
-    el.innerHTML = 'Done ' + fmt(done) + ' · ' + fmt(togo) + ' to go · ' + poisDone + ' of ' + N + ' POIs done' +
-      (errs ? ' · <span class="err">' + errs + (errs === 1 ? ' error' : ' errors') + '</span>' : '');
+    el.innerHTML = '<span>Done ' + fmt(done) + '</span><span>· ' + fmt(togo) + ' to go</span><span>· ' + poisDone + ' of ' + N + ' POIs done</span>' +
+      (errs ? '<span class="err">· ' + errs + (errs === 1 ? ' error' : ' errors') + '</span>' : '');
   });
   each('[data-donecount]', function (el) { el.textContent = poisDone + ' of ' + N + ' done'; });
   each('.grid[data-active]', function (g) {
@@ -1380,8 +1489,9 @@
     g.innerHTML = cells;
   });
 
-  // Centre every list on its POI (data-scroll, else the active one) and
-  // every grid on the active row; again after any resize of a frame.
+  // Centre every list on its POI (data-scroll, else the active one), rounded
+  // to whole rows so a whole row sits at the top edge; the grid likewise on
+  // the active tile's row. Again after any resize of a frame.
   function centre() {
     each('.col[data-active]', function (col) {
       var list = col.querySelector('.list');
@@ -1389,14 +1499,16 @@
       if (!row) return;
       var rh = row.offsetHeight;
       var n = +(col.getAttribute('data-scroll') || col.getAttribute('data-active'));
-      list.scrollTop = Math.max(0, (n - 1) * rh + rh / 2 - list.clientHeight / 2);
+      var top = Math.min((n - 1) * rh + rh / 2 - list.clientHeight / 2, list.scrollHeight - list.clientHeight);
+      list.scrollTop = Math.max(0, Math.floor(top / rh) * rh);
     });
     each('.grid[data-active]', function (g) {
       var cell = g.firstElementChild;
       if (!cell) return;
       var rh = g.children[10] ? g.children[10].offsetTop - cell.offsetTop : cell.offsetHeight;
       var row = Math.floor((+g.getAttribute('data-active') - 1) / 10);
-      g.scrollTop = Math.max(0, row * rh + rh / 2 - g.clientHeight / 2);
+      var top = Math.min(row * rh + rh / 2 - g.clientHeight / 2, g.scrollHeight - g.clientHeight);
+      g.scrollTop = Math.max(0, Math.floor(top / rh) * rh);
     });
   }
 

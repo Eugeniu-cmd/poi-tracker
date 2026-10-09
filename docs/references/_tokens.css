@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.6 — 2026-10-06
+   v0.7 — 2026-10-09
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -23,6 +23,12 @@
    References drawn before this version (main-screen v0.17, settings
    v0.8, history v0.7) use 44px targets in a 1000 × 600 frame and may
    look crowded until they are redrawn.
+   v0.7 2026-10-09 — a dedicated decision after the pixel audit of
+   main-screen v0.18. New --scrim for the dimmed layer behind dialogs and
+   sheets. It painted --ink before, which turns near white in the dark
+   theme, so the dimming brightened the screen. Small green and red text
+   now reaches 4.5:1 on its tints (WCAG): light --ok #11855A to #0E7450,
+   light --err #C8342B to #B42E26, dark --err #FF6B62 to #FF9189.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -45,15 +51,16 @@
   --side-ring: rgba(242, 168, 29, 0.45);
   --side-soft: rgba(242, 168, 29, 0.16);
   --man-soft: rgba(28, 32, 48, 0.08);
-  --ok: #11855A;
+  --ok: #0E7450;
   --ok-bg: rgba(214, 244, 228, 0.85);
-  --err: #C8342B;
+  --err: #B42E26;
   --err-bg: rgba(255, 226, 223, 0.85);
   --warn: #B87400;
   --warn-bg: rgba(255, 238, 209, 0.85);
   --active: rgba(242, 168, 29, 0.18);
   --active-line: var(--side);
   --focus: #1F5EFF;
+  --scrim: rgba(16, 20, 32, 0.32);
   --shadow: 0 6px 20px rgba(50, 65, 120, 0.14);
   --shadow-lift: 0 10px 26px rgba(40, 50, 90, 0.26);
   --r-sm: 12px;
@@ -125,13 +132,14 @@
     --man-soft: rgba(255, 255, 255, 0.10);
     --ok: #3ECC82;
     --ok-bg: rgba(22, 60, 40, 0.7);
-    --err: #FF6B62;
+    --err: #FF9189;
     --err-bg: rgba(70, 28, 25, 0.7);
     --warn: #FFB13D;
     --warn-bg: rgba(62, 44, 16, 0.7);
     --active: rgba(242, 168, 29, 0.22);
     --active-line: var(--side);
     --focus: #7FA3FF;
+    --scrim: rgba(0, 0, 0, 0.55);
     --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
     --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
   }
@@ -157,13 +165,14 @@
   --man-soft: rgba(255, 255, 255, 0.10);
   --ok: #3ECC82;
   --ok-bg: rgba(22, 60, 40, 0.7);
-  --err: #FF6B62;
+  --err: #FF9189;
   --err-bg: rgba(70, 28, 25, 0.7);
   --warn: #FFB13D;
   --warn-bg: rgba(62, 44, 16, 0.7);
   --active: rgba(242, 168, 29, 0.22);
   --active-line: var(--side);
   --focus: #7FA3FF;
+  --scrim: rgba(0, 0, 0, 0.55);
   --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
   --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
 }
