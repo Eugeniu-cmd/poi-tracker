@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.29 — 2026-10-09
+v0.30 — 2026-10-09
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -117,6 +117,10 @@ compass may rise over the "Still needed" card on a short screen
 is the column's header and the list shows whole rows at its top (items
 56, 58). Both menus mark the current choice with a check (item 60). "Add
 routes in Settings" is a button (item 35).
+v0.30 2026-10-09 — fixes from the audit of main-screen v0.19. Each
+maneuver keeps its own place in the type icon (item 60). The active row
+keeps its amber tint and edge in every state (item 40). With no routes,
+a caption under the discs names the reason (item 35).
 -->
 
 The app is one working screen plus two slide-in panels, on a tablet held
@@ -240,13 +244,15 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     icon shows the allowed maneuvers, not the shape of the road: their
     icons of item 69 side by side in the order left, straight, right, in
     a tile wide enough for three, so the type name starts at the same
-    place for every type. Tapping the pill opens a menu with the six
-    types, each with its icon and split, the current one marked with a
-    check, as the route menu marks the active route. The menu changes
-    the active POI only. Two taps are deliberate: a stray touch while
-    driving cannot change a type. A change with consequences for passes
-    already recorded asks first (item 64). The counter beside the number
-    carries no chevron.
+    place for every type. Each maneuver keeps its own place in the tile:
+    an absent one leaves its place empty instead of shifting the others,
+    so the tiles read as a map of the maneuvers. Tapping the pill opens
+    a menu with the six types, each with its icon and split, the current
+    one marked with a check, as the route menu marks the active route.
+    The menu changes the active POI only. Two taps are deliberate: a
+    stray touch while driving cannot change a type. A change with
+    consequences for passes already recorded asks first (item 64). The
+    counter beside the number carries no chevron.
 61. In portrait the History panel covers the main area while the POI
     column stays live beside it, so item 44 holds unchanged. The compass
     keeps its place at the top right of the main area in both layouts
@@ -319,7 +325,9 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 40. The active POI row carries an amber tint, a 4px left edge, its number
     in the amber foreground colour and its "N to go" darkened. It must be
     findable with peripheral vision and must not imitate the green done
-    row, the red error row, or a control.
+    row, the red error row, or a control. The tint and the edge stay
+    amber in every state. An active row that is done or in error shows
+    that state in the colour of its number, text and bar.
 43. On a POI in spreadsheet error the line under the counter replaces
     "N to go" and states the mismatch in words. It stays in the ordinary
     muted colour; the red caption beside the locked discs is where the
@@ -493,7 +501,8 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     the muted colour. Nothing is lost meanwhile.
 35. No routes yet in this city: the route picker reads "No routes yet",
     the POI list is replaced by a single button "Add routes in Settings"
-    that opens Settings, and the discs are dimmed and inert.
+    that opens Settings, and the discs are dimmed and inert, with the
+    caption "Add a route to start" under them (item 27).
 36. A pass has just been recorded: a toast appears over the working area
     for about two seconds, reading "Saved: ← South · 57 of 70", then
     fades. The screen beneath does not move.

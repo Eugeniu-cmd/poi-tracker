@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.7 — 2026-10-09
+   v0.8 — 2026-10-09
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -29,6 +29,12 @@
    theme, so the dimming brightened the screen. Small green and red text
    now reaches 4.5:1 on its tints (WCAG): light --ok #11855A to #0E7450,
    light --err #C8342B to #B42E26, dark --err #FF6B62 to #FF9189.
+   v0.8 2026-10-09 — a dedicated decision after the audit of
+   main-screen v0.19. New --panel-raised for menus, dialogs and sheets.
+   In the dark theme they used --panel-solid, darker than what they
+   cover, and read as holes. New --danger and --on-danger for the fill
+   and the text of a destructive button. The dark --err is a text colour
+   and looked coral as a fill. Light values stay as they were.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -61,6 +67,9 @@
   --active-line: var(--side);
   --focus: #1F5EFF;
   --scrim: rgba(16, 20, 32, 0.32);
+  --panel-raised: #FFFFFF;
+  --danger: var(--err);
+  --on-danger: #FFFFFF;
   --shadow: 0 6px 20px rgba(50, 65, 120, 0.14);
   --shadow-lift: 0 10px 26px rgba(40, 50, 90, 0.26);
   --r-sm: 12px;
@@ -140,6 +149,9 @@
     --active-line: var(--side);
     --focus: #7FA3FF;
     --scrim: rgba(0, 0, 0, 0.55);
+    --panel-raised: #303749;
+    --danger: #D7373F;
+    --on-danger: #FFFFFF;
     --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
     --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
   }
@@ -173,6 +185,9 @@
   --active-line: var(--side);
   --focus: #7FA3FF;
   --scrim: rgba(0, 0, 0, 0.55);
+  --panel-raised: #303749;
+  --danger: #D7373F;
+  --on-danger: #FFFFFF;
   --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
   --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
 }
