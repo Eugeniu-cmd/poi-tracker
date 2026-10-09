@@ -128,12 +128,19 @@
           the mini-map. The compass keeps its distance, menus stay
           anchored, dark tiles no longer read as holes, "Done" is
           smaller, and text keeps spare room so it never overlaps.
+  v0.22 2026-10-09 — the user's review of v0.21 (screens.md v0.32).
+          Every "Still needed" tile drops its "16 of 28" line: a tile is
+          its label, its value and its bar. In the compact landscape step
+          the side margins become --s-4, the gaps beside the column and
+          the discs --s-3, and the closed side discs sit --s-2 nearer, so
+          the type pill and the card keep their normal paddings and
+          breathe at 1000 × 600.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.21</title>
+<title>POI Tracker — Working Screen Reference v0.22</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -453,9 +460,10 @@
           font-weight: var(--w-heavy); color: var(--ink-2); white-space: nowrap; }
   .tchg .ic { margin-right: -0.25em; }
 
-  /* ---- "Still needed" card (item 39). Tile lines are trimmed to cap height
-     and baseline and rounded up, so the insets above the first line and
-     below the last are the tile's padding. ---- */
+  /* ---- "Still needed" card (item 39). A tile is its label, its value and
+     its bar (v0.32). The text lines are trimmed to cap height and baseline
+     and rounded up, so the inset above the label and the inset below the
+     bar are both the tile's padding. ---- */
   .card { background: var(--panel); border: 1px solid var(--panel-edge);
           border-radius: var(--r-md); box-shadow: var(--shadow); padding: var(--s-4);
           display: flex; flex-direction: column; gap: var(--s-3); }
@@ -481,9 +489,6 @@
   .nv .dn { font-size: var(--t-label); }
   .nb { display: block; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
         overflow: hidden; }
-  .nf { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
-        line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); text-wrap: balance;
-        text-box: trim-both cap alphabetic; min-height: round(up, 1cap, 1px); }
   .nc.ok .nv { color: var(--ok); }
   .nc.ok .nb i { background: var(--ok); }
   .nc.over .nv { color: var(--warn); }
@@ -677,10 +682,8 @@
      word and its split without the passes prefix */
   @container info (max-width: 400px) {
     .card { padding: var(--s-3); }
-    .need { grid-template-columns: repeat(3, auto); align-items: start; }
+    .need { grid-template-columns: repeat(3, auto); }
     .nc { padding: var(--s-2); }
-    /* a caption never widens its tile: it wraps, balanced, where it must */
-    .nf { width: 0; min-width: 100%; }
     .need, .sides4 { gap: var(--s-1); }
     .sv { padding-left: var(--s-2); padding-right: var(--s-2); gap: var(--s-1); }
     .tchg span, .tl small .tp { display: none; }
@@ -699,6 +702,34 @@
             padding: 0 var(--s-3); }
     .mm { display: none; }
     .mline { display: flex; }
+  }
+  /* ---- the compact landscape step (item 70, v0.32): the side margins
+     become --s-4, the gaps beside the column and the discs --s-3 and the
+     closed side discs sit --s-2 nearer to Straight. The disc size, the
+     vertical offsets and the open compass do not change. ---- */
+  @container (max-height: 700px) and (orientation: landscape) {
+    .scr { padding-left: var(--s-4); padding-right: var(--s-4); }
+    .body { column-gap: var(--s-3); }
+    .main { column-gap: var(--s-3); }
+    .mright, .stage { width: calc(2 * var(--side-reach) + var(--disc-man)); }
+    .disc.l { left: calc(50% - var(--side-reach)); }
+    .disc.r { left: calc(50% + var(--side-reach)); }
+    /* the caption keeps one line and its spare width in the narrower zone */
+    .lock { padding-left: var(--s-2); padding-right: var(--s-2); }
+  }
+  /* with that width the card and its tiles keep their normal paddings
+     instead of the compact ones: from the landscape minimum of 1000px the
+     left group is at least 370px wide, enough for every label, value and
+     chip to keep its spare width. In a frame dragged narrower the compact
+     card stays. The pill keeps its compact look. */
+  @container (max-height: 700px) and (orientation: landscape) and (min-width: 1000px) {
+    .card { padding: var(--s-4) var(--s-3); }
+    /* --s-4 between the two sections over the card's --s-3 row gap */
+    .sph.sides { margin-top: calc(var(--s-4) - var(--s-3)); }
+    .need { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); }
+    .nc { padding: var(--s-3); }
+    .sides4 { gap: var(--s-2); }
+    .sv { padding-left: var(--s-3); padding-right: var(--s-3); gap: var(--s-2); }
   }
   /* APP END */
 </style>
@@ -722,17 +753,19 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.21 — 2026-10-09.</b> The user's review of v0.20 and the last audit fixes:
-     every value inside the frames is a token of <b>_tokens.css v0.9</b> (size C,
-     screens.md item 67) and every rule follows <b>screens.md v0.31</b>. Icons are
+  <p class="meta"><b>v0.22 — 2026-10-09.</b> The user's review of v0.21: lighter "Still
+     needed" tiles and air for the card at 1000 × 600. Every value inside the frames is
+     a token of <b>_tokens.css v0.9</b> (size C, screens.md item 67) and every rule
+     follows <b>screens.md v0.32</b>. Icons are
      Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
      presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and
      <b>1000 × 600</b> (landscape minimum); every frame also drags at its bottom-right
      corner. The POI column is wide from 1200px and the main area follows the frame's
      shape: side by side when wider than tall, stacked when taller (item 51). Below
-     700px of height the compact step applies: smaller display numbers and a one-line
-     grid button instead of the mini-map (item 70). Fourteen states, A to N.</p>
+     700px of height the compact step applies: smaller display numbers, a one-line
+     grid button instead of the mini-map and, in landscape, narrower margins and gaps
+     so the card keeps its paddings (item 70). Fourteen states, A to N.</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>
@@ -768,9 +801,9 @@
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
       </div>
       <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
@@ -801,12 +834,13 @@
         <li><b>4</b> Big POI number, "41 of 70" beside it, "29 to go" under the counter.</li>
         <li><b>19</b> Compass at the top right of the main area.</li>
         <li><b>60</b> Type pill under the number (item 60): a tile with three fixed slots, Left, Straight, Right; an absent maneuver leaves its slot empty. Name, split line with the same icons, "Change".</li>
-        <li><b>39</b> "Still needed" card: per maneuver its Lucide icon (item 69), "N more", bar, "N of T"; "Sides so far" with E at zero faded.</li>
+        <li><b>39</b> "Still needed" card: per maneuver its Lucide icon (item 69), "N more" and a bar, no "N of T" line under it (v0.32); "Sides so far" with E at zero faded.</li>
         <li><b>5</b> Three discs in the middle of the free space, Straight higher; Lucide corner-up-left, arrow-up, corner-up-right (item 69).</li>
         <li><b>9</b> "Undo last" live; "History" beside it.</li>
         <li><b>3</b> Bottom summary under the main area in portrait; in landscape inside the action bar, which runs under the whole main area, and the column runs down to the bottom (items 3, 51). Error count only when non-zero.</li>
         <li><b>53</b> Bottom padding adds env(safe-area-inset-bottom).</li>
-        <li><b>67, 68</b> Size C; every value inside the frame is a token.</li>\n        <li><b>52, 70</b> On a short screen (1000 × 600, 1333 × 680) display numbers shrink; discs, compass and tap targets keep their size.</li>
+        <li><b>67, 68</b> Size C; every value inside the frame is a token.</li>
+        <li><b>52, 70</b> On a short screen (1000 × 600, 1333 × 680) display numbers shrink; discs, compass and tap targets keep their size. In landscape the side margins become --s-4, the gaps beside the column and the discs --s-3 and the closed side discs sit --s-2 nearer, so the card and the pill keep their paddings (v0.32).</li>
       </ul></aside>
     </section>
 
@@ -829,9 +863,9 @@
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
       </div>
       <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
@@ -860,6 +894,7 @@
         <li><b>6</b> Left tapped: the disc slides to the centre of the disc area, the other two are out of the way, N above, S below, W left, E right.</li>
         <li><b>6</b> Sides sit --side-reach from the centre; no side reaches the screen edge, the POI column or comes within 8px of the action bar. On a short screen (720 × 1000) the compass rises over the card (item 6).</li>
         <li><b>19</b> Minimum gap between any two discs is --s-2.</li>
+        <li><b>70</b> In the compact landscape step the disc zone is --s-2 narrower on each side; the open compass keeps its size and its clearances (v0.32).</li>
         <li><b>8</b> "Cancel" visible only while the compass is open, at the trailing end of the bar; tapping Left again also closes it.</li>
         <li><b>7, 62</b> A tap on a side records the pass (chime, vibration, bounce, toast): motion lives in the prototype, not here.</li>
         <li><b>26</b> Nothing else on the screen changes while the compass is open.</li>
@@ -885,9 +920,9 @@
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">20<small>more</small></span><span class="nb"><i style="width: 43%"></i></span><span class="nf">15 of 35</span></div>
-        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf">not at this POI</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">20<small>more</small></span><span class="nb"><i style="width: 43%"></i></span><span class="nf">15 of 35</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">20<small>more</small></span><span class="nb"><i style="width: 43%"></i></span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">20<small>more</small></span><span class="nb"><i style="width: 43%"></i></span></div>
       </div>
       <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">30 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">12</span></div><div class="sv"><span class="svl">S</span><span class="svv">9</span></div><div class="sv"><span class="svl">W</span><span class="svv">6</span></div><div class="sv"><span class="svl">E</span><span class="svv">3</span></div></div>
@@ -912,7 +947,7 @@
         <li><b>46</b> Type "No straight": Left 35, Right 35 (70). A maneuver the type does not allow takes no passes.</li>
         <li><b>26</b> The Straight disc keeps its colour and is dimmed (--o-locked), never recoloured or hidden.</li>
         <li><b>27, 5</b> The caption "No straight at this POI" sits under the discs and never moves them.</li>
-        <li><b>39</b> The Straight tile shows a dash and "not at this POI", faded.</li>
+        <li><b>39</b> The Straight tile shows a dash over an empty bar, faded; the caption under the discs names the reason (v0.32).</li>
         <li><b>60</b> The pill tile keeps its three slots: Left and Right in place, the Straight slot empty (items 60, 69).</li>
       </ul></aside>
     </section>
@@ -936,9 +971,9 @@
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc ok"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv"><b class="dn">Done</b></span><span class="nb"><i style="width: 100%"></i></span><span class="nf">28 of 28</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 93%"></i></span><span class="nf">13 of 14</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 96%"></i></span><span class="nf">27 of 28</span></div>
+        <div class="nc ok"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv"><b class="dn">Done</b></span><span class="nb"><i style="width: 100%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 93%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 96%"></i></span></div>
       </div>
       <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">68 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">24</span></div><div class="sv"><span class="svl">S</span><span class="svv">20</span></div><div class="sv"><span class="svl">W</span><span class="svv">14</span></div><div class="sv"><span class="svl">E</span><span class="svv">10</span></div></div>
@@ -987,9 +1022,9 @@
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc ok"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv"><b class="dn">Done</b></span><span class="nb"><i style="width: 100%"></i></span><span class="nf">28 of 28</span></div>
-        <div class="nc ok"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv"><b class="dn">Done</b></span><span class="nb"><i style="width: 100%"></i></span><span class="nf">14 of 14</span></div>
-        <div class="nc ok"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv"><b class="dn">Done</b></span><span class="nb"><i style="width: 100%"></i></span><span class="nf">28 of 28</span></div>
+        <div class="nc ok"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv"><b class="dn">Done</b></span><span class="nb"><i style="width: 100%"></i></span></div>
+        <div class="nc ok"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv"><b class="dn">Done</b></span><span class="nb"><i style="width: 100%"></i></span></div>
+        <div class="nc ok"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv"><b class="dn">Done</b></span><span class="nb"><i style="width: 100%"></i></span></div>
       </div>
       <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">70 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">25</span></div><div class="sv"><span class="svl">S</span><span class="svv">21</span></div><div class="sv"><span class="svl">W</span><span class="svv">14</span></div><div class="sv"><span class="svl">E</span><span class="svv">10</span></div></div>
@@ -1038,9 +1073,9 @@
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">10<small>more</small></span><span class="nb"><i style="width: 64%"></i></span><span class="nf">18 of 28</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">5<small>more</small></span><span class="nb"><i style="width: 64%"></i></span><span class="nf">9 of 14</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">10<small>more</small></span><span class="nb"><i style="width: 64%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">5<small>more</small></span><span class="nb"><i style="width: 64%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
       </div>
       <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">46 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">18</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">9</span></div><div class="sv"><span class="svl">E</span><span class="svv">5</span></div></div>
@@ -1090,9 +1125,9 @@
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf"></span></div>
-        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf"></span></div>
-        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf"></span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span></div>
       </div>
       <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">0 passes</span></div>
       <div class="sides4"><div class="sv z"><span class="svl">N</span><span class="svv">0</span></div><div class="sv z"><span class="svl">S</span><span class="svv">0</span></div><div class="sv z"><span class="svl">W</span><span class="svv">0</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
@@ -1143,9 +1178,9 @@
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
       </div>
       <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
@@ -1203,9 +1238,9 @@
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">2<small>more</small></span><span class="nb"><i style="width: 93%"></i></span><span class="nf">26 of 28</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 93%"></i></span><span class="nf">13 of 14</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 96%"></i></span><span class="nf">27 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">2<small>more</small></span><span class="nb"><i style="width: 93%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 93%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">1<small>more</small></span><span class="nb"><i style="width: 96%"></i></span></div>
       </div>
       <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">66 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">24</span></div><div class="sv"><span class="svl">S</span><span class="svv">19</span></div><div class="sv"><span class="svl">W</span><span class="svv">13</span></div><div class="sv"><span class="svl">E</span><span class="svv">10</span></div></div>
@@ -1261,9 +1296,9 @@
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
       </div>
       <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
@@ -1319,9 +1354,9 @@
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
       </div>
       <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
@@ -1394,9 +1429,9 @@
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
       </div>
       <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
@@ -1445,9 +1480,9 @@
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">16 of 28</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span><span class="nf">8 of 14</span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span><span class="nf">17 of 28</span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
       </div>
       <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
       <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
@@ -1495,9 +1530,9 @@
     <div class="card">
       <div class="sph"><span class="spt">STILL NEEDED</span></div>
       <div class="need">
-        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf"></span></div>
-        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf"></span></div>
-        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span><span class="nf"></span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span></div>
       </div>
       <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">0 passes</span></div>
       <div class="sides4"><div class="sv z"><span class="svl">N</span><span class="svv">0</span></div><div class="sv z"><span class="svl">S</span><span class="svv">0</span></div><div class="sv z"><span class="svl">W</span><span class="svv">0</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>

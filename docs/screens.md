@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.31 — 2026-10-09
+v0.32 — 2026-10-09
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -129,6 +129,12 @@ the summary (items 3, 51). A short screen gets a compact step: smaller
 display numbers and a one-line button instead of the mini-map, while
 discs and tap targets keep their size (items 52, 58, 70). An open menu
 closes when the screen turns (item 66).
+v0.32 2026-10-09 — the user's review of main-screen v0.21: at 1000 × 600
+the "Still needed" card and the type pill had no air. In landscape the
+compact step narrows the margins and gaps and draws the closed side discs
+8px nearer, so the card keeps its normal paddings (item 70). Each "Still
+needed" tile drops its "16 of 28" line, which repeated what "12 more" and
+the bar already say, while the type pill shows the split (item 39).
 -->
 
 The app is one working screen plus two slide-in panels, on a tablet held
@@ -195,6 +201,11 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     ("79 of 197") and "Open", as tall as a tap target, so the column
     shows more POI rows. Discs, the compass and every tap target keep
     their size, since they are what the passenger hits in a moving car.
+    In landscape the compact step also gives the "Still needed" card and
+    the type pill room to breathe: the screen's side margins become 16px,
+    the gaps beside the POI column and between the card and the discs
+    12px, and the closed Left and Right discs sit 8px nearer to Straight.
+    The card, its tiles and its chips then keep their normal paddings.
 
 ## Canon (applies to every screen)
 67. Size C is the app's size, chosen on the user's tablet on 2026-10-06
@@ -335,8 +346,10 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     any two discs on the screen is 8px.
 39. The per-POI mini counters live in the "Still needed" card under the
     type pill. Its top row shows, per maneuver, what is still needed
-    against the split of the POI's type (item 46): a large "12 more", a
-    bar, and "16 of 28" under it. A maneuver whose share is full shows
+    against the split of the POI's type (item 46): a large "12 more" and
+    a bar. There is no "16 of 28" line: it repeated the same number, and
+    the type pill above already shows the split. A maneuver whose share is
+    full shows
     "Done" in the done colour, and its disc locks (item 46). A count past
     the share, possible only from numbers typed into the sheet or from a
     type change, shows "+3 over" in the warning colour. A maneuver the
