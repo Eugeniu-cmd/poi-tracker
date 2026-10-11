@@ -42,12 +42,17 @@
           a deleted pass, both delete dialogs, a refused pass with "Send
           again" and "Delete" (item 47), a POI with no passes from this
           tablet, and the end of the list at the 3,000 limit (item 48).
+  v0.9 2026-10-12 — the user's review of v0.8: the panel's title and the
+          two chips were as loud as the rows. The title takes --t-row and
+          the chips --t-body with --s-2 of side padding. "Delete" keeps
+          its red tint. The shell is copied again from main-screen.html
+          v0.24 (the redrawn compass, _tokens.css v0.11).
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.8</title>
+<title>POI Tracker — History Reference v0.9</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -101,11 +106,11 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.23. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.24. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.10 or a calc() over
+     line height below is a var() from _tokens.css v0.11 or a calc() over
      them. Literal values are limited to 0, 1px hairlines, 50% for round
      shapes, percentages and fr of a layout, em, ch, lh and cap ratios of
      a token font size, keywords, SVG geometry, the 1200px breakpoint of
@@ -306,10 +311,11 @@
      height and baseline and rounded up to a whole pixel; the counter column
      keeps --s-3 between its trimmed lines, so its cap top and last baseline
      are level with the number's. In portrait the head keeps room for the
-     compass, which rises --gap minus --s-2 above the main area: --s-2 below
-     the top bar and --s-2 above the type pill. ---- */
+     compass, which sits at the main area's top, one gap under the top bar:
+     the head is at least as tall as the compass, so the type pill sits one
+     gap under it (item 19). ---- */
   .head { display: flex; flex-wrap: nowrap; align-items: flex-start; gap: var(--s-4);
-          min-height: calc(var(--compass) - 2 * var(--gap) + 2 * var(--s-2));
+          min-height: var(--compass);
           padding-right: calc(var(--compass) + var(--s-2)); }
   /* ink shifted left by the digits' side bearing: Manrope ExtraBold sets a
      "1" 3px and a "5" 5px in at 92px, so the midpoint keeps both within 1px */
@@ -327,13 +333,16 @@
           line-height: var(--lh-tight); text-box: trim-both cap alphabetic; }
   .rest span { white-space: nowrap; }
   .rest.ok { color: var(--ok); font-weight: var(--w-bold); }
-  .compass { position: absolute; right: anchor(--main right);
-             top: calc(anchor(--main top) - (var(--gap) - var(--s-2))); width: var(--compass);
-             height: var(--compass); color: var(--ink); z-index: 2; }
-  .compass .ring { fill: none; stroke: var(--ink-2); }
-  .compass text { font-size: var(--t-small); font-weight: var(--w-heavy); fill: currentColor; }
-  .compass .needle { fill: var(--side); }
-  .compass .needle2 { fill: var(--side-ring); }
+  /* the compass (item 19): a drawn widget, its ring, letters and needle
+     in tokens; the needle's north end and the letter N share --compass-n */
+  .compass { position: absolute; right: anchor(--main right); top: anchor(--main top);
+             width: var(--compass); height: var(--compass); color: var(--ink); z-index: 2; }
+  .compass .marks, .compass .ring { fill: none; stroke: var(--ink-2); }
+  .compass .minor { fill: none; stroke: var(--ink-3); stroke-linecap: round; }
+  .compass text { font-size: var(--t-small); fill: var(--ink-2); font-weight: var(--w-bold); }
+  .compass .cn { fill: var(--compass-n); font-weight: var(--w-heavy); }
+  .compass .nn { fill: var(--compass-n); }
+  .compass .ns { fill: var(--compass-s); }
   .compass .hub { fill: currentColor; }
 
   /* ---- type pill and its menu (items 46, 60, 69) ---- */
@@ -576,7 +585,6 @@
     .mright { grid-area: zone; width: calc(2 * var(--side-reach) + 2 * var(--s-2) + var(--disc-man)); }
     .bar { grid-area: bar; }
     .head { padding-right: 0; min-height: 0; }
-    .compass { top: anchor(--main top); }
     /* the free space runs from the top of the main area to the bar */
     .stagebox { top: round(max(0px, min(calc((100% + var(--gap) - 2 * var(--disc-man)) / 2),
                                         calc(100% + var(--gap) - var(--s-4) - 2 * var(--disc-man)
@@ -641,6 +649,15 @@
     .sides4 { gap: var(--s-2); }
     .sv { padding-left: var(--s-3); padding-right: var(--s-3); gap: var(--s-2); }
   }
+  /* ---- the compass's sizes (item 19, v0.35): 128px, 144px on a tall
+     landscape screen, 96px on a short one. The compass and the head read
+     --compass, so one step sets it for both. ---- */
+  @container (orientation: landscape) and (height > 700px) {
+    .scr { --compass: var(--compass-wide); }
+  }
+  @container (max-height: 700px) {
+    .scr { --compass: var(--compass-compact); }
+  }
   /* ---- the roomy card (item 71, v0.33): on a tall landscape screen the
      "Still needed" card steps up one size, the mirror of the compact
      step, so it keeps its 1000 × 600 proportion beside the discs. Only
@@ -681,7 +698,7 @@
      of inset, the chosen segment raised; radii concentric; the segments
      --s-2 apart so each is its own tap target, both as wide as the wider */
   .hh { flex: none; display: flex; align-items: center; gap: var(--s-3); }
-  .ht { flex: 1; min-width: 0; margin: 0; font-size: var(--t-title); font-weight: var(--w-heavy);
+  .ht { flex: 1; min-width: 0; margin: 0; font-size: var(--t-row); font-weight: var(--w-heavy);
         line-height: var(--lh-tight); white-space: nowrap; }
   .seg { flex: none; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--s-2);
          padding: var(--s-1); background: var(--man-soft); border-radius: var(--r-md); }
@@ -692,9 +709,9 @@
   .sg.on { background: var(--panel-raised); box-shadow: var(--shadow); color: var(--ink); }
   /* sub-header (item 41): amber chip, quiet context, neutral chip */
   .hsub { flex: none; display: flex; align-items: center; gap: var(--s-3); }
-  .chip { flex: none; display: inline-flex; align-items: center; padding: var(--s-1) var(--s-3);
+  .chip { flex: none; display: inline-flex; align-items: center; padding: var(--s-1) var(--s-2);
           border-radius: var(--r-sm); background: var(--man-soft); color: var(--ink);
-          font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+          font-size: var(--t-body); font-weight: var(--w-heavy); line-height: var(--lh-tight);
           white-space: nowrap; }
   .chip.amber { background: var(--side-soft); color: var(--warn); }
   .hctx { flex: 1; min-width: 0; font-size: var(--t-small); font-weight: var(--w-bold);
@@ -805,14 +822,15 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.8 — 2026-10-11.</b> The History panel redrawn as a rubber board on the canon:
-     it covers the main area beside the live POI column, in POI or Route scope, and lists
+  <p class="meta"><b>v0.9 — 2026-10-12.</b> The user's review of v0.8: the panel's title and
+     its two chips are quieter, a step under the rows, so the rows lead. The History panel
+     covers the main area beside the live POI column, in POI or Route scope, and lists
      every pass this tablet recorded, newest first, with "Delete" on each, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
-     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.10</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.34</b>. The shell
+     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.11</b>
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.35</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.23</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.24</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Eight states,
      A to H; wording the registry has not settled yet is tagged "proposal" in the maps.</p>
@@ -871,7 +889,7 @@
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>12</b> The panel covers the main area: "POI" | "Route" scope control at the top right, a segmented control in the iOS style; "POI" chosen. Each entry: time, the maneuver's Lucide icon and the side alone (v0.19).</li>
         <li><b>66</b> Round ✕ close button at the top-left, as large as a tap target; no text "Close".</li>
-        <li><b>41</b> Sub-header ranks its facts: the POI in an amber chip, the route and city as quiet context, the count of passes listed in a neutral chip.</li>
+        <li><b>41</b> Sub-header ranks its facts: the POI in an amber chip, the route and city as quiet context, the count of passes listed in a neutral chip. The title is in --t-row and the chips in --t-body, a step under the rows, so the rows lead (v0.9).</li>
         <li><b>13, 28</b> "Delete" on every pass, red text on the red tint at the right edge, apart from the routine controls; the filled red button stays in the dialog (item 63).</li>
         <li><b>33</b> Two newest passes "Waiting", the sync control reads "2 passes waiting for network" with its dot in the warning colour.</li>
         <li><b>proposal</b> State labels: "Waiting" with an amber dot (the amber text itself falls short of 4.5:1 at this size), "Sent" and "Deleted" quiet, "Not accepted" in the error colour.</li>
@@ -939,7 +957,7 @@
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>12</b> "Route" chosen: every pass of the route this tablet recorded, newest first, POI 136's first.</li>
-        <li><b>41</b> The route in the amber chip, the city as context, "2,184 passes" in the neutral chip.</li>
+        <li><b>41</b> The route in the amber chip, the city as context, "2,184 passes" in the neutral chip. The title is in --t-row and the chips in --t-body, a step under the rows, so the rows lead (v0.9).</li>
         <li><b>12</b> The POI number leads each row in a fixed slot as wide as the widest number, digits right-aligned; the time slot fits a date and a time, right-aligned so the clock times line up.</li>
         <li><b>16</b> A pass from today shows the time alone, an older one the date and the time ("10.10 18:52"), as the timestamp rule says.</li>
         <li><b>proposal</b> The time slot is right-aligned (the rule names the slot, not its alignment).</li>
@@ -1171,7 +1189,7 @@
         <li><b>44</b> POI 139 chosen in the column, which keeps its place: the panel reloaded for it without closing.</li>
         <li><b>14, 45</b> POI 139's 12 passes were typed into the sheet by hand, so there are no individual passes behind them: nothing is listed, and they are corrected in the sheet.</li>
         <li><b>proposal</b> Empty state in the middle of the list area: "No passes from this tablet" and "The 12 passes of POI 139 reached the sheet another way, typed in by hand. Correct them in the sheet."</li>
-        <li><b>41</b> The neutral chip reads "0 passes".</li>
+        <li><b>41</b> The neutral chip reads "0 passes". The title is in --t-row and the chips in --t-body, a step under the rows, so the rows lead (v0.9).</li>
       </ul></aside>
     </section>
 
