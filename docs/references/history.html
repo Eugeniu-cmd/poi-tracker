@@ -34,480 +34,1367 @@
           done on 2026-09-09.
   v0.7 2026-09-12 — audit fix: the undo paragraph states the v0.20 rule
           instead of the retired queue rule.
+  v0.8 2026-10-11 — redrawn as a rubber board on the canon (screens.md
+          v0.34, _tokens.css v0.10), sharing the app shell of
+          main-screen.html v0.23: presets, drag corner, light and dark,
+          size C, Lucide icons. The panel covers the main area beside
+          the live POI column. Eight frames: this POI, the whole route,
+          a deleted pass, both delete dialogs, a refused pass with "Send
+          again" and "Delete" (item 47), a POI with no passes from this
+          tablet, and the end of the list at the 3,000 limit (item 48).
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.7</title>
+<title>POI Tracker — History Reference v0.8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
 <link rel="stylesheet" href="_tokens.css">
 <style>
   /* ============================================================
-     PAGE CHROME — not part of the product. Hardcoded colors are
-     deliberate here: this is the presentation board, and it must
-     contrast with the mockup so the frame reads as a device.
+     PAGE CHROME — not part of the product. Hardcoded values are
+     deliberate here: this is the presentation board and the checking
+     tool of screens.md item 54. It must contrast with the app frames
+     so each frame reads as a device. Nothing in this block styles
+     anything inside an .app element.
      ============================================================ */
   * { box-sizing: border-box; }
   body { margin: 0; padding: 40px 44px 56px; background: #23262F; color: #E7E9F0;
          font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  .eyebrow { font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+  .eyebrow { font-size: 12px; line-height: 16px; letter-spacing: .18em; text-transform: uppercase;
              color: #8A90A6; margin: 0 0 10px; }
-  h1 { margin: 0 0 12px; font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
-  .meta { margin: 0 0 34px; font-size: 14px; line-height: 1.65; color: #A6ACC0;
+  h1 { margin: 0 0 12px; font-size: 30px; line-height: 36px; font-weight: 700; letter-spacing: -.01em; }
+  .meta { margin: 0 0 26px; font-size: 14px; line-height: 23px; color: #A6ACC0;
           max-width: 900px; }
   .meta b { color: #E7E9F0; font-weight: 600; }
-  .rail { display: flex; align-items: flex-start; gap: 40px; }
-  .unit { display: flex; align-items: flex-start; gap: 26px; flex: none; }
+  .tool { position: sticky; top: 0; z-index: 100; display: flex; flex-wrap: wrap;
+          align-items: center; gap: 8px; padding: 12px 0; margin: 0 0 34px;
+          background: #23262F; border-bottom: 1px solid #383D4B; }
+  .tool .lbl { font-size: 11px; line-height: 14px; letter-spacing: .16em; text-transform: uppercase;
+               color: #8A90A6; margin-right: 6px; }
+  .tool .sep { width: 1px; height: 24px; background: #3A3F4D; margin: 0 10px; }
+  .tool button { height: 34px; padding: 0 14px; border-radius: 9px; cursor: pointer;
+                 border: 1px solid #3A3F4D; background: #2B2F3A; color: #E7E9F0;
+                 font: inherit; font-size: 13px; font-weight: 600; }
+  .tool button.on { background: #E7E9F0; color: #23262F; border-color: #E7E9F0; }
+  .tool .hint { font-size: 12px; line-height: 16px; color: #8A90A6; margin-left: auto; }
+  .board { display: flex; flex-direction: column; gap: 56px; }
+  .unit { display: flex; align-items: flex-start; gap: 26px; flex-wrap: wrap; }
   .device { flex: none; }
-  .bezel { width: 1014px; height: 614px; padding: 7px; background: #0C0E14;
-           border-radius: 29px; box-shadow: 0 26px 60px rgba(0,0,0,.55),
-           0 0 0 1px rgba(255,255,255,.06) inset; }
-  .caption { margin: 14px 0 0; font-size: 11px; letter-spacing: .16em;
+  /* The frame is the rubber: preset buttons set its size, the corner drags it.
+     Its clipping and radius stand for the tablet screen, nothing more. */
+  .frame { box-sizing: content-box; width: 800px; height: 1333px; resize: both; overflow: hidden;
+           background: #0C0E14; border-radius: 22px; border: 7px solid #0C0E14;
+           box-shadow: 0 26px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06) inset; }
+  .caption { margin: 14px 0 0; font-size: 11px; line-height: 14px; letter-spacing: .16em;
              text-transform: uppercase; color: #8A90A6; }
+  .caption b { color: #F2F4FA; font-weight: 700; }
   .dmap { flex: none; width: 300px; background: #2B2F3A; border-radius: 14px;
-          padding: 20px 20px 8px; border: 1px solid #383D4B; }
-  .dmap-title { font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
-                color: #8A90A6; margin-bottom: 14px; }
-  .dtopic { margin-bottom: 18px; }
-  .dtopic h3 { margin: 0 0 5px; font-size: 14px; font-weight: 700; color: #F2F4FA; }
-  .dtopic p { margin: 0; font-size: 12.5px; line-height: 1.55; color: #BFC5D6; }
-  .dtopic p.why { margin-top: 5px; color: #878DA1; }
+          padding: 20px 20px 10px; border: 1px solid #383D4B; }
+  .dmap-title { font-size: 11px; line-height: 14px; letter-spacing: .16em; text-transform: uppercase;
+                color: #8A90A6; margin-bottom: 12px; }
+  .dmap ul { list-style: none; margin: 0; padding: 0; }
+  .dmap li { margin: 0 0 9px; font-size: 12.5px; line-height: 19px; color: #BFC5D6; }
+  .dmap li b { display: inline-block; min-width: 26px; color: #F2F4FA; font-weight: 700; }
+  .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+  /* APP START */
+  /* Shared shell, copied from main-screen.html v0.23. Change it there first, then copy it here again. */
+  /* ============================================================
+     THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
+     Every colour, size, spacing, radius, opacity, shadow, weight and
+     line height below is a var() from _tokens.css v0.10 or a calc() over
+     them. Literal values are limited to 0, 1px hairlines, 50% for round
+     shapes, percentages and fr of a layout, em, ch, lh and cap ratios of
+     a token font size, keywords, SVG geometry, the 1200px breakpoint of
+     item 51, the 700px height of the compact step (item 70), the 400px
+     width of the compact card, the 1000px width of the compact landscape
+     card (v0.22) and the 520px width of the roomy card (item 71). Icons
+     are Lucide symbols (rule 10, item 69); an inline icon is 1em of its
+     text. A chevron's path ends
+     inside its 24-unit box (chevron-down at 18/24, chevron-right at
+     15/24, check at 20/24), so a negative em margin of that remainder
+     puts the drawn end, not the box, on the padding. Line boxes that set
+     a block's height are rounded up to whole pixels.
+     ============================================================ */
+  .app { position: relative; container-type: size; width: 100%; height: 100%;
+         overflow: hidden; background: var(--bg); background-image: var(--bg-grad);
+         font-family: var(--font); font-size: var(--t-body); font-weight: var(--w-medium);
+         line-height: var(--lh-body); color: var(--ink); }
+  /* .app is the container the queries measure: no padding, so its box is the
+     frame. .scr inside it carries the padding and the stack, and is the
+     containing block of the menus and the compass. */
+  .scr { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column;
+         gap: var(--gap);
+         padding: var(--s-4) var(--s-5) calc(var(--s-5) + env(safe-area-inset-bottom, 0px)); }
+  .app *, .app *::before, .app *::after { box-sizing: border-box; }
+  :where(.app) button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
+                        margin: 0; cursor: pointer; text-align: left; }
+  .app svg { display: block; }
+  .ic { width: 1em; height: 1em; flex: none; }
+  .iw { display: inline-flex; align-items: center; gap: var(--s-1); white-space: nowrap; }
+  /* tabular figures only where numbers stand in a column; rail labels are
+     centred one under another, so they keep proportional figures and their
+     ink keeps clear of the finger pad */
+  .rn, .rt, .cn, .ritem small { font-variant-numeric: tabular-nums; }
+
+  /* ---- top bar (items 1, 16) ---- */
+  .topbar { display: flex; align-items: center; gap: var(--s-3); flex: none; }
+  .city { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+          color: var(--ink); }
+  .pickwrap { anchor-name: --pick; }
+  .route, .sync { display: inline-flex; align-items: center; gap: var(--s-2);
+                  height: var(--tap-min); padding: 0 var(--s-4); background: var(--panel-strong);
+                  border: 1px solid var(--panel-edge); border-radius: var(--r-sm);
+                  box-shadow: var(--shadow); white-space: nowrap; }
+  .route { font-size: var(--t-label); font-weight: var(--w-heavy); }
+  .sync { margin-left: auto; font-size: var(--t-body); font-weight: var(--w-medium); }
+  .route .ic { margin-right: -0.25em; }
+  .sync .ic { margin-right: -0.375em; }
+  .dot { width: var(--s-2); height: var(--s-2); border-radius: 50%; background: var(--ok); flex: none; }
+
+  /* ---- menus (items 1, 60, 66): one build for both. Anchored --s-2 under
+     their control and snapped to whole pixels; a menu that does not fit
+     there moves up just enough to keep --s-5 and the safe-area inset from
+     the frame's bottom. The checking tool re-creates an open menu when a
+     preset or theme changes, as the app closes menus when the screen
+     turns, so the position never depends on the order of clicks. ---- */
+  @position-try --shift { top: auto; bottom: calc(var(--s-5) + env(safe-area-inset-bottom, 0px)); }
+  .rmenu, .pop { position: absolute; background: var(--panel-raised);
+                 border: 1px solid var(--panel-edge); border-radius: var(--r-md);
+                 box-shadow: var(--shadow-lift); padding: var(--s-2);
+                 position-try-fallbacks: --shift; }
+  .rmenu { z-index: 30; left: round(anchor(--pick left), 1px);
+           top: calc(anchor(--pick bottom) + var(--s-2)); width: var(--col-wide); }
+  /* the type menu is as wide as the pill, and at least as wide as its split
+     lines need on one line; sized, not inset, so a position fallback can apply */
+  .pop { z-index: 9; left: anchor(--pill left); top: calc(anchor(--pill bottom) + var(--s-2));
+         width: max(anchor-size(--pill width), calc(var(--col-wide) + 2 * var(--s-6))); }
+  .ritem, .opt { width: 100%; min-height: var(--tap-min); display: flex; align-items: center;
+                 gap: var(--s-3); padding: var(--s-2);
+                 border-radius: calc(var(--r-md) - var(--s-2) - 1px); }
+  .ritem b { flex: 1; font-size: var(--t-label); font-weight: var(--w-heavy); }
+  .ritem small { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2); }
+  .chk { width: 1em; height: 1em; flex: none; font-size: var(--t-label); color: var(--ink);
+         visibility: hidden; margin-right: -0.167em; }
+  .ritem.on, .opt.on { background: var(--active); }
+  .ritem.on .chk, .opt.on .chk { visibility: visible; }
+  .ritem.on small, .opt.on .ol small { color: var(--ink); }
+  .pt { font-size: var(--t-small); letter-spacing: calc(var(--s-1) / 2);
+        font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight);
+        padding: var(--s-2) var(--s-2) var(--s-3); }
+  .ol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
+  .ol b { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+
+  /* ---- body: the POI column beside the main area (items 51, 56); the
+     summary under the main area in portrait (item 3) ---- */
+  .body { position: relative; flex: 1; min-height: 0; display: grid; gap: var(--gap);
+          grid-template-columns: var(--col-narrow) minmax(0, 1fr);
+          grid-template-rows: minmax(0, 1fr) auto;
+          grid-template-areas: "col main" "col sum"; }
+  .colwrap { grid-area: col; position: relative; min-height: 0; display: flex; }
+  /* the rail's touch area also takes in the gap beside the column (item 57) */
+  .colwrap::after { content: ""; position: absolute; top: 0; bottom: 0; left: 100%;
+                    width: var(--gap); }
+  .col { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column;
+         background: var(--panel); border: 1px solid var(--panel-edge);
+         border-radius: var(--r-md); box-shadow: var(--shadow); overflow: hidden; }
+  .main { grid-area: main; min-width: 0; min-height: 0; anchor-name: --main;
+          display: flex; flex-direction: column; gap: var(--gap); }
+  /* the left group is a container: the card and the pill go compact when it is narrow */
+  .mleft { flex: none; display: flex; flex-direction: column; gap: var(--gap); min-width: 0;
+           container-type: inline-size; container-name: info; }
+  .mright { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  /* the summary is one balanced block; every "·" belongs to the unit before
+     it and a segment never breaks. Its line height is --lh-body rounded up to
+     an even number of pixels, so it centres in the action bar on a whole pixel
+     and the blocks around it land on whole pixels. The portrait copy
+     sits under the main area, the landscape copy inside the action bar. */
+  .summary { display: block; text-align: center; text-wrap: balance; column-gap: var(--s-1);
+             font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+             line-height: round(up, calc(var(--lh-body) * var(--t-small)), 2px);
+             min-height: 1lh; }
+  .summary span { white-space: nowrap; }
+  .summary .err { color: var(--err); font-weight: var(--w-bold); }
+  .sumport { grid-area: sum; }
+  .sumbar { display: none; flex: 1; min-width: 0; }
+
+  /* ---- mini-map, the column's header (item 58); on a short screen a
+     one-line grid button in its place (item 70) ---- */
+  .mmap { flex: none; width: 100%; padding: var(--s-3); background: var(--panel-strong);
+          border-bottom: 1px solid var(--line); display: flex; flex-direction: column;
+          align-items: center; }
+  .mm { display: flex; flex-direction: column; gap: var(--s-2); }
+  .dots { display: grid; grid-template-columns: repeat(20, var(--s-2)); gap: 1px; }
+  .dots i { display: block; width: var(--s-2); height: var(--s-2); background: var(--line); }
+  .dots i.done { background: var(--ok); }
+  .dots i.err { background: var(--err); }
+  .dots i.part { background: var(--ink-3); }
+  .dots i.nd { background: transparent; box-shadow: inset 0 0 0 1px var(--ink-2); }
+  .dots i.act { background: var(--side); box-shadow: 0 0 0 1px var(--side-ring); }
+  .mcap { width: 100%; display: flex; justify-content: space-between; align-items: center;
+          font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
+          line-height: var(--lh-tight); }
+  .mcap .ic, .mline .iw .ic { margin-right: -0.375em; }
+  .mline { display: none; width: 100%; align-items: center; gap: var(--s-2);
+           font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
+           line-height: var(--lh-tight); white-space: nowrap; }
+  .mline .gi { width: var(--s-5); height: var(--s-5); color: var(--ink); }
+  .mline .iw { margin-left: auto; }
+
+  /* ---- POI rows (items 2, 31, 40, 46, 56) and the index rail (57) ---- */
+  .colbody { flex: 1; display: flex; min-height: 0; position: relative; }
+  .list { flex: 1; min-width: 0; overflow: hidden;
+          mask-image: linear-gradient(var(--ink) calc(100% - var(--s-3)), transparent); }
+  .row { width: 100%; height: var(--row-h); display: flex; align-items: center; gap: var(--s-2);
+         padding: 0 var(--s-3); border-bottom: 1px solid var(--line); }
+  .rn { width: 3ch; flex: none; text-align: right; font-size: var(--t-row);
+        font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .rc { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
+  .rb { display: block; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
+        overflow: hidden; }
+  .rb i, .nb i, .cb i { display: block; height: 100%; background: var(--ink-3);
+                        border-radius: inherit; }
+  .rt { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+        line-height: var(--lh-tight); white-space: nowrap; }
+  .row.done { background: var(--ok-bg); }
+  .row.done .rn, .row.done .rt { color: var(--ok); }
+  .row.done .rb i { background: var(--ok); }
+  .row.err { background: var(--err-bg); box-shadow: inset var(--s-1) 0 0 0 var(--err); }
+  .row.err .rn, .row.err .rt { color: var(--err); }
+  .row.err .rb i { background: var(--err); }
+  .row.nd .rn, .row.nd .rt { color: var(--ink-2); }
+  .row.nd .rb { opacity: var(--o-off); }
+  /* item 40: the tint and the edge stay amber in every state; a done or error
+     row shows its state in the colour of its number, text and bar */
+  .row.active { background: var(--active); box-shadow: inset var(--s-1) 0 0 0 var(--active-line); }
+  .row.active .rn { color: var(--warn); }
+  .row.active .rt { color: var(--ink); font-weight: var(--w-heavy); }
+  .row.active.done .rn, .row.active.done .rt { color: var(--ok); }
+  .row.active.err .rn, .row.active.err .rt { color: var(--err); }
+  /* rail labels sit on a linear track inset by --s-2 and half a label, so the
+     first and last keep clear of the hairline and the corner; the finger pad
+     spans the rail's inner width */
+  .rail { position: relative; width: var(--s-6); flex: none; border-left: 1px solid var(--line);
+          background: var(--panel-strong); }
+  .rail span { position: absolute; left: 0; right: 0; text-align: center;
+               transform: translateY(-50%); font-size: var(--t-small);
+               font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight); }
+  .finger { position: absolute; left: 0; right: 0; height: var(--tap-min);
+            border-radius: var(--r-md); background: var(--man-soft);
+            box-shadow: inset 0 0 0 1px var(--line); transform: translateY(-50%); }
+  .bubble { position: absolute; right: calc(var(--s-6) + var(--s-2)); min-width: var(--tap-min);
+            height: var(--tap-min); padding: 0 var(--s-4); border-radius: var(--r-md);
+            background: var(--disc); color: var(--disc-glyph); font-size: var(--t-title);
+            font-weight: var(--w-heavy); display: flex; align-items: center;
+            justify-content: center; box-shadow: var(--shadow-lift);
+            transform: translateY(-50%); z-index: 12; }
+  /* "Add routes in Settings" (item 35): the action bar's button look, its
+     radius concentric with the column's */
+  .colbtn { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2);
+            margin: var(--s-3); width: calc(100% - 2 * var(--s-3)); min-height: var(--tap-min);
+            padding: var(--s-3) var(--s-4); font-size: var(--t-body); font-weight: var(--w-bold);
+            line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px);
+            text-wrap: balance; color: var(--ink);
+            background: var(--panel-strong); border: 1px solid var(--line);
+            border-radius: calc(var(--r-md) - var(--s-3) - 1px); }
+  .colbtn .ic { margin-right: -0.375em; }
+
+  /* ---- head (items 4, 19, 43). The number's box is trimmed to its cap
+     height and baseline and rounded up to a whole pixel; the counter column
+     keeps --s-3 between its trimmed lines, so its cap top and last baseline
+     are level with the number's. In portrait the head keeps room for the
+     compass, which rises --gap minus --s-2 above the main area: --s-2 below
+     the top bar and --s-2 above the type pill. ---- */
+  .head { display: flex; flex-wrap: nowrap; align-items: flex-start; gap: var(--s-4);
+          min-height: calc(var(--compass) - 2 * var(--gap) + 2 * var(--s-2));
+          padding-right: calc(var(--compass) + var(--s-2)); }
+  /* ink shifted left by the digits' side bearing: Manrope ExtraBold sets a
+     "1" 3px and a "5" 5px in at 92px, so the midpoint keeps both within 1px */
+  .big { flex: none; font-size: var(--t-num); line-height: var(--lh-tight);
+         font-weight: var(--w-heavy); text-box: trim-both cap alphabetic;
+         height: round(up, 1cap, 1px); margin-left: -0.0435em; }
+  .big.dash { color: var(--ink-3); }
+  .hcol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-3); }
+  .plabel { font-size: var(--t-small); letter-spacing: calc(var(--s-1) / 2);
+            font-weight: var(--w-bold); color: var(--ink-2); line-height: var(--lh-tight);
+            text-box: trim-both cap alphabetic; }
+  .cnt { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+         text-wrap: balance; text-box: trim-both cap alphabetic; }
+  .rest { font-size: var(--t-body); font-weight: var(--w-medium); color: var(--ink-2);
+          line-height: var(--lh-tight); text-box: trim-both cap alphabetic; }
+  .rest span { white-space: nowrap; }
+  .rest.ok { color: var(--ok); font-weight: var(--w-bold); }
+  .compass { position: absolute; right: anchor(--main right);
+             top: calc(anchor(--main top) - (var(--gap) - var(--s-2))); width: var(--compass);
+             height: var(--compass); color: var(--ink); z-index: 2; }
+  .compass .ring { fill: none; stroke: var(--ink-2); }
+  .compass text { font-size: var(--t-small); font-weight: var(--w-heavy); fill: currentColor; }
+  .compass .needle { fill: var(--side); }
+  .compass .needle2 { fill: var(--side-ring); }
+  .compass .hub { fill: currentColor; }
+
+  /* ---- type pill and its menu (items 46, 60, 69) ---- */
+  .typewrap { anchor-name: --pill; }
+  .typebtn { width: 100%; display: flex; align-items: center; gap: var(--s-3);
+             min-height: var(--tap-min); padding: var(--s-2) var(--s-4);
+             background: var(--panel-strong); border: 1px solid var(--panel-edge);
+             border-radius: var(--r-md); box-shadow: var(--shadow); }
+  /* the tile is a map of the maneuvers: three fixed slots, Left, Straight,
+     Right; an absent maneuver leaves its slot empty. One size for every
+     type (the pill's inner height less its two hairlines), radius concentric
+     with the pill's. */
+  .ticon { flex: none; display: grid; grid-template-columns: repeat(3, var(--s-5));
+           gap: var(--s-1); justify-content: center; align-content: center;
+           width: calc(3 * var(--s-5) + 2 * var(--s-1) + 2 * var(--s-2));
+           height: calc(var(--tap-min) - 2 * (var(--s-2) + 1px));
+           border-radius: calc(var(--r-md) - var(--s-2) - 1px); background: var(--disc);
+           color: var(--disc-glyph); }
+  .ticon svg { width: var(--s-5); height: var(--s-5); }
+  .ticon .sl { grid-column: 1; }
+  .ticon .ss, .ticon .sb { grid-column: 2; }
+  .ticon .sr { grid-column: 3; }
+  .typebtn.nd { background: transparent; border: 1px dashed var(--ink-2); box-shadow: none; }
+  .typebtn.nd .ticon, .ticon.nd { background: transparent;
+                                  box-shadow: inset 0 0 0 1px var(--ink-2); color: var(--ink-2); }
+  .typebtn.off { opacity: var(--o-off); }
+  .tl { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
+  .tl b { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+          white-space: nowrap; }
+  .tl small, .ol small { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--s-1);
+                         row-gap: var(--s-1); font-size: var(--t-small); font-weight: var(--w-bold);
+                         color: var(--ink-2); line-height: var(--lh-tight); }
+  .tchg { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--t-small);
+          font-weight: var(--w-heavy); color: var(--ink-2); white-space: nowrap; }
+  .tchg .ic { margin-right: -0.25em; }
+
+  /* ---- "Still needed" card (item 39). A tile is its label, its value and
+     its bar (v0.32). The text lines are trimmed to cap height and baseline
+     and rounded up, so the inset above the label and the inset below the
+     bar are both the tile's padding. ---- */
+  .card { background: var(--panel); border: 1px solid var(--panel-edge);
+          border-radius: var(--r-md); box-shadow: var(--shadow); padding: var(--s-4);
+          display: flex; flex-direction: column; gap: var(--s-3); }
+  .sph { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-2); }
+  .sph.sides { margin-top: var(--s-3); }
+  .spt { font-size: var(--t-small); letter-spacing: calc(var(--s-1) / 2);
+         font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight); }
+  .spn { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
+         line-height: var(--lh-tight); }
+  .need { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); }
+  .nc { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0;
+        padding: var(--s-3); border-radius: var(--r-sm); background: var(--panel-strong); }
+  .nh { display: block; font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
+        line-height: var(--lh-tight); white-space: nowrap; text-box: trim-both cap alphabetic;
+        height: round(up, 1cap, 1px); }
+  /* the inline icon sits centred on the cap height: its bottom 0.15em under the baseline */
+  .nh .ic { display: inline-block; vertical-align: -0.15em; margin-right: var(--s-1); }
+  .nv { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+        white-space: nowrap; text-box: trim-both cap alphabetic; height: round(up, 1cap, 1px); }
+  .nv small { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
+              margin-left: var(--s-1); }
+  /* "Done" is a label, not a number: smaller, on the numbers' baseline */
+  .nv .dn { font-size: var(--t-label); }
+  .nb { display: block; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
+        overflow: hidden; }
+  .nc.ok .nv { color: var(--ok); }
+  .nc.ok .nb i { background: var(--ok); }
+  .nc.over .nv { color: var(--warn); }
+  .nc.over .nb i { background: var(--warn); }
+  .nc.off .nv, .nc.off .nb { opacity: var(--o-zero); }
+  .sides4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-2); }
+  /* Manrope sets the digits' cap-to-baseline box about 1.3px above the centre
+     of its line box, so a quarter step of padding moves from top to bottom */
+  .sv { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-2);
+        min-width: 0; border-radius: var(--r-sm);
+        padding: calc(var(--s-2) - var(--s-1) / 4) var(--s-3) calc(var(--s-2) + var(--s-1) / 4);
+        background: var(--side-soft); }
+  .svl { font-size: var(--t-label); font-weight: var(--w-heavy); color: var(--warn);
+         line-height: var(--lh-tight); }
+  .svv { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .sv.z .svv { opacity: var(--o-zero); }
+
+  /* ---- discs (items 5, 6, 10, 19, 26, 46). The closed cluster sits in the
+     middle of its free space. Where the zone is too short for centred discs
+     plus one caption line, the cluster rises just enough for the caption to
+     keep --s-4 from the action bar. The open compass is centred too and, where
+     it does not fit, keeps --s-2 from the bar and rises over the card. The
+     placement depends on the zone's height only, never on a caption, and is
+     rounded to a whole pixel. ---- */
+  .stagezone { flex: 1; min-height: 0; position: relative; }
+  .stagebox { position: absolute; left: 0; right: 0; height: calc(2 * var(--disc-man));
+              top: round(max(0px, min(calc((100% - 2 * var(--disc-man)) / 2),
+                                      calc(100% + var(--gap) - var(--s-4) - 2 * var(--disc-man)
+                                           - (var(--s-4) + round(up, calc(var(--lh-body) * var(--t-body)), 1px) + 2 * var(--s-1))))), 1px); }
+  .stagebox:has(.stage.open) { height: calc(2 * var(--side-reach) + var(--disc-side));
+              top: round(min(calc((100% - (2 * var(--side-reach) + var(--disc-side))) / 2),
+                             calc(100% + var(--gap) - var(--s-2) - var(--s-1)
+                                  - (2 * var(--side-reach) + var(--disc-side)))), 1px); }
+  .stage { position: relative; margin: 0 auto; height: 100%;
+           width: calc(2 * var(--side-reach) + 2 * var(--s-2) + var(--disc-man)); }
+  .disc { position: absolute; left: 50%; top: 50%; width: var(--disc-man); height: var(--disc-man);
+          border-radius: 50%; transform: translate(-50%, -50%); display: flex;
+          align-items: center; justify-content: center; background: var(--disc);
+          color: var(--disc-glyph); box-shadow: var(--shadow-lift); z-index: 3; }
+  .disc svg { width: 56%; height: 56%; }
+  .disc.l { left: calc(50% - var(--side-reach) - var(--s-2));
+            top: calc(50% + (var(--side-reach) - var(--s-2)) / 2); }
+  .disc.st { top: calc(50% - (var(--side-reach) - var(--s-2)) / 2); }
+  .disc.r { left: calc(50% + var(--side-reach) + var(--s-2));
+            top: calc(50% + (var(--side-reach) - var(--s-2)) / 2); }
+  .stage.open .disc.on { left: 50%; top: 50%; }
+  .stage.open .disc:not(.on) { visibility: hidden; }
+  .disc.locked { opacity: var(--o-locked); box-shadow: var(--shadow); }
+  .side { position: absolute; left: 50%; top: 50%; width: var(--disc-side); height: var(--disc-side);
+          border-radius: 50%; transform: translate(-50%, -50%); display: flex;
+          align-items: center; justify-content: center; font-size: var(--t-title);
+          font-weight: var(--w-heavy); line-height: var(--lh-tight); background: var(--side);
+          color: var(--side-glyph); box-shadow: 0 0 0 var(--s-1) var(--side-ring), var(--shadow-lift);
+          z-index: 4; }
+  .side-n { top: calc(50% - var(--side-reach)); }
+  .side-s { top: calc(50% + var(--side-reach)); }
+  .side-w { left: calc(50% - var(--side-reach)); }
+  .side-e { left: calc(50% + var(--side-reach)); }
+  /* the caption sits --s-4 under the lowest disc, centred, on one line, as
+     wide as its text up to the zone's width plus --s-2 on each side, so a
+     wider font rendering never wraps it */
+  .lock { position: absolute; left: 50%; top: calc(100% + var(--s-4)); translate: -50% 0;
+          width: max-content; max-width: calc(100% + 2 * var(--s-2)); text-wrap: balance;
+          font-size: var(--t-body); font-weight: var(--w-bold); border-radius: var(--r-sm);
+          padding: var(--s-1) var(--s-3); text-align: center;
+          line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px); }
+  .lock.ok { color: var(--ok); background: var(--ok-bg); }
+  .lock.err { color: var(--err); background: var(--err-bg); }
+  .lock.info { color: var(--ink-2); background: var(--panel-strong); }
+
+  /* ---- action bar (items 3, 8, 9, 10, 26, 27, 42, 51): buttons concentric
+     with the bar; in landscape the bar runs under the whole main area and
+     holds the summary; a dimmed control carries its caption ---- */
+  .bar { flex: none; display: flex; align-items: center; gap: var(--s-2); padding: var(--s-2);
+         background: var(--panel); border: 1px solid var(--panel-edge);
+         border-radius: var(--r-md); box-shadow: var(--shadow); }
+  .btn { display: inline-flex; align-items: center; height: var(--tap-min);
+         padding: 0 var(--s-4); font-size: var(--t-body); font-weight: var(--w-bold);
+         background: var(--panel-strong); border: 1px solid var(--line);
+         border-radius: calc(var(--r-md) - var(--s-2) - 1px); white-space: nowrap; }
+  .btn.off { opacity: var(--o-off); }
+  .btn.cancel { margin-left: auto; }
+  .barnote { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+             line-height: var(--lh-tight); white-space: nowrap; }
+
+  /* ---- overlays: dimmed background, dialogs (item 63), the grid (59, 66).
+     Raised surfaces in both themes; dialogs snap to whole pixels. ---- */
+  .scrim { position: absolute; inset: 0; z-index: 25; background: var(--scrim); }
+  .scrim.top { z-index: 50; }
+  .dlg { position: absolute; z-index: 51; left: round(50%, 1px); top: round(50%, 1px);
+         translate: round(-50%, 1px) round(-50%, 1px);
+         width: calc(100% - 2 * var(--s-6)); max-width: calc(var(--col-narrow) + var(--col-wide));
+         background: var(--panel-raised); border: 1px solid var(--panel-edge);
+         border-radius: var(--r-lg); box-shadow: var(--shadow-lift); padding: var(--s-5);
+         display: flex; flex-direction: column; gap: var(--s-4); }
+  .dtitle { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .dchip { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--s-1);
+           padding: var(--s-2) var(--s-3); border-radius: var(--r-sm); background: var(--man-soft);
+           font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .dbody { font-size: var(--t-body); font-weight: var(--w-medium);
+           line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px);
+           text-wrap: balance; color: var(--ink-2); }
+  .dbtns { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); margin-top: var(--s-2); }
+  .dbtn { height: calc(var(--tap-min) + var(--s-2)); border-radius: var(--r-sm);
+          font-size: var(--t-label); font-weight: var(--w-heavy); background: var(--man-soft);
+          border: 1px solid var(--line); display: inline-flex; align-items: center;
+          justify-content: center; }
+  .dbtn.danger { background: var(--danger); border-color: var(--danger); color: var(--on-danger); }
+  .dbtn.primary { background: var(--disc); border-color: var(--disc); color: var(--disc-glyph); }
+  .sheet { position: absolute; inset: var(--s-4); z-index: 26; background: var(--panel-raised);
+           border: 1px solid var(--panel-edge); border-radius: var(--r-lg);
+           box-shadow: var(--shadow-lift); padding: var(--s-5); display: flex;
+           flex-direction: column; gap: var(--s-3); }
+  .shead { display: flex; align-items: center; gap: var(--s-3); }
+  .stt { display: flex; align-items: baseline; gap: var(--s-3); min-width: 0; }
+  .xbtn { width: var(--tap-min); height: var(--tap-min); flex: none; display: flex;
+          align-items: center; justify-content: center; border-radius: 50%;
+          background: var(--man-soft); border: 1px solid var(--line); color: var(--ink); }
+  .xbtn svg { width: var(--s-5); height: var(--s-5); }
+  .stitle { font-size: var(--t-title); font-weight: var(--w-heavy); color: var(--ink);
+            line-height: var(--lh-tight); white-space: nowrap; }
+  .sroute { font-size: var(--t-body); font-weight: var(--w-bold); white-space: nowrap; }
+  .legend { display: flex; gap: var(--s-4); flex-wrap: wrap; font-size: var(--t-small);
+            font-weight: var(--w-bold); color: var(--ink-2); }
+  .lg { display: inline-flex; align-items: center; gap: var(--s-2); }
+  /* six states, as the mini-map's squares: each tile and its swatch carry
+     the state's colour on the border, so any two differ in fill or border;
+     "not started" has no fill, so it never reads as a hole */
+  .sw { width: var(--t-small); height: var(--t-small); border-radius: calc(var(--r-sm) / 3);
+        display: inline-block; background: transparent; border: 1px solid var(--line); }
+  .sw.part, .cell.part { background: var(--man-soft); border-color: var(--ink-2); }
+  .sw.done, .cell.done { background: var(--ok-bg); border-color: var(--ok); }
+  .sw.err, .cell.err { background: var(--err-bg); border-color: var(--err); }
+  .sw.nd, .cell.nd { background: transparent; border: 1px dashed var(--ink-2); }
+  .sw.act, .cell.active { background: var(--active); border-color: var(--active-line); }
+  .sw.act { box-shadow: inset 0 0 0 1px var(--active-line); }
+  .grid { flex: 1; min-height: 0; overflow: hidden; display: grid; align-content: start;
+          grid-template-columns: repeat(10, minmax(0, 1fr)); grid-auto-rows: var(--row-h);
+          gap: var(--s-2);
+          mask-image: linear-gradient(var(--ink) calc(100% - var(--s-3)), transparent); }
+  .cell { border-radius: var(--r-sm); background: transparent; border: 1px solid var(--line);
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          gap: var(--s-2); }
+  .cn { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .cb { width: 60%; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
+        overflow: hidden; display: block; }
+  .cell.done .cn { color: var(--ok); }
+  .cell.done .cb i { background: var(--ok); }
+  .cell.err .cn { color: var(--err); }
+  .cell.err .cb i { background: var(--err); }
+  .cell.nd .cn { color: var(--ink-2); }
+  .cell.active { box-shadow: inset 0 0 0 var(--s-1) var(--active-line); }
+  .cell.active .cn { color: var(--warn); }
+
+  /* ---- item 51: the column is wide from 1200px; the main area follows the
+     shape of the app: side by side when wider than tall, stacked when taller.
+     In landscape the action bar runs under both groups and holds the summary,
+     and the column runs down to the bottom. These rules come last so they win
+     over the component rules above. ---- */
+  @container (min-width: 1200px) {
+    .body { grid-template-columns: var(--col-wide) minmax(0, 1fr); }
+    /* the wide column's mini-map uses larger squares, still 20 to a row */
+    .dots { grid-template-columns: repeat(20, var(--s-3)); }
+    .dots i { width: var(--s-3); height: var(--s-3); }
+  }
+  @container (orientation: landscape) {
+    .body { grid-template-rows: minmax(0, 1fr); grid-template-areas: "col main"; }
+    .sumport { display: none; }
+    .sumbar { display: block; }
+    .main { display: grid; column-gap: var(--gap); row-gap: var(--gap);
+            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-rows: minmax(0, 1fr) auto;
+            grid-template-areas: "left zone" "bar bar"; }
+    .mleft { grid-area: left; }
+    .mright { grid-area: zone; width: calc(2 * var(--side-reach) + 2 * var(--s-2) + var(--disc-man)); }
+    .bar { grid-area: bar; }
+    .head { padding-right: 0; min-height: 0; }
+    .compass { top: anchor(--main top); }
+    /* the free space runs from the top of the main area to the bar */
+    .stagebox { top: round(max(0px, min(calc((100% + var(--gap) - 2 * var(--disc-man)) / 2),
+                                        calc(100% + var(--gap) - var(--s-4) - 2 * var(--disc-man)
+                                             - (var(--s-4) + round(up, calc(var(--lh-body) * var(--t-body)), 1px) + 2 * var(--s-1))))), 1px); }
+    .stagebox:has(.stage.open) {
+      top: round(min(calc((100% + var(--gap) - (2 * var(--side-reach) + var(--disc-side))) / 2),
+                     calc(100% + var(--gap) - var(--s-2) - var(--s-1)
+                          - (2 * var(--side-reach) + var(--disc-side)))), 1px); }
+  }
+  /* the compact card and pill: beside the discs the left group can be
+     narrow; the card and its tiles tighten, columns size to their content so
+     every line keeps to one line, and the pill shows its chevron without the
+     word and its split without the passes prefix */
+  @container info (max-width: 400px) {
+    .card { padding: var(--s-3); }
+    .need { grid-template-columns: repeat(3, auto); }
+    .nc { padding: var(--s-2); }
+    .need, .sides4 { gap: var(--s-1); }
+    .sv { padding-left: var(--s-2); padding-right: var(--s-2); gap: var(--s-1); }
+    .tchg span, .tl small .tp { display: none; }
+  }
+  /* ---- the compact step (item 70): on a short screen display text shrinks
+     and the mini-map becomes a one-line grid button; discs, the compass and
+     tap targets keep their size ---- */
+  @container (max-height: 700px) {
+    .big { font-size: var(--t-num-compact); }
+    .cnt { font-size: var(--t-label); }
+    .rest { font-size: var(--t-small); }
+    .nv, .svv { font-size: var(--t-label); }
+    /* half a step between the counter lines keeps them level with the smaller number */
+    .hcol { gap: calc(var(--s-3) / 2); }
+    .mmap { flex-direction: row; align-items: center; height: var(--tap-min);
+            padding: 0 var(--s-3); }
+    .mm { display: none; }
+    .mline { display: flex; }
+  }
+  /* ---- the compact landscape step (item 70, v0.32): the side margins
+     become --s-4, the gaps beside the column and the discs --s-3 and the
+     closed side discs sit --s-2 nearer to Straight. The disc size, the
+     vertical offsets and the open compass do not change. ---- */
+  @container (max-height: 700px) and (orientation: landscape) {
+    .scr { padding-left: var(--s-4); padding-right: var(--s-4); }
+    .body { column-gap: var(--s-3); }
+    .main { column-gap: var(--s-3); }
+    .mright, .stage { width: calc(2 * var(--side-reach) + var(--disc-man)); }
+    .disc.l { left: calc(50% - var(--side-reach)); }
+    .disc.r { left: calc(50% + var(--side-reach)); }
+    /* the caption keeps one line and its spare width in the narrower zone */
+    .lock { padding-left: var(--s-2); padding-right: var(--s-2); }
+  }
+  /* with that width the card and its tiles keep their normal paddings
+     instead of the compact ones: from the landscape minimum of 1000px the
+     left group is at least 370px wide, enough for every label, value and
+     chip to keep its spare width. In a frame dragged narrower the compact
+     card stays. The pill keeps its compact look. */
+  @container (max-height: 700px) and (orientation: landscape) and (min-width: 1000px) {
+    .card { padding: var(--s-4) var(--s-3); }
+    /* --s-4 between the two sections over the card's --s-3 row gap */
+    .sph.sides { margin-top: calc(var(--s-4) - var(--s-3)); }
+    .need { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); }
+    .nc { padding: var(--s-3); }
+    .sides4 { gap: var(--s-2); }
+    .sv { padding-left: var(--s-3); padding-right: var(--s-3); gap: var(--s-2); }
+  }
+  /* ---- the roomy card (item 71, v0.33): on a tall landscape screen the
+     "Still needed" card steps up one size, the mirror of the compact
+     step, so it keeps its 1000 × 600 proportion beside the discs. Only
+     its text sizes and paddings change. Where the left group is narrower
+     than 520px the larger values would lose their spare width, so the
+     normal card stays. ---- */
+  @container (orientation: landscape) and (height > 700px) {
+    @container info (width >= 520px) {
+      .card { padding: var(--s-5); gap: var(--s-4); }
+      /* --s-5 between the sections: the card's --s-4 gap plus --s-2 */
+      .sph.sides { margin-top: var(--s-2); }
+      .spt, .spn { font-size: var(--t-body); }
+      .need, .sides4 { gap: var(--s-3); }
+      .nc { padding: var(--s-4); gap: var(--s-3); }
+      .nh { font-size: var(--t-body); }
+      .nv { font-size: var(--t-stat); }
+      .nv small { font-size: var(--t-body); margin-left: var(--s-2); }
+      .nv .dn { font-size: var(--t-title); }
+      .nb { height: var(--s-2); }
+      /* taller chips, the same text: the sides are secondary */
+      .sv { padding: calc(var(--s-3) - var(--s-1) / 4) var(--s-4)
+                     calc(var(--s-3) + var(--s-1) / 4); }
+    }
+  }
 
   /* ============================================================
-     SCREEN CONTENT: tokens only
-     Everything below styles what is inside the device frame.
-     No hardcoded colors, radii, fonts or shadows may appear here
-     — only var(--…) from _tokens.css v0.5.
-
-     Every class below is work-* or hist-* and is used for exactly one
-     purpose in this file; nothing reuses a name from another element.
+     HISTORY (screens.md items 12, 13, 14, 38, 41, 44, 45, 47, 48, 61,
+     63, 66). The panel fills the main area of the shell above and takes
+     the column's surface, so the two read as a pair. Tokens only, as
+     the canon note above says.
      ============================================================ */
-  .screen { width: 1000px; height: 600px; position: relative; overflow: hidden;
-            border-radius: 22px; background: var(--bg);
-            background-image: var(--bg-grad);
-            font-family: var(--font); color: var(--ink); }
-
-  /* ---- the working screen showing through, dimmed ---- */
-  .work-under { position: absolute; left: 0; top: 0; width: 100%; height: 100%;
-                display: flex; opacity: .45; }
-  .work-col { width: 330px; flex: none; display: flex; flex-direction: column;
-              background: var(--panel); border-right: 1px solid var(--line); }
-  .work-route { display: flex; align-items: center; justify-content: space-between;
-                margin: 12px; padding: 10px 14px; min-height: var(--tap-min);
-                font-size: 18px; font-weight: 700; color: var(--ink);
-                background: var(--panel-strong); border: 1px solid var(--panel-edge);
-                border-radius: var(--r-sm); }
-  .work-chev { font-size: 13px; color: var(--ink-3); }
-  .work-list { flex: 1; overflow: hidden; border-top: 1px solid var(--line); }
-  .work-row { display: flex; align-items: center; gap: 10px;
-              height: var(--tap-min); padding: 0 14px; background: var(--panel);
-              border-bottom: 1px solid var(--line); }
-  .work-num { width: 30px; flex: none; text-align: right; font-size: 13px;
-              font-weight: 600; color: var(--ink); }
-  /* the active POI reads the same here as on the working screen itself:
-     tint, 4px edge, amber number, no badge (main-screen.html v0.12) */
-  .work-active { background: var(--active);
-                 box-shadow: inset 4px 0 0 0 var(--active-line); }
-  .work-active .work-num { color: var(--warn); }
-  .work-bar { flex: 1; height: 5px; background: var(--line);
-              border-radius: var(--r-sm); overflow: hidden; }
-  .work-bar i { display: block; height: 100%; background: var(--ink-3); }
-
-  /* ---- the History panel: glass, panel level ---- */
-  .hist-panel { position: absolute; right: 0; top: 0; width: 660px; height: 600px;
-                display: flex; flex-direction: column; padding: 16px 20px;
-                background: var(--panel-strong);
-                backdrop-filter: blur(var(--blur));
-                -webkit-backdrop-filter: blur(var(--blur));
-                border-left: 1px solid var(--line);
-                box-shadow: var(--shadow-lift); }
-  .hist-head { display: flex; align-items: center; gap: 14px; flex: none;
-               min-height: var(--tap-min); }
-  .hist-title { font-size: 20px; font-weight: 700; color: var(--ink); }
-  .hist-seg { margin-left: auto; display: inline-flex; align-items: center;
-              padding: 3px; background: var(--panel); border: 1px solid var(--line);
-              border-radius: var(--r-sm); }
-  .hist-seg-on { display: inline-flex; align-items: center; height: var(--tap-min);
-                 padding: 0 16px; font-size: 13px; font-weight: 700;
-                 color: var(--side-glyph); background: var(--side);
-                 border-radius: var(--r-sm); }
-  .hist-seg-off { display: inline-flex; align-items: center; height: var(--tap-min);
-                  padding: 0 16px; font-size: 13px; font-weight: 600;
-                  color: var(--ink-2); }
-  .hist-close { display: inline-flex; align-items: center; justify-content: center;
-                width: var(--tap-min); height: var(--tap-min); font-size: 16px;
-                color: var(--ink); background: var(--panel);
-                border: 1px solid var(--panel-edge); border-radius: var(--r-sm); }
-  /* screens.md item 41: the sub-header ranks its facts instead of listing them,
-     in the same chip language the working screen uses for its counters — amber
-     for the thing that says where you are, quiet text for context, a neutral
-     chip for a total. */
-  .hist-sub { flex: none; margin-top: 10px; display: flex; align-items: center;
-              gap: 10px; }
-  .hist-chip { display: inline-flex; align-items: baseline; gap: 6px;
-               padding: 4px 10px; border-radius: var(--r-sm); }
-  .hist-chip-label { font-size: 11px; font-weight: 700; line-height: 1; }
-  .hist-chip-value { font-size: 15px; font-weight: 700; line-height: 1;
-                     color: var(--ink); }
-  .hist-chip-amber { background: var(--side-soft); }
-  .hist-chip-amber .hist-chip-label { color: var(--warn); }
-  .hist-chip-neutral { background: var(--man-soft); }
-  .hist-chip-neutral .hist-chip-label { color: var(--ink-2); }
-  .hist-context { font-size: 13px; color: var(--ink-3); }
-  .hist-note { flex: none; margin-top: 10px; padding: 8px 14px; font-size: 13px;
-               font-weight: 700; color: var(--warn); background: var(--warn-bg);
-               border-radius: var(--r-sm); }
-
-  /* ---- the list: translucent rows, NEVER blurred ---- */
-  .hist-list { flex: none; margin-top: 12px; overflow: hidden; }
-  /* whole-route scope: the height is an exact multiple of the row pitch, so the
-     strip always ends on a complete row while further rows sit beyond the clip.
-     8 rows x 48px + 7 gaps x 5px = 419px — one row fewer than before, to make
-     room for the footer this scope now carries too. */
-  .hist-list-tall { height: 419px; }
-  .hist-row { display: flex; align-items: center; gap: 12px;
-              height: 48px; padding: 0 14px; background: var(--panel);
-              border: 1px solid var(--line); border-radius: var(--r-sm); }
-  .hist-row + .hist-row { margin-top: 5px; }
-  /* the side carries the extra weight and size; the time keeps its own, because
-     it is the left edge of every row and holds the list's rhythm. Weakening it
-     (v0.5) left the rows without an anchor. */
-  .hist-time { width: 46px; flex: none; font-size: 14px; font-weight: 700;
-               color: var(--ink); }
-  .hist-poi { width: 56px; flex: none; font-size: 13px; font-weight: 700;
-              color: var(--ink-2); }
-  .hist-arrow { flex: none; display: inline-flex; align-items: center;
-                color: var(--ink); }
-  .hist-side { flex: 1; font-size: 16px; font-weight: 700; color: var(--ink); }
-  .hist-state { flex: none; font-size: 12px; font-weight: 700; }
-  .hist-waiting { color: var(--warn); }
-  .hist-sent { color: var(--ink-3); }
-  .hist-del { display: inline-flex; align-items: center; flex: none;
-              height: var(--tap-min); padding: 0 16px; font-size: 13px;
-              font-weight: 600; color: var(--err); background: var(--err-bg);
-              border: 1px solid var(--line); border-radius: var(--r-sm); }
-  .hist-gone { opacity: .5; }
-  .hist-gone .hist-side, .hist-gone .hist-time { text-decoration: line-through; }
-  .hist-deleted { flex: none; font-size: 13px; font-weight: 700;
-                  color: var(--ink-3); }
-  .hist-queued { flex: none; font-size: 11px; color: var(--ink-3); }
-  .hist-foot { flex: none; margin-top: auto; padding-top: 12px; font-size: 12px;
-               color: var(--ink-3); }
-  /* ==================== END SCREEN CONTENT ==================== */
+  .hist { flex: 1; min-height: 0; grid-area: 1 / 1 / -1 / -1; position: relative;
+          display: flex; flex-direction: column; gap: var(--s-3); padding: var(--s-4);
+          background: var(--panel); border: 1px solid var(--panel-edge);
+          border-radius: var(--r-md); box-shadow: var(--shadow); }
+  /* header: the round close button (item 66), the title, the scope control
+     (item 12), a segmented control in the iOS style: a soft track with --s-1
+     of inset, the chosen segment raised; radii concentric; the segments
+     --s-2 apart so each is its own tap target, both as wide as the wider */
+  .hh { flex: none; display: flex; align-items: center; gap: var(--s-3); }
+  .ht { flex: 1; min-width: 0; margin: 0; font-size: var(--t-title); font-weight: var(--w-heavy);
+        line-height: var(--lh-tight); white-space: nowrap; }
+  .seg { flex: none; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--s-2);
+         padding: var(--s-1); background: var(--man-soft); border-radius: var(--r-md); }
+  .sg { height: var(--tap-min); min-width: calc(var(--tap-min) + var(--s-6)); padding: 0 var(--s-4);
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: var(--t-body); font-weight: var(--w-heavy); color: var(--ink-2);
+        border-radius: calc(var(--r-md) - var(--s-1)); white-space: nowrap; }
+  .sg.on { background: var(--panel-raised); box-shadow: var(--shadow); color: var(--ink); }
+  /* sub-header (item 41): amber chip, quiet context, neutral chip */
+  .hsub { flex: none; display: flex; align-items: center; gap: var(--s-3); }
+  .chip { flex: none; display: inline-flex; align-items: center; padding: var(--s-1) var(--s-3);
+          border-radius: var(--r-sm); background: var(--man-soft); color: var(--ink);
+          font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+          white-space: nowrap; }
+  .chip.amber { background: var(--side-soft); color: var(--warn); }
+  .hctx { flex: 1; min-width: 0; font-size: var(--t-small); font-weight: var(--w-bold);
+          color: var(--ink-2); line-height: var(--lh-tight); white-space: nowrap; }
+  /* queue line (item 13), only while removals are queued */
+  .hq { flex: none; display: flex; align-items: center; gap: var(--s-2); font-size: var(--t-small);
+        font-weight: var(--w-bold); color: var(--ink-2); line-height: var(--lh-tight);
+        white-space: nowrap; }
+  .hq .dot { background: var(--warn); }
+  /* the sync control's dot follows the queue: waiting in the warning colour
+     (item 33), a refused pass in the error colour (item 47) */
+  .sync.wait .dot { background: var(--warn); }
+  .sync.bad .dot { background: var(--err); }
+  /* the list: a grid whose columns are shared by every row, so the POI
+     number and the time each sit in one fixed slot as wide as the widest. A
+     row element has no box of its own (display: contents): its lines are
+     items of the list's grid and the subgrid reaches every one of them. The
+     first line is --row-h tall with a hairline, as the POI rows beside it;
+     its content is --tap-min tall, --s-1 under the row's top, so the "Delete"
+     button and the texts land on whole pixels. The texts share a baseline
+     inside their own block; each is trimmed to its cap height and baseline,
+     so the block's centre is the ink's centre. A whole row sits at the top
+     edge, the cut row at the bottom fades (item 56). */
+  .hlist { flex: 1; min-height: 0; overflow: hidden; overflow-anchor: none; display: grid; align-content: start;
+           column-gap: var(--s-2);
+           grid-template-columns: [time] max-content [side] minmax(0, 1fr) [label] max-content [act] max-content;
+           mask-image: linear-gradient(var(--ink) calc(100% - var(--s-3)), transparent); }
+  .hlist[data-scope="route"] { grid-template-columns: [num] max-content [time] max-content [side] minmax(0, 1fr) [label] max-content [act] max-content; }
+  .hlist.end { mask-image: none; padding-bottom: var(--row-h); }
+  .hr { display: contents; }
+  .hl1 { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center;
+         height: var(--row-h); padding-top: var(--s-1);
+         padding-bottom: calc(var(--row-h) - var(--tap-min) - var(--s-1) - 1px);
+         border-bottom: 1px solid var(--line); }
+  .htx { grid-column: 1 / -2; display: grid; grid-template-columns: subgrid; align-items: baseline; }
+  .hn, .htm, .hmv, .hst { text-box: trim-both cap alphabetic; }
+  .hn { font-size: var(--t-row); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+        text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .htm { font-size: var(--t-body); font-weight: var(--w-medium); color: var(--ink-2);
+         line-height: var(--lh-tight); text-align: right; font-variant-numeric: tabular-nums;
+         white-space: nowrap; }
+  .hmv { min-width: 0; font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+         white-space: nowrap; }
+  /* the inline icon sits centred on the cap height, as in the card's tiles */
+  .hmv .ic { display: inline-block; vertical-align: -0.15em; margin-right: var(--s-1); }
+  .hst { font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
+         line-height: var(--lh-tight); white-space: nowrap; }
+  .hst.wait { color: var(--ink); }
+  .hst .dot { display: inline-block; vertical-align: calc(0.5cap - var(--s-1)); margin-right: var(--s-1);
+              background: var(--warn); }
+  .hst.rej { color: var(--err); }
+  /* "Delete" (items 13, 28): red text on the red tint, at the right edge, a
+     tap target; the filled red button stays reserved for the dialog. Its box
+     is --tap-min + --s-5 wide: --s-3 of padding less the hairline keeps the
+     word inside that width, so the box lands on whole pixels. */
+  .hdel { align-self: center; justify-self: end; display: inline-flex; align-items: center;
+          justify-content: center; height: var(--tap-min); min-width: calc(var(--tap-min) + var(--s-5));
+          padding: 0 calc(var(--s-3) - 1px); font-size: var(--t-body); font-weight: var(--w-bold);
+          color: var(--err); background: var(--err-bg); border: 1px solid var(--line);
+          border-radius: var(--r-sm); white-space: nowrap; }
+  /* a deleted pass (items 13, 38): struck through, labelled, no buttons, not dimmed */
+  .hr.del .htm, .hr.del .hmv { text-decoration: line-through; }
+  /* a refused pass (item 47): three lines with --s-3 above and below, the
+     reason as a sentence, its two actions at the right edge, never on the
+     line with the time; the hairline closes the row under the actions */
+  .hr.rej .hl1 { height: var(--tap-min); padding: 0; border: 0; margin-top: var(--s-3); }
+  .hwhy { grid-column: 1 / -1; margin: var(--s-2) 0 0; font-size: var(--t-small); font-weight: var(--w-medium);
+          color: var(--ink-2); line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px);
+          text-wrap: balance; }
+  .hacts { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: var(--s-2);
+           margin-top: var(--s-2); padding-bottom: var(--s-3); border-bottom: 1px solid var(--line); }
+  .hacts .btn { min-width: calc(3 * var(--tap-min) - var(--s-6)); justify-content: center; }
+  /* the end of the list (item 48) and the empty state (items 14, 45) */
+  .hend { grid-column: 1 / -1; margin: 0; padding: var(--s-4) var(--s-3); text-align: center;
+          font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+          line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .hend span { display: block; white-space: nowrap; }
+  .hlist.empty { display: flex; align-items: center; justify-content: center; mask-image: none; }
+  .hempty { display: flex; flex-direction: column; gap: var(--s-2); text-align: center;
+            max-width: 40ch; }
+  .hempty b { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+              white-space: nowrap; }
+  .hempty p { margin: 0; font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+              line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); text-wrap: balance; }
+  /* footer (items 14, 45) */
+  .hfoot { flex: none; margin: 0; padding-top: var(--s-1); text-align: center; font-size: var(--t-small);
+           font-weight: var(--w-medium); color: var(--ink-2); line-height: var(--lh-tight);
+           white-space: nowrap; }
+  /* APP END */
 </style>
 </head>
 <body>
 
+<svg class="sprite" aria-hidden="true">
+  <!-- Lucide icons (CLAUDE.md rule 10, screens.md item 69): path data verbatim
+       from the Lucide source, stroke-width 2.6, colour from currentColor -->
+  <symbol id="i-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20v-7a4 4 0 0 0-4-4H4"/><path d="M9 14 4 9l5-5"/></symbol>
+  <symbol id="i-straight" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></symbol>
+  <symbol id="i-ban" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.929 4.929 19.07 19.071"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-chev-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-chev-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></symbol>
+  <symbol id="i-chev-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></symbol>
+</svg>
+
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
-  <h1>POI Tracker — History Reference</h1>
-  <p class="meta"><b>v0.7 — 2026-09-12.</b> The undo paragraph states the
-     current rule: undo removes the last pass this tablet recorded for the
-     active POI, delivered or not, queueing a removal for a delivered one
-     exactly as this panel does.
-     <b>Reference device: Android tablet 10.6", 1000 × 600 px</b>
-     (2000 × 1200 physical at 2× density), landscape, full-screen.</p>
+  <h1>POI Tracker — History panel</h1>
+  <p class="meta"><b>v0.8 — 2026-10-11.</b> The History panel redrawn as a rubber board on the canon:
+     it covers the main area beside the live POI column, in POI or Route scope, and lists
+     every pass this tablet recorded, newest first, with "Delete" on each, a deleted pass
+     struck through while its removal waits, and a refused pass offering "Send again" and
+     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.10</b>
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.34</b>. The shell
+     (top bar, POI column, presets, drag corner, light and dark) is that of
+     <b>main-screen.html v0.23</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
+     <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Eight states,
+     A to H; wording the registry has not settled yet is tagged "proposal" in the maps.</p>
 
-  <div class="rail">
+  <div class="tool" role="group" aria-label="Checking tool">
+    <span class="lbl">Preset</span>
+    <button type="button" class="on" data-preset="800x1333">800 × 1333</button>
+    <button type="button" data-preset="720x1000">720 × 1000</button>
+    <button type="button" data-preset="1333x800">1333 × 800</button>
+    <button type="button" data-preset="1000x600">1000 × 600</button>
+    <span class="sep"></span>
+    <span class="lbl">Theme</span>
+    <button type="button" class="on" data-theme-set="light">Light</button>
+    <button type="button" data-theme-set="dark">Dark</button>
+    <span class="hint">Checking tool only — nothing here is part of the app.</span>
+  </div>
 
-    <div class="unit">
+  <div class="board">
+
+    <!-- ================= A · This POI ================= -->
+    <section class="unit">
       <div class="device">
-        <div class="bezel">
-          <div class="screen">
-
-            <div class="work-under">
-              <div class="work-col">
-                <div class="work-route"><span>R20890-028</span><span class="work-chev">▾</span></div>
-                <div class="work-list">
-                  <div class="work-row"><span class="work-num">1</span><span class="work-bar"><i style="width:100%"></i></span></div>
-                  <div class="work-row work-active"><span class="work-num">2</span><span class="work-bar"><i style="width:80%"></i></span></div>
-                  <div class="work-row"><span class="work-num">3</span><span class="work-bar"><i style="width:65.71%"></i></span></div>
-                  <div class="work-row"><span class="work-num">4</span><span class="work-bar"><i style="width:35.71%"></i></span></div>
-                  <div class="work-row"><span class="work-num">5</span><span class="work-bar"><i style="width:48.57%"></i></span></div>
-                  <div class="work-row"><span class="work-num">6</span><span class="work-bar"><i style="width:11.43%"></i></span></div>
-                  <div class="work-row"><span class="work-num">7</span><span class="work-bar"><i style="width:27.14%"></i></span></div>
-                  <div class="work-row"><span class="work-num">8</span><span class="work-bar"><i style="width:18.57%"></i></span></div>
-                  <div class="work-row"><span class="work-num">9</span><span class="work-bar"><i style="width:24.29%"></i></span></div>
-                  <div class="work-row"><span class="work-num">10</span><span class="work-bar"><i style="width:8.57%"></i></span></div>
-                  <div class="work-row"><span class="work-num">11</span><span class="work-bar"><i style="width:22.86%"></i></span></div>
-                  <div class="work-row"><span class="work-num">12</span><span class="work-bar"><i style="width:17.14%"></i></span></div>
-                  <div class="work-row"><span class="work-num">13</span><span class="work-bar"><i style="width:21.43%"></i></span></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="hist-panel">
-              <div class="hist-head">
-                <span class="hist-title">History</span>
-                <span class="hist-seg"><span class="hist-seg-on">POI</span><span class="hist-seg-off">Route</span></span>
-                <span class="hist-close">✕</span>
-              </div>
-              <div class="hist-sub"><span class="hist-chip hist-chip-amber"><span class="hist-chip-label">POI</span><span class="hist-chip-value">2</span></span><span class="hist-context">R20890-028 · Düsseldorf</span></div>
-              <div class="hist-list">
-                <div class="hist-row"><span class="hist-time">12:44</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">South</span><span class="hist-state hist-waiting">waiting</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:41</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">North</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:39</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span><span class="hist-side">West</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:36</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">South</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:31</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">East</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:28</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">North</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-              </div>
-              <div class="hist-foot">History shows only what this tablet recorded</div>
-            </div>
-
-          </div>
-          <!-- /screen -->
-        </div>
-        <p class="caption">Screen 1 · This POI</p>
+        <div class="frame"><div class="app" data-state="A"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-right"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+<section class="hist" aria-label="History">
+  <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg on" type="button" role="tab" aria-selected="true">POI</button><button class="sg" type="button" role="tab" aria-selected="false">Route</button></div></header>
+  <div class="hsub"><span class="chip amber">POI 136</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">41 passes</span></div>
+  <div class="hlist" data-scope="poi">
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:38</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:31</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:27</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:22</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:18</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:12</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:07</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:01</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">20:56</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+  </div>
+  <p class="hfoot">History shows only what this tablet recorded</p>
+</section>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>A</b> · This POI</p>
       </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>12</b> The panel covers the main area: "POI" | "Route" scope control at the top right, a segmented control in the iOS style; "POI" chosen. Each entry: time, the maneuver's Lucide icon and the side alone (v0.19).</li>
+        <li><b>66</b> Round ✕ close button at the top-left, as large as a tap target; no text "Close".</li>
+        <li><b>41</b> Sub-header ranks its facts: the POI in an amber chip, the route and city as quiet context, the count of passes listed in a neutral chip.</li>
+        <li><b>13, 28</b> "Delete" on every pass, red text on the red tint at the right edge, apart from the routine controls; the filled red button stays in the dialog (item 63).</li>
+        <li><b>33</b> Two newest passes "Waiting", the sync control reads "2 passes waiting for network" with its dot in the warning colour.</li>
+        <li><b>proposal</b> State labels: "Waiting" with an amber dot (the amber text itself falls short of 4.5:1 at this size), "Sent" and "Deleted" quiet, "Not accepted" in the error colour.</li>
+        <li><b>44</b> The POI column stays live beside the panel, the active row amber: tapping another POI reloads the panel for it without closing. The panel never carries a second POI picker.</li>
+        <li><b>61, 3</b> In portrait the panel covers the main area and the summary under it keeps its place; in landscape it covers the whole main area, action bar and compass included.</li>
+        <li><b>14, 45</b> Footer: "History shows only what this tablet recorded".</li>
+        <li><b>56</b> The list shows a whole row at its top edge and fades the cut row at its bottom, like the POI column; rows are --row-h tall, as the POI rows beside them.</li>
+        <li><b>67, 68</b> Size C; every value inside the frame is a token; the shell is main-screen v0.23's.</li>
+      </ul></aside>
+    </section>
 
-      <aside class="dmap">
-        <div class="dmap-title">Decision map · Screen 1</div>
-
-        <div class="dtopic">
-          <h3>Any pass can be deleted, not only the last</h3>
-          <p>Every row carries its own Delete. This is the reason the panel exists:
-             "Undo last" walks backwards from the end, and a mistake noticed three
-             intersections later is not the last thing recorded.</p>
-          <p class="why"><em>Passes are entered at speed and errors surface late —
-             often only when the counters stop matching what the shift actually
-             drove. Forcing a correction to unwind every good pass recorded after
-             the bad one would make people leave the error in rather than lose
-             the work.</em></p>
-        </div>
-
-        <div class="dtopic">
-          <h3>Each row says whether it was delivered</h3>
-          <p>A pass reads "waiting" while it is still on the tablet and "sent" once
-             it has reached the sheet, in the warning colour and the muted colour
-             respectively.</p>
-          <p class="why"><em>The two states delete differently: one disappears
-             locally, the other has to travel to the sheet as a removal. Showing
-             the state before the tap is what makes the difference in outcome
-             predictable instead of surprising.</em></p>
-        </div>
-
-        <div class="dtopic">
-          <h3>The POI list stays live behind the panel</h3>
-          <p>Another POI is chosen straight from the list already on screen beside
-             the panel; the panel reloads in place for it, and History never
-             closes.</p>
-          <p class="why"><em>Putting a second picker inside the panel would
-             duplicate a control the screen already carries, and closing the panel
-             to change POI would cost two taps for something done often — check
-             one POI, correct it, move to the next.</em></p>
-        </div>
-
-        <div class="dtopic">
-          <h3>The sub-header ranks its three facts</h3>
-          <p>The POI or route you are actually looking at sits in an amber chip;
-             the route and the city stay behind it as quiet context, and a total
-             like the route's pass count gets a neutral chip of its own.</p>
-          <p class="why"><em>Three facts set in one weight force the eye to read
-             all three to find the one that changes between screens. Amber already
-             means "where I am" everywhere else in the app — the active POI row,
-             the approach-side discs, the side chips — so reusing it here costs
-             nothing to learn.</em></p>
-        </div>
-
-        <div class="dtopic">
-          <h3>Hand-typed passes never appear</h3>
-          <p>Only passes recorded on this tablet are listed. Numbers typed straight
-             into the spreadsheet are absent, and the footer says so.</p>
-          <p class="why"><em>The app knows its own events; it does not know how a
-             cell reached its value. Inventing rows for numbers it never recorded
-             would promise a delete it cannot perform — those corrections belong
-             in the sheet.</em></p>
-        </div>
-      </aside>
-    </div>
-
-    <div class="unit">
+    <!-- ================= B · Whole route ================= -->
+    <section class="unit">
       <div class="device">
-        <div class="bezel">
-          <div class="screen">
-
-            <div class="work-under">
-              <div class="work-col">
-                <div class="work-route"><span>R20890-028</span><span class="work-chev">▾</span></div>
-                <div class="work-list">
-                  <div class="work-row"><span class="work-num">1</span><span class="work-bar"><i style="width:100%"></i></span></div>
-                  <div class="work-row work-active"><span class="work-num">2</span><span class="work-bar"><i style="width:80%"></i></span></div>
-                  <div class="work-row"><span class="work-num">3</span><span class="work-bar"><i style="width:65.71%"></i></span></div>
-                  <div class="work-row"><span class="work-num">4</span><span class="work-bar"><i style="width:35.71%"></i></span></div>
-                  <div class="work-row"><span class="work-num">5</span><span class="work-bar"><i style="width:48.57%"></i></span></div>
-                  <div class="work-row"><span class="work-num">6</span><span class="work-bar"><i style="width:11.43%"></i></span></div>
-                  <div class="work-row"><span class="work-num">7</span><span class="work-bar"><i style="width:27.14%"></i></span></div>
-                  <div class="work-row"><span class="work-num">8</span><span class="work-bar"><i style="width:18.57%"></i></span></div>
-                  <div class="work-row"><span class="work-num">9</span><span class="work-bar"><i style="width:24.29%"></i></span></div>
-                  <div class="work-row"><span class="work-num">10</span><span class="work-bar"><i style="width:8.57%"></i></span></div>
-                  <div class="work-row"><span class="work-num">11</span><span class="work-bar"><i style="width:22.86%"></i></span></div>
-                  <div class="work-row"><span class="work-num">12</span><span class="work-bar"><i style="width:17.14%"></i></span></div>
-                  <div class="work-row"><span class="work-num">13</span><span class="work-bar"><i style="width:21.43%"></i></span></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="hist-panel">
-              <div class="hist-head">
-                <span class="hist-title">History</span>
-                <span class="hist-seg"><span class="hist-seg-off">POI</span><span class="hist-seg-on">Route</span></span>
-                <span class="hist-close">✕</span>
-              </div>
-              <div class="hist-sub"><span class="hist-chip hist-chip-amber"><span class="hist-chip-label">ROUTE</span><span class="hist-chip-value">028</span></span><span class="hist-context">Düsseldorf</span><span class="hist-chip hist-chip-neutral"><span class="hist-chip-value">590</span><span class="hist-chip-label">passes</span></span></div>
-              <div class="hist-list hist-list-tall">
-                <div class="hist-row"><span class="hist-time">12:44</span><span class="hist-poi">POI 2</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">South</span><span class="hist-state hist-waiting">waiting</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:41</span><span class="hist-poi">POI 2</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">North</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:39</span><span class="hist-poi">POI 2</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span><span class="hist-side">West</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:36</span><span class="hist-poi">POI 7</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">South</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:31</span><span class="hist-poi">POI 7</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">East</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:28</span><span class="hist-poi">POI 16</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">North</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:24</span><span class="hist-poi">POI 16</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">East</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:19</span><span class="hist-poi">POI 16</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span><span class="hist-side">West</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:15</span><span class="hist-poi">POI 16</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">South</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:11</span><span class="hist-poi">POI 16</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">North</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:06</span><span class="hist-poi">POI 16</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span><span class="hist-side">West</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:02</span><span class="hist-poi">POI 16</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">East</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-              </div>
-              <div class="hist-foot">History shows only what this tablet recorded</div>
-            </div>
-
-          </div>
-          <!-- /screen -->
-        </div>
-        <p class="caption">Screen 2 · Whole route</p>
+        <div class="frame"><div class="app" data-state="B"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-right"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+<section class="hist" aria-label="History">
+  <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg" type="button" role="tab" aria-selected="false">POI</button><button class="sg on" type="button" role="tab" aria-selected="true">Route</button></div></header>
+  <div class="hsub"><span class="chip amber">R20890-058</span><span class="hctx">Vienna</span><span class="chip">2,184 passes</span></div>
+  <div class="hlist" data-scope="route">
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:38</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:31</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:27</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:22</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:18</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:12</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:07</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:01</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">20:56</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">135</span><span class="htm">20:49</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">135</span><span class="htm">20:44</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">135</span><span class="htm">20:38</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">134</span><span class="htm">20:31</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">134</span><span class="htm">20:25</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">134</span><span class="htm">20:19</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">133</span><span class="htm">10.10 18:52</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">133</span><span class="htm">10.10 18:47</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">133</span><span class="htm">10.10 18:41</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">133</span><span class="htm">10.10 18:36</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">133</span><span class="htm">10.10 18:30</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">133</span><span class="htm">10.10 18:24</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>East</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">133</span><span class="htm">10.10 18:19</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">133</span><span class="htm">10.10 18:13</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">132</span><span class="htm">10.10 18:06</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">132</span><span class="htm">10.10 18:01</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">132</span><span class="htm">10.10 17:55</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">132</span><span class="htm">10.10 17:49</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+  </div>
+  <p class="hfoot">History shows only what this tablet recorded</p>
+</section>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>B</b> · Whole route</p>
       </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>12</b> "Route" chosen: every pass of the route this tablet recorded, newest first, POI 136's first.</li>
+        <li><b>41</b> The route in the amber chip, the city as context, "2,184 passes" in the neutral chip.</li>
+        <li><b>12</b> The POI number leads each row in a fixed slot as wide as the widest number, digits right-aligned; the time slot fits a date and a time, right-aligned so the clock times line up.</li>
+        <li><b>16</b> A pass from today shows the time alone, an older one the date and the time ("10.10 18:52"), as the timestamp rule says.</li>
+        <li><b>proposal</b> The time slot is right-aligned (the rule names the slot, not its alignment).</li>
+      </ul></aside>
+    </section>
 
-      <aside class="dmap">
-        <div class="dmap-title">Decision map · Screen 2</div>
-
-        <div class="dtopic">
-          <h3>One panel, two scopes</h3>
-          <p>The same list switches between this POI and the whole route through a
-             segmented control in its header, rather than living in two separate
-             panels reached from different places.</p>
-          <p class="why"><em>The two views answer one question — "what did I
-             record?" — at two zoom levels, and the row, its states and its Delete
-             behave identically in both. Splitting them would duplicate every rule
-             and force the passenger to guess which panel holds the pass they are
-             hunting for.</em></p>
-        </div>
-
-        <div class="dtopic">
-          <h3>Newest first</h3>
-          <p>The most recent pass is at the top, and the list runs backwards in
-             time from there.</p>
-          <p class="why"><em>Corrections are overwhelmingly about what just
-             happened: a wrong side, a double tap at the last intersection. Putting
-             the newest row where the eye lands makes the common case a glance
-             rather than a scroll through the whole shift.</em></p>
-        </div>
-
-        <div class="dtopic">
-          <h3>The POI is named only in this scope</h3>
-          <p>Whole-route rows carry a POI column; the this-POI rows do not, because
-             the line under the header already names it.</p>
-          <p class="why"><em>Repeating "POI 2" on six consecutive rows spends width
-             on a constant and pushes the side and the delete control together.
-             Across the route the POI is the column that actually varies, so that
-             is where it earns its place.</em></p>
-        </div>
-      </aside>
-    </div>
-
-    <div class="unit">
+    <!-- ================= C · A deleted pass ================= -->
+    <section class="unit">
       <div class="device">
-        <div class="bezel">
-          <div class="screen">
-
-            <div class="work-under">
-              <div class="work-col">
-                <div class="work-route"><span>R20890-028</span><span class="work-chev">▾</span></div>
-                <div class="work-list">
-                  <div class="work-row"><span class="work-num">1</span><span class="work-bar"><i style="width:100%"></i></span></div>
-                  <div class="work-row work-active"><span class="work-num">2</span><span class="work-bar"><i style="width:80%"></i></span></div>
-                  <div class="work-row"><span class="work-num">3</span><span class="work-bar"><i style="width:65.71%"></i></span></div>
-                  <div class="work-row"><span class="work-num">4</span><span class="work-bar"><i style="width:35.71%"></i></span></div>
-                  <div class="work-row"><span class="work-num">5</span><span class="work-bar"><i style="width:48.57%"></i></span></div>
-                  <div class="work-row"><span class="work-num">6</span><span class="work-bar"><i style="width:11.43%"></i></span></div>
-                  <div class="work-row"><span class="work-num">7</span><span class="work-bar"><i style="width:27.14%"></i></span></div>
-                  <div class="work-row"><span class="work-num">8</span><span class="work-bar"><i style="width:18.57%"></i></span></div>
-                  <div class="work-row"><span class="work-num">9</span><span class="work-bar"><i style="width:24.29%"></i></span></div>
-                  <div class="work-row"><span class="work-num">10</span><span class="work-bar"><i style="width:8.57%"></i></span></div>
-                  <div class="work-row"><span class="work-num">11</span><span class="work-bar"><i style="width:22.86%"></i></span></div>
-                  <div class="work-row"><span class="work-num">12</span><span class="work-bar"><i style="width:17.14%"></i></span></div>
-                  <div class="work-row"><span class="work-num">13</span><span class="work-bar"><i style="width:21.43%"></i></span></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="hist-panel">
-              <div class="hist-head">
-                <span class="hist-title">History</span>
-                <span class="hist-seg"><span class="hist-seg-on">POI</span><span class="hist-seg-off">Route</span></span>
-                <span class="hist-close">✕</span>
-              </div>
-              <div class="hist-sub"><span class="hist-chip hist-chip-amber"><span class="hist-chip-label">POI</span><span class="hist-chip-value">2</span></span><span class="hist-context">R20890-028 · Düsseldorf</span></div>
-              <div class="hist-note">1 pass queued for removal</div>
-              <div class="hist-list">
-                <div class="hist-row"><span class="hist-time">12:44</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">South</span><span class="hist-state hist-waiting">waiting</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row hist-gone"><span class="hist-time">12:41</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">North</span><span class="hist-deleted">deleted</span><span class="hist-queued">queued · disappears once removed from the sheet</span></div>
-                <div class="hist-row"><span class="hist-time">12:39</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span><span class="hist-side">West</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:36</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">South</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:31</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span><span class="hist-side">East</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-                <div class="hist-row"><span class="hist-time">12:28</span><span class="hist-arrow"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></span><span class="hist-side">North</span><span class="hist-state hist-sent">sent</span><span class="hist-del">Delete</span></div>
-              </div>
-              <div class="hist-foot">History shows only what this tablet recorded</div>
-            </div>
-
-          </div>
-          <!-- /screen -->
-        </div>
-        <p class="caption">Screen 3 · A deleted pass</p>
+        <div class="frame"><div class="app" data-state="C"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync wait" type="button"><span class="dot"></span>1 removal waiting for network<svg class="ic"><use href="#i-chev-right"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136" data-count="40"></div></div>
+  <div class="main">
+<section class="hist" aria-label="History">
+  <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg on" type="button" role="tab" aria-selected="true">POI</button><button class="sg" type="button" role="tab" aria-selected="false">Route</button></div></header>
+  <div class="hsub"><span class="chip amber">POI 136</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">40 passes</span></div>
+  <div class="hq"><span class="dot"></span>1 removal waiting to be sent</div>
+  <div class="hlist" data-scope="poi">
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:38</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr del"><div class="hl1"><div class="htx"><span class="htm">21:31</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst">Deleted</span></div></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:27</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:22</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:18</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:12</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:07</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:01</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">20:56</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+  </div>
+  <p class="hfoot">History shows only what this tablet recorded</p>
+</section>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>C</b> · A deleted pass</p>
       </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>13, 38</b> The 21:31 Straight · West pass was already in the sheet: it stays in the list struck through and labelled "Deleted", without buttons, until its removal is delivered; then it leaves the list.</li>
+        <li><b>26</b> The deleted row is not dimmed: opacity marks an unavailable control, and this row is a state, not a control.</li>
+        <li><b>13</b> A line above the list counts the removals still queued: "1 removal waiting to be sent".</li>
+        <li><b>proposal</b> The sync control reads "1 removal waiting for network" with its dot in the warning colour: a queued removal counts like a waiting pass (item 33).</li>
+        <li><b>data-model</b> The waiting removal already counts: the neutral chip reads "40 passes" and POI 136's row in the column "30 to go".</li>
+      </ul></aside>
+    </section>
 
-      <aside class="dmap">
-        <div class="dmap-title">Decision map · Screen 3</div>
+    <!-- ================= D · Delete a sent pass ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="D"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-right"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+<section class="hist" aria-label="History">
+  <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg on" type="button" role="tab" aria-selected="true">POI</button><button class="sg" type="button" role="tab" aria-selected="false">Route</button></div></header>
+  <div class="hsub"><span class="chip amber">POI 136</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">41 passes</span></div>
+  <div class="hlist" data-scope="poi">
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:38</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:31</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:27</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:22</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:18</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:12</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:07</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:01</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">20:56</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+  </div>
+  <p class="hfoot">History shows only what this tablet recorded</p>
+</section>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+<button class="scrim top" type="button" aria-label="Cancel"></button>
+<div class="dlg" role="alertdialog" aria-modal="true" aria-label="Delete this pass?">
+  <div class="dtitle">Delete this pass?</div>
+  <div class="dchip">POI 136 · <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>Straight from West</span> · 21:31</div>
+  <div class="dbody">It is already in the sheet, so a removal is sent with the next sync.</div>
+  <div class="dbtns"><button class="dbtn" type="button">Cancel</button><button class="dbtn danger" type="button">Delete</button></div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>D</b> · Delete a sent pass</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>13, 63</b> "Delete" asks first: the dialog of main-screen's frame J, in the middle of the screen over a dimmed background, a tap outside equals Cancel.</li>
+        <li><b>63</b> Title "Delete this pass?", the pass itself in a chip (POI, maneuver, side, time), one line on what happens: a pass already in the sheet gets a removal sent with the next sync.</li>
+        <li><b>63, 28</b> "Cancel" left, "Delete" right, the removing button filled red.</li>
+      </ul></aside>
+    </section>
 
-        <div class="dtopic">
-          <h3>A deleted pass stays visible until the removal lands</h3>
-          <p>The row is struck through, dimmed and labelled "deleted" while its
-             removal is still queued. Once that removal has reached the sheet the
-             row leaves the list for good.</p>
-          <p class="why"><em>A row still on screen is the evidence that something
-             has not yet been delivered — it is the same promise the sync line
-             makes, shown against the specific pass it concerns. Keeping every
-             deletion for ever would turn that signal into decoration: after a
-             full shift the struck-through rows outnumber the live ones and bury
-             the passes that still matter.</em></p>
-        </div>
+    <!-- ================= E · Delete a waiting pass ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="E"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-right"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+<section class="hist" aria-label="History">
+  <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg on" type="button" role="tab" aria-selected="true">POI</button><button class="sg" type="button" role="tab" aria-selected="false">Route</button></div></header>
+  <div class="hsub"><span class="chip amber">POI 136</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">41 passes</span></div>
+  <div class="hlist" data-scope="poi">
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:38</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:31</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:27</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:22</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:18</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:12</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:07</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:01</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">20:56</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+  </div>
+  <p class="hfoot">History shows only what this tablet recorded</p>
+</section>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+<button class="scrim top" type="button" aria-label="Cancel"></button>
+<div class="dlg" role="alertdialog" aria-modal="true" aria-label="Delete this pass?">
+  <div class="dtitle">Delete this pass?</div>
+  <div class="dchip">POI 136 · <span class="iw"><svg class="ic"><use href="#i-left"/></svg>Left from South</span> · 21:40</div>
+  <div class="dbody">It has not been sent yet, so it is simply dropped from this tablet.</div>
+  <div class="dbtns"><button class="dbtn" type="button">Cancel</button><button class="dbtn danger" type="button">Delete</button></div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>E</b> · Delete a waiting pass</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>38, 63</b> The same dialog for a pass still waiting on the tablet: it is simply dropped and leaves the list at once; nothing is sent.</li>
+        <li><b>63, 28</b> "Cancel" left, "Delete" right, the removing button filled red.</li>
+      </ul></aside>
+    </section>
 
-        <div class="dtopic">
-          <h3>Deleting a delivered pass is queued, not refused</h3>
-          <p>The pass had already reached the sheet, so its removal becomes an
-             event of its own, waiting in the queue like any pass. The note above
-             the list counts what is pending.</p>
-          <p class="why"><em>Refusing would send the passenger to the spreadsheet
-             for the one correction the app is best placed to make, and doing it
-             silently on the tablet would leave the sheet holding a pass that no
-             longer exists. Queueing a removal keeps both sides converging on the
-             same answer through the one channel that already works offline.</em></p>
-        </div>
+    <!-- ================= F · A refused pass ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="F"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync bad" type="button"><span class="dot"></span>1 pass not accepted<svg class="ic"><use href="#i-chev-right"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+<section class="hist" aria-label="History">
+  <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg on" type="button" role="tab" aria-selected="true">POI</button><button class="sg" type="button" role="tab" aria-selected="false">Route</button></div></header>
+  <div class="hsub"><span class="chip amber">POI 136</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">41 passes</span></div>
+  <div class="hlist" data-scope="poi">
+    <div class="hr rej"><div class="hl1"><div class="htx"><span class="htm">21:44</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst rej">Not accepted</span></div></div><p class="hwhy">The sheet has text in a cell this pass adds to. Fix the cell, then send again.</p><div class="hacts"><button class="btn" type="button">Send again</button><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:38</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:31</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:27</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:22</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:18</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:12</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:07</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:01</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="htm">20:56</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+  </div>
+  <p class="hfoot">History shows only what this tablet recorded</p>
+</section>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>F</b> · A refused pass</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>47</b> The newest pass was refused by the mailbox: its row grows to three lines, "Not accepted" in the error colour, the reason as a sentence, and the two actions "Send again" and "Delete" at the right edge, --s-2 apart, never on the line with the time.</li>
+        <li><b>47</b> "Send again" queues the same event once more, for when its cause has been fixed in the sheet; "Delete" drops it from this tablet after the dialog, and nothing is sent.</li>
+        <li><b>47</b> A refused pass does not count: the neutral chip stays "41 passes", as the counter's "41 of 70".</li>
+        <li><b>proposal</b> The sync control reads "1 pass not accepted" with its dot in the error colour.</li>
+        <li><b>proposal</b> text-in-cell: "The sheet has text in a cell this pass adds to. Fix the cell, then send again."</li>
+        <li><b>proposal</b> no-route: "The tracker has no sheet named R20890-058. Check the route code, then send again."</li>
+        <li><b>proposal</b> no-poi: "The sheet has no row for POI 136. Check the route, then send again."</li>
+        <li><b>proposal</b> below-zero (only a removal can meet it): "The sheet's count is already 0, so there is nothing left to remove."</li>
+        <li><b>proposal</b> bad-request and bad-target: "The tracker could not read this change. Send it again or delete it."</li>
+        <li><b>proposal</b> error: "The tracker could not write this change. Send it again."</li>
+      </ul></aside>
+    </section>
 
-        <div class="dtopic">
-          <h3>How this differs from "Undo last"</h3>
-          <p>"Undo last" removes the last pass this tablet recorded for the
-             active POI, delivered or not; a delivered one has its removal
-             queued, exactly as this panel does. This panel is where any pass
-             can be deleted, not only the most recent.</p>
-          <p class="why"><em>Two controls with one job each stay predictable: undo
-             is the quick fix for the tap you just made, History is the considered
-             fix for anything older. Merging them would give a single button two
-             very different consequences depending on state the passenger cannot
-             see at a glance.</em></p>
-        </div>
-      </aside>
-    </div>
+    <!-- ================= G · No passes from this tablet ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="G"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-right"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="139" data-scroll="136"></div></div>
+  <div class="main">
+<section class="hist" aria-label="History">
+  <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg on" type="button" role="tab" aria-selected="true">POI</button><button class="sg" type="button" role="tab" aria-selected="false">Route</button></div></header>
+  <div class="hsub"><span class="chip amber">POI 139</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">0 passes</span></div>
+  <div class="hlist empty"><div class="hempty"><b>No passes from this tablet</b><p>The 12 passes of POI 139 reached the sheet another way, typed in by hand. Correct them in the sheet.</p></div></div>
+  <p class="hfoot">History shows only what this tablet recorded</p>
+</section>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>G</b> · No passes from this tablet</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>44</b> POI 139 chosen in the column, which keeps its place: the panel reloaded for it without closing.</li>
+        <li><b>14, 45</b> POI 139's 12 passes were typed into the sheet by hand, so there are no individual passes behind them: nothing is listed, and they are corrected in the sheet.</li>
+        <li><b>proposal</b> Empty state in the middle of the list area: "No passes from this tablet" and "The 12 passes of POI 139 reached the sheet another way, typed in by hand. Correct them in the sheet."</li>
+        <li><b>41</b> The neutral chip reads "0 passes".</li>
+      </ul></aside>
+    </section>
+
+    <!-- ================= H · The end of the list ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="H"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-right"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+<section class="hist" aria-label="History">
+  <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg" type="button" role="tab" aria-selected="false">POI</button><button class="sg on" type="button" role="tab" aria-selected="true">Route</button></div></header>
+  <div class="hsub"><span class="chip amber">R20890-058</span><span class="hctx">Vienna</span><span class="chip">2,816 passes</span></div>
+  <div class="hlist" data-scope="route" data-end>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">7</span><span class="htm">02.10 17:58</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">7</span><span class="htm">02.10 17:53</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">7</span><span class="htm">02.10 17:47</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">7</span><span class="htm">02.10 17:42</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">6</span><span class="htm">02.10 17:36</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">6</span><span class="htm">02.10 17:31</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">6</span><span class="htm">02.10 17:26</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">6</span><span class="htm">02.10 17:21</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>East</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">5</span><span class="htm">02.10 17:16</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">5</span><span class="htm">02.10 17:12</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">5</span><span class="htm">02.10 17:09</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">4</span><span class="htm">02.10 17:07</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">4</span><span class="htm">02.10 17:06</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">3</span><span class="htm">02.10 17:05</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <p class="hend"><span>This tablet keeps its newest 3,000 events.</span><span>Older sent passes are no longer listed.</span></p>
+  </div>
+  <p class="hfoot">History shows only what this tablet recorded</p>
+</section>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>H</b> · The end of the list</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>48</b> The route scope scrolled to its end: the oldest rows, dated "02.10", are the oldest of the 3,000 events this tablet keeps.</li>
+        <li><b>proposal</b> Under the last row: "This tablet keeps its newest 3,000 events. Older sent passes are no longer listed."</li>
+        <li><b>56</b> Scrolled to the end, the list still shows a whole row at its top edge and drops the fade, since no row is cut at the bottom.</li>
+        <li><b>14, 45</b> The standard footer follows the list.</li>
+      </ul></aside>
+    </section>
 
   </div>
 
+<script>
+/* Checking-tool script (screens.md item 54) and sample-data generator,
+   copied from main-screen.html v0.23 with two additions marked "History".
+   It fills the repeated markup of every frame (mini-map squares, POI rows,
+   rail labels, grid tiles, the bottom summary) from one fixed table, so all
+   eight frames show the same route as main-screen. No randomness: the same picture on
+   every load. It also wires the presets, the drag corner and the theme
+   switch. Nothing here runs in the app. */
+(function () {
+  var N = 197;
+  var TARGET = { int: 70, nost: 70, nol: 70, nor: 70, str: 40, nd: 0 };
+  var ICON = function (id) { return '<svg class="ic"><use href="#' + id + '"/></svg>'; };
+  // Route R20890-058: POIs 1 to 48 done, 57 in spreadsheet error, 168 not
+  // drivable, the POIs of the frames fixed, the rest a fixed mix.
+  function poi(n) {
+    if (n === 57) return { t: 'int', c: 46, err: true };
+    if (n === 168) return { t: 'nd', c: 0 };
+    if (n === 122) return { t: 'int', c: 66 };
+    if (n === 124) return { t: 'int', c: 68 };
+    if (n === 135) return { t: 'int', c: 70 };
+    if (n === 136) return { t: 'int', c: 41 };
+    if (n === 138) return { t: 'nost', c: 30 };
+    if (n <= 48) return { t: 'int', c: 70 };
+    var t = n % 19 === 0 ? 'str' : (n % 23 === 0 ? 'nost' : 'int');
+    var T = TARGET[t];
+    var k = (n * 37) % 23;
+    if (k < 5) return { t: t, c: T };
+    if (k < 9) return { t: t, c: 0 };
+    return { t: t, c: 1 + ((n * 11) % (T - 1)) };
+  }
+  var pois = [];
+  for (var n = 1; n <= N; n++) { var p = poi(n); p.n = n; p.T = TARGET[p.t]; pois.push(p); }
+  function status(p) {
+    if (p.T === 0) return 'nd';
+    if (p.err) return 'err';
+    if (p.c >= p.T) return 'done';
+    return p.c > 0 ? 'part' : '';
+  }
+  function tag(p) {
+    var s = status(p);
+    if (s === 'nd') return 'not drivable';
+    if (s === 'err') return 'error';
+    if (s === 'done') return p.c > p.T ? 'done +' + (p.c - p.T) : 'done';
+    return (p.T - p.c) + ' to go';
+  }
+  function pct(p) { return p.T ? Math.round(Math.min(p.c, p.T) / p.T * 100) : 0; }
+  function cls(base, p, active) {
+    var s = status(p);
+    if (base === 'row' && s === 'part') s = '';
+    return base + (s ? ' ' + s : '') + (p.n === active ? ' active' : '');
+  }
+  var done = 0, togo = 0, poisDone = 0, errs = 0;
+  pois.forEach(function (p) {
+    done += Math.min(p.c, p.T); togo += Math.max(0, p.T - p.c);
+    if (p.T && p.c >= p.T) poisDone += 1;
+    if (p.err) errs += 1;
+  });
+  function fmt(x) { return x.toLocaleString('en-US'); }
+  // rail labels on a linear scale: POI n sits at (n - 1) / (N - 1) of the track,
+  // the track being the rail minus --s-2 and half a label at each end
+  var RAIL = [1, 40, 80, 120, 160, 197];
+  function railTop(n) {
+    var f = ((n - 1) / (N - 1)).toFixed(4);
+    return 'top: calc(var(--s-2) + var(--t-small) / 2 + ' + f + ' * (100% - 2 * var(--s-2) - var(--t-small)))';
+  }
+  var each = function (sel, fn) { Array.prototype.forEach.call(document.querySelectorAll(sel), fn); };
+
+  // History: a frame may show one POI with another count (data-count), as
+  // after a deletion that already counts (data-model.md)
+  function poisFor(col) { var over = col.getAttribute('data-count'); var active = +col.getAttribute('data-active'); return over === null ? pois : pois.map(function (p) { return p.n === active ? Object.assign({}, p, { c: +over }) : p; }); }
+  each('.col[data-active]', function (col) {
+    var active = +col.getAttribute('data-active');
+    var finger = col.getAttribute('data-finger');
+    var dots = '', rows = '';
+    poisFor(col).forEach(function (p) {
+      var s = status(p);
+      dots += '<i class="' + (p.n === active ? 'act' : s) + '"></i>';
+      rows += '<button class="' + cls('row', p, active) + '" type="button" aria-label="POI ' + p.n + '">' +
+        '<span class="rn">' + p.n + '</span><span class="rc"><span class="rb"><i style="width: ' + pct(p) + '%"></i></span>' +
+        '<span class="rt">' + tag(p) + '</span></span></button>';
+    });
+    var rail = RAIL.map(function (r) { return '<span style="' + railTop(r) + '">' + r + '</span>'; }).join('');
+    if (finger) rail += '<div class="finger" style="' + railTop(+finger) + '" aria-hidden="true"></div>';
+    var bubble = finger ? '<div class="bubble" style="' + railTop(+finger) + '" aria-hidden="true">' + finger + '</div>' : '';
+    col.innerHTML = '<button class="mmap" type="button" aria-label="Open the grid of all POIs"><span class="mm"><span class="dots">' + dots +
+      '</span><span class="mcap"><span>' + poisDone + ' of ' + N + ' done</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></span>' +
+      '<span class="mline"><svg class="gi"><use href="#i-grid"/></svg><span>' + poisDone + ' of ' + N + '</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></button>' +
+      '<div class="colbody"><div class="list">' + rows + '</div><div class="rail" aria-label="Jump through the POI list">' + rail + '</div>' + bubble + '</div>';
+  });
+  each('[data-summary]', function (el) {
+    var adj = 0, oc = el.closest('.app') && el.closest('.app').querySelector('.col[data-count]');
+    if (oc) { adj = +oc.getAttribute('data-count') - pois[+oc.getAttribute('data-active') - 1].c; }
+    var seg = ['Done ' + fmt(done + adj), fmt(togo - adj) + ' to go', poisDone + ' of ' + N + ' POIs done'];
+    if (errs) seg.push(errs + (errs === 1 ? ' error' : ' errors'));
+    el.innerHTML = seg.map(function (t, i) { return '<span' + (errs && i === seg.length - 1 ? ' class="err"' : '') + '>' + t + (i < seg.length - 1 ? ' ·' : '') + '</span>'; }).join(' ');
+  });
+  each('[data-donecount]', function (el) { el.textContent = poisDone + ' of ' + N + ' done'; });
+  each('.grid[data-active]', function (g) {
+    var active = +g.getAttribute('data-active'), cells = '';
+    pois.forEach(function (p) {
+      cells += '<button class="' + cls('cell', p, active) + '" type="button" aria-label="POI ' + p.n + '">' +
+        '<span class="cn">' + p.n + '</span><span class="cb"><i style="width: ' + pct(p) + '%"></i></span></button>';
+    });
+    g.innerHTML = cells;
+  });
+
+  // Centre every list on its POI (data-scroll, else the active one), rounded
+  // to whole rows so a whole row sits at the top edge; the grid likewise on
+  // the active tile's row. Again after any resize of a frame.
+  function centre() {
+    // History's list: a whole row at its top edge; a list shown at its end
+    // (data-end) scrolls as far as whole rows allow and drops its fade
+    each('.hlist', function (l) {
+      var row = l.querySelector('.hl1');
+      if (!row) return;
+      var rh = row.offsetHeight;
+      var max = l.scrollHeight - l.clientHeight;
+      var top = l.hasAttribute('data-end') ? Math.floor(Math.max(0, max) / rh) * rh : 0;
+      l.scrollTop = top;
+      l.classList.toggle('end', l.hasAttribute('data-end'));
+    });
+    each('.col[data-active]', function (col) {
+      var list = col.querySelector('.list');
+      var row = list && list.firstElementChild;
+      if (!row) return;
+      var rh = row.offsetHeight;
+      var n = +(col.getAttribute('data-scroll') || col.getAttribute('data-active'));
+      var top = Math.min((n - 1) * rh + rh / 2 - list.clientHeight / 2, list.scrollHeight - list.clientHeight);
+      list.scrollTop = Math.max(0, Math.floor(top / rh) * rh);
+    });
+    each('.grid[data-active]', function (g) {
+      var cell = g.firstElementChild;
+      if (!cell) return;
+      var rh = g.children[10] ? g.children[10].offsetTop - cell.offsetTop : cell.offsetHeight;
+      var row = Math.floor((+g.getAttribute('data-active') - 1) / 10);
+      var top = Math.min(row * rh + rh / 2 - g.clientHeight / 2, g.scrollHeight - g.clientHeight);
+      g.scrollTop = Math.max(0, Math.floor(top / rh) * rh);
+    });
+  }
+
+  var frames = document.querySelectorAll('.frame');
+  // An open menu is re-created when the frame or the theme changes, the way
+  // the app closes menus when the screen turns (item 66): its position is
+  // then found afresh and never depends on the order of clicks.
+  function resetMenus() { each('.pop, .rmenu', function (m) { m.replaceWith(m.cloneNode(true)); }); }
+  window.resetMenus = resetMenus;
+  each('[data-preset]', function (b) {
+    b.addEventListener('click', function () {
+      var wh = b.getAttribute('data-preset').split('x');
+      Array.prototype.forEach.call(frames, function (f) { f.style.width = wh[0] + 'px'; f.style.height = wh[1] + 'px'; });
+      each('[data-preset]', function (x) { x.classList.toggle('on', x === b); });
+      resetMenus();
+      centre();
+    });
+  });
+  each('[data-theme-set]', function (b) {
+    b.addEventListener('click', function () {
+      document.documentElement.setAttribute('data-theme', b.getAttribute('data-theme-set'));
+      each('[data-theme-set]', function (x) { x.classList.toggle('on', x === b); });
+      resetMenus();
+    });
+  });
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(function () { centre(); });
+    Array.prototype.forEach.call(frames, function (f) { ro.observe(f); });
+  }
+  centre();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(centre);
+})();
+</script>
 </body>
 </html>

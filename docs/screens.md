@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.33 — 2026-10-11
+v0.34 — 2026-10-11
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -139,6 +139,9 @@ v0.33 2026-10-11 — the user's review of main-screen v0.22: at 1333 × 800
 the "Still needed" card looked small and flat beside the discs. On a tall
 landscape screen the card steps up one size, the mirror of the compact
 step, and item 52 now names two exceptions (items 52, 71).
+v0.34 2026-10-11 — the user's decision before History is redrawn: a pass
+the mailbox refused offers "Send again" and "Delete" in its History row
+(item 47).
 -->
 
 The app is one working screen plus two slide-in panels, on a tablet held
@@ -468,7 +471,14 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 47. An event the mailbox refused stays on the tablet as "rejected", with
     the mailbox's reason. History shows it in its row, and the working
     screen's sync control counts rejected events alongside waiting ones.
-    Exact wording and look are still to be drawn.
+    A refused pass offers two actions in its row, as Apple's Messages
+    offers "Try Again" on a message that was "Not Delivered". "Send
+    again" queues the same event once more, for when its cause has been
+    fixed in the sheet: the mailbox keeps no trace of a refused event, so
+    it applies once. "Delete" drops it from this tablet after the dialog
+    of item 63, and nothing is sent, since nothing reached the sheet. The
+    wording of the reasons and the look of the row are drawn in
+    history.html.
 48. History holds the newest 3,000 events this tablet recorded. Older
     delivered events drop off the list; nothing still waiting is ever
     dropped, whatever its age.
