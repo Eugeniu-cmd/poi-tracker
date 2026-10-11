@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.32 — 2026-10-09
+v0.33 — 2026-10-11
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -135,6 +135,10 @@ compact step narrows the margins and gaps and draws the closed side discs
 8px nearer, so the card keeps its normal paddings (item 70). Each "Still
 needed" tile drops its "16 of 28" line, which repeated what "12 more" and
 the bar already say, while the type pill shows the split (item 39).
+v0.33 2026-10-11 — the user's review of main-screen v0.22: at 1333 × 800
+the "Still needed" card looked small and flat beside the discs. On a tall
+landscape screen the card steps up one size, the mirror of the compact
+step, and item 52 now names two exceptions (items 52, 71).
 -->
 
 The app is one working screen plus two slide-in panels, on a tablet held
@@ -174,8 +178,11 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 52. Discs, the compass, text sizes and tap targets keep their size in px
     on every screen. A larger screen shows more, not bigger: extra space
     goes into the length of lists (more POI rows at once) and into the
-    gaps between blocks. Nothing is scaled as a whole. The one exception
-    is the compact step of item 70 on a short screen.
+    gaps between blocks. Nothing is scaled as a whole. There are two
+    exceptions, and both change only display text and paddings: the
+    compact step of item 70 on a short screen and the roomy card of item
+    71 on a tall landscape screen. Discs, the compass and tap targets
+    never change size.
 53. The bottom edge of the screen is shared with the system: on Android a
     sideways swipe along the bottom handle switches apps. Nothing
     tappable or swipeable sits inside that area. Its height is taken from
@@ -206,6 +213,22 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     the gaps beside the POI column and between the card and the discs
     12px, and the closed Left and Right discs sit 8px nearer to Straight.
     The card, its tiles and its chips then keep their normal paddings.
+71. Roomy card. When the app is wider than tall and more than 700px tall
+    (the user's tablet in landscape without browser bars, 1333 × 800)
+    and the left group beside the discs is at least 520px wide, the
+    "Still needed" card steps up one size, the mirror of the compact
+    step. Beside the 118px discs the normal card looked small and flat,
+    while at 1000 × 600 the card and the discs balance. The roomy card
+    keeps the 1000 × 600 proportion of about 1.8 to 1. The tile values
+    take --t-stat, the tile labels, "more" and the two section headings
+    --t-body, and "Done" --t-title. The bars are 8px tall, the card has
+    24px of padding and each tile 16px. The side chips grow taller, but
+    their text keeps its size, since the sides are secondary. At
+    1333 × 800 the card's centre then sits level with the centre of the
+    disc cluster. Where the left group is narrower than 520px (at
+    1280 × 800, for example) the larger values would lose their 8px of
+    spare width, so the normal card stays. The head, the type pill, the
+    discs, the compass and every tap target do not change.
 
 ## Canon (applies to every screen)
 67. Size C is the app's size, chosen on the user's tablet on 2026-10-06

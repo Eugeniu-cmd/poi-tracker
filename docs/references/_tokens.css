@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.9 — 2026-10-09
+   v0.10 — 2026-10-11
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -39,6 +39,10 @@
    main-screen v0.20. New --t-num-compact for the big POI number on a
    short screen (screens.md item 70). Every other compact size reuses an
    existing token.
+   v0.10 2026-10-11 — a dedicated decision on the user's review of
+   main-screen v0.22. New --t-stat for the values in the "Still needed"
+   tiles on the roomy card of a tall landscape screen (screens.md item
+   71). Every other roomy size reuses an existing token.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -97,6 +101,7 @@
   --t-label: 19px;
   --t-row: 23px;
   --t-title: 26px;
+  --t-stat: 40px;
   --t-num: 92px;
   --t-num-compact: 64px;
   --w-medium: 600;

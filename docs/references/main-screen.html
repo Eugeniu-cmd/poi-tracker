@@ -135,12 +135,20 @@
           the discs --s-3, and the closed side discs sit --s-2 nearer, so
           the type pill and the card keep their normal paddings and
           breathe at 1000 × 600.
+  v0.23 2026-10-11 — the user's review of v0.22 (screens.md v0.33,
+          _tokens.css v0.10). On a tall landscape screen with a left
+          group of at least 520px the "Still needed" card steps up one
+          size (item 71): tile values --t-stat, labels and headings
+          --t-body, "Done" --t-title, 8px bars, 24px card and 16px tile
+          padding, taller side chips. At 1333 × 800 the card keeps its
+          1000 × 600 proportion and its centre sits level with the
+          discs. Every other size is unchanged.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.22</title>
+<title>POI Tracker — Working Screen Reference v0.23</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -197,13 +205,15 @@
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.9 or a calc() over
+     line height below is a var() from _tokens.css v0.10 or a calc() over
      them. Literal values are limited to 0, 1px hairlines, 50% for round
      shapes, percentages and fr of a layout, em, ch, lh and cap ratios of
      a token font size, keywords, SVG geometry, the 1200px breakpoint of
-     item 51, the 700px height of the compact step (item 70) and the
-     400px width of the compact card. Icons are Lucide symbols (rule 10,
-     item 69); an inline icon is 1em of its text. A chevron's path ends
+     item 51, the 700px height of the compact step (item 70), the 400px
+     width of the compact card, the 1000px width of the compact landscape
+     card (v0.22) and the 520px width of the roomy card (item 71). Icons
+     are Lucide symbols (rule 10, item 69); an inline icon is 1em of its
+     text. A chevron's path ends
      inside its 24-unit box (chevron-down at 18/24, chevron-right at
      15/24, check at 20/24), so a negative em margin of that remainder
      puts the drawn end, not the box, on the padding. Line boxes that set
@@ -731,6 +741,30 @@
     .sides4 { gap: var(--s-2); }
     .sv { padding-left: var(--s-3); padding-right: var(--s-3); gap: var(--s-2); }
   }
+  /* ---- the roomy card (item 71, v0.33): on a tall landscape screen the
+     "Still needed" card steps up one size, the mirror of the compact
+     step, so it keeps its 1000 × 600 proportion beside the discs. Only
+     its text sizes and paddings change. Where the left group is narrower
+     than 520px the larger values would lose their spare width, so the
+     normal card stays. ---- */
+  @container (orientation: landscape) and (height > 700px) {
+    @container info (width >= 520px) {
+      .card { padding: var(--s-5); gap: var(--s-4); }
+      /* --s-5 between the sections: the card's --s-4 gap plus --s-2 */
+      .sph.sides { margin-top: var(--s-2); }
+      .spt, .spn { font-size: var(--t-body); }
+      .need, .sides4 { gap: var(--s-3); }
+      .nc { padding: var(--s-4); gap: var(--s-3); }
+      .nh { font-size: var(--t-body); }
+      .nv { font-size: var(--t-stat); }
+      .nv small { font-size: var(--t-body); margin-left: var(--s-2); }
+      .nv .dn { font-size: var(--t-title); }
+      .nb { height: var(--s-2); }
+      /* taller chips, the same text: the sides are secondary */
+      .sv { padding: calc(var(--s-3) - var(--s-1) / 4) var(--s-4)
+                     calc(var(--s-3) + var(--s-1) / 4); }
+    }
+  }
   /* APP END */
 </style>
 </head>
@@ -753,10 +787,10 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.22 — 2026-10-09.</b> The user's review of v0.21: lighter "Still
-     needed" tiles and air for the card at 1000 × 600. Every value inside the frames is
-     a token of <b>_tokens.css v0.9</b> (size C, screens.md item 67) and every rule
-     follows <b>screens.md v0.32</b>. Icons are
+  <p class="meta"><b>v0.23 — 2026-10-11.</b> The user's review of v0.22: on a tall landscape
+     screen a roomier "Still needed" card balances the discs (item 71). Every value inside
+     the frames is a token of <b>_tokens.css v0.10</b> (size C, screens.md item 67) and
+     every rule follows <b>screens.md v0.33</b>. Icons are
      Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
      presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and
@@ -840,7 +874,7 @@
         <li><b>3</b> Bottom summary under the main area in portrait; in landscape inside the action bar, which runs under the whole main area, and the column runs down to the bottom (items 3, 51). Error count only when non-zero.</li>
         <li><b>53</b> Bottom padding adds env(safe-area-inset-bottom).</li>
         <li><b>67, 68</b> Size C; every value inside the frame is a token.</li>
-        <li><b>52, 70</b> On a short screen (1000 × 600, 1333 × 680) display numbers shrink; discs, compass and tap targets keep their size. In landscape the side margins become --s-4, the gaps beside the column and the discs --s-3 and the closed side discs sit --s-2 nearer, so the card and the pill keep their paddings (v0.32).</li>
+        <li><b>52, 70, 71</b> On a short screen (1000 × 600, 1333 × 680) display numbers shrink; discs, compass and tap targets keep their size. In landscape the side margins become --s-4, the gaps beside the column and the discs --s-3 and the closed side discs sit --s-2 nearer, so the card and the pill keep their paddings (v0.32). On a tall landscape screen (1333 × 800) the "Still needed" card steps up one size and keeps its 1000 × 600 proportion (item 71, v0.33).</li>
       </ul></aside>
     </section>
 
