@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.34 — 2026-10-11
+v0.35 — 2026-10-11
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -142,6 +142,12 @@ step, and item 52 now names two exceptions (items 52, 71).
 v0.34 2026-10-11 — the user's decision before History is redrawn: a pass
 the mailbox refused offers "Send again" and "Delete" in its History row
 (item 47).
+v0.35 2026-10-11 — the user's review of main-screen v0.23: the compass
+is redrawn with its four letters, a red N and a two-colour needle, grows
+to 128px, 144px on a tall landscape screen, and sits in the same place
+with the same air in both layouts (item 19). Items 52, 70 and 71 now
+name the compass's own sizes. Whether the dial stays fixed or turns is
+tested in the car with tools/compass-prototype.html.
 -->
 
 The app is one working screen plus two slide-in panels, on a tablet held
@@ -184,8 +190,9 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     gaps between blocks. Nothing is scaled as a whole. There are two
     exceptions, and both change only display text and paddings: the
     compact step of item 70 on a short screen and the roomy card of item
-    71 on a tall landscape screen. Discs, the compass and tap targets
-    never change size.
+    71 on a tall landscape screen. Discs and tap targets never change
+    size. The compass follows the same steps with its own sizes (item
+    19).
 53. The bottom edge of the screen is shared with the system: on Android a
     sideways swipe along the bottom handle switches apps. Nothing
     tappable or swipeable sits inside that area. Its height is taken from
@@ -209,8 +216,9 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     --t-label. The mini-map becomes a one-line button at the top of the
     column: the Lucide layout-grid icon, the count of finished POIs
     ("79 of 197") and "Open", as tall as a tap target, so the column
-    shows more POI rows. Discs, the compass and every tap target keep
-    their size, since they are what the passenger hits in a moving car.
+    shows more POI rows. Discs and every tap target keep their size,
+    since they are what the passenger hits in a moving car. The compass
+    takes --compass-compact (item 19).
     In landscape the compact step also gives the "Still needed" card and
     the type pill room to breathe: the screen's side margins become 16px,
     the gaps beside the POI column and between the card and the discs
@@ -231,7 +239,8 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     disc cluster. Where the left group is narrower than 520px (at
     1280 × 800, for example) the larger values would lose their 8px of
     spare width, so the normal card stays. The head, the type pill, the
-    discs, the compass and every tap target do not change.
+    discs and every tap target do not change. The compass takes its
+    landscape size (item 19).
 
 ## Canon (applies to every screen)
 67. Size C is the app's size, chosen on the user's tablet on 2026-10-06
@@ -367,9 +376,22 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     stops: "Undo last" and "History" stay available, because a miscount
     is most likely to be noticed exactly when the POI closes.
 11. The screen stays awake while the app is open.
-19. A compass sits in the top-right corner: a fixed ring with a North tick
-    and a needle that rotates to the car's heading. Minimum gap between
-    any two discs on the screen is 8px.
+19. A compass sits at the top right of the main area, in both layouts
+    one gap under the top bar and flush with the main area's right edge,
+    so it stands in the same place with the same air on every screen. In
+    portrait the head keeps room for it and the type pill sits one gap
+    under it. It is a drawn widget (item 69): a ring with the letters N,
+    E, S and W inside, minor ticks every 30 degrees, four marks outside
+    the ring, and a needle with a red north end and a blue south end, as
+    a magnet is painted. The letter N is red too. It is 128px
+    (--compass), 144px on a landscape screen more than 700px tall
+    (--compass-wide) and 96px on a short screen (--compass-compact,
+    item 70). The needle turns to the car's heading while the ring stays
+    fixed. Whether the ring should turn instead, so that the letter at
+    the bottom names the approach side, is tested in the car with
+    tools/compass-prototype.html before chapter 6. The heading comes
+    from the tablet's sensors as data-model.md "Heading" describes.
+    Minimum gap between any two discs on the screen is 8px.
 39. The per-POI mini counters live in the "Still needed" card under the
     type pill. Its top row shows, per maneuver, what is still needed
     against the split of the POI's type (item 46): a large "12 more" and

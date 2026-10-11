@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.10 — 2026-10-11
+   v0.11 — 2026-10-11
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -43,6 +43,13 @@
    main-screen v0.22. New --t-stat for the values in the "Still needed"
    tiles on the roomy card of a tall landscape screen (screens.md item
    71). Every other roomy size reuses an existing token.
+   v0.11 2026-10-11 — a dedicated decision on the user's review of
+   main-screen v0.23: the compass is redrawn with its four letters and a
+   two-colour needle, and grows (screens.md item 19). --compass becomes
+   128px, with --compass-wide 144px for a tall landscape screen and
+   --compass-compact 96px, the old size, for a short screen. New
+   --compass-n, the red of the letter N and of the needle's north end,
+   and --compass-s, the blue of its south end, as a magnet is painted.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -78,6 +85,8 @@
   --panel-raised: #FFFFFF;
   --danger: var(--err);
   --on-danger: #FFFFFF;
+  --compass-n: #B42E26;
+  --compass-s: #1F5EFF;
   --shadow: 0 6px 20px rgba(50, 65, 120, 0.14);
   --shadow-lift: 0 10px 26px rgba(40, 50, 90, 0.26);
   --r-sm: 12px;
@@ -93,7 +102,9 @@
   --disc-man: 118px;
   --disc-side: 92px;
   --side-reach: 124px;
-  --compass: 96px;
+  --compass: 128px;
+  --compass-wide: 144px;
+  --compass-compact: 96px;
 
   /* Type */
   --t-small: 14px;
@@ -162,6 +173,8 @@
     --panel-raised: #303749;
     --danger: #D7373F;
     --on-danger: #FFFFFF;
+    --compass-n: #FF6B62;
+    --compass-s: #7FA2FF;
     --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
     --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
   }
@@ -198,6 +211,8 @@
   --panel-raised: #303749;
   --danger: #D7373F;
   --on-danger: #FFFFFF;
+  --compass-n: #FF6B62;
+  --compass-s: #7FA2FF;
   --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
   --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
 }

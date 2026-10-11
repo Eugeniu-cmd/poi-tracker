@@ -51,6 +51,7 @@ Where to look:
 | RECON snapshots | _recon/ |
 | Mailbox (Apps Script) | mailbox/Code.gs, mailbox/README.md |
 | Measure a tablet's viewport | tools/viewport.html |
+| Compass prototype, live heading from the sensors | tools/compass-prototype.html |
 
 This file carries no version tag or history on purpose: it is a config
 Claude Code reads at startup, not a registry of decisions.
