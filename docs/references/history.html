@@ -57,12 +57,15 @@
           the sync control's chevron points down, since it opens the
           Sync panel (item 72), and its dot colours now live in the
           shell.
+  v0.11 2026-10-12 — the shell and the sprite are copied again from
+          main-screen.html v0.26 (screens.md v0.37): every frame's top
+          bar carries the gear that opens Settings (item 73).
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.10</title>
+<title>POI Tracker — History Reference v0.11</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -116,7 +119,7 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.25. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.26. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
@@ -168,6 +171,12 @@
   .sync { margin-left: auto; font-size: var(--t-body); font-weight: var(--w-medium); }
   .route .ic { margin-right: -0.25em; }
   .sync .ic { margin-right: -0.375em; }
+  /* the gear (item 73): a square tap target on the sync control's surface */
+  .gear { flex: none; display: inline-flex; align-items: center; justify-content: center;
+          width: var(--tap-min); height: var(--tap-min); background: var(--panel-strong);
+          border: 1px solid var(--panel-edge); border-radius: var(--r-sm);
+          box-shadow: var(--shadow); color: var(--ink); }
+  .gear svg { width: var(--s-5); height: var(--s-5); }
   .dot { width: var(--s-2); height: var(--s-2); border-radius: 50%; background: var(--ok); flex: none; }
   /* the sync control anchors the Sync panel (item 72). Its dot follows the
      queue: waiting in the warning colour (item 33), a refused pass in the
@@ -847,19 +856,20 @@
   <symbol id="i-chev-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></symbol>
   <symbol id="i-chev-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
   <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></symbol>
 </svg>
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.10 — 2026-10-12.</b> The user's decisions after prototype v17: a removal
-     that still waits says so, and the amber chip's text is ink. The History panel
+  <p class="meta"><b>v0.11 — 2026-10-12.</b> The shell is that of main-screen.html v0.26: the top
+     bar carries the gear that opens Settings (item 73). The History panel
      covers the main area beside the live POI column, in POI or Route scope, and lists
      every pass this tablet recorded, newest first, with "Delete" on each, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
      "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.11</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.36</b>. The shell
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.37</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.25</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.26</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Eight states,
      A to H; wording the registry has not settled yet is tagged "proposal" in the maps.</p>
@@ -887,6 +897,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -938,6 +949,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1001,6 +1013,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync wait" type="button"><span class="dot"></span>1 removal waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136" data-count="40"></div></div>
@@ -1047,6 +1060,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1097,6 +1111,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1146,6 +1161,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync bad" type="button"><span class="dot"></span>1 pass not accepted<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1197,6 +1213,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="139" data-scroll="136"></div></div>
@@ -1230,6 +1247,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>

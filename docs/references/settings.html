@@ -33,544 +33,1819 @@
           content change.
   v0.8 2026-09-12 — audit fixes: today's timestamp drops the word "today";
           the sync caption reads "last loaded", the wording of screens.md item 16.
+  v0.9 2026-10-12 — redrawn as a rubber board on the canon (screens.md
+          v0.37, _tokens.css v0.11), sharing the app shell and the board
+          of main-screen.html v0.26: presets, drag corner, light and
+          dark, size C, Lucide icons. Settings is a sheet over the
+          working screen (item 74). Nine frames: the list, the city in
+          use, another city with "Use this city", Connection, a route, a
+          new route whose tab is not found, a new city, and the two
+          dialogs that can lose passes.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Settings Reference v0.8</title>
+<title>POI Tracker — Settings Reference v0.9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
 <link rel="stylesheet" href="_tokens.css">
 <style>
   /* ============================================================
-     PAGE CHROME — not part of the product. Hardcoded colors are
-     deliberate here: this is the presentation board, and it must
-     contrast with the mockup so the frame reads as a device.
+     PAGE CHROME — not part of the product. Hardcoded values are
+     deliberate here: this is the presentation board and the checking
+     tool of screens.md item 54. It must contrast with the app frames
+     so each frame reads as a device. Nothing in this block styles
+     anything inside an .app element.
      ============================================================ */
   * { box-sizing: border-box; }
   body { margin: 0; padding: 40px 44px 56px; background: #23262F; color: #E7E9F0;
          font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  .eyebrow { font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+  .eyebrow { font-size: 12px; line-height: 16px; letter-spacing: .18em; text-transform: uppercase;
              color: #8A90A6; margin: 0 0 10px; }
-  h1 { margin: 0 0 12px; font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
-  .meta { margin: 0 0 34px; font-size: 14px; line-height: 1.65; color: #A6ACC0;
+  h1 { margin: 0 0 12px; font-size: 30px; line-height: 36px; font-weight: 700; letter-spacing: -.01em; }
+  .meta { margin: 0 0 26px; font-size: 14px; line-height: 23px; color: #A6ACC0;
           max-width: 900px; }
   .meta b { color: #E7E9F0; font-weight: 600; }
-  .rail { display: flex; align-items: flex-start; gap: 40px; }
-  .unit { display: flex; align-items: flex-start; gap: 26px; flex: none; }
+  .tool { position: sticky; top: 0; z-index: 100; display: flex; flex-wrap: wrap;
+          align-items: center; gap: 8px; padding: 12px 0; margin: 0 0 34px;
+          background: #23262F; border-bottom: 1px solid #383D4B; }
+  .tool .lbl { font-size: 11px; line-height: 14px; letter-spacing: .16em; text-transform: uppercase;
+               color: #8A90A6; margin-right: 6px; }
+  .tool .sep { width: 1px; height: 24px; background: #3A3F4D; margin: 0 10px; }
+  .tool button { height: 34px; padding: 0 14px; border-radius: 9px; cursor: pointer;
+                 border: 1px solid #3A3F4D; background: #2B2F3A; color: #E7E9F0;
+                 font: inherit; font-size: 13px; font-weight: 600; }
+  .tool button.on { background: #E7E9F0; color: #23262F; border-color: #E7E9F0; }
+  .tool .hint { font-size: 12px; line-height: 16px; color: #8A90A6; margin-left: auto; }
+  .board { display: flex; flex-direction: column; gap: 56px; }
+  .unit { display: flex; align-items: flex-start; gap: 26px; flex-wrap: wrap; }
   .device { flex: none; }
-  .bezel { width: 1014px; height: 614px; padding: 7px; background: #0C0E14;
-           border-radius: 29px; box-shadow: 0 26px 60px rgba(0,0,0,.55),
-           0 0 0 1px rgba(255,255,255,.06) inset; }
-  .caption { margin: 14px 0 0; font-size: 11px; letter-spacing: .16em;
+  /* The frame is the rubber: preset buttons set its size, the corner drags it.
+     Its clipping and radius stand for the tablet screen, nothing more. */
+  .frame { box-sizing: content-box; width: 800px; height: 1333px; resize: both; overflow: hidden;
+           background: #0C0E14; border-radius: 22px; border: 7px solid #0C0E14;
+           box-shadow: 0 26px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06) inset; }
+  .caption { margin: 14px 0 0; font-size: 11px; line-height: 14px; letter-spacing: .16em;
              text-transform: uppercase; color: #8A90A6; }
+  .caption b { color: #F2F4FA; font-weight: 700; }
   .dmap { flex: none; width: 300px; background: #2B2F3A; border-radius: 14px;
-          padding: 20px 20px 8px; border: 1px solid #383D4B; }
-  .dmap-title { font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
-                color: #8A90A6; margin-bottom: 14px; }
-  .dtopic { margin-bottom: 18px; }
-  .dtopic h3 { margin: 0 0 5px; font-size: 14px; font-weight: 700; color: #F2F4FA; }
-  .dtopic p { margin: 0; font-size: 12.5px; line-height: 1.55; color: #BFC5D6; }
-  .dtopic p.why { margin-top: 5px; color: #878DA1; }
+          padding: 20px 20px 10px; border: 1px solid #383D4B; }
+  .dmap-title { font-size: 11px; line-height: 14px; letter-spacing: .16em; text-transform: uppercase;
+                color: #8A90A6; margin-bottom: 12px; }
+  .dmap ul { list-style: none; margin: 0; padding: 0; }
+  .dmap li { margin: 0 0 9px; font-size: 12.5px; line-height: 19px; color: #BFC5D6; }
+  .dmap li b { display: inline-block; min-width: 26px; color: #F2F4FA; font-weight: 700; }
+  .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+  /* APP START */
+  /* Shared shell, copied from main-screen.html v0.26. Change it there first, then copy it here again. */
+  /* ============================================================
+     THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
+     Every colour, size, spacing, radius, opacity, shadow, weight and
+     line height below is a var() from _tokens.css v0.11 or a calc() over
+     them. Literal values are limited to 0, 1px hairlines, 50% for round
+     shapes, percentages and fr of a layout, em, ch, lh and cap ratios of
+     a token font size, keywords, SVG geometry, the 1200px breakpoint of
+     item 51, the 700px height of the compact step (item 70), the 400px
+     width of the compact card, the 1000px width of the compact landscape
+     card (v0.22) and the 520px width of the roomy card (item 71). Icons
+     are Lucide symbols (rule 10, item 69); an inline icon is 1em of its
+     text. A chevron's path ends
+     inside its 24-unit box (chevron-down at 18/24, chevron-right at
+     15/24, check at 20/24), so a negative em margin of that remainder
+     puts the drawn end, not the box, on the padding. Line boxes that set
+     a block's height are rounded up to whole pixels.
+     ============================================================ */
+  .app { position: relative; container-type: size; width: 100%; height: 100%;
+         overflow: hidden; background: var(--bg); background-image: var(--bg-grad);
+         font-family: var(--font); font-size: var(--t-body); font-weight: var(--w-medium);
+         line-height: var(--lh-body); color: var(--ink); }
+  /* .app is the container the queries measure: no padding, so its box is the
+     frame. .scr inside it carries the padding and the stack, and is the
+     containing block of the menus and the compass. */
+  .scr { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column;
+         gap: var(--gap);
+         padding: var(--s-4) var(--s-5) calc(var(--s-5) + env(safe-area-inset-bottom, 0px)); }
+  .app *, .app *::before, .app *::after { box-sizing: border-box; }
+  :where(.app) button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
+                        margin: 0; cursor: pointer; text-align: left; }
+  .app svg { display: block; }
+  .ic { width: 1em; height: 1em; flex: none; }
+  .iw { display: inline-flex; align-items: center; gap: var(--s-1); white-space: nowrap; }
+  /* tabular figures only where numbers stand in a column; rail labels are
+     centred one under another, so they keep proportional figures and their
+     ink keeps clear of the finger pad */
+  .rn, .rt, .cn, .ritem small { font-variant-numeric: tabular-nums; }
+
+  /* ---- top bar (items 1, 16) ---- */
+  .topbar { display: flex; align-items: center; gap: var(--s-3); flex: none; }
+  .city { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+          color: var(--ink); }
+  .pickwrap { anchor-name: --pick; }
+  .route, .sync { display: inline-flex; align-items: center; gap: var(--s-2);
+                  height: var(--tap-min); padding: 0 var(--s-4); background: var(--panel-strong);
+                  border: 1px solid var(--panel-edge); border-radius: var(--r-sm);
+                  box-shadow: var(--shadow); white-space: nowrap; }
+  .route { font-size: var(--t-label); font-weight: var(--w-heavy); }
+  .sync { margin-left: auto; font-size: var(--t-body); font-weight: var(--w-medium); }
+  .route .ic { margin-right: -0.25em; }
+  .sync .ic { margin-right: -0.375em; }
+  /* the gear (item 73): a square tap target on the sync control's surface */
+  .gear { flex: none; display: inline-flex; align-items: center; justify-content: center;
+          width: var(--tap-min); height: var(--tap-min); background: var(--panel-strong);
+          border: 1px solid var(--panel-edge); border-radius: var(--r-sm);
+          box-shadow: var(--shadow); color: var(--ink); }
+  .gear svg { width: var(--s-5); height: var(--s-5); }
+  .dot { width: var(--s-2); height: var(--s-2); border-radius: 50%; background: var(--ok); flex: none; }
+  /* the sync control anchors the Sync panel (item 72). Its dot follows the
+     queue: waiting in the warning colour (item 33), a refused pass in the
+     error colour (item 47), no connection in the muted colour (item 34) */
+  .sync { anchor-name: --sync; }
+  .sync.wait .dot { background: var(--warn); }
+  .sync.bad .dot { background: var(--err); }
+  .sync.off .dot { background: var(--ink-3); }
+
+  /* ---- menus (items 1, 60, 66): one build for both. Anchored --s-2 under
+     their control and snapped to whole pixels; a menu that does not fit
+     there moves up just enough to keep --s-5 and the safe-area inset from
+     the frame's bottom. The checking tool re-creates an open menu when a
+     preset or theme changes, as the app closes menus when the screen
+     turns, so the position never depends on the order of clicks. ---- */
+  @position-try --shift { top: auto; bottom: calc(var(--s-5) + env(safe-area-inset-bottom, 0px)); }
+  .rmenu, .pop { position: absolute; background: var(--panel-raised);
+                 border: 1px solid var(--panel-edge); border-radius: var(--r-md);
+                 box-shadow: var(--shadow-lift); padding: var(--s-2);
+                 position-try-fallbacks: --shift; }
+  .rmenu { z-index: 30; left: round(anchor(--pick left), 1px);
+           top: calc(anchor(--pick bottom) + var(--s-2)); width: var(--col-wide); }
+  /* the type menu is as wide as the pill, and at least as wide as its split
+     lines need on one line; sized, not inset, so a position fallback can apply */
+  .pop { z-index: 9; left: anchor(--pill left); top: calc(anchor(--pill bottom) + var(--s-2));
+         width: max(anchor-size(--pill width), calc(var(--col-wide) + 2 * var(--s-6))); }
+  .ritem, .opt { width: 100%; min-height: var(--tap-min); display: flex; align-items: center;
+                 gap: var(--s-3); padding: var(--s-2);
+                 border-radius: calc(var(--r-md) - var(--s-2) - 1px); }
+  .ritem b { flex: 1; font-size: var(--t-label); font-weight: var(--w-heavy); }
+  .ritem small { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2); }
+  .chk { width: 1em; height: 1em; flex: none; font-size: var(--t-label); color: var(--ink);
+         visibility: hidden; margin-right: -0.167em; }
+  .ritem.on, .opt.on { background: var(--active); }
+  .ritem.on .chk, .opt.on .chk { visibility: visible; }
+  .ritem.on small, .opt.on .ol small { color: var(--ink); }
+  .pt { font-size: var(--t-small); letter-spacing: calc(var(--s-1) / 2);
+        font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight);
+        padding: var(--s-2) var(--s-2) var(--s-3); }
+  .ol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
+  .ol b { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  /* ---- the Sync panel (item 72): under the sync control, right edges
+     aligned, built like the type menu. The state's line wraps. A control
+     that cannot act dims its label and keeps its reason legible ---- */
+  .pop.syncpop { z-index: 30; left: auto; right: anchor(--sync right);
+                 top: calc(anchor(--sync bottom) + var(--s-2));
+                 width: calc(var(--col-wide) + 2 * var(--s-6)); }
+  .sstat { display: flex; align-items: flex-start; gap: var(--s-3);
+           padding: var(--s-2) var(--s-2) var(--s-3); }
+  .sstat .dot { margin-top: round(down, calc((var(--t-label) - var(--s-2)) / 2), 1px); }
+  .sstat.wait .dot { background: var(--warn); }
+  .sstat.bad .dot { background: var(--err); }
+  .sstat.off .dot { background: var(--ink-3); }
+  .sstat .ol small { display: block; line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .sdiv { height: 1px; margin: var(--s-2); background: var(--line); }
+  .syncpop .opt.off b { opacity: var(--o-off); }
+  .syncpop .go { width: 1em; height: 1em; flex: none; font-size: var(--t-label); color: var(--ink-2); }
+
+  /* ---- body: the POI column beside the main area (items 51, 56); the
+     summary under the main area in portrait (item 3) ---- */
+  .body { position: relative; flex: 1; min-height: 0; display: grid; gap: var(--gap);
+          grid-template-columns: var(--col-narrow) minmax(0, 1fr);
+          grid-template-rows: minmax(0, 1fr) auto;
+          grid-template-areas: "col main" "col sum"; }
+  .colwrap { grid-area: col; position: relative; min-height: 0; display: flex; }
+  /* the rail's touch area also takes in the gap beside the column (item 57) */
+  .colwrap::after { content: ""; position: absolute; top: 0; bottom: 0; left: 100%;
+                    width: var(--gap); }
+  .col { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column;
+         background: var(--panel); border: 1px solid var(--panel-edge);
+         border-radius: var(--r-md); box-shadow: var(--shadow); overflow: hidden; }
+  .main { grid-area: main; min-width: 0; min-height: 0; anchor-name: --main;
+          display: flex; flex-direction: column; gap: var(--gap); }
+  /* the left group is a container: the card and the pill go compact when it is narrow */
+  .mleft { flex: none; display: flex; flex-direction: column; gap: var(--gap); min-width: 0;
+           container-type: inline-size; container-name: info; }
+  .mright { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  /* the summary is one balanced block; every "·" belongs to the unit before
+     it and a segment never breaks. Its line height is --lh-body rounded up to
+     an even number of pixels, so it centres in the action bar on a whole pixel
+     and the blocks around it land on whole pixels. The portrait copy
+     sits under the main area, the landscape copy inside the action bar. */
+  .summary { display: block; text-align: center; text-wrap: balance; column-gap: var(--s-1);
+             font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+             line-height: round(up, calc(var(--lh-body) * var(--t-small)), 2px);
+             min-height: 1lh; }
+  .summary span { white-space: nowrap; }
+  .summary .err { color: var(--err); font-weight: var(--w-bold); }
+  .sumport { grid-area: sum; }
+  .sumbar { display: none; flex: 1; min-width: 0; }
+
+  /* ---- mini-map, the column's header (item 58); on a short screen a
+     one-line grid button in its place (item 70) ---- */
+  .mmap { flex: none; width: 100%; padding: var(--s-3); background: var(--panel-strong);
+          border-bottom: 1px solid var(--line); display: flex; flex-direction: column;
+          align-items: center; }
+  .mm { display: flex; flex-direction: column; gap: var(--s-2); }
+  .dots { display: grid; grid-template-columns: repeat(20, var(--s-2)); gap: 1px; }
+  .dots i { display: block; width: var(--s-2); height: var(--s-2); background: var(--line); }
+  .dots i.done { background: var(--ok); }
+  .dots i.err { background: var(--err); }
+  .dots i.part { background: var(--ink-3); }
+  .dots i.nd { background: transparent; box-shadow: inset 0 0 0 1px var(--ink-2); }
+  .dots i.act { background: var(--side); box-shadow: 0 0 0 1px var(--side-ring); }
+  .mcap { width: 100%; display: flex; justify-content: space-between; align-items: center;
+          font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
+          line-height: var(--lh-tight); }
+  .mcap .ic, .mline .iw .ic { margin-right: -0.375em; }
+  .mline { display: none; width: 100%; align-items: center; gap: var(--s-2);
+           font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
+           line-height: var(--lh-tight); white-space: nowrap; }
+  .mline .gi { width: var(--s-5); height: var(--s-5); color: var(--ink); }
+  .mline .iw { margin-left: auto; }
+
+  /* ---- POI rows (items 2, 31, 40, 46, 56) and the index rail (57) ---- */
+  .colbody { flex: 1; display: flex; min-height: 0; position: relative; }
+  .list { flex: 1; min-width: 0; overflow: hidden;
+          mask-image: linear-gradient(var(--ink) calc(100% - var(--s-3)), transparent); }
+  .row { width: 100%; height: var(--row-h); display: flex; align-items: center; gap: var(--s-2);
+         padding: 0 var(--s-3); border-bottom: 1px solid var(--line); }
+  .rn { width: 3ch; flex: none; text-align: right; font-size: var(--t-row);
+        font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .rc { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
+  .rb { display: block; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
+        overflow: hidden; }
+  .rb i, .nb i, .cb i { display: block; height: 100%; background: var(--ink-3);
+                        border-radius: inherit; }
+  .rt { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+        line-height: var(--lh-tight); white-space: nowrap; }
+  .row.done { background: var(--ok-bg); }
+  .row.done .rn, .row.done .rt { color: var(--ok); }
+  .row.done .rb i { background: var(--ok); }
+  .row.err { background: var(--err-bg); box-shadow: inset var(--s-1) 0 0 0 var(--err); }
+  .row.err .rn, .row.err .rt { color: var(--err); }
+  .row.err .rb i { background: var(--err); }
+  .row.nd .rn, .row.nd .rt { color: var(--ink-2); }
+  .row.nd .rb { opacity: var(--o-off); }
+  /* item 40: the tint and the edge stay amber in every state; a done or error
+     row shows its state in the colour of its number, text and bar */
+  .row.active { background: var(--active); box-shadow: inset var(--s-1) 0 0 0 var(--active-line); }
+  .row.active .rn { color: var(--warn); }
+  .row.active .rt { color: var(--ink); font-weight: var(--w-heavy); }
+  .row.active.done .rn, .row.active.done .rt { color: var(--ok); }
+  .row.active.err .rn, .row.active.err .rt { color: var(--err); }
+  /* rail labels sit on a linear track inset by --s-2 and half a label, so the
+     first and last keep clear of the hairline and the corner; the finger pad
+     spans the rail's inner width */
+  .rail { position: relative; width: var(--s-6); flex: none; border-left: 1px solid var(--line);
+          background: var(--panel-strong); }
+  .rail span { position: absolute; left: 0; right: 0; text-align: center;
+               transform: translateY(-50%); font-size: var(--t-small);
+               font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight); }
+  .finger { position: absolute; left: 0; right: 0; height: var(--tap-min);
+            border-radius: var(--r-md); background: var(--man-soft);
+            box-shadow: inset 0 0 0 1px var(--line); transform: translateY(-50%); }
+  .bubble { position: absolute; right: calc(var(--s-6) + var(--s-2)); min-width: var(--tap-min);
+            height: var(--tap-min); padding: 0 var(--s-4); border-radius: var(--r-md);
+            background: var(--disc); color: var(--disc-glyph); font-size: var(--t-title);
+            font-weight: var(--w-heavy); display: flex; align-items: center;
+            justify-content: center; box-shadow: var(--shadow-lift);
+            transform: translateY(-50%); z-index: 12; }
+  /* "Add routes in Settings" (item 35): the action bar's button look, its
+     radius concentric with the column's */
+  .colbtn { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2);
+            margin: var(--s-3); width: calc(100% - 2 * var(--s-3)); min-height: var(--tap-min);
+            padding: var(--s-3) var(--s-4); font-size: var(--t-body); font-weight: var(--w-bold);
+            line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px);
+            text-wrap: balance; color: var(--ink);
+            background: var(--panel-strong); border: 1px solid var(--line);
+            border-radius: calc(var(--r-md) - var(--s-3) - 1px); }
+  .colbtn .ic { margin-right: -0.375em; }
+
+  /* ---- head (items 4, 19, 43). The number's box is trimmed to its cap
+     height and baseline and rounded up to a whole pixel; the counter column
+     keeps --s-3 between its trimmed lines, so its cap top and last baseline
+     are level with the number's. In portrait the head keeps room for the
+     compass, which sits at the main area's top, one gap under the top bar:
+     the head is at least as tall as the compass, so the type pill sits one
+     gap under it (item 19). ---- */
+  .head { display: flex; flex-wrap: nowrap; align-items: flex-start; gap: var(--s-4);
+          min-height: var(--compass);
+          padding-right: calc(var(--compass) + var(--s-2)); }
+  /* ink shifted left by the digits' side bearing: Manrope ExtraBold sets a
+     "1" 3px and a "5" 5px in at 92px, so the midpoint keeps both within 1px */
+  .big { flex: none; font-size: var(--t-num); line-height: var(--lh-tight);
+         font-weight: var(--w-heavy); text-box: trim-both cap alphabetic;
+         height: round(up, 1cap, 1px); margin-left: -0.0435em; }
+  .big.dash { color: var(--ink-3); }
+  .hcol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-3); }
+  .plabel { font-size: var(--t-small); letter-spacing: calc(var(--s-1) / 2);
+            font-weight: var(--w-bold); color: var(--ink-2); line-height: var(--lh-tight);
+            text-box: trim-both cap alphabetic; }
+  .cnt { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+         text-wrap: balance; text-box: trim-both cap alphabetic; }
+  .rest { font-size: var(--t-body); font-weight: var(--w-medium); color: var(--ink-2);
+          line-height: var(--lh-tight); text-box: trim-both cap alphabetic; }
+  .rest span { white-space: nowrap; }
+  .rest.ok { color: var(--ok); font-weight: var(--w-bold); }
+  /* the compass (item 19): a drawn widget, its ring, letters and needle
+     in tokens; the needle's north end and the letter N share --compass-n */
+  .compass { position: absolute; right: anchor(--main right); top: anchor(--main top);
+             width: var(--compass); height: var(--compass); color: var(--ink); z-index: 2; }
+  .compass .marks, .compass .ring { fill: none; stroke: var(--ink-2); }
+  .compass .minor { fill: none; stroke: var(--ink-3); stroke-linecap: round; }
+  .compass text { font-size: var(--t-small); fill: var(--ink-2); font-weight: var(--w-bold); }
+  .compass .cn { fill: var(--compass-n); font-weight: var(--w-heavy); }
+  .compass .nn { fill: var(--compass-n); }
+  .compass .ns { fill: var(--compass-s); }
+  .compass .hub { fill: currentColor; }
+
+  /* ---- type pill and its menu (items 46, 60, 69) ---- */
+  .typewrap { anchor-name: --pill; }
+  .typebtn { width: 100%; display: flex; align-items: center; gap: var(--s-3);
+             min-height: var(--tap-min); padding: var(--s-2) var(--s-4);
+             background: var(--panel-strong); border: 1px solid var(--panel-edge);
+             border-radius: var(--r-md); box-shadow: var(--shadow); }
+  /* the tile is a map of the maneuvers: three fixed slots, Left, Straight,
+     Right; an absent maneuver leaves its slot empty. One size for every
+     type (the pill's inner height less its two hairlines), radius concentric
+     with the pill's. */
+  .ticon { flex: none; display: grid; grid-template-columns: repeat(3, var(--s-5));
+           gap: var(--s-1); justify-content: center; align-content: center;
+           width: calc(3 * var(--s-5) + 2 * var(--s-1) + 2 * var(--s-2));
+           height: calc(var(--tap-min) - 2 * (var(--s-2) + 1px));
+           border-radius: calc(var(--r-md) - var(--s-2) - 1px); background: var(--disc);
+           color: var(--disc-glyph); }
+  .ticon svg { width: var(--s-5); height: var(--s-5); }
+  .ticon .sl { grid-column: 1; }
+  .ticon .ss, .ticon .sb { grid-column: 2; }
+  .ticon .sr { grid-column: 3; }
+  .typebtn.nd { background: transparent; border: 1px dashed var(--ink-2); box-shadow: none; }
+  .typebtn.nd .ticon, .ticon.nd { background: transparent;
+                                  box-shadow: inset 0 0 0 1px var(--ink-2); color: var(--ink-2); }
+  .typebtn.off { opacity: var(--o-off); }
+  .tl { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
+  .tl b { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+          white-space: nowrap; }
+  .tl small, .ol small { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--s-1);
+                         row-gap: var(--s-1); font-size: var(--t-small); font-weight: var(--w-bold);
+                         color: var(--ink-2); line-height: var(--lh-tight); }
+  .tchg { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--t-small);
+          font-weight: var(--w-heavy); color: var(--ink-2); white-space: nowrap; }
+  .tchg .ic { margin-right: -0.25em; }
+
+  /* ---- "Still needed" card (item 39). A tile is its label, its value and
+     its bar (v0.32). The text lines are trimmed to cap height and baseline
+     and rounded up, so the inset above the label and the inset below the
+     bar are both the tile's padding. ---- */
+  .card { background: var(--panel); border: 1px solid var(--panel-edge);
+          border-radius: var(--r-md); box-shadow: var(--shadow); padding: var(--s-4);
+          display: flex; flex-direction: column; gap: var(--s-3); }
+  .sph { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-2); }
+  .sph.sides { margin-top: var(--s-3); }
+  .spt { font-size: var(--t-small); letter-spacing: calc(var(--s-1) / 2);
+         font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight); }
+  .spn { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
+         line-height: var(--lh-tight); }
+  .need { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); }
+  .nc { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0;
+        padding: var(--s-3); border-radius: var(--r-sm); background: var(--panel-strong); }
+  .nh { display: block; font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
+        line-height: var(--lh-tight); white-space: nowrap; text-box: trim-both cap alphabetic;
+        height: round(up, 1cap, 1px); }
+  /* the inline icon sits centred on the cap height: its bottom 0.15em under the baseline */
+  .nh .ic { display: inline-block; vertical-align: -0.15em; margin-right: var(--s-1); }
+  .nv { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+        white-space: nowrap; text-box: trim-both cap alphabetic; height: round(up, 1cap, 1px); }
+  .nv small { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
+              margin-left: var(--s-1); }
+  /* "Done" is a label, not a number: smaller, on the numbers' baseline */
+  .nv .dn { font-size: var(--t-label); }
+  .nb { display: block; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
+        overflow: hidden; }
+  .nc.ok .nv { color: var(--ok); }
+  .nc.ok .nb i { background: var(--ok); }
+  .nc.over .nv { color: var(--warn); }
+  .nc.over .nb i { background: var(--warn); }
+  .nc.off .nv, .nc.off .nb { opacity: var(--o-zero); }
+  .sides4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-2); }
+  /* Manrope sets the digits' cap-to-baseline box about 1.3px above the centre
+     of its line box, so a quarter step of padding moves from top to bottom */
+  .sv { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-2);
+        min-width: 0; border-radius: var(--r-sm);
+        padding: calc(var(--s-2) - var(--s-1) / 4) var(--s-3) calc(var(--s-2) + var(--s-1) / 4);
+        background: var(--side-soft); }
+  .svl { font-size: var(--t-label); font-weight: var(--w-heavy); color: var(--warn);
+         line-height: var(--lh-tight); }
+  .svv { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .sv.z .svv { opacity: var(--o-zero); }
+
+  /* ---- discs (items 5, 6, 10, 19, 26, 46). The closed cluster sits in the
+     middle of its free space. Where the zone is too short for centred discs
+     plus one caption line, the cluster rises just enough for the caption to
+     keep --s-4 from the action bar. The open compass is centred too and, where
+     it does not fit, keeps --s-2 from the bar and rises over the card. The
+     placement depends on the zone's height only, never on a caption, and is
+     rounded to a whole pixel. ---- */
+  .stagezone { flex: 1; min-height: 0; position: relative; }
+  .stagebox { position: absolute; left: 0; right: 0; height: calc(2 * var(--disc-man));
+              top: round(max(0px, min(calc((100% - 2 * var(--disc-man)) / 2),
+                                      calc(100% + var(--gap) - var(--s-4) - 2 * var(--disc-man)
+                                           - (var(--s-4) + round(up, calc(var(--lh-body) * var(--t-body)), 1px) + 2 * var(--s-1))))), 1px); }
+  .stagebox:has(.stage.open) { height: calc(2 * var(--side-reach) + var(--disc-side));
+              top: round(min(calc((100% - (2 * var(--side-reach) + var(--disc-side))) / 2),
+                             calc(100% + var(--gap) - var(--s-2) - var(--s-1)
+                                  - (2 * var(--side-reach) + var(--disc-side)))), 1px); }
+  .stage { position: relative; margin: 0 auto; height: 100%;
+           width: calc(2 * var(--side-reach) + 2 * var(--s-2) + var(--disc-man)); }
+  .disc { position: absolute; left: 50%; top: 50%; width: var(--disc-man); height: var(--disc-man);
+          border-radius: 50%; transform: translate(-50%, -50%); display: flex;
+          align-items: center; justify-content: center; background: var(--disc);
+          color: var(--disc-glyph); box-shadow: var(--shadow-lift); z-index: 3; }
+  .disc svg { width: 56%; height: 56%; }
+  .disc.l { left: calc(50% - var(--side-reach) - var(--s-2));
+            top: calc(50% + (var(--side-reach) - var(--s-2)) / 2); }
+  .disc.st { top: calc(50% - (var(--side-reach) - var(--s-2)) / 2); }
+  .disc.r { left: calc(50% + var(--side-reach) + var(--s-2));
+            top: calc(50% + (var(--side-reach) - var(--s-2)) / 2); }
+  .stage.open .disc.on { left: 50%; top: 50%; }
+  .stage.open .disc:not(.on) { visibility: hidden; }
+  .disc.locked { opacity: var(--o-locked); box-shadow: var(--shadow); }
+  .side { position: absolute; left: 50%; top: 50%; width: var(--disc-side); height: var(--disc-side);
+          border-radius: 50%; transform: translate(-50%, -50%); display: flex;
+          align-items: center; justify-content: center; font-size: var(--t-title);
+          font-weight: var(--w-heavy); line-height: var(--lh-tight); background: var(--side);
+          color: var(--side-glyph); box-shadow: 0 0 0 var(--s-1) var(--side-ring), var(--shadow-lift);
+          z-index: 4; }
+  .side-n { top: calc(50% - var(--side-reach)); }
+  .side-s { top: calc(50% + var(--side-reach)); }
+  .side-w { left: calc(50% - var(--side-reach)); }
+  .side-e { left: calc(50% + var(--side-reach)); }
+  /* the caption sits --s-4 under the lowest disc, centred, on one line, as
+     wide as its text up to the zone's width plus --s-2 on each side, so a
+     wider font rendering never wraps it */
+  .lock { position: absolute; left: 50%; top: calc(100% + var(--s-4)); translate: -50% 0;
+          width: max-content; max-width: calc(100% + 2 * var(--s-2)); text-wrap: balance;
+          font-size: var(--t-body); font-weight: var(--w-bold); border-radius: var(--r-sm);
+          padding: var(--s-1) var(--s-3); text-align: center;
+          line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px); }
+  .lock.ok { color: var(--ok); background: var(--ok-bg); }
+  .lock.err { color: var(--err); background: var(--err-bg); }
+  .lock.info { color: var(--ink-2); background: var(--panel-strong); }
+
+  /* ---- action bar (items 3, 8, 9, 10, 26, 27, 42, 51): buttons concentric
+     with the bar; in landscape the bar runs under the whole main area and
+     holds the summary; a dimmed control carries its caption ---- */
+  .bar { flex: none; display: flex; align-items: center; gap: var(--s-2); padding: var(--s-2);
+         background: var(--panel); border: 1px solid var(--panel-edge);
+         border-radius: var(--r-md); box-shadow: var(--shadow); }
+  .btn { display: inline-flex; align-items: center; height: var(--tap-min);
+         padding: 0 var(--s-4); font-size: var(--t-body); font-weight: var(--w-bold);
+         background: var(--panel-strong); border: 1px solid var(--line);
+         border-radius: calc(var(--r-md) - var(--s-2) - 1px); white-space: nowrap; }
+  .btn.off { opacity: var(--o-off); }
+  .btn.cancel { margin-left: auto; }
+  .barnote { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+             line-height: var(--lh-tight); white-space: nowrap; }
+
+  /* ---- overlays: dimmed background, dialogs (item 63), the grid (59, 66).
+     Raised surfaces in both themes; dialogs snap to whole pixels. ---- */
+  .scrim { position: absolute; inset: 0; z-index: 25; background: var(--scrim); }
+  .scrim.top { z-index: 50; }
+  .dlg { position: absolute; z-index: 51; left: round(50%, 1px); top: round(50%, 1px);
+         translate: round(-50%, 1px) round(-50%, 1px);
+         width: calc(100% - 2 * var(--s-6)); max-width: calc(var(--col-narrow) + var(--col-wide));
+         background: var(--panel-raised); border: 1px solid var(--panel-edge);
+         border-radius: var(--r-lg); box-shadow: var(--shadow-lift); padding: var(--s-5);
+         display: flex; flex-direction: column; gap: var(--s-4); }
+  .dtitle { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .dchip { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--s-1);
+           padding: var(--s-2) var(--s-3); border-radius: var(--r-sm); background: var(--man-soft);
+           font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .dbody { font-size: var(--t-body); font-weight: var(--w-medium);
+           line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px);
+           text-wrap: balance; color: var(--ink-2); }
+  .dbtns { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); margin-top: var(--s-2); }
+  .dbtn { height: calc(var(--tap-min) + var(--s-2)); border-radius: var(--r-sm);
+          font-size: var(--t-label); font-weight: var(--w-heavy); background: var(--man-soft);
+          border: 1px solid var(--line); display: inline-flex; align-items: center;
+          justify-content: center; }
+  .dbtn.danger { background: var(--danger); border-color: var(--danger); color: var(--on-danger); }
+  .dbtn.primary { background: var(--disc); border-color: var(--disc); color: var(--disc-glyph); }
+  .sheet { position: absolute; inset: var(--s-4); z-index: 26; background: var(--panel-raised);
+           border: 1px solid var(--panel-edge); border-radius: var(--r-lg);
+           box-shadow: var(--shadow-lift); padding: var(--s-5); display: flex;
+           flex-direction: column; gap: var(--s-3); }
+  .shead { display: flex; align-items: center; gap: var(--s-3); }
+  .stt { display: flex; align-items: baseline; gap: var(--s-3); min-width: 0; }
+  .xbtn { width: var(--tap-min); height: var(--tap-min); flex: none; display: flex;
+          align-items: center; justify-content: center; border-radius: 50%;
+          background: var(--man-soft); border: 1px solid var(--line); color: var(--ink); }
+  .xbtn svg { width: var(--s-5); height: var(--s-5); }
+  .stitle { font-size: var(--t-title); font-weight: var(--w-heavy); color: var(--ink);
+            line-height: var(--lh-tight); white-space: nowrap; }
+  .sroute { font-size: var(--t-body); font-weight: var(--w-bold); white-space: nowrap; }
+  .legend { display: flex; gap: var(--s-4); flex-wrap: wrap; font-size: var(--t-small);
+            font-weight: var(--w-bold); color: var(--ink-2); }
+  .lg { display: inline-flex; align-items: center; gap: var(--s-2); }
+  /* six states, as the mini-map's squares: each tile and its swatch carry
+     the state's colour on the border, so any two differ in fill or border;
+     "not started" has no fill, so it never reads as a hole */
+  .sw { width: var(--t-small); height: var(--t-small); border-radius: calc(var(--r-sm) / 3);
+        display: inline-block; background: transparent; border: 1px solid var(--line); }
+  .sw.part, .cell.part { background: var(--man-soft); border-color: var(--ink-2); }
+  .sw.done, .cell.done { background: var(--ok-bg); border-color: var(--ok); }
+  .sw.err, .cell.err { background: var(--err-bg); border-color: var(--err); }
+  .sw.nd, .cell.nd { background: transparent; border: 1px dashed var(--ink-2); }
+  .sw.act, .cell.active { background: var(--active); border-color: var(--active-line); }
+  .sw.act { box-shadow: inset 0 0 0 1px var(--active-line); }
+  .grid { flex: 1; min-height: 0; overflow: hidden; display: grid; align-content: start;
+          grid-template-columns: repeat(10, minmax(0, 1fr)); grid-auto-rows: var(--row-h);
+          gap: var(--s-2);
+          mask-image: linear-gradient(var(--ink) calc(100% - var(--s-3)), transparent); }
+  .cell { border-radius: var(--r-sm); background: transparent; border: 1px solid var(--line);
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          gap: var(--s-2); }
+  .cn { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .cb { width: 60%; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
+        overflow: hidden; display: block; }
+  .cell.done .cn { color: var(--ok); }
+  .cell.done .cb i { background: var(--ok); }
+  .cell.err .cn { color: var(--err); }
+  .cell.err .cb i { background: var(--err); }
+  .cell.nd .cn { color: var(--ink-2); }
+  .cell.active { box-shadow: inset 0 0 0 var(--s-1) var(--active-line); }
+  .cell.active .cn { color: var(--warn); }
+
+  /* ---- item 51: the column is wide from 1200px; the main area follows the
+     shape of the app: side by side when wider than tall, stacked when taller.
+     In landscape the action bar runs under both groups and holds the summary,
+     and the column runs down to the bottom. These rules come last so they win
+     over the component rules above. ---- */
+  @container (min-width: 1200px) {
+    .body { grid-template-columns: var(--col-wide) minmax(0, 1fr); }
+    /* the wide column's mini-map uses larger squares, still 20 to a row */
+    .dots { grid-template-columns: repeat(20, var(--s-3)); }
+    .dots i { width: var(--s-3); height: var(--s-3); }
+  }
+  @container (orientation: landscape) {
+    .body { grid-template-rows: minmax(0, 1fr); grid-template-areas: "col main"; }
+    .sumport { display: none; }
+    .sumbar { display: block; }
+    .main { display: grid; column-gap: var(--gap); row-gap: var(--gap);
+            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-rows: minmax(0, 1fr) auto;
+            grid-template-areas: "left zone" "bar bar"; }
+    .mleft { grid-area: left; }
+    .mright { grid-area: zone; width: calc(2 * var(--side-reach) + 2 * var(--s-2) + var(--disc-man)); }
+    .bar { grid-area: bar; }
+    .head { padding-right: 0; min-height: 0; }
+    /* the free space runs from the top of the main area to the bar */
+    .stagebox { top: round(max(0px, min(calc((100% + var(--gap) - 2 * var(--disc-man)) / 2),
+                                        calc(100% + var(--gap) - var(--s-4) - 2 * var(--disc-man)
+                                             - (var(--s-4) + round(up, calc(var(--lh-body) * var(--t-body)), 1px) + 2 * var(--s-1))))), 1px); }
+    .stagebox:has(.stage.open) {
+      top: round(min(calc((100% + var(--gap) - (2 * var(--side-reach) + var(--disc-side))) / 2),
+                     calc(100% + var(--gap) - var(--s-2) - var(--s-1)
+                          - (2 * var(--side-reach) + var(--disc-side)))), 1px); }
+  }
+  /* the compact card and pill: beside the discs the left group can be
+     narrow; the card and its tiles tighten, columns size to their content so
+     every line keeps to one line, and the pill shows its chevron without the
+     word and its split without the passes prefix */
+  @container info (max-width: 400px) {
+    .card { padding: var(--s-3); }
+    .need { grid-template-columns: repeat(3, auto); }
+    .nc { padding: var(--s-2); }
+    .need, .sides4 { gap: var(--s-1); }
+    .sv { padding-left: var(--s-2); padding-right: var(--s-2); gap: var(--s-1); }
+    .tchg span, .tl small .tp { display: none; }
+  }
+  /* ---- the compact step (item 70): on a short screen display text shrinks
+     and the mini-map becomes a one-line grid button; discs, the compass and
+     tap targets keep their size ---- */
+  @container (max-height: 700px) {
+    .big { font-size: var(--t-num-compact); }
+    .cnt { font-size: var(--t-label); }
+    .rest { font-size: var(--t-small); }
+    .nv, .svv { font-size: var(--t-label); }
+    /* half a step between the counter lines keeps them level with the smaller number */
+    .hcol { gap: calc(var(--s-3) / 2); }
+    .mmap { flex-direction: row; align-items: center; height: var(--tap-min);
+            padding: 0 var(--s-3); }
+    .mm { display: none; }
+    .mline { display: flex; }
+  }
+  /* ---- the compact landscape step (item 70, v0.32): the side margins
+     become --s-4, the gaps beside the column and the discs --s-3 and the
+     closed side discs sit --s-2 nearer to Straight. The disc size, the
+     vertical offsets and the open compass do not change. ---- */
+  @container (max-height: 700px) and (orientation: landscape) {
+    .scr { padding-left: var(--s-4); padding-right: var(--s-4); }
+    .body { column-gap: var(--s-3); }
+    .main { column-gap: var(--s-3); }
+    .mright, .stage { width: calc(2 * var(--side-reach) + var(--disc-man)); }
+    .disc.l { left: calc(50% - var(--side-reach)); }
+    .disc.r { left: calc(50% + var(--side-reach)); }
+    /* the caption keeps one line and its spare width in the narrower zone */
+    .lock { padding-left: var(--s-2); padding-right: var(--s-2); }
+  }
+  /* with that width the card and its tiles keep their normal paddings
+     instead of the compact ones: from the landscape minimum of 1000px the
+     left group is at least 370px wide, enough for every label, value and
+     chip to keep its spare width. In a frame dragged narrower the compact
+     card stays. The pill keeps its compact look. */
+  @container (max-height: 700px) and (orientation: landscape) and (min-width: 1000px) {
+    .card { padding: var(--s-4) var(--s-3); }
+    /* --s-4 between the two sections over the card's --s-3 row gap */
+    .sph.sides { margin-top: calc(var(--s-4) - var(--s-3)); }
+    .need { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); }
+    .nc { padding: var(--s-3); }
+    .sides4 { gap: var(--s-2); }
+    .sv { padding-left: var(--s-3); padding-right: var(--s-3); gap: var(--s-2); }
+  }
+  /* ---- the compass's sizes (item 19, v0.35): 128px, 144px on a tall
+     landscape screen, 96px on a short one. The compass and the head read
+     --compass, so one step sets it for both. ---- */
+  @container (orientation: landscape) and (height > 700px) {
+    .scr { --compass: var(--compass-wide); }
+  }
+  @container (max-height: 700px) {
+    .scr { --compass: var(--compass-compact); }
+  }
+  /* ---- the roomy card (item 71, v0.33): on a tall landscape screen the
+     "Still needed" card steps up one size, the mirror of the compact
+     step, so it keeps its 1000 × 600 proportion beside the discs. Only
+     its text sizes and paddings change. Where the left group is narrower
+     than 520px the larger values would lose their spare width, so the
+     normal card stays. ---- */
+  @container (orientation: landscape) and (height > 700px) {
+    @container info (width >= 520px) {
+      .card { padding: var(--s-5); gap: var(--s-4); }
+      /* --s-5 between the sections: the card's --s-4 gap plus --s-2 */
+      .sph.sides { margin-top: var(--s-2); }
+      .spt, .spn { font-size: var(--t-body); }
+      .need, .sides4 { gap: var(--s-3); }
+      .nc { padding: var(--s-4); gap: var(--s-3); }
+      .nh { font-size: var(--t-body); }
+      .nv { font-size: var(--t-stat); }
+      .nv small { font-size: var(--t-body); margin-left: var(--s-2); }
+      .nv .dn { font-size: var(--t-title); }
+      .nb { height: var(--s-2); }
+      /* taller chips, the same text: the sides are secondary */
+      .sv { padding: calc(var(--s-3) - var(--s-1) / 4) var(--s-4)
+                     calc(var(--s-3) + var(--s-1) / 4); }
+    }
+  }
 
   /* ============================================================
-     SCREEN CONTENT: tokens only
-     Everything below styles what is inside the device frame.
-     No hardcoded colors, radii, fonts or shadows may appear here
-     — only var(--…) from _tokens.css v0.3.
+     SETTINGS (screens.md items 17, 18, 20 to 25, 65, 73 to 75): a sheet
+     over the screen (item 74), one column that drills down in portrait,
+     the list beside the page in landscape. Tokens only.
      ============================================================ */
-  .screen { width: 1000px; height: 600px; display: flex; flex-direction: column;
-            overflow: hidden; border-radius: 22px; background: var(--bg);
-            background-image: var(--bg-grad);
-            font-family: var(--font); color: var(--ink); }
-
-  /* ---- top bar: glass (blurred), panel level ---- */
-  .topbar { height: 64px; flex: none; display: flex; align-items: center; gap: 14px;
-            padding: 0 22px; background: var(--panel);
-            backdrop-filter: blur(var(--blur));
-            -webkit-backdrop-filter: blur(var(--blur));
-            border-bottom: 1px solid var(--line); }
-  .back { display: inline-flex; align-items: center; justify-content: center;
-          width: var(--tap-min); height: var(--tap-min); font-size: 20px;
-          color: var(--ink); background: var(--panel-strong);
-          border: 1px solid var(--panel-edge); border-radius: var(--r-sm); }
-  .ttl { font-size: 20px; font-weight: 700; color: var(--ink); }
-  .ttl-sub { font-size: 12px; color: var(--ink-2); margin-left: auto; }
-
-  /* ---- body ---- */
-  .body { flex: 1; display: flex; gap: 18px; padding: 18px 22px; overflow: hidden; }
-  .col { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-  .col.narrow { flex: none; width: 420px; }
-  .col.side { flex: none; width: 360px; }
-
-  /* ---- panel: glass (blurred), panel level ---- */
-  .panel { background: var(--panel); backdrop-filter: blur(var(--blur));
-           -webkit-backdrop-filter: blur(var(--blur));
-           border: 1px solid var(--panel-edge); border-radius: var(--r-md);
-           box-shadow: var(--shadow); padding: 16px 18px; overflow: hidden; }
-  .panel + .panel { margin-top: 14px; }
-  .panel.grow { flex: 1; }
-  .sect { font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
-          color: var(--ink-3); margin-bottom: 12px; }
-
-  /* ---- list rows: translucent, NEVER blurred ---- */
-  .crow { display: flex; align-items: center; gap: 12px; min-height: 60px;
-          padding: 10px 14px; background: var(--panel-strong);
-          border: 1px solid var(--line); border-radius: var(--r-sm); }
-  .crow + .crow { margin-top: 8px; }
-  .crow.active { background: var(--active);
-                 box-shadow: inset 3px 0 0 0 var(--active-line); }
-  .cname { font-size: 17px; font-weight: 700; color: var(--ink); }
-  .cmeta { font-size: 12px; color: var(--ink-2); margin-top: 3px; }
-  .chev { margin-left: auto; font-size: 16px; color: var(--ink-3); }
-
-  .rrow { display: flex; align-items: center; gap: 10px; height: var(--tap-min);
-          padding: 0 14px; background: var(--panel-strong);
-          border: 1px solid var(--line); border-radius: var(--r-sm); }
-  .rrow + .rrow { margin-top: 6px; }
-  .rcode { font-size: 14px; font-weight: 700; color: var(--ink); }
-  .rpoi { font-size: 12px; color: var(--ink-2); }
-
-  /* ---- form fields ---- */
-  .field { margin-bottom: 14px; }
-  .field.last { margin-bottom: 0; }
-  .flabel { font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
-            color: var(--ink-3); margin-bottom: 5px; }
-  .fval { height: var(--tap-min); line-height: 42px; padding: 0 14px;
-          font-size: 15px; color: var(--ink); background: var(--panel-solid);
-          border: 1px solid var(--line); border-radius: var(--r-sm);
-          overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-  .fval.mask { letter-spacing: .22em; }
-  .fhint { font-size: 11px; color: var(--ink-3); margin-top: 5px; }
-  .ro { height: var(--tap-min); line-height: 42px; padding: 0 14px;
-        font-size: 15px; font-weight: 700; color: var(--ink-2);
-        background: var(--panel); border: 1px solid var(--line);
-        border-radius: var(--r-sm); }
-
-  /* ---- controls: solid, never glass ---- */
-  .row-btns { display: flex; gap: 10px; margin-top: 4px; }
-  .btn { display: inline-flex; align-items: center; height: var(--tap-min);
-         padding: 0 16px; font-size: 13px; font-weight: 600; color: var(--ink);
-         background: var(--panel-strong); border: 1px solid var(--panel-edge);
-         border-radius: var(--r-sm); }
-  .btn.primary { color: var(--side-glyph); background: var(--side);
-                 border-color: var(--side-ring); }
-  .btn.add { width: 100%; justify-content: center; margin-top: 10px;
-             color: var(--ink-2); background: var(--panel);
-             border: 1px solid var(--line); }
-  .btn.danger { color: var(--err); background: var(--err-bg);
-                border-color: var(--line); }
-  /* State, not role: an unavailable control keeps every colour it already
-     has and is only dimmed. Same rule as the maneuver discs on a finished
-     POI in main-screen.html. */
-  .btn.unavailable { opacity: .4; pointer-events: none; }
-  .danger-wrap { margin-top: auto; padding-top: 14px; }
-  .danger-note { font-size: 11px; color: var(--ink-3); margin-top: 6px; }
-  .statusline { font-size: 12px; color: var(--ok); font-weight: 600;
-                margin-top: 12px; }
-  /* one sync control plus the caption that explains it (screen 3 only) */
-  .ctl { margin-top: 14px; }
-
-  /* ---- footer strip: glass (blurred), panel level ---- */
-  .footbar { height: 40px; flex: none; display: flex; align-items: center;
-             padding: 0 22px; font-size: 12px; color: var(--ink-2);
-             background: var(--panel); backdrop-filter: blur(var(--blur));
-             -webkit-backdrop-filter: blur(var(--blur));
-             border-top: 1px solid var(--line); }
-  /* ==================== END SCREEN CONTENT ==================== */
+  .set { gap: var(--s-4); }
+  .sbody { flex: 1; min-height: 0; display: grid; gap: var(--s-5);
+           grid-template-columns: var(--col-wide) minmax(0, 1fr); }
+  /* a list cut at the bottom edge fades there, as the POI list does (item 56) */
+  .slist, .sdet { min-height: 0; overflow: hidden; display: flex; flex-direction: column;
+                  mask-image: linear-gradient(var(--ink) calc(100% - var(--s-3)), transparent); }
+  @container (orientation: portrait) {
+    .sbody { grid-template-columns: minmax(0, 1fr); }
+    .sbody[data-depth="0"] .sdet, .sbody[data-depth="1"] .slist { display: none; }
+  }
+  /* in landscape the list is beside a city's page, so no link back to it */
+  @container (orientation: landscape) {
+    .back.toroot { display: none; }
+  }
+  .sgh { flex: none; padding: var(--s-5) var(--s-2) var(--s-2); font-size: var(--t-small);
+         font-weight: var(--w-heavy); letter-spacing: calc(var(--s-1) / 2); color: var(--ink-2);
+         line-height: var(--lh-tight); }
+  .sgh:first-child { padding-top: var(--s-2); }
+  .sgap { flex: none; height: var(--s-5); }
+  .sgroup { flex: none; background: var(--panel-strong); border: 1px solid var(--line);
+            border-radius: var(--r-md); overflow: hidden; }
+  .srow { width: 100%; min-height: var(--row-h); display: flex; align-items: center; gap: var(--s-3);
+          padding: var(--s-2) var(--s-4); border-bottom: 1px solid var(--line); }
+  .srow:last-child { border-bottom: 0; }
+  .srow.on { background: var(--active); }
+  .srow.stack { flex-direction: column; align-items: stretch; gap: var(--s-2);
+                padding-top: var(--s-3); padding-bottom: var(--s-3); }
+  .srow .ol small { display: block; line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .srow.add .ol b { font-size: var(--t-body); }
+  .srow.danger .ol b { color: var(--err); }
+  .srow.off .ol b { opacity: var(--o-off); }
+  .srow .go { width: 1em; height: 1em; flex: none; font-size: var(--t-label); color: var(--ink-2); }
+  .srow .plus { width: var(--s-5); height: var(--s-5); flex: none; color: var(--ink); }
+  .inuse { flex: none; display: inline-flex; align-items: center; gap: var(--s-1);
+           padding: var(--s-1) var(--s-2); border-radius: var(--r-sm); background: var(--ok-bg);
+           color: var(--ok); font-size: var(--t-small); font-weight: var(--w-heavy);
+           line-height: var(--lh-tight); white-space: nowrap; }
+  /* Theme (item 17): the segmented control of History's scope */
+  .seg { flex: none; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--s-2);
+         padding: var(--s-1); background: var(--man-soft); border-radius: var(--r-md); }
+  .sg { height: var(--tap-min); min-width: calc(var(--tap-min) + var(--s-6)); padding: 0 var(--s-4);
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: var(--t-body); font-weight: var(--w-heavy); color: var(--ink-2);
+        border-radius: calc(var(--r-md) - var(--s-1)); white-space: nowrap; }
+  .sg.on { background: var(--panel-raised); box-shadow: var(--shadow); color: var(--ink); }
+  /* Sound (item 65): a switch, on in the colour of the discs */
+  .switch { flex: none; position: relative; width: calc(var(--s-6) + var(--s-5)); height: var(--s-6);
+            border-radius: var(--s-4); background: var(--disc); }
+  .switch::after { content: ""; position: absolute; top: var(--s-1); right: var(--s-1);
+                   width: var(--s-5); height: var(--s-5); border-radius: 50%; background: var(--disc-glyph); }
+  /* a deeper page: the link back names the page above (item 74) */
+  .back { flex: none; align-self: flex-start; display: inline-flex; align-items: center; gap: var(--s-1);
+          height: var(--tap-min); padding: 0 var(--s-2); margin-left: calc(-1 * var(--s-2));
+          font-size: var(--t-body); font-weight: var(--w-bold); color: var(--ink-2); }
+  .back svg { width: var(--s-5); height: var(--s-5); }
+  .dh { flex: none; display: flex; align-items: center; gap: var(--s-3); min-height: var(--tap-min);
+        padding: 0 var(--s-2); }
+  .dh h3 { margin: 0; min-width: 0; font-size: var(--t-row); font-weight: var(--w-heavy);
+           line-height: var(--lh-tight); }
+  .usebtn { margin-left: auto; flex: none; display: inline-flex; align-items: center; height: var(--tap-min);
+            padding: 0 var(--s-4); border-radius: var(--r-sm); background: var(--disc);
+            color: var(--disc-glyph); font-size: var(--t-body); font-weight: var(--w-heavy); white-space: nowrap; }
+  .shint { flex: none; margin: 0; padding: var(--s-2) var(--s-2) 0; font-size: var(--t-small);
+           font-weight: var(--w-medium); color: var(--ink-2);
+           line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  /* fields (items 22, 25, 75) */
+  .field { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-3) var(--s-4);
+           border-bottom: 1px solid var(--line); }
+  .field:last-child { border-bottom: 0; }
+  .field label { font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
+                 line-height: var(--lh-tight); }
+  .fbox { display: flex; align-items: center; gap: var(--s-3); min-width: 0; min-height: var(--tap-min);
+          padding: 0 var(--s-4); border-radius: var(--r-sm); background: var(--panel-raised);
+          border: 1px solid var(--line); font-size: var(--t-body); font-weight: var(--w-medium); }
+  .fv { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fv.ph { color: var(--ink-3); }
+  .fbox b { flex: none; font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2); }
+  .field.bad .fbox { border-color: var(--err); }
+  .ferr { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--err);
+          line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .sstate { flex: none; display: flex; align-items: center; gap: var(--s-2); padding: var(--s-3) var(--s-2) 0;
+            font-size: var(--t-body); font-weight: var(--w-bold); }
+  .sacts { flex: none; display: flex; gap: var(--s-3); padding-top: var(--s-4); }
+  .sacts .dbtn { flex: 1; }
+  /* APP END */
 </style>
 </head>
 <body>
 
+<svg class="sprite" aria-hidden="true">
+  <!-- Lucide icons (CLAUDE.md rule 10, screens.md item 69): path data verbatim
+       from the Lucide source, stroke-width 2.6, colour from currentColor -->
+  <symbol id="i-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20v-7a4 4 0 0 0-4-4H4"/><path d="M9 14 4 9l5-5"/></symbol>
+  <symbol id="i-straight" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></symbol>
+  <symbol id="i-ban" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.929 4.929 19.07 19.071"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-chev-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-chev-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></symbol>
+  <symbol id="i-chev-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-chev-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+</svg>
+
   <p class="eyebrow">Design Reference · docs/references/settings.html</p>
-  <h1>POI Tracker — Settings Reference</h1>
-  <p class="meta"><b>v0.8 — 2026-09-12.</b> Today's timestamp drops the word
-     "today", and the sync caption reads "last loaded", the wording of
-     screens.md item 16.
-     <b>Reference device: Android tablet 10.6", 1000 × 600 px</b>
-     (2000 × 1200 physical at 2× density), landscape, full-screen.</p>
+  <h1>POI Tracker — Settings</h1>
+  <p class="meta"><b>v0.9 — 2026-10-12.</b> Settings redrawn on the canon after the user's five
+     decisions: the gear opens it (item 73), a city is put in use from its page (item 21), a route
+     has its own page and loads from the sheet when it is added (item 22), and the dialogs name
+     the passes they would lose (items 18, 24). Every value inside the frames is a token of
+     <b>_tokens.css v0.11</b> and every rule follows <b>screens.md v0.37</b>. The shell (top bar,
+     POI column, presets, drag corner, light and dark) is that of <b>main-screen.html v0.26</b>,
+     copied unchanged: presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
+     <b>720 × 1000</b>, <b>1333 × 800</b> and <b>1000 × 600</b>. Every frame also drags at its
+     bottom-right corner. In portrait Settings is one column that drills down, in landscape the
+     list stays beside the page (item 74). Nine states, A to I. Graz, Linz and the R20891 codes
+     are sample data.</p>
 
-  <div class="rail">
+  <div class="tool" role="group" aria-label="Checking tool">
+    <span class="lbl">Preset</span>
+    <button type="button" class="on" data-preset="800x1333">800 × 1333</button>
+    <button type="button" data-preset="720x1000">720 × 1000</button>
+    <button type="button" data-preset="1333x800">1333 × 800</button>
+    <button type="button" data-preset="1000x600">1000 × 600</button>
+    <span class="sep"></span>
+    <span class="lbl">Theme</span>
+    <button type="button" class="on" data-theme-set="light">Light</button>
+    <button type="button" data-theme-set="dark">Dark</button>
+    <span class="hint">Checking tool only — nothing here is part of the app.</span>
+  </div>
 
-    <div class="unit">
+  <div class="board">
+
+    <!-- ================= A · Settings ================= -->
+    <section class="unit">
       <div class="device">
-        <div class="bezel">
-          <div class="screen">
-
-            <div class="topbar">
-              <span class="back">‹</span>
-              <span class="ttl">Settings</span>
-            </div>
-
-            <div class="body">
-              <div class="col narrow">
-                <div class="panel grow">
-                  <div class="sect">Cities</div>
-
-                  <div class="crow active">
-                    <div>
-                      <div class="cname">Düsseldorf</div>
-                      <div class="cmeta">6 routes · Connected</div>
-                    </div>
-                    <span class="chev">›</span>
-                  </div>
-
-                  <div class="crow">
-                    <div>
-                      <div class="cname">Vienna</div>
-                      <div class="cmeta">0 routes · Connection not set</div>
-                    </div>
-                    <span class="chev">›</span>
-                  </div>
-
-                  <span class="btn add">Add city</span>
-                </div>
-              </div>
-              <div class="col"></div>
-            </div>
-
-            <div class="footbar">All sent · 12:41</div>
-
-          </div>
-          <!-- /screen -->
-        </div>
-        <p class="caption">Screen 1 · City list</p>
+        <div class="frame"><div class="app" data-state="A"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(40 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
+    <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp">70 passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28 ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14 ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="sph"><span class="spt">STILL NEEDED</span></div>
+      <div class="need">
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
       </div>
-
-      <aside class="dmap">
-        <div class="dmap-title">Decision map · Screen 1</div>
-
-        <div class="dtopic">
-          <h3>Cities are a list, not one address</h3>
-          <p>Settings holds a list that grows: Dortmund, then Düsseldorf, then
-             Vienna. Each entry carries its own connection details and its own
-             routes rather than overwriting a single global field.</p>
-          <p class="why"><em>Every city is a separate Google tracker, so a single
-             editable address would mean retyping it on every move and losing the
-             previous city's routes and baseline the moment the work
-             shifts.</em></p>
-        </div>
-
-        <div class="dtopic">
-          <h3>The active city is marked twice</h3>
-          <p>The row here carries the active highlight, and the same city name
-             sits beside the route picker on the working screen.</p>
-          <p class="why"><em>A tap writes into one specific tracker. Showing the
-             target only in Settings would mean the one screen where passes are
-             actually recorded never says which city it is filling.</em></p>
-        </div>
-
-        <div class="dtopic">
-          <h3>A city is never deleted automatically</h3>
-          <p>Finishing a city and moving to the next one adds an entry; nothing
-             is cleaned up on the way out. Removal is always an explicit act.</p>
-          <p class="why"><em>A finished city still holds its baseline and its
-             history, and may still hold passes that never reached the sheet.
-             Automatic tidying would throw those away silently.</em></p>
-        </div>
-      </aside>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+    </div></div></div>
+    </div>
+    <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><div class="summary sumbar" data-summary></div></div>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+<button class="scrim" type="button" aria-label="Close Settings"></button>
+<div class="sheet set" role="dialog" aria-label="Settings">
+  <div class="shead"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><span class="stt"><span class="stitle">Settings</span></span></div>
+  <div class="sbody" data-depth="0">
+      <div class="slist">
+        <div class="sgh">CITIES</div>
+        <div class="sgroup">
+          <button class="srow on" type="button"><span class="ol"><b>Vienna</b><small>8 routes · Connected</small></span><span class="inuse"><svg class="ic"><use href="#i-check"/></svg>In use</span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Graz</b><small>6 routes · Connected</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Linz</b><small>4 routes · Connection not set up</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow add" type="button"><svg class="plus"><use href="#i-plus"/></svg><span class="ol"><b>Add city</b></span></button>
+        </div>
+        <div class="sgh">THIS TABLET</div>
+        <div class="sgroup">
+          <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+        </div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <button class="srow danger" type="button"><span class="ol"><b>Erase everything on this tablet</b><small>Passes not yet sent are lost. The sheets stay as they are.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+      </div>
+      <div class="sdet">
+        <button class="back toroot" type="button"><svg><use href="#i-chev-left"/></svg>Settings</button>
+        <div class="dh"><h3>Vienna</h3><span class="inuse"><svg class="ic"><use href="#i-check"/></svg>In use</span></div>
+        <div class="sgh">CONNECTION</div>
+        <div class="sgroup">
+          <button class="srow" type="button"><span class="ol"><b>Connection</b><small><span class="iw"><span class="dot"></span>Connected · tested 18:20</span></small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+        <div class="sgh">ROUTES</div>
+        <div class="sgroup">
+          <button class="srow" type="button"><span class="ol"><b>R20890-054</b><small>197 POIs · 197 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-055</b><small>197 POIs · 197 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-056</b><small>197 POIs · 141 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-057</b><small>197 POIs · 88 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-058</b><small>197 POIs · 79 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-059</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-060</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-061</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow add" type="button"><svg class="plus"><use href="#i-plus"/></svg><span class="ol"><b>Add route</b></span></button>
+        </div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <div class="srow danger off"><span class="ol"><b>Delete city</b><small>Switch to another city first</small></span></div>
+        </div>
+      </div>
+  </div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>A</b> · Settings</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>73, 74</b> The gear opens Settings as a sheet over the screen, as the grid of all POIs opens (item 59): the round ✕ top left, the title "Settings".</li>
+        <li><b>20</b> CITIES: name, routes, connection state. The city in use carries "In use". "Add city" ends the list.</li>
+        <li><b>17, 65</b> THIS TABLET: Theme as a segmented control (System, Light, Dark), Sound as a switch.</li>
+        <li><b>18, 28</b> "Erase everything on this tablet" apart at the bottom, in red.</li>
+        <li><b>74</b> In portrait this is the whole column. In landscape the list stays on the left at --col-wide and the city in use is shown beside it, tinted in the list like the active POI row (item 40).</li>
+      </ul></aside>
+    </section>
 
-    <div class="unit">
+    <!-- ================= B · The city in use ================= -->
+    <section class="unit">
       <div class="device">
-        <div class="bezel">
-          <div class="screen">
-
-            <div class="topbar">
-              <span class="back">‹</span>
-              <span class="ttl">Düsseldorf</span>
-              <span class="ttl-sub">City</span>
-            </div>
-
-            <div class="body">
-              <div class="col side">
-                <div class="panel">
-                  <div class="field last">
-                    <div class="flabel">City name</div>
-                    <div class="fval">Düsseldorf</div>
-                  </div>
-                </div>
-
-                <div class="panel">
-                  <div class="crow">
-                    <div>
-                      <div class="cname">Connection</div>
-                      <div class="cmeta">Connected · tested 12:38</div>
-                    </div>
-                    <span class="chev">›</span>
-                  </div>
-                </div>
-
-                <div class="danger-wrap">
-                  <span class="btn danger">Delete city</span>
-                </div>
-              </div>
-
-              <div class="col">
-                <div class="panel grow">
-                  <div class="sect">Routes</div>
-                  <div class="rrow"><span class="rcode">R20890-024</span><span class="rpoi">197 POIs</span><span class="chev">›</span></div>
-                  <div class="rrow"><span class="rcode">R20890-025</span><span class="rpoi">197 POIs</span><span class="chev">›</span></div>
-                  <div class="rrow"><span class="rcode">R20890-026</span><span class="rpoi">197 POIs</span><span class="chev">›</span></div>
-                  <div class="rrow"><span class="rcode">R20890-027</span><span class="rpoi">197 POIs</span><span class="chev">›</span></div>
-                  <div class="rrow"><span class="rcode">R20890-028</span><span class="rpoi">197 POIs</span><span class="chev">›</span></div>
-                  <div class="rrow"><span class="rcode">R20890-029</span><span class="rpoi">197 POIs</span><span class="chev">›</span></div>
-                  <span class="btn add">Add route</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-          <!-- /screen -->
-        </div>
-        <p class="caption">Screen 2 · City — Düsseldorf</p>
+        <div class="frame"><div class="app" data-state="B"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(40 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
+    <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp">70 passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28 ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14 ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="sph"><span class="spt">STILL NEEDED</span></div>
+      <div class="need">
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
       </div>
-
-      <aside class="dmap">
-        <div class="dmap-title">Decision map · Screen 2</div>
-
-        <div class="dtopic">
-          <h3>Connection is one row, not three fields</h3>
-          <p>The address and the key are entered once in the life of a city and
-             then never read again, so they collapse into a single row that
-             states its status and opens a screen of its own.</p>
-          <p class="why"><em>Ranking a screen by how often each thing is used
-             beats ranking it by setup order. Three setup fields at the top push
-             the routes — the reason the screen is opened at all — below a field
-             nobody looks at twice.</em></p>
-        </div>
-
-        <div class="dtopic">
-          <h3>Routes fill the screen</h3>
-          <p>The route list takes the largest region and shows all six at once,
-             each at full tap size, with adding a route at the end of the
-             list.</p>
-          <p class="why"><em>Routes are the working content of a city: they are
-             checked, corrected and added throughout a job. Content that changes
-             often deserves the space, and seeing the whole set at once is what
-             makes a missing or mistyped route obvious.</em></p>
-        </div>
-
-        <div class="dtopic">
-          <h3>Deleting a city is explicit and low</h3>
-          <p>The control sits at the bottom of the column in a muted destructive
-             style, away from the routes and the connection row.</p>
-          <p class="why"><em>It is the only action here that can lose field work
-             that never reached a spreadsheet. Distance and a quiet style are the
-             cheapest guard against a mis-tap while scrolling.</em></p>
-        </div>
-      </aside>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+    </div></div></div>
+    </div>
+    <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><div class="summary sumbar" data-summary></div></div>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+<button class="scrim" type="button" aria-label="Close Settings"></button>
+<div class="sheet set" role="dialog" aria-label="Settings">
+  <div class="shead"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><span class="stt"><span class="stitle">Settings</span></span></div>
+  <div class="sbody" data-depth="1">
+      <div class="slist">
+        <div class="sgh">CITIES</div>
+        <div class="sgroup">
+          <button class="srow on" type="button"><span class="ol"><b>Vienna</b><small>8 routes · Connected</small></span><span class="inuse"><svg class="ic"><use href="#i-check"/></svg>In use</span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Graz</b><small>6 routes · Connected</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Linz</b><small>4 routes · Connection not set up</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow add" type="button"><svg class="plus"><use href="#i-plus"/></svg><span class="ol"><b>Add city</b></span></button>
+        </div>
+        <div class="sgh">THIS TABLET</div>
+        <div class="sgroup">
+          <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+        </div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <button class="srow danger" type="button"><span class="ol"><b>Erase everything on this tablet</b><small>Passes not yet sent are lost. The sheets stay as they are.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+      </div>
+      <div class="sdet">
+        <button class="back toroot" type="button"><svg><use href="#i-chev-left"/></svg>Settings</button>
+        <div class="dh"><h3>Vienna</h3><span class="inuse"><svg class="ic"><use href="#i-check"/></svg>In use</span></div>
+        <div class="sgh">CONNECTION</div>
+        <div class="sgroup">
+          <button class="srow" type="button"><span class="ol"><b>Connection</b><small><span class="iw"><span class="dot"></span>Connected · tested 18:20</span></small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+        <div class="sgh">ROUTES</div>
+        <div class="sgroup">
+          <button class="srow" type="button"><span class="ol"><b>R20890-054</b><small>197 POIs · 197 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-055</b><small>197 POIs · 197 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-056</b><small>197 POIs · 141 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-057</b><small>197 POIs · 88 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-058</b><small>197 POIs · 79 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-059</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-060</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-061</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow add" type="button"><svg class="plus"><use href="#i-plus"/></svg><span class="ol"><b>Add route</b></span></button>
+        </div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <div class="srow danger off"><span class="ol"><b>Delete city</b><small>Switch to another city first</small></span></div>
+        </div>
+      </div>
+  </div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>B</b> · The city in use</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>21</b> The city's page: its name with "In use", the Connection row with its state and the time of the last test, its routes with "N of 197 done", "Add route".</li>
+        <li><b>74</b> In portrait a back link "Settings" leads up. In landscape the list is beside the page, so that link is not shown.</li>
+        <li><b>21, 26, 27</b> "Delete city" stays at the bottom, dimmed, with the reason "Switch to another city first".</li>
+      </ul></aside>
+    </section>
 
-    <div class="unit">
+    <!-- ================= C · Another city ================= -->
+    <section class="unit">
       <div class="device">
-        <div class="bezel">
-          <div class="screen">
-
-            <div class="topbar">
-              <span class="back">‹</span>
-              <span class="ttl">Connection</span>
-              <span class="ttl-sub">Düsseldorf</span>
-            </div>
-
-            <div class="body">
-              <div class="col narrow">
-                <div class="panel">
-                  <div class="field">
-                    <div class="flabel">Script URL</div>
-                    <div class="fval">https://script.google.com/…/exec</div>
-                    <div class="fhint">The address Apps Script gives you after deployment</div>
-                  </div>
-
-                  <div class="field">
-                    <div class="flabel">Access key</div>
-                    <div class="fval mask">••••••</div>
-                    <div class="fhint">Stored on this tablet only — never in the project</div>
-                  </div>
-
-                  <div class="row-btns">
-                    <span class="btn">Test connection</span>
-                    <span class="btn primary">Save</span>
-                  </div>
-
-                  <div class="statusline">Connected · tested 12:38</div>
-                </div>
-              </div>
-
-              <div class="col">
-                <div class="panel">
-                  <div class="sect">Sync</div>
-                  <div class="statusline">All sent · 12:41</div>
-
-                  <div class="ctl">
-                    <span class="btn">Send now</span>
-                    <div class="fhint">Sending is automatic whenever there is network</div>
-                  </div>
-
-                  <div class="ctl">
-                    <span class="btn">Load from sheet</span>
-                    <div class="fhint">Reads the numbers this route already has in the sheet and continues from them</div>
-                    <div class="fhint">Use once, when you start tapping on a route that was filled in by hand · last loaded 04.09 19:20</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-          <!-- /screen -->
-        </div>
-        <p class="caption">Screen 3 · Connection — Düsseldorf</p>
+        <div class="frame"><div class="app" data-state="C"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(40 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
+    <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp">70 passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28 ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14 ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="sph"><span class="spt">STILL NEEDED</span></div>
+      <div class="need">
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
       </div>
-
-      <aside class="dmap">
-        <div class="dmap-title">Decision map · Screen 3</div>
-
-        <div class="dtopic">
-          <h3>The key and the URL live on the tablet</h3>
-          <p>Both are entered here and saved to this device only. Neither ever
-             appears in a project file, a prompt or a chat message.</p>
-          <p class="why"><em>The address plus its key is write access to the
-             user's live tracker. Anything committed to the repository is
-             effectively published, and a deployment address cannot be rotated as
-             easily as a key.</em></p>
-        </div>
-
-        <div class="dtopic">
-          <h3>"Script URL" and "Access key", not "Mailbox" and "Password"</h3>
-          <p>The screen names each thing as the user meets it: the URL is
-             literally the link Apps Script hands back after deployment, and the
-             key is a secret this app invents for itself.</p>
-          <p class="why"><em>Mailbox is our internal word for the Apps Script and
-             means nothing to the person typing; password would suggest the
-             Google account credential and invite someone to paste it here. The
-             documentation may keep saying mailbox — the interface may not.</em></p>
-        </div>
-
-        <div class="dtopic">
-          <h3>Testing is a button, not an automatic act</h3>
-          <p>"Test connection" sits beside Save and is pressed deliberately; the
-             result appears as a status line under the buttons.</p>
-          <p class="why"><em>A test fired on every keystroke would hammer a live
-             spreadsheet with half-typed addresses and turn a normal edit into a
-             stream of failures. Pressing it is also the moment the user actually
-             wants an answer.</em></p>
-        </div>
-
-        <div class="dtopic">
-          <h3>Sending is automatic; the button only confirms</h3>
-          <p>Passes go out on their own as soon as there is network, and the
-             status line carries the time of the last successful send. "Send
-             now" changes nothing about that — it is there for the moment before
-             a shift ends, when the user wants to see it happen.</p>
-          <p class="why"><em>An offline-first app that waits to be told to sync
-             loses data the day someone forgets. Automatic delivery removes that
-             failure, but it leaves no moment of confirmation, and a driver
-             parking up wants to know the day's work landed before closing the
-             tablet. The button buys that certainty without becoming the
-             mechanism.</em></p>
-        </div>
-
-        <div class="dtopic">
-          <h3>"Load from sheet" is the bridge from hand entry</h3>
-          <p>It reads what a route already holds in the sheet so the app can carry
-             on from those numbers — the one way work done by hand becomes work
-             the app can continue. It warns first whenever passes are still
-             waiting to be sent, and it lives here rather than on the working
-             screen because it overwrites local counts.</p>
-          <p class="why"><em>The sheet keeps seven totals per POI, not the passes
-             that made them, so the app can continue from a hand-filled route but
-             can never show the individual passes behind those totals — which is
-             why History lists nothing for them. Loading before sending would
-             silently discard the queue, because the tracker cannot know about
-             passes that never reached it; and the working screen is tapped
-             without looking, so no overwriting action belongs there.</em></p>
-        </div>
-      </aside>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+    </div></div></div>
+    </div>
+    <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><div class="summary sumbar" data-summary></div></div>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+<button class="scrim" type="button" aria-label="Close Settings"></button>
+<div class="sheet set" role="dialog" aria-label="Settings">
+  <div class="shead"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><span class="stt"><span class="stitle">Settings</span></span></div>
+  <div class="sbody" data-depth="1">
+      <div class="slist">
+        <div class="sgh">CITIES</div>
+        <div class="sgroup">
+          <button class="srow" type="button"><span class="ol"><b>Vienna</b><small>8 routes · Connected</small></span><span class="inuse"><svg class="ic"><use href="#i-check"/></svg>In use</span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow on" type="button"><span class="ol"><b>Graz</b><small>6 routes · Connected</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Linz</b><small>4 routes · Connection not set up</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow add" type="button"><svg class="plus"><use href="#i-plus"/></svg><span class="ol"><b>Add city</b></span></button>
+        </div>
+        <div class="sgh">THIS TABLET</div>
+        <div class="sgroup">
+          <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+        </div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <button class="srow danger" type="button"><span class="ol"><b>Erase everything on this tablet</b><small>Passes not yet sent are lost. The sheets stay as they are.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+      </div>
+      <div class="sdet">
+        <button class="back toroot" type="button"><svg><use href="#i-chev-left"/></svg>Settings</button>
+        <div class="dh"><h3>Graz</h3><button class="usebtn" type="button">Use this city</button></div>
+        <p class="shint">The working screen switches to Graz and opens its last route, R20891-015. Passes still waiting for Vienna go to Vienna’s sheet as usual.</p>
+        <div class="sgh">CONNECTION</div>
+        <div class="sgroup">
+          <button class="srow" type="button"><span class="ol"><b>Connection</b><small><span class="iw"><span class="dot"></span>Connected · tested 28.09 07:55</span></small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+        <div class="sgh">ROUTES</div>
+        <div class="sgroup">
+          <button class="srow" type="button"><span class="ol"><b>R20891-011</b><small>142 POIs · 142 of 142 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20891-012</b><small>142 POIs · 142 of 142 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20891-013</b><small>142 POIs · 142 of 142 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20891-014</b><small>142 POIs · 120 of 142 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20891-015</b><small>142 POIs · 64 of 142 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20891-016</b><small>142 POIs · 0 of 142 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow add" type="button"><svg class="plus"><use href="#i-plus"/></svg><span class="ol"><b>Add route</b></span></button>
+        </div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <button class="srow danger" type="button"><span class="ol"><b>Delete city</b><small>Its routes, connection and History leave this tablet. The sheet stays as it is.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+      </div>
+  </div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>C</b> · Another city</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>21</b> "Use this city" beside the name, with one line on what happens: the working screen switches to Graz and opens its last route, passes still waiting for Vienna go to Vienna's sheet.</li>
+        <li><b>63</b> No dialog: nothing is lost, and it is undone the same way.</li>
+        <li><b>24</b> "Delete city" in red at the bottom. Its dialog is frame I.</li>
+        <li><b>sample</b> Graz, Linz and the R20891 codes are sample data.</li>
+      </ul></aside>
+    </section>
 
-    <div class="unit">
+    <!-- ================= D · Connection ================= -->
+    <section class="unit">
       <div class="device">
-        <div class="bezel">
-          <div class="screen">
-
-            <div class="topbar">
-              <span class="back">‹</span>
-              <span class="ttl">R20890-028</span>
-              <span class="ttl-sub">Route editor · Düsseldorf</span>
-            </div>
-
-            <div class="body">
-              <div class="col narrow">
-                <div class="panel">
-                  <div class="sect">Route</div>
-
-                  <div class="field">
-                    <div class="flabel">Route code</div>
-                    <div class="fval">R20890-028</div>
-                    <div class="fhint">Must match the sheet name in this city's tracker</div>
-                  </div>
-
-                  <div class="field">
-                    <div class="flabel">POI count</div>
-                    <div class="fval">197</div>
-                  </div>
-
-                  <div class="field">
-                    <div class="flabel">Passes per POI</div>
-                    <div class="ro">Passes per POI: 70</div>
-                    <div class="fhint">Fixed for the whole project</div>
-                  </div>
-
-                  <div class="row-btns">
-                    <span class="btn primary">Save</span>
-                    <span class="btn">Cancel</span>
-                  </div>
-                </div>
-
-                <div class="danger-wrap">
-                  <span class="btn danger unavailable">Delete route</span>
-                  <div class="danger-note">32 passes not yet sent</div>
-                </div>
-              </div>
-              <div class="col"></div>
-            </div>
-
-          </div>
-          <!-- /screen -->
-        </div>
-        <p class="caption">Screen 4 · Route editor — R20890-028</p>
+        <div class="frame"><div class="app" data-state="D"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(40 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
+    <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp">70 passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28 ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14 ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="sph"><span class="spt">STILL NEEDED</span></div>
+      <div class="need">
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
       </div>
-
-      <aside class="dmap">
-        <div class="dmap-title">Decision map · Screen 4</div>
-
-        <div class="dtopic">
-          <h3>Passes per POI is shown, not editable</h3>
-          <p>The figure sits in the form as a read-only line rather than being
-             hidden away or offered as an input.</p>
-          <p class="why"><em>70 is a project-wide constant, so an editable field
-             would invite a per-route value that nothing downstream honours. It
-             still has to be visible, because it is the number every "N of 70"
-             counter and every completion check is measured against.</em></p>
-        </div>
-
-        <div class="dtopic">
-          <h3>Deleting a route with unsent passes is refused, and looks it</h3>
-          <p>While the queue still holds passes for this route the control is
-             inert. It keeps the same red destructive colour as "Delete city"
-             and is only dimmed, with the caption underneath naming the count —
-             "32 passes not yet sent".</p>
-          <p class="why"><em>Recolouring it grey would make it a different
-             control: the eye stops recognising the one action on this screen
-             that destroys work. Dimming leaves the identity intact and reads as
-             "not now" rather than "not here", which is the truth — send the
-             passes and the same red control becomes available. A warning that
-             can be dismissed would destroy field work with one tap, and those
-             passes exist nowhere else yet.</em></p>
-        </div>
-      </aside>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+    </div></div></div>
+    </div>
+    <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><div class="summary sumbar" data-summary></div></div>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+<button class="scrim" type="button" aria-label="Close Settings"></button>
+<div class="sheet set" role="dialog" aria-label="Settings">
+  <div class="shead"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><span class="stt"><span class="stitle">Settings</span></span></div>
+  <div class="sbody" data-depth="1">
+      <div class="slist">
+        <div class="sgh">CITIES</div>
+        <div class="sgroup">
+          <button class="srow on" type="button"><span class="ol"><b>Vienna</b><small>8 routes · Connected</small></span><span class="inuse"><svg class="ic"><use href="#i-check"/></svg>In use</span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Graz</b><small>6 routes · Connected</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Linz</b><small>4 routes · Connection not set up</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow add" type="button"><svg class="plus"><use href="#i-plus"/></svg><span class="ol"><b>Add city</b></span></button>
+        </div>
+        <div class="sgh">THIS TABLET</div>
+        <div class="sgroup">
+          <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+        </div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <button class="srow danger" type="button"><span class="ol"><b>Erase everything on this tablet</b><small>Passes not yet sent are lost. The sheets stay as they are.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+      </div>
+      <div class="sdet">
+        <button class="back" type="button"><svg><use href="#i-chev-left"/></svg>Vienna</button>
+        <div class="dh"><h3>Connection · Vienna</h3></div>
+        <div class="sgh">THE TRACKER’S SCRIPT</div>
+        <div class="sgroup">
+          <div class="field"><label>Script URL</label><div class="fbox"><span class="fv">https://script.google.com/macros/s/…/exec</span></div></div>
+          <div class="field"><label>Access key</label><div class="fbox"><span class="fv">••••••••••••</span><b>Show</b></div></div>
+        </div>
+        <p class="shint">Both stay on this tablet only. Apps Script gives the address when the script is deployed.</p>
+        <div class="sstate"><span class="dot"></span>Connected · tested 18:20</div>
+        <div class="sacts"><button class="dbtn" type="button">Test connection</button><button class="dbtn primary" type="button">Save</button></div>
+      </div>
+  </div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>D</b> · Connection</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>25</b> "Script URL" and "Access key" (masked, "Show"), the hint that both stay on this tablet, the state with the time of the last test, "Test connection" and "Save".</li>
+        <li><b>29</b> "Send now" and "Load from sheet" are not here: they live in the Sync panel (item 72).</li>
+        <li><b>74</b> A deeper page: the back link names the city, "Vienna", in both orientations.</li>
+        <li><b>rule 5</b> The address shown is elided. No real address or key ever appears in a reference.</li>
+      </ul></aside>
+    </section>
+
+    <!-- ================= E · A route ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="E"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(40 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
+    <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp">70 passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28 ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14 ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="sph"><span class="spt">STILL NEEDED</span></div>
+      <div class="need">
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      </div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
+    </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+    </div></div></div>
+    </div>
+    <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><div class="summary sumbar" data-summary></div></div>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+<button class="scrim" type="button" aria-label="Close Settings"></button>
+<div class="sheet set" role="dialog" aria-label="Settings">
+  <div class="shead"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><span class="stt"><span class="stitle">Settings</span></span></div>
+  <div class="sbody" data-depth="1">
+      <div class="slist">
+        <div class="sgh">CITIES</div>
+        <div class="sgroup">
+          <button class="srow on" type="button"><span class="ol"><b>Vienna</b><small>8 routes · Connected</small></span><span class="inuse"><svg class="ic"><use href="#i-check"/></svg>In use</span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Graz</b><small>6 routes · Connected</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Linz</b><small>4 routes · Connection not set up</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow add" type="button"><svg class="plus"><use href="#i-plus"/></svg><span class="ol"><b>Add city</b></span></button>
+        </div>
+        <div class="sgh">THIS TABLET</div>
+        <div class="sgroup">
+          <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+        </div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <button class="srow danger" type="button"><span class="ol"><b>Erase everything on this tablet</b><small>Passes not yet sent are lost. The sheets stay as they are.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+      </div>
+      <div class="sdet">
+        <button class="back" type="button"><svg><use href="#i-chev-left"/></svg>Vienna</button>
+        <div class="dh"><h3>R20890-058</h3></div>
+        <div class="sgh">ROUTE</div>
+        <div class="sgroup">
+          <div class="field"><label>Route code</label><div class="fbox"><span class="fv">R20890-058</span></div></div>
+          <div class="field"><label>Number of POIs</label><div class="fbox"><span class="fv">197</span></div></div>
+        </div>
+        <p class="shint">The code must match the tab in Vienna’s tracker exactly, or passes have nowhere to go. Targets are set per POI on the working screen.</p>
+        <div class="sacts"><button class="dbtn primary" type="button">Save</button></div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <div class="srow danger off"><span class="ol"><b>Delete route</b><small>2 passes not yet sent. Delete works once they are in the sheet.</small></span></div>
+        </div>
+      </div>
+  </div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>E</b> · A route</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>22</b> Its own page: "Route code" and "Number of POIs", the hint on the tab's name, "Save".</li>
+        <li><b>24, 26, 27</b> "Delete route" stays, dimmed, with the reason: 2 passes not yet sent.</li>
+        <li><b>46</b> Targets are set per POI on the working screen, never here.</li>
+      </ul></aside>
+    </section>
+
+    <!-- ================= F · A new route, its tab not found ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="F"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(40 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
+    <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp">70 passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28 ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14 ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="sph"><span class="spt">STILL NEEDED</span></div>
+      <div class="need">
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      </div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
+    </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+    </div></div></div>
+    </div>
+    <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><div class="summary sumbar" data-summary></div></div>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+<button class="scrim" type="button" aria-label="Close Settings"></button>
+<div class="sheet set" role="dialog" aria-label="Settings">
+  <div class="shead"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><span class="stt"><span class="stitle">Settings</span></span></div>
+  <div class="sbody" data-depth="1">
+      <div class="slist">
+        <div class="sgh">CITIES</div>
+        <div class="sgroup">
+          <button class="srow on" type="button"><span class="ol"><b>Vienna</b><small>8 routes · Connected</small></span><span class="inuse"><svg class="ic"><use href="#i-check"/></svg>In use</span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Graz</b><small>6 routes · Connected</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Linz</b><small>4 routes · Connection not set up</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow add" type="button"><svg class="plus"><use href="#i-plus"/></svg><span class="ol"><b>Add city</b></span></button>
+        </div>
+        <div class="sgh">THIS TABLET</div>
+        <div class="sgroup">
+          <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+        </div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <button class="srow danger" type="button"><span class="ol"><b>Erase everything on this tablet</b><small>Passes not yet sent are lost. The sheets stay as they are.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+      </div>
+      <div class="sdet">
+        <button class="back" type="button"><svg><use href="#i-chev-left"/></svg>Vienna</button>
+        <div class="dh"><h3>New route · Vienna</h3></div>
+        <div class="sgh">ROUTE</div>
+        <div class="sgroup">
+          <div class="field bad"><label>Route code</label><div class="fbox"><span class="fv">R20890-602</span></div><span class="ferr">No tab named R20890-602 in Vienna’s tracker. Check the code.</span></div>
+          <div class="field"><label>Number of POIs</label><div class="fbox"><span class="fv">197</span></div></div>
+        </div>
+        <p class="shint">The code must match the tab in Vienna’s tracker exactly. The route loads from the sheet when it is added.</p>
+        <div class="sacts"><button class="dbtn primary" type="button">Add route</button></div>
+      </div>
+  </div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>F</b> · A new route, its tab not found</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>22</b> A new route loads from the sheet when it is added. The mailbox answered "no-route", so the code field says so in the error colour and the route is not saved until the code is right.</li>
+        <li><b>22</b> Without a network the route is saved as "Not checked yet" and loads when the network is back. That changes a line of text only, so it is not drawn.</li>
+        <li><b>30</b> A route that has never been loaded loads when it is first opened.</li>
+      </ul></aside>
+    </section>
+
+    <!-- ================= G · A new city ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="G"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(40 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
+    <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp">70 passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28 ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14 ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="sph"><span class="spt">STILL NEEDED</span></div>
+      <div class="need">
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      </div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
+    </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+    </div></div></div>
+    </div>
+    <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><div class="summary sumbar" data-summary></div></div>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+<button class="scrim" type="button" aria-label="Close Settings"></button>
+<div class="sheet set" role="dialog" aria-label="Settings">
+  <div class="shead"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><span class="stt"><span class="stitle">Settings</span></span></div>
+  <div class="sbody" data-depth="1">
+      <div class="slist">
+        <div class="sgh">CITIES</div>
+        <div class="sgroup">
+          <button class="srow" type="button"><span class="ol"><b>Vienna</b><small>8 routes · Connected</small></span><span class="inuse"><svg class="ic"><use href="#i-check"/></svg>In use</span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Graz</b><small>6 routes · Connected</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Linz</b><small>4 routes · Connection not set up</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow add" type="button"><svg class="plus"><use href="#i-plus"/></svg><span class="ol"><b>Add city</b></span></button>
+        </div>
+        <div class="sgh">THIS TABLET</div>
+        <div class="sgroup">
+          <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+        </div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <button class="srow danger" type="button"><span class="ol"><b>Erase everything on this tablet</b><small>Passes not yet sent are lost. The sheets stay as they are.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+      </div>
+      <div class="sdet">
+        <button class="back toroot" type="button"><svg><use href="#i-chev-left"/></svg>Settings</button>
+        <div class="dh"><h3>New city</h3></div>
+        <div class="sgh">CITY</div>
+        <div class="sgroup">
+          <div class="field"><label>City name</label><div class="fbox"><span class="fv ph">As the crew calls it, e.g. Salzburg</span></div></div>
+        </div>
+        <p class="shint">Next comes its connection: the address and the key of the script in the city’s tracker.</p>
+        <div class="sacts"><button class="dbtn primary" type="button">Save</button></div>
+      </div>
+  </div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>G</b> · A new city</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>75</b> "Add city" opens a page with the city's name only. After "Save" the city's page opens, its connection not set up, and its Connection row leads to the Connection page (frame D).</li>
+        <li><b>23</b> Adding a city never touches a spreadsheet: the city's tracker is made in Google Sheets first.</li>
+      </ul></aside>
+    </section>
+
+    <!-- ================= H · Erase everything ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="H"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync wait" type="button"><span class="dot"></span>12 passes waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(40 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
+    <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp">70 passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28 ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14 ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="sph"><span class="spt">STILL NEEDED</span></div>
+      <div class="need">
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      </div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
+    </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+    </div></div></div>
+    </div>
+    <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><div class="summary sumbar" data-summary></div></div>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+<button class="scrim" type="button" aria-label="Close Settings"></button>
+<div class="sheet set" role="dialog" aria-label="Settings">
+  <div class="shead"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><span class="stt"><span class="stitle">Settings</span></span></div>
+  <div class="sbody" data-depth="0">
+      <div class="slist">
+        <div class="sgh">CITIES</div>
+        <div class="sgroup">
+          <button class="srow on" type="button"><span class="ol"><b>Vienna</b><small>8 routes · Connected</small></span><span class="inuse"><svg class="ic"><use href="#i-check"/></svg>In use</span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Graz</b><small>6 routes · Connected</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Linz</b><small>4 routes · Connection not set up</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow add" type="button"><svg class="plus"><use href="#i-plus"/></svg><span class="ol"><b>Add city</b></span></button>
+        </div>
+        <div class="sgh">THIS TABLET</div>
+        <div class="sgroup">
+          <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+        </div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <button class="srow danger" type="button"><span class="ol"><b>Erase everything on this tablet</b><small>Passes not yet sent are lost. The sheets stay as they are.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+      </div>
+      <div class="sdet">
+        <button class="back toroot" type="button"><svg><use href="#i-chev-left"/></svg>Settings</button>
+        <div class="dh"><h3>Vienna</h3><span class="inuse"><svg class="ic"><use href="#i-check"/></svg>In use</span></div>
+        <div class="sgh">CONNECTION</div>
+        <div class="sgroup">
+          <button class="srow" type="button"><span class="ol"><b>Connection</b><small><span class="iw"><span class="dot"></span>Connected · tested 18:20</span></small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+        <div class="sgh">ROUTES</div>
+        <div class="sgroup">
+          <button class="srow" type="button"><span class="ol"><b>R20890-054</b><small>197 POIs · 197 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-055</b><small>197 POIs · 197 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-056</b><small>197 POIs · 141 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-057</b><small>197 POIs · 88 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-058</b><small>197 POIs · 79 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-059</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-060</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-061</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow add" type="button"><svg class="plus"><use href="#i-plus"/></svg><span class="ol"><b>Add route</b></span></button>
+        </div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <div class="srow danger off"><span class="ol"><b>Delete city</b><small>Switch to another city first</small></span></div>
+        </div>
+      </div>
+  </div>
+</div>
+<button class="scrim top" type="button" aria-label="Cancel"></button>
+<div class="dlg" role="alertdialog" aria-modal="true" aria-label="Erase everything on this tablet?">
+  <div class="dtitle">Erase everything on this tablet?</div>
+  <div class="dbody">12 passes have not reached a sheet yet and will be lost. Cities, routes, connections and History leave this tablet. The sheets stay as they are.</div>
+  <div class="dbtns"><button class="dbtn" type="button">Cancel</button><button class="dbtn danger" type="button">Erase and lose 12 passes</button></div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>H</b> · Erase everything</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>18, 63</b> The dialog of item 63. 12 passes are still waiting, so the text gives their number and the red button names the loss.</li>
+        <li><b>76</b> Afterwards the tablet has no city: main-screen frame Q.</li>
+        <li><b>28</b> The button is red, "Cancel" on the left.</li>
+      </ul></aside>
+    </section>
+
+    <!-- ================= I · Delete a city ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="I"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(40 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
+    <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp">70 passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28 ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14 ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="sph"><span class="spt">STILL NEEDED</span></div>
+      <div class="need">
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      </div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
+    </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+    </div></div></div>
+    </div>
+    <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><div class="summary sumbar" data-summary></div></div>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+<button class="scrim" type="button" aria-label="Close Settings"></button>
+<div class="sheet set" role="dialog" aria-label="Settings">
+  <div class="shead"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><span class="stt"><span class="stitle">Settings</span></span></div>
+  <div class="sbody" data-depth="1">
+      <div class="slist">
+        <div class="sgh">CITIES</div>
+        <div class="sgroup">
+          <button class="srow" type="button"><span class="ol"><b>Vienna</b><small>8 routes · Connected</small></span><span class="inuse"><svg class="ic"><use href="#i-check"/></svg>In use</span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow on" type="button"><span class="ol"><b>Graz</b><small>6 routes · Connected</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Linz</b><small>4 routes · Connection not set up</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow add" type="button"><svg class="plus"><use href="#i-plus"/></svg><span class="ol"><b>Add city</b></span></button>
+        </div>
+        <div class="sgh">THIS TABLET</div>
+        <div class="sgroup">
+          <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+        </div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <button class="srow danger" type="button"><span class="ol"><b>Erase everything on this tablet</b><small>Passes not yet sent are lost. The sheets stay as they are.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+      </div>
+      <div class="sdet">
+        <button class="back toroot" type="button"><svg><use href="#i-chev-left"/></svg>Settings</button>
+        <div class="dh"><h3>Graz</h3><button class="usebtn" type="button">Use this city</button></div>
+        <p class="shint">The working screen switches to Graz and opens its last route, R20891-015. Passes still waiting for Vienna go to Vienna’s sheet as usual.</p>
+        <div class="sgh">CONNECTION</div>
+        <div class="sgroup">
+          <button class="srow" type="button"><span class="ol"><b>Connection</b><small><span class="iw"><span class="dot"></span>Connected · tested 28.09 07:55</span></small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+        <div class="sgh">ROUTES</div>
+        <div class="sgroup">
+          <button class="srow" type="button"><span class="ol"><b>R20891-011</b><small>142 POIs · 142 of 142 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20891-012</b><small>142 POIs · 142 of 142 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20891-013</b><small>142 POIs · 142 of 142 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20891-014</b><small>142 POIs · 120 of 142 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20891-015</b><small>142 POIs · 64 of 142 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20891-016</b><small>142 POIs · 0 of 142 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow add" type="button"><svg class="plus"><use href="#i-plus"/></svg><span class="ol"><b>Add route</b></span></button>
+        </div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <button class="srow danger" type="button"><span class="ol"><b>Delete city</b><small>Its routes, connection and History leave this tablet. The sheet stays as it is.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+      </div>
+  </div>
+</div>
+<button class="scrim top" type="button" aria-label="Cancel"></button>
+<div class="dlg" role="alertdialog" aria-modal="true" aria-label="Delete Graz?">
+  <div class="dtitle">Delete Graz?</div>
+  <div class="dbody">Its 6 routes, its connection and its History leave this tablet. Every pass already reached the sheet, which stays as it is.</div>
+  <div class="dbtns"><button class="dbtn" type="button">Cancel</button><button class="dbtn danger" type="button">Delete</button></div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>I</b> · Delete a city</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>24, 63</b> Every pass of Graz is in its sheet, so the button reads "Delete". With passes waiting it would read "Delete and lose 4 passes" and the text would give the number.</li>
+      </ul></aside>
+    </section>
 
   </div>
 
+<script>
+/* Checking-tool script (screens.md item 54) and sample-data generator.
+   It fills the repeated markup of every frame (mini-map squares, POI rows,
+   rail labels, grid tiles, the bottom summary) from one fixed table, so all
+   nine frames show the same route. No randomness: the same picture on
+   every load. It also wires the presets, the drag corner and the theme
+   switch. Nothing here runs in the app. */
+(function () {
+  var N = 197;
+  var TARGET = { int: 70, nost: 70, nol: 70, nor: 70, str: 40, nd: 0 };
+  var ICON = function (id) { return '<svg class="ic"><use href="#' + id + '"/></svg>'; };
+  // Route R20890-058: POIs 1 to 48 done, 57 in spreadsheet error, 168 not
+  // drivable, the POIs of the frames fixed, the rest a fixed mix.
+  function poi(n) {
+    if (n === 57) return { t: 'int', c: 46, err: true };
+    if (n === 168) return { t: 'nd', c: 0 };
+    if (n === 122) return { t: 'int', c: 66 };
+    if (n === 124) return { t: 'int', c: 68 };
+    if (n === 135) return { t: 'int', c: 70 };
+    if (n === 136) return { t: 'int', c: 41 };
+    if (n === 138) return { t: 'nost', c: 30 };
+    if (n <= 48) return { t: 'int', c: 70 };
+    var t = n % 19 === 0 ? 'str' : (n % 23 === 0 ? 'nost' : 'int');
+    var T = TARGET[t];
+    var k = (n * 37) % 23;
+    if (k < 5) return { t: t, c: T };
+    if (k < 9) return { t: t, c: 0 };
+    return { t: t, c: 1 + ((n * 11) % (T - 1)) };
+  }
+  var pois = [];
+  for (var n = 1; n <= N; n++) { var p = poi(n); p.n = n; p.T = TARGET[p.t]; pois.push(p); }
+  function status(p) {
+    if (p.T === 0) return 'nd';
+    if (p.err) return 'err';
+    if (p.c >= p.T) return 'done';
+    return p.c > 0 ? 'part' : '';
+  }
+  function tag(p) {
+    var s = status(p);
+    if (s === 'nd') return 'not drivable';
+    if (s === 'err') return 'error';
+    if (s === 'done') return p.c > p.T ? 'done +' + (p.c - p.T) : 'done';
+    return (p.T - p.c) + ' to go';
+  }
+  function pct(p) { return p.T ? Math.round(Math.min(p.c, p.T) / p.T * 100) : 0; }
+  function cls(base, p, active) {
+    var s = status(p);
+    if (base === 'row' && s === 'part') s = '';
+    return base + (s ? ' ' + s : '') + (p.n === active ? ' active' : '');
+  }
+  var done = 0, togo = 0, poisDone = 0, errs = 0;
+  pois.forEach(function (p) {
+    done += Math.min(p.c, p.T); togo += Math.max(0, p.T - p.c);
+    if (p.T && p.c >= p.T) poisDone += 1;
+    if (p.err) errs += 1;
+  });
+  function fmt(x) { return x.toLocaleString('en-US'); }
+  // rail labels on a linear scale: POI n sits at (n - 1) / (N - 1) of the track,
+  // the track being the rail minus --s-2 and half a label at each end
+  var RAIL = [1, 40, 80, 120, 160, 197];
+  function railTop(n) {
+    var f = ((n - 1) / (N - 1)).toFixed(4);
+    return 'top: calc(var(--s-2) + var(--t-small) / 2 + ' + f + ' * (100% - 2 * var(--s-2) - var(--t-small)))';
+  }
+  var each = function (sel, fn) { Array.prototype.forEach.call(document.querySelectorAll(sel), fn); };
+
+  each('.col[data-active]', function (col) {
+    var active = +col.getAttribute('data-active');
+    var finger = col.getAttribute('data-finger');
+    var dots = '', rows = '';
+    pois.forEach(function (p) {
+      var s = status(p);
+      dots += '<i class="' + (p.n === active ? 'act' : s) + '"></i>';
+      rows += '<button class="' + cls('row', p, active) + '" type="button" aria-label="POI ' + p.n + '">' +
+        '<span class="rn">' + p.n + '</span><span class="rc"><span class="rb"><i style="width: ' + pct(p) + '%"></i></span>' +
+        '<span class="rt">' + tag(p) + '</span></span></button>';
+    });
+    var rail = RAIL.map(function (r) { return '<span style="' + railTop(r) + '">' + r + '</span>'; }).join('');
+    if (finger) rail += '<div class="finger" style="' + railTop(+finger) + '" aria-hidden="true"></div>';
+    var bubble = finger ? '<div class="bubble" style="' + railTop(+finger) + '" aria-hidden="true">' + finger + '</div>' : '';
+    col.innerHTML = '<button class="mmap" type="button" aria-label="Open the grid of all POIs"><span class="mm"><span class="dots">' + dots +
+      '</span><span class="mcap"><span>' + poisDone + ' of ' + N + ' done</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></span>' +
+      '<span class="mline"><svg class="gi"><use href="#i-grid"/></svg><span>' + poisDone + ' of ' + N + '</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></button>' +
+      '<div class="colbody"><div class="list">' + rows + '</div><div class="rail" aria-label="Jump through the POI list">' + rail + '</div>' + bubble + '</div>';
+  });
+  each('[data-summary]', function (el) {
+    var seg = ['Done ' + fmt(done), fmt(togo) + ' to go', poisDone + ' of ' + N + ' POIs done'];
+    if (errs) seg.push(errs + (errs === 1 ? ' error' : ' errors'));
+    el.innerHTML = seg.map(function (t, i) { return '<span' + (errs && i === seg.length - 1 ? ' class="err"' : '') + '>' + t + (i < seg.length - 1 ? ' ·' : '') + '</span>'; }).join(' ');
+  });
+  each('[data-donecount]', function (el) { el.textContent = poisDone + ' of ' + N + ' done'; });
+  each('.grid[data-active]', function (g) {
+    var active = +g.getAttribute('data-active'), cells = '';
+    pois.forEach(function (p) {
+      cells += '<button class="' + cls('cell', p, active) + '" type="button" aria-label="POI ' + p.n + '">' +
+        '<span class="cn">' + p.n + '</span><span class="cb"><i style="width: ' + pct(p) + '%"></i></span></button>';
+    });
+    g.innerHTML = cells;
+  });
+
+  // Centre every list on its POI (data-scroll, else the active one), rounded
+  // to whole rows so a whole row sits at the top edge; the grid likewise on
+  // the active tile's row. Again after any resize of a frame.
+  function centre() {
+    each('.col[data-active]', function (col) {
+      var list = col.querySelector('.list');
+      var row = list && list.firstElementChild;
+      if (!row) return;
+      var rh = row.offsetHeight;
+      var n = +(col.getAttribute('data-scroll') || col.getAttribute('data-active'));
+      var top = Math.min((n - 1) * rh + rh / 2 - list.clientHeight / 2, list.scrollHeight - list.clientHeight);
+      list.scrollTop = Math.max(0, Math.floor(top / rh) * rh);
+    });
+    each('.grid[data-active]', function (g) {
+      var cell = g.firstElementChild;
+      if (!cell) return;
+      var rh = g.children[10] ? g.children[10].offsetTop - cell.offsetTop : cell.offsetHeight;
+      var row = Math.floor((+g.getAttribute('data-active') - 1) / 10);
+      var top = Math.min(row * rh + rh / 2 - g.clientHeight / 2, g.scrollHeight - g.clientHeight);
+      g.scrollTop = Math.max(0, Math.floor(top / rh) * rh);
+    });
+  }
+
+  var frames = document.querySelectorAll('.frame');
+  // An open menu is re-created when the frame or the theme changes, the way
+  // the app closes menus when the screen turns (item 66): its position is
+  // then found afresh and never depends on the order of clicks.
+  function resetMenus() { each('.pop, .rmenu', function (m) { m.replaceWith(m.cloneNode(true)); }); }
+  window.resetMenus = resetMenus;
+  each('[data-preset]', function (b) {
+    b.addEventListener('click', function () {
+      var wh = b.getAttribute('data-preset').split('x');
+      Array.prototype.forEach.call(frames, function (f) { f.style.width = wh[0] + 'px'; f.style.height = wh[1] + 'px'; });
+      each('[data-preset]', function (x) { x.classList.toggle('on', x === b); });
+      resetMenus();
+      centre();
+    });
+  });
+  each('[data-theme-set]', function (b) {
+    b.addEventListener('click', function () {
+      document.documentElement.setAttribute('data-theme', b.getAttribute('data-theme-set'));
+      each('[data-theme-set]', function (x) { x.classList.toggle('on', x === b); });
+      resetMenus();
+    });
+  });
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(function () { centre(); });
+    Array.prototype.forEach.call(frames, function (f) { ro.observe(f); });
+  }
+  centre();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(centre);
+})();
+</script>
 </body>
 </html>

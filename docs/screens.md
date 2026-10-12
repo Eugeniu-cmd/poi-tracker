@@ -156,6 +156,16 @@ a connection reads "Connection not set up" (item 34). A pass already in
 the sheet whose removal still waits reads "Removal waiting" with the
 warning-colour dot of a waiting pass, because "deleted" read as done
 (item 13).
+v0.37 2026-10-12 — the user's decisions on Settings: a gear at the right
+end of the top bar opens it (item 73). Settings is a sheet over the
+screen, one column that drills down in portrait and the list beside the
+page in landscape (item 74). A city is put in use with "Use this city"
+on its page (item 21). A route has its own page and loads from the sheet
+right after "Add route", which also checks its code (item 22). Erasing
+the tablet and deleting a city name the passes they would lose on the
+red button (items 18, 24). A new city starts from its name (item 75),
+and a tablet without a city shows "Add your first city" (item 76). A tap
+outside an open menu only closes it (item 66).
 -->
 
 The app is one working screen plus two slide-in panels, on a tablet held
@@ -337,6 +347,9 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 1. Active city and route picker, side by side. The city name is always
    visible so it is obvious which tracker a tap is written into. It is as
    large as the route code, bold, in the ink colour.
+73. A gear button (Lucide settings) at the right end of the top bar,
+    after the sync control, opens Settings (item 74). It is a square tap
+    target as tall as the sync control, on the same raised surface.
 2. POI list 1…N for the route's POI count: number, progress bar, "N to
    go". Row turns green at its target, red on error, not-drivable POI in a
    state of its own (item 46), active POI highlighted.
@@ -538,26 +551,66 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     History for the whole route, where each refused pass offers "Send
     again" and "Delete" (item 47). The panel closes like a menu (item
     66) and never sends or loads by itself.
-17. Theme: system / light / dark.
-65. Sound: on / off, on by default. It silences the chimes of item 62
-    only. Vibration and motion do not change.
-18. "Erase everything on this tablet" — with confirmation and a
-    warning about undelivered passes; the spreadsheet is not touched.
+17. Theme: System, Light or Dark, a segmented control under "This
+    tablet" in Settings (item 74).
+65. Sound: on / off, on by default, a switch under "This tablet". It
+    silences the chimes of item 62 only. Vibration and motion do not
+    change.
+18. "Erase everything on this tablet" sits apart at the bottom of the
+    Settings list, in red (item 28). It asks first with the dialog of
+    item 63. When passes have not reached a sheet yet, the dialog gives
+    their number and the red button names the loss: "Erase and lose 12
+    passes". The spreadsheets are not touched. Afterwards the tablet has
+    no city (item 76).
 
 ## "Settings" panel — cities and routes
-20. A list of cities. Each row: city name, how many routes it holds, and
-    whether its mailbox is configured. Tapping a row opens that city.
-21. City screen: the city name and that city's list of routes. A single
-    "Connection" row shows the status (connected / not set) and opens the
-    connection screen. A "Delete city" control sits at the bottom.
-22. Route editor inside a city: route code (must match the sheet name in
-    that city's tracker) and POI count. The target per POI is not set
-    here; it is set per POI from the working screen (item 46).
+74. Settings is a sheet over the whole screen, as the grid of all POIs
+    is (item 59), with the round ✕ of item 66 and the title "Settings".
+    Its list holds "CITIES" (item 20), "THIS TABLET" (Theme, item 17,
+    and Sound, item 65) and, apart at the bottom, "Erase everything on
+    this tablet" (item 18). In portrait one column drills down: the
+    list, a city, its Connection or a route. Every deeper page has a
+    back link that names the page above ("Settings", "Vienna"). In
+    landscape the list stays on the left at the column's wide width and
+    the page opens beside it, the chosen city tinted like the active POI
+    row (item 40). With nothing chosen, the city in use is shown there.
+    A city's page needs no back link in landscape, the list is beside it.
+20. A list of cities under "CITIES". Each row: the city name, how many
+    routes it holds and whether its connection is set up. The city in
+    use carries an "In use" chip. Tapping a row opens that city. "Add
+    city" ends the list (item 75).
+75. "Add city" opens a page with the city's name only. After "Save" the
+    city's page opens, its connection not set up, and its "Connection"
+    row leads to the Connection page (item 25).
+21. City page: the city name, then a single "Connection" row with the
+    status (connected and when it was last tested, or not set up) that
+    opens the Connection page, then the city's routes and "Add route".
+    A city not in use shows "Use this city" beside its name, with one
+    line under it: the working screen switches to that city and opens
+    its last route, and passes still waiting for the old city go to that
+    city's sheet as usual. It asks nothing, since nothing is lost and it
+    is undone the same way. "Delete city" sits apart at the bottom, in
+    red. On the city in use it is dimmed with the reason "Switch to
+    another city first" (items 26, 27).
+22. Route page: "Route code" (it must match the tab's name in that
+    city's tracker exactly) and "Number of POIs", a hint, and "Save", or
+    "Add route" for a new one. The target per POI is not set here. It is
+    set per POI from the working screen (item 46). A new route loads
+    from the sheet at once (item 30). The mailbox answers "no-route" for
+    a tab it cannot find, so the load also checks the code: the field
+    says "No tab named R20890-602 in Vienna's tracker" and the route is
+    not saved until the code is right. Without a network the route is
+    saved as "Not checked yet" and loads when the network is back. A
+    route that has never been loaded loads when it is first opened.
+    "Delete route" sits at the bottom, in red.
 23. Adding a city or a route never touches any spreadsheet; the tracker
     for a new city is created by the user in Google Sheets first.
-24. Deleting a city warns that its queued, undelivered passes will be lost
-    and asks for confirmation. Deleting a route is refused while that
-    route holds undelivered passes.
+24. Deleting a city asks first with the dialog of item 63: its routes,
+    its connection and its History leave this tablet, and the sheet
+    stays as it is. When some of its passes have not reached the sheet,
+    the dialog gives their number and the red button reads "Delete and
+    lose 4 passes". Deleting a route is refused while that route holds
+    undelivered passes: the control stays, dimmed, with the reason.
 25. Connection screen, one per city: "Script URL" (the address Apps Script
     returns after deployment) and "Access key" (masked), with the hint
     that both are stored on this tablet only, plus "Test connection" and
@@ -608,7 +661,9 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     the overlay, a tap on it closes the overlay too. The Android back
     gesture closes the topmost open overlay instead of leaving the app.
     Menus (type, route, sync) close by a choice, a tap outside, or when the
-    screen turns. Confirmation dialogs keep "Cancel" (item 63).
+    screen turns. A tap outside only closes the menu: nothing under it
+    reacts, as Apple's popovers keep other views from touches until they
+    close. Confirmation dialogs keep "Cancel" (item 63).
 
 ## Working-screen states not drawn as separate reference screens
 32. Empty POI: counters read "0 of 70" and "70 to go", all mini counters
@@ -623,6 +678,13 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     the POI list is replaced by a single button "Add routes in Settings"
     that opens Settings, and the discs are dimmed and inert, with the
     caption "Add a route to start" under them (item 27).
+76. No city on this tablet (a new tablet, or after item 18): the top bar
+    reads "No city" and "No routes yet", the sync control "Connection
+    not set up", the POI list is replaced by a single button "Add your
+    first city" that opens Settings at "Add city" (item 75), and the
+    discs are dimmed and inert with the caption "Add a city to start"
+    (item 27). It changes the column, so it is drawn (main-screen frame
+    Q).
 36. A pass has just been recorded: a toast appears over the working area
     for about two seconds, reading "Saved: ← South · 57 of 70", then
     fades. The screen beneath does not move.

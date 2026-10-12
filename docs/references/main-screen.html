@@ -160,12 +160,17 @@
           warning colour while passes wait, the error colour for a refused
           pass and the muted colour without a connection (items 33, 34,
           47).
+  v0.26 2026-10-12 — the user's decisions on Settings (screens.md
+          v0.37). A gear at the right end of the top bar opens Settings,
+          in every frame (item 73). New frame Q: a tablet without a city
+          shows "Add your first city" (item 76). The maps of the menus
+          say that a tap outside only closes them (item 66).
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.25</title>
+<title>POI Tracker — Working Screen Reference v0.26</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -270,6 +275,12 @@
   .sync { margin-left: auto; font-size: var(--t-body); font-weight: var(--w-medium); }
   .route .ic { margin-right: -0.25em; }
   .sync .ic { margin-right: -0.375em; }
+  /* the gear (item 73): a square tap target on the sync control's surface */
+  .gear { flex: none; display: inline-flex; align-items: center; justify-content: center;
+          width: var(--tap-min); height: var(--tap-min); background: var(--panel-strong);
+          border: 1px solid var(--panel-edge); border-radius: var(--r-sm);
+          box-shadow: var(--shadow); color: var(--ink); }
+  .gear svg { width: var(--s-5); height: var(--s-5); }
   .dot { width: var(--s-2); height: var(--s-2); border-radius: 50%; background: var(--ok); flex: none; }
   /* the sync control anchors the Sync panel (item 72). Its dot follows the
      queue: waiting in the warning colour (item 33), a refused pass in the
@@ -835,14 +846,15 @@
   <symbol id="i-chev-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></symbol>
   <symbol id="i-chev-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
   <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></symbol>
 </svg>
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.25 — 2026-10-12.</b> The user's decisions after prototype v17: the sync
-     control opens the Sync panel under itself (items 16, 72). Every value inside
+  <p class="meta"><b>v0.26 — 2026-10-12.</b> The user's decisions on Settings: a gear in the top
+     bar opens it (item 73), and a tablet without a city has its own state (item 76). Every value inside
      the frames is a token of <b>_tokens.css v0.11</b> (size C, screens.md item 67) and
-     every rule follows <b>screens.md v0.36</b>. Icons are
+     every rule follows <b>screens.md v0.37</b>. Icons are
      Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
      presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and
@@ -851,7 +863,7 @@
      shape: side by side when wider than tall, stacked when taller (item 51). Below
      700px of height the compact step applies: smaller display numbers, a one-line
      grid button instead of the mini-map and, in landscape, narrower margins and gaps
-     so the card keeps its paddings (item 70). Sixteen states, A to P.</p>
+     so the card keeps its paddings (item 70). Seventeen states, A to Q.</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>
@@ -876,6 +888,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -913,6 +926,7 @@
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>1</b> City name as large as the route code, bold, ink; route picker beside it. Chevrons are Lucide (item 69).</li>
         <li><b>16</b> Sync status always visible, with a timestamp. It is a tap target that opens the Sync panel under itself (frame O), so its chevron points down.</li>
+        <li><b>73</b> The gear at the right end of the top bar opens Settings (settings.html).</li>
         <li><b>2, 56</b> POI column on the left: number, bar, "N to go"; rows 66px (--row-h). A whole row sits at the top edge, the cut row at the bottom fades (item 56).</li>
         <li><b>58</b> Mini-map as the column's header (item 58): one square per POI, coloured by state, "79 of 197 done", "Open" with a chevron; a hairline under it. Below 700px of height it is a one-line grid button (item 70).</li>
         <li><b>57</b> Index rail along the column's right edge: 1, 40, 80, 120, 160, 197.</li>
@@ -938,6 +952,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -995,6 +1010,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="138"></div></div>
@@ -1046,6 +1062,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="124"></div></div>
@@ -1097,6 +1114,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="135"></div></div>
@@ -1148,6 +1166,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="57"></div></div>
@@ -1200,6 +1219,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="168"></div></div>
@@ -1252,6 +1272,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1300,7 +1321,7 @@
         <li><b>60</b> Tapping the pill opens a menu with the six types, each with its icon tile and split, the current one marked with a check (item 60); every icon has the same place in every row; the pill's chevron points up while it is open.</li>
         <li><b>46</b> Intersection 28/14/28 · No straight 35/35 · No left 14/56 · No right 56/14 · Straight only 40 · Not drivable, not counted.</li>
         <li><b>60</b> Two taps are deliberate: a stray touch cannot change a type. The menu changes the active POI only.</li>
-        <li><b>66</b> A menu closes by a choice, a tap outside or when the screen turns; no ✕ (item 66). Its rows keep their split lines on one line.</li>
+        <li><b>66</b> A menu closes by a choice, a tap outside or when the screen turns; no ✕ (item 66). A tap outside only closes it: nothing under it reacts. Its rows keep their split lines on one line.</li>
         <li><b>64</b> A choice with consequences asks first (frame I).</li>
       </ul></aside>
     </section>
@@ -1313,6 +1334,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="122"></div></div>
@@ -1371,6 +1393,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1429,6 +1452,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1504,6 +1528,7 @@
       <button class="ritem" type="button"><b>R20890-061</b><small>0 of 197 done</small><svg class="chk"><use href="#i-check"/></svg></button>
     </div>
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1542,7 +1567,7 @@
         <li><b>1</b> The route picker opens the city's routes under itself; the active route is marked with a check (item 60); the picker's chevron points up while it is open.</li>
         <li><b>1</b> Each row: the route code and "N of 197 done".</li>
         <li><b>22</b> Routes are typed in by hand in Settings: code and POI count; nothing here edits them.</li>
-        <li><b>66</b> A menu closes by a choice or a tap outside.</li>
+        <li><b>66</b> A menu closes by a choice or a tap outside, and a tap outside only closes it: nothing under it reacts.</li>
         <li><b>26</b> The rest of the screen stays as it is while the menu is open.</li>
       </ul></aside>
     </section>
@@ -1555,6 +1580,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136" data-scroll="120" data-finger="120"></div></div>
@@ -1605,6 +1631,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">No routes yet<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col"><button class="colbtn" type="button">Add routes in Settings<svg class="ic"><use href="#i-chev-right"/></svg></button></div></div>
@@ -1656,6 +1683,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync" type="button" aria-expanded="true"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-up"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1705,7 +1733,7 @@
         <li><b>26, 27</b> "Send now" stays in place, its label dimmed, with its reason "Nothing to send" under it. Sending is automatic, the button only confirms before a shift ends (item 29).</li>
         <li><b>30</b> "Load from sheet" names the route and the time of the last load (item 16 timestamps).</li>
         <li><b>25</b> "Connection" opens the city's Connection screen: Script URL, access key, "Test connection". "Send now" and "Load from sheet" no longer sit there (item 29).</li>
-        <li><b>66</b> The panel closes by a choice, a tap outside or when the screen turns.</li>
+        <li><b>66</b> The panel closes by a choice, a tap outside or when the screen turns. A tap outside only closes it: nothing under it reacts.</li>
       </ul></aside>
     </section>
 
@@ -1717,6 +1745,7 @@
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
   <button class="sync bad" type="button" aria-expanded="true"><span class="dot"></span>1 pass not accepted<svg class="ic"><use href="#i-chev-up"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1769,13 +1798,65 @@
       </ul></aside>
     </section>
 
+    <!-- ================= Q · No city yet ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="Q"><div class="scr">
+<header class="topbar">
+  <span class="city">No city</span>
+  <span class="pickwrap"><button class="route" type="button">No routes yet<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync off" type="button"><span class="dot"></span>Connection not set up<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col"><button class="colbtn" type="button">Add your first city<svg class="ic"><use href="#i-chev-right"/></svg></button></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(40 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
+    <section class="head"><div class="big dash">—</div><div class="hcol"><div class="plabel">POI</div></div></section>
+    <div class="typewrap"><button class="typebtn off" type="button" aria-label="POI type, unavailable"><span class="ticon nd"></span><span class="tl"><b>No POI</b></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="sph"><span class="spt">STILL NEEDED</span></div>
+      <div class="need">
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span></div>
+        <div class="nc off"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">—</span><span class="nb"><i style="width: 0%"></i></span></div>
+      </div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">0 passes</span></div>
+      <div class="sides4"><div class="sv z"><span class="svl">N</span><span class="svv">0</span></div><div class="sv z"><span class="svl">S</span><span class="svv">0</span></div><div class="sv z"><span class="svl">W</span><span class="svv">0</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
+    </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l locked" type="button" aria-label="Left, unavailable"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st locked" type="button" aria-label="Straight, unavailable"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r locked" type="button" aria-label="Right, unavailable"><svg><use href="#i-right"/></svg></button>
+    </div><div class="lock info">Add a city to start</div></div></div>
+    </div>
+    <div class="bar"><button class="btn off" type="button">Undo last</button><button class="btn" type="button">History</button><span class="barnote">Nothing to undo</span><div class="summary sumbar"></div></div>
+  </div>
+  <div class="summary sumport"></div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>Q</b> · No city yet</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>76</b> A tablet without a city: the top bar reads "No city" and "No routes yet", the POI list is replaced by the button "Add your first city", which opens Settings at "Add city" (item 75), and the discs are dimmed and inert with the caption "Add a city to start".</li>
+        <li><b>34</b> The sync control reads "Connection not set up" with its dot in the muted colour: nothing can be sent before a city has a connection.</li>
+        <li><b>18</b> This is also the screen right after "Erase everything on this tablet".</li>
+        <li><b>26</b> Discs and the type pill keep their colour and are dimmed. Nothing is hidden. The pill reads "No POI" and the head shows a dash, as in frame N.</li>
+        <li><b>73</b> The gear stays in its place: Settings is where the first city is added.</li>
+      </ul></aside>
+    </section>
+
   </div>
 
 <script>
 /* Checking-tool script (screens.md item 54) and sample-data generator.
    It fills the repeated markup of every frame (mini-map squares, POI rows,
    rail labels, grid tiles, the bottom summary) from one fixed table, so all
-   sixteen frames show the same route. No randomness: the same picture on
+   seventeen frames show the same route. No randomness: the same picture on
    every load. It also wires the presets, the drag corner and the theme
    switch. Nothing here runs in the app. */
 (function () {
