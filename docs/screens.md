@@ -148,6 +148,14 @@ to 128px, 144px on a tall landscape screen, and sits in the same place
 with the same air in both layouts (item 19). Items 52, 70 and 71 now
 name the compass's own sizes. Whether the dial stays fixed or turns is
 tested in the car with tools/compass-prototype.html.
+v0.36 2026-10-12 — the user's decisions after the working prototype
+v17: the sync control opens a small Sync panel under itself, as the type
+menu opens under the pill, and "Send now" and "Load from sheet" move
+there from the Connection screen (items 16, 29, 66, 72). A city without
+a connection reads "Connection not set up" (item 34). A pass already in
+the sheet whose removal still waits reads "Removal waiting" with the
+warning-colour dot of a waiting pass, because "deleted" read as done
+(item 13).
 -->
 
 The app is one working screen plus two slide-in panels, on a tablet held
@@ -470,8 +478,9 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     "maneuver + side".
 13. Every pass has "Delete", which asks first (item 63). A pass still
     waiting on the tablet is removed outright. A pass already in the
-    sheet stays in the list, struck through and labelled "deleted", only
-    until its removal has been delivered. Then it leaves the list. A line
+    sheet stays in the list, struck through and labelled "Removal
+    waiting" with the warning-colour dot of a waiting pass, only until
+    its removal has been delivered. Then it leaves the list. A line
     above the list counts the removals still queued.
 14. Passes entered earlier by hand in the spreadsheet are not shown — they
     are corrected in the spreadsheet.
@@ -508,10 +517,27 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 ## Connection, sync status and tablet data
 16. Sync status is always visible on the working screen and carries a
     timestamp: "All sent · 12:41", "12 passes waiting for network", "No
-    connection". Tapping it opens the Connection screen of the active
-    city. Nothing is ever lost while it waits.
+    connection". Tapping it opens the Sync panel of item 72 under it,
+    and its chevron points down, up while the panel is open. Nothing is
+    ever lost while it waits.
     Timestamps show the time alone for today and the date with the time
     when older: "All sent · 12:41", "last loaded 04.09 19:20".
+72. The Sync panel opens under the sync control, right edges aligned,
+    and is built like the type menu (item 60). A small title reads "SYNC"
+    and the city. Under it the state in words beside the sync control's
+    dot ("All sent", "2 passes waiting for network", "1 pass not
+    accepted", "No connection", "Connection not set up") with one line:
+    the time of the last send, or what happens next. Then "Send now" and
+    "Load from sheet" (items 29, 30), the latter with the route and the
+    time of the last load. A control that cannot act stays in place,
+    dimmed, and its line names the reason: "Nothing to send", "No
+    network", "Connection not set up" (items 26, 27). Last comes
+    "Connection", which opens the city's Connection screen (item 25), or
+    "Set up connection" while there is none. When the mailbox refused
+    passes, a row "Show in History" sits right under the state and opens
+    History for the whole route, where each refused pass offers "Send
+    again" and "Delete" (item 47). The panel closes like a menu (item
+    66) and never sends or loads by itself.
 17. Theme: system / light / dark.
 65. Sound: on / off, on by default. It silences the chimes of item 62
     only. Vibration and motion do not change.
@@ -536,10 +562,11 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     returns after deployment) and "Access key" (masked), with the hint
     that both are stored on this tablet only, plus "Test connection" and
     "Save". The word "Mailbox" never appears in the interface.
-29. Connection also holds "Send now" and "Load from sheet", with the time
-    of the last successful send and the last load. Sending is automatic
-    whenever the network is up; the button exists to confirm before a
-    shift ends, not to run the sync.
+29. "Send now" and "Load from sheet" live in the Sync panel (item 72),
+    with the time of the last successful send and the last load, and
+    nowhere else. Sending is automatic whenever the network is up. The
+    button exists to confirm before a shift ends, not to run the sync.
+    The Connection screen keeps the setup of item 25 only.
 30. "Load from sheet" replaces the active route's counts and targets with
     what the tracker currently holds. Passes still waiting on the tablet
     are kept and sent as usual: they are not in the sheet yet, so the
@@ -580,7 +607,7 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     label, in the top-left corner. Where a dimmed background surrounds
     the overlay, a tap on it closes the overlay too. The Android back
     gesture closes the topmost open overlay instead of leaving the app.
-    Menus (type, route) close by a choice, a tap outside, or when the
+    Menus (type, route, sync) close by a choice, a tap outside, or when the
     screen turns. Confirmation dialogs keep "Cancel" (item 63).
 
 ## Working-screen states not drawn as separate reference screens
@@ -589,7 +616,9 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 33. Passes waiting: the sync control reads "N passes waiting for network"
     with the dot in the warning colour. Everything else is unchanged.
 34. No connection: the sync control reads "No connection" with the dot in
-    the muted colour. Nothing is lost meanwhile.
+    the muted colour. Nothing is lost meanwhile. A city whose connection
+    is not set up yet reads "Connection not set up" with the same muted
+    dot.
 35. No routes yet in this city: the route picker reads "No routes yet",
     the POI list is replaced by a single button "Add routes in Settings"
     that opens Settings, and the discs are dimmed and inert, with the

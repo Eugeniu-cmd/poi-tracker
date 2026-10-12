@@ -47,12 +47,22 @@
           the chips --t-body with --s-2 of side padding. "Delete" keeps
           its red tint. The shell is copied again from main-screen.html
           v0.24 (the redrawn compass, _tokens.css v0.11).
+  v0.10 2026-10-12 — the user's decisions after the working prototype
+          v17 (screens.md v0.36). A pass already in the sheet whose
+          removal still waits reads "Removal waiting" with the amber dot
+          of a waiting pass, because "Deleted" read as done (item 13).
+          The amber chip's text is ink and the chip stays amber by its
+          fill: 13.3:1 in light, where the amber text had 3.28:1 (item
+          41). The shell is copied again from main-screen.html v0.25:
+          the sync control's chevron points down, since it opens the
+          Sync panel (item 72), and its dot colours now live in the
+          shell.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.9</title>
+<title>POI Tracker — History Reference v0.10</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -106,7 +116,7 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.24. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.25. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
@@ -159,6 +169,13 @@
   .route .ic { margin-right: -0.25em; }
   .sync .ic { margin-right: -0.375em; }
   .dot { width: var(--s-2); height: var(--s-2); border-radius: 50%; background: var(--ok); flex: none; }
+  /* the sync control anchors the Sync panel (item 72). Its dot follows the
+     queue: waiting in the warning colour (item 33), a refused pass in the
+     error colour (item 47), no connection in the muted colour (item 34) */
+  .sync { anchor-name: --sync; }
+  .sync.wait .dot { background: var(--warn); }
+  .sync.bad .dot { background: var(--err); }
+  .sync.off .dot { background: var(--ink-3); }
 
   /* ---- menus (items 1, 60, 66): one build for both. Anchored --s-2 under
      their control and snapped to whole pixels; a menu that does not fit
@@ -192,6 +209,22 @@
         padding: var(--s-2) var(--s-2) var(--s-3); }
   .ol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
   .ol b { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  /* ---- the Sync panel (item 72): under the sync control, right edges
+     aligned, built like the type menu. The state's line wraps. A control
+     that cannot act dims its label and keeps its reason legible ---- */
+  .pop.syncpop { z-index: 30; left: auto; right: anchor(--sync right);
+                 top: calc(anchor(--sync bottom) + var(--s-2));
+                 width: calc(var(--col-wide) + 2 * var(--s-6)); }
+  .sstat { display: flex; align-items: flex-start; gap: var(--s-3);
+           padding: var(--s-2) var(--s-2) var(--s-3); }
+  .sstat .dot { margin-top: round(down, calc((var(--t-label) - var(--s-2)) / 2), 1px); }
+  .sstat.wait .dot { background: var(--warn); }
+  .sstat.bad .dot { background: var(--err); }
+  .sstat.off .dot { background: var(--ink-3); }
+  .sstat .ol small { display: block; line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .sdiv { height: 1px; margin: var(--s-2); background: var(--line); }
+  .syncpop .opt.off b { opacity: var(--o-off); }
+  .syncpop .go { width: 1em; height: 1em; flex: none; font-size: var(--t-label); color: var(--ink-2); }
 
   /* ---- body: the POI column beside the main area (items 51, 56); the
      summary under the main area in portrait (item 3) ---- */
@@ -713,7 +746,7 @@
           border-radius: var(--r-sm); background: var(--man-soft); color: var(--ink);
           font-size: var(--t-body); font-weight: var(--w-heavy); line-height: var(--lh-tight);
           white-space: nowrap; }
-  .chip.amber { background: var(--side-soft); color: var(--warn); }
+  .chip.amber { background: var(--side-soft); color: var(--ink); }
   .hctx { flex: 1; min-width: 0; font-size: var(--t-small); font-weight: var(--w-bold);
           color: var(--ink-2); line-height: var(--lh-tight); white-space: nowrap; }
   /* queue line (item 13), only while removals are queued */
@@ -721,10 +754,6 @@
         font-weight: var(--w-bold); color: var(--ink-2); line-height: var(--lh-tight);
         white-space: nowrap; }
   .hq .dot { background: var(--warn); }
-  /* the sync control's dot follows the queue: waiting in the warning colour
-     (item 33), a refused pass in the error colour (item 47) */
-  .sync.wait .dot { background: var(--warn); }
-  .sync.bad .dot { background: var(--err); }
   /* the list: a grid whose columns are shared by every row, so the POI
      number and the time each sit in one fixed slot as wide as the widest. A
      row element has no box of its own (display: contents): its lines are
@@ -822,15 +851,15 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.9 — 2026-10-12.</b> The user's review of v0.8: the panel's title and
-     its two chips are quieter, a step under the rows, so the rows lead. The History panel
+  <p class="meta"><b>v0.10 — 2026-10-12.</b> The user's decisions after prototype v17: a removal
+     that still waits says so, and the amber chip's text is ink. The History panel
      covers the main area beside the live POI column, in POI or Route scope, and lists
      every pass this tablet recorded, newest first, with "Delete" on each, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
      "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.11</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.35</b>. The shell
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.36</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.24</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.25</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Eight states,
      A to H; wording the registry has not settled yet is tagged "proposal" in the maps.</p>
@@ -857,7 +886,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -892,7 +921,7 @@
         <li><b>41</b> Sub-header ranks its facts: the POI in an amber chip, the route and city as quiet context, the count of passes listed in a neutral chip. The title is in --t-row and the chips in --t-body, a step under the rows, so the rows lead (v0.9).</li>
         <li><b>13, 28</b> "Delete" on every pass, red text on the red tint at the right edge, apart from the routine controls; the filled red button stays in the dialog (item 63).</li>
         <li><b>33</b> Two newest passes "Waiting", the sync control reads "2 passes waiting for network" with its dot in the warning colour.</li>
-        <li><b>proposal</b> State labels: "Waiting" with an amber dot (the amber text itself falls short of 4.5:1 at this size), "Sent" and "Deleted" quiet, "Not accepted" in the error colour.</li>
+        <li><b>proposal</b> State labels: "Waiting" and "Removal waiting" with an amber dot (the amber text itself falls short of 4.5:1 at this size), "Sent" quiet, "Not accepted" in the error colour.</li>
         <li><b>44</b> The POI column stays live beside the panel, the active row amber: tapping another POI reloads the panel for it without closing. The panel never carries a second POI picker.</li>
         <li><b>61, 3</b> In portrait the panel covers the main area and the summary under it keeps its place; in landscape it covers the whole main area, action bar and compass included.</li>
         <li><b>14, 45</b> Footer: "History shows only what this tablet recorded".</li>
@@ -908,7 +937,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -971,7 +1000,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync wait" type="button"><span class="dot"></span>1 removal waiting for network<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync wait" type="button"><span class="dot"></span>1 removal waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136" data-count="40"></div></div>
@@ -983,7 +1012,7 @@
   <div class="hlist" data-scope="poi">
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:38</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
-    <div class="hr del"><div class="hl1"><div class="htx"><span class="htm">21:31</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst">Deleted</span></div></div></div>
+    <div class="hr del"><div class="hl1"><div class="htx"><span class="htm">21:31</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst wait"><span class="dot"></span>Removal waiting</span></div></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:27</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:22</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:18</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
@@ -1002,7 +1031,7 @@
         <p class="caption"><b>C</b> · A deleted pass</p>
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
-        <li><b>13, 38</b> The 21:31 Straight · West pass was already in the sheet: it stays in the list struck through and labelled "Deleted", without buttons, until its removal is delivered; then it leaves the list.</li>
+        <li><b>13, 38</b> The 21:31 Straight · West pass was already in the sheet: it stays in the list struck through and labelled "Removal waiting" with the amber dot of a waiting pass, without buttons, until its removal is delivered. Then it leaves the list (v0.10).</li>
         <li><b>26</b> The deleted row is not dimmed: opacity marks an unavailable control, and this row is a state, not a control.</li>
         <li><b>13</b> A line above the list counts the removals still queued: "1 removal waiting to be sent".</li>
         <li><b>proposal</b> The sync control reads "1 removal waiting for network" with its dot in the warning colour: a queued removal counts like a waiting pass (item 33).</li>
@@ -1017,7 +1046,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1067,7 +1096,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1116,7 +1145,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync bad" type="button"><span class="dot"></span>1 pass not accepted<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync bad" type="button"><span class="dot"></span>1 pass not accepted<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1167,7 +1196,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="139" data-scroll="136"></div></div>
@@ -1200,7 +1229,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>

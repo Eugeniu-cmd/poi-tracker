@@ -152,12 +152,20 @@
           short one, and sits at the main area's top in both layouts,
           one gap under the top bar. In portrait the head is at least as
           tall as the compass, so the type pill sits one gap under it.
+  v0.25 2026-10-12 — the user's decisions after the working prototype
+          v17 (screens.md v0.36). The sync control's chevron points down,
+          since it opens the Sync panel under itself (items 16, 72). Two
+          new frames draw the panel: O with everything sent and P with a
+          pass the mailbox refused. The sync control's dot takes the
+          warning colour while passes wait, the error colour for a refused
+          pass and the muted colour without a connection (items 33, 34,
+          47).
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.24</title>
+<title>POI Tracker — Working Screen Reference v0.25</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -263,6 +271,13 @@
   .route .ic { margin-right: -0.25em; }
   .sync .ic { margin-right: -0.375em; }
   .dot { width: var(--s-2); height: var(--s-2); border-radius: 50%; background: var(--ok); flex: none; }
+  /* the sync control anchors the Sync panel (item 72). Its dot follows the
+     queue: waiting in the warning colour (item 33), a refused pass in the
+     error colour (item 47), no connection in the muted colour (item 34) */
+  .sync { anchor-name: --sync; }
+  .sync.wait .dot { background: var(--warn); }
+  .sync.bad .dot { background: var(--err); }
+  .sync.off .dot { background: var(--ink-3); }
 
   /* ---- menus (items 1, 60, 66): one build for both. Anchored --s-2 under
      their control and snapped to whole pixels; a menu that does not fit
@@ -296,6 +311,22 @@
         padding: var(--s-2) var(--s-2) var(--s-3); }
   .ol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
   .ol b { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  /* ---- the Sync panel (item 72): under the sync control, right edges
+     aligned, built like the type menu. The state's line wraps. A control
+     that cannot act dims its label and keeps its reason legible ---- */
+  .pop.syncpop { z-index: 30; left: auto; right: anchor(--sync right);
+                 top: calc(anchor(--sync bottom) + var(--s-2));
+                 width: calc(var(--col-wide) + 2 * var(--s-6)); }
+  .sstat { display: flex; align-items: flex-start; gap: var(--s-3);
+           padding: var(--s-2) var(--s-2) var(--s-3); }
+  .sstat .dot { margin-top: round(down, calc((var(--t-label) - var(--s-2)) / 2), 1px); }
+  .sstat.wait .dot { background: var(--warn); }
+  .sstat.bad .dot { background: var(--err); }
+  .sstat.off .dot { background: var(--ink-3); }
+  .sstat .ol small { display: block; line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .sdiv { height: 1px; margin: var(--s-2); background: var(--line); }
+  .syncpop .opt.off b { opacity: var(--o-off); }
+  .syncpop .go { width: 1em; height: 1em; flex: none; font-size: var(--t-label); color: var(--ink-2); }
 
   /* ---- body: the POI column beside the main area (items 51, 56); the
      summary under the main area in portrait (item 3) ---- */
@@ -808,10 +839,10 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.24 — 2026-10-11.</b> The user's review of v0.23: the compass is redrawn,
-     larger, and sits in the same place in both layouts (item 19). Every value inside
+  <p class="meta"><b>v0.25 — 2026-10-12.</b> The user's decisions after prototype v17: the sync
+     control opens the Sync panel under itself (items 16, 72). Every value inside
      the frames is a token of <b>_tokens.css v0.11</b> (size C, screens.md item 67) and
-     every rule follows <b>screens.md v0.35</b>. Icons are
+     every rule follows <b>screens.md v0.36</b>. Icons are
      Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
      presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and
@@ -820,7 +851,7 @@
      shape: side by side when wider than tall, stacked when taller (item 51). Below
      700px of height the compact step applies: smaller display numbers, a one-line
      grid button instead of the mini-map and, in landscape, narrower margins and gaps
-     so the card keeps its paddings (item 70). Fourteen states, A to N.</p>
+     so the card keeps its paddings (item 70). Sixteen states, A to P.</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>
@@ -844,7 +875,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -881,7 +912,7 @@
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>1</b> City name as large as the route code, bold, ink; route picker beside it. Chevrons are Lucide (item 69).</li>
-        <li><b>16</b> Sync status always visible, with a timestamp; it is a tap target.</li>
+        <li><b>16</b> Sync status always visible, with a timestamp. It is a tap target that opens the Sync panel under itself (frame O), so its chevron points down.</li>
         <li><b>2, 56</b> POI column on the left: number, bar, "N to go"; rows 66px (--row-h). A whole row sits at the top edge, the cut row at the bottom fades (item 56).</li>
         <li><b>58</b> Mini-map as the column's header (item 58): one square per POI, coloured by state, "79 of 197 done", "Open" with a chevron; a hairline under it. Below 700px of height it is a one-line grid button (item 70).</li>
         <li><b>57</b> Index rail along the column's right edge: 1, 40, 80, 120, 160, 197.</li>
@@ -906,7 +937,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -963,7 +994,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="138"></div></div>
@@ -1014,7 +1045,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="124"></div></div>
@@ -1065,7 +1096,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="135"></div></div>
@@ -1116,7 +1147,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="57"></div></div>
@@ -1168,7 +1199,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="168"></div></div>
@@ -1220,7 +1251,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1281,7 +1312,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="122"></div></div>
@@ -1339,7 +1370,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1397,7 +1428,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1472,7 +1503,7 @@
       <button class="ritem" type="button"><b>R20890-060</b><small>0 of 197 done</small><svg class="chk"><use href="#i-check"/></svg></button>
       <button class="ritem" type="button"><b>R20890-061</b><small>0 of 197 done</small><svg class="chk"><use href="#i-check"/></svg></button>
     </div>
-  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
@@ -1523,7 +1554,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136" data-scroll="120" data-finger="120"></div></div>
@@ -1573,7 +1604,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">No routes yet<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-right"/></svg></button>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col"><button class="colbtn" type="button">Add routes in Settings<svg class="ic"><use href="#i-chev-right"/></svg></button></div></div>
@@ -1617,13 +1648,134 @@
       </ul></aside>
     </section>
 
+    <!-- ================= O · Sync panel ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="O"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync" type="button" aria-expanded="true"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-up"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(40 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
+    <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp">70 passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28 ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14 ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="sph"><span class="spt">STILL NEEDED</span></div>
+      <div class="need">
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      </div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
+    </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+    </div></div></div>
+    </div>
+    <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><div class="summary sumbar" data-summary></div></div>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+      <div class="pop syncpop" role="dialog" aria-label="Sync">
+        <div class="pt">SYNC · VIENNA</div>
+        <div class="sstat"><span class="dot"></span><span class="ol"><b>All sent</b><small>Last sent 21:40</small></span></div>
+        <div class="sdiv"></div>
+        <button class="opt off" type="button" aria-disabled="true"><span class="ol"><b>Send now</b><small>Nothing to send</small></span></button>
+        <button class="opt" type="button"><span class="ol"><b>Load from sheet</b><small>R20890-058 · last loaded 09.10 19:20</small></span></button>
+        <div class="sdiv"></div>
+        <button class="opt" type="button"><span class="ol"><b>Connection</b><small>Script URL and access key for Vienna</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+      </div>
+</div>
+        </div></div>
+        <p class="caption"><b>O</b> · Sync panel</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>72</b> The sync control opens the Sync panel under itself, right edges aligned, built like the type menu. Its chevron points up while the panel is open (item 16).</li>
+        <li><b>72</b> Title "SYNC · VIENNA", then the state in words beside the dot of the sync control, with the time of the last send under it.</li>
+        <li><b>26, 27</b> "Send now" stays in place, its label dimmed, with its reason "Nothing to send" under it. Sending is automatic, the button only confirms before a shift ends (item 29).</li>
+        <li><b>30</b> "Load from sheet" names the route and the time of the last load (item 16 timestamps).</li>
+        <li><b>25</b> "Connection" opens the city's Connection screen: Script URL, access key, "Test connection". "Send now" and "Load from sheet" no longer sit there (item 29).</li>
+        <li><b>66</b> The panel closes by a choice, a tap outside or when the screen turns.</li>
+      </ul></aside>
+    </section>
+
+    <!-- ================= P · Sync panel, a refused pass ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="P"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync bad" type="button" aria-expanded="true"><span class="dot"></span>1 pass not accepted<svg class="ic"><use href="#i-chev-up"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(40 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
+    <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp">70 passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28 ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14 ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="sph"><span class="spt">STILL NEEDED</span></div>
+      <div class="need">
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      </div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
+    </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+    </div></div></div>
+    </div>
+    <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><div class="summary sumbar" data-summary></div></div>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+      <div class="pop syncpop" role="dialog" aria-label="Sync">
+        <div class="pt">SYNC · VIENNA</div>
+        <div class="sstat bad"><span class="dot"></span><span class="ol"><b>1 pass not accepted</b><small>The sheet refused it. Fix the cause in the sheet, then send it again from History.</small></span></div>
+        <button class="opt" type="button"><span class="ol"><b>Show in History</b><small>1 pass to fix or delete</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        <div class="sdiv"></div>
+        <button class="opt off" type="button" aria-disabled="true"><span class="ol"><b>Send now</b><small>Nothing to send</small></span></button>
+        <button class="opt" type="button"><span class="ol"><b>Load from sheet</b><small>R20890-058 · last loaded 09.10 19:20</small></span></button>
+        <div class="sdiv"></div>
+        <button class="opt" type="button"><span class="ol"><b>Connection</b><small>Script URL and access key for Vienna</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+      </div>
+</div>
+        </div></div>
+        <p class="caption"><b>P</b> · Sync panel, a refused pass</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>47</b> The sync control reads "1 pass not accepted" with its dot in the error colour. A refused pass does not count, so the counter stays "41 of 70".</li>
+        <li><b>72</b> "Show in History" sits right under the state and opens History for the whole route, where the refused pass offers "Send again" and "Delete".</li>
+        <li><b>33</b> While passes wait, the dot takes the warning colour and the state reads "2 passes waiting for network", with "Kept on this tablet. They go out on their own when the network is back." under it.</li>
+        <li><b>34</b> Without a network "Send now" and "Load from sheet" are dimmed with the reason "No network". A city without a connection reads "Connection not set up" with the muted dot, and the last row becomes "Set up connection". These change text only, so they are not drawn.</li>
+      </ul></aside>
+    </section>
+
   </div>
 
 <script>
 /* Checking-tool script (screens.md item 54) and sample-data generator.
    It fills the repeated markup of every frame (mini-map squares, POI rows,
    rail labels, grid tiles, the bottom summary) from one fixed table, so all
-   fourteen frames show the same route. No randomness: the same picture on
+   sixteen frames show the same route. No randomness: the same picture on
    every load. It also wires the presets, the drag corner and the theme
    switch. Nothing here runs in the app. */
 (function () {
