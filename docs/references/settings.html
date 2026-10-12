@@ -41,12 +41,19 @@
           use, another city with "Use this city", Connection, a route, a
           new route whose tab is not found, a new city, and the two
           dialogs that can lose passes.
+  v0.10 2026-10-13 — the v0.9 report: in dark, grey text in the sheet
+          fell to 3.65:1 on the groups' lighter fill. The groups lose
+          their fill and keep their border, the chosen city's line turns
+          ink, the Theme labels are ink as Apple's and Google's segmented
+          controls keep them, and the placeholder takes --ink-2. Every
+          text in the sheet reads at 4.5:1 or more in both themes, and
+          light looks as before.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Settings Reference v0.9</title>
+<title>POI Tracker — Settings Reference v0.10</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -730,12 +737,14 @@
          line-height: var(--lh-tight); }
   .sgh:first-child { padding-top: var(--s-2); }
   .sgap { flex: none; height: var(--s-5); }
-  .sgroup { flex: none; background: var(--panel-strong); border: 1px solid var(--line);
-            border-radius: var(--r-md); overflow: hidden; }
+  /* a group is drawn by its border alone: on the raised sheet a lighter fill
+     would take grey text under 4.5:1 in dark */
+  .sgroup { flex: none; border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; }
   .srow { width: 100%; min-height: var(--row-h); display: flex; align-items: center; gap: var(--s-3);
           padding: var(--s-2) var(--s-4); border-bottom: 1px solid var(--line); }
   .srow:last-child { border-bottom: 0; }
   .srow.on { background: var(--active); }
+  .srow.on .ol small { color: var(--ink); }
   .srow.stack { flex-direction: column; align-items: stretch; gap: var(--s-2);
                 padding-top: var(--s-3); padding-bottom: var(--s-3); }
   .srow .ol small { display: block; line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
@@ -748,12 +757,14 @@
            padding: var(--s-1) var(--s-2); border-radius: var(--r-sm); background: var(--ok-bg);
            color: var(--ok); font-size: var(--t-small); font-weight: var(--w-heavy);
            line-height: var(--lh-tight); white-space: nowrap; }
-  /* Theme (item 17): the segmented control of History's scope */
+  /* Theme (item 17): the segmented control of History's scope, its labels in
+     ink as Apple's and Google's segmented controls keep them, since grey on
+     the track falls under 4.5:1 on the raised sheet in dark */
   .seg { flex: none; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--s-2);
          padding: var(--s-1); background: var(--man-soft); border-radius: var(--r-md); }
   .sg { height: var(--tap-min); min-width: calc(var(--tap-min) + var(--s-6)); padding: 0 var(--s-4);
         display: inline-flex; align-items: center; justify-content: center;
-        font-size: var(--t-body); font-weight: var(--w-heavy); color: var(--ink-2);
+        font-size: var(--t-body); font-weight: var(--w-heavy); color: var(--ink);
         border-radius: calc(var(--r-md) - var(--s-1)); white-space: nowrap; }
   .sg.on { background: var(--panel-raised); box-shadow: var(--shadow); color: var(--ink); }
   /* Sound (item 65): a switch, on in the colour of the discs */
@@ -786,7 +797,7 @@
           padding: 0 var(--s-4); border-radius: var(--r-sm); background: var(--panel-raised);
           border: 1px solid var(--line); font-size: var(--t-body); font-weight: var(--w-medium); }
   .fv { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .fv.ph { color: var(--ink-3); }
+  .fv.ph { color: var(--ink-2); }
   .fbox b { flex: none; font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2); }
   .field.bad .fbox { border-color: var(--err); }
   .ferr { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--err);
@@ -820,7 +831,7 @@
 
   <p class="eyebrow">Design Reference · docs/references/settings.html</p>
   <h1>POI Tracker — Settings</h1>
-  <p class="meta"><b>v0.9 — 2026-10-12.</b> Settings redrawn on the canon after the user's five
+  <p class="meta"><b>v0.10 — 2026-10-13.</b> Settings on the canon after the user's five
      decisions: the gear opens it (item 73), a city is put in use from its page (item 21), a route
      has its own page and loads from the sheet when it is added (item 22), and the dialogs name
      the passes they would lose (items 18, 24). Every value inside the frames is a token of
@@ -830,7 +841,7 @@
      <b>720 × 1000</b>, <b>1333 × 800</b> and <b>1000 × 600</b>. Every frame also drags at its
      bottom-right corner. In portrait Settings is one column that drills down, in landscape the
      list stays beside the page (item 74). Nine states, A to I. Graz, Linz and the R20891 codes
-     are sample data.</p>
+     are sample data. Every text in the sheet reads at 4.5:1 or more in both themes (v0.10).</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>
