@@ -1,6 +1,6 @@
 # Data model
 
-v0.11 — 2026-10-13
+v0.12 — 2026-10-13
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -51,6 +51,13 @@ is saved or tested again, 'busy' is retried silently. The mailbox must
 leave no Log row for a rejected event, which v1.3 can break on 'error'.
 The fields the screens need are listed. "Load from sheet" serves a new
 route too.
+v0.12 2026-10-13 — mailbox v1.4, the user's two decisions and an
+independent review. A write that fails is undone: the old cell contents
+come back and the event's Log row is cleared, so a rejected event leaves
+no trace. A removal needs its ref, and a second removal of the same pass
+is rejected as 'already-removed'. Event ids are UUIDs. A push stops
+after 4 minutes and names only the events it handled. pull waits for a
+running push, and a load waits for unanswered pushes.
 -->
 
 ## Pass (one crossing of an intersection)
@@ -162,7 +169,9 @@ route too.
 - NEW sheet `Log` (created by the mailbox on first run): row = event,
   append-only. Columns: A id · B time · C route · D POI · E side ·
   F maneuver · G delta · H ref · I target. A pass row leaves I empty; a
-  target row leaves E..H empty.
+  target row leaves E..H empty. The mailbox clears a row only to undo
+  its own write that failed a moment before (see "Mailbox"), so an
+  empty row can sit between others.
 - The client's spreadsheet (Duesseldorf_Tracking_RoadNet_v1) is never
   touched.
 
@@ -180,21 +189,40 @@ route too.
   row is written, and the event is rejected (reason 'below-zero'). A
   cell that comes to 0 is left empty, not written as 0: a 0 typed by
   hand marks an impossible maneuver.
+- An event id must be a UUID, else 'bad-request' (the self-test uses ids
+  of its own). A removal (delta −1) must carry ref, the UUID of the pass
+  it removes, else 'bad-request'. If a removal in `Log` already took out
+  the pass that ref names, the removal is rejected as 'already-removed'
+  and nothing changes. This holds within one push too.
 - Applying a target event: write target into the POI's cell of the
   target column (see "Targets per POI") and append a row to `Log`.
+- Since v1.4 the mailbox appends the `Log` row, writes the cells and
+  flushes, all inside the event's own check. If anything fails, it puts
+  the old cell contents back (a formula as a formula, text as text),
+  clears the `Log` row carrying that event's id, and answers 'error'.
+  Each undo step is tried twice, a second apart. The `Log` row is
+  cleared only when every cell is back. If a cell cannot be put back,
+  the row stays, so a resend answers 'duplicate' and the tablet counts
+  what the sheet may hold, and column S shows a pass left half written.
+  That takes two failures in a row and is the one known limit.
+- A push stops taking new events after 4 minutes, because Apps Script
+  ends any run at 6 and a run cut short could leave a Log row without
+  its cells. Its answer then names only the events it handled, and the
+  tablet sends the others again, as for an unanswered push (see
+  "Event").
 - Rejection reasons, one per event: 'bad-request' (malformed event or
   unknown side, maneuver or delta), 'no-route' (no sheet of that exact
   name with "POI" in A1), 'no-poi' (no row with that number in column
   A), 'text-in-cell' (one of the two cells holds text), 'below-zero',
+  'already-removed' (the pass this removal names was already removed),
   'bad-target' (not 70, 40 or 0), 'error' (anything else failed for
   that event; the rest of the batch still runs).
-- The mailbox must leave no Log row for an event it rejects, so that
-  "Send again" applies it once. Mailbox v1.3 writes the Log row before
-  the cells, so an 'error' while writing a cell can leave the row behind,
-  and the resend then answers 'duplicate' although the cells never
-  changed. To be fixed in the mailbox before chapter 6. The mailbox does
-  not check that a ref is removed only once: the tablet guarantees it
-  (see "Event").
+- The mailbox leaves no Log row for an event it rejects, so that "Send
+  again" applies it once. v1.3 could break this on 'error' (it wrote
+  the Log row before the cells and never undid it). v1.4 undoes the
+  failed event's writes, as above. The tablet still sends at most one
+  removal per pass (see "Event"), and the mailbox now refuses a second
+  one as well.
 - A push waits up to 30 s for the script lock; if another push still
   holds it → {ok:false, error:'busy'}, and the tablet retries a few
   seconds later without telling the user.
@@ -202,7 +230,11 @@ route too.
   counts:{poi:[N,S,W,E,L,St,R]}, targets:{poi:target}} — one route per
   call; a missing target cell reads as 70. A route with no sheet of that
   name → {ok:false, error:'no-route'}. Text in B..H reads as 0 and is not
-  reported; column S of the sheet shows it, the answer does not.
+  reported; column S of the sheet shows it, the answer does not. Since
+  v1.4 pull waits for the script lock as push does, so it never reads a
+  push half done, and answers {ok:false, error:'busy'} when it cannot
+  get the lock. The tablet then tries the load again a few seconds
+  later, as for a busy push.
 - POST {token, action:'ping'} → {ok:true, version}
 - Wrong token → {ok:false, error:'auth'}. The tablet keeps every event
   waiting, sets the city's keyRejected and shows "Access key rejected"
@@ -232,7 +264,10 @@ route too.
   saved. A route never loaded loads when it is first opened. Passes
   still waiting on the tablet are kept and sent as usual: they are not
   in the sheet yet, so the loaded numbers plus the waiting passes are
-  exactly right. Nothing is discarded and no warning is needed.
+  exactly right. Nothing is discarded and no warning is needed. A load
+  never runs while a push is unanswered: its events may already be in
+  the sheet, so the tablet first sends that push again until an answer
+  names them.
 
 ## Heading (compass)
 - Two sources, because neither alone is trustworthy in a car:

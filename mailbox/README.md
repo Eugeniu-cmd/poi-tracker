@@ -18,7 +18,8 @@ is docs/data-model.md, section "Mailbox".
   there (70, 40 or 0). An empty or non-numeric cell reads as 70. You may
   also type 40 or 0 there by hand.
 - No sheet named Log. The mailbox creates it on the first push, at the
-  end of the tab list, and only ever appends to it.
+  end of the tab list, and appends to it. It clears a row only to undo
+  its own write that failed a moment before (v1.4).
 - File > Settings > Time zone set to the city's time zone. The Log's
   time column is shown in that zone; with the default GMT a tap at 16:43
   in Vienna reads 14:43.
@@ -80,6 +81,34 @@ Project Settings > Script properties > Edit script properties > new
 value for TOKEN > Save. No new deployment is needed: the key is read on
 every request. Enter the new key on the tablet too.
 
+## Test the safety net on a copy (v1.4)
+
+Since v1.4 a write that fails is undone: the cells get their old values
+back and the Log row of that event is cleared, so "Send again" applies
+it once. A second removal of a pass already removed is refused as
+already-removed. selfTestOnCopy proves both on a copy of a tracker.
+Never run it on the real tracker: the test writes and removes passes.
+
+1. Open the tracker. File > Make a copy. Open the copy. The copy carries
+   its own copy of the script.
+2. In the copy: Extensions > Apps Script. Paste the whole of
+   mailbox/Code.gs into the editor's Code.gs. Save.
+3. In the copy only: Project Settings (gear icon) > Script properties >
+   Add script property. Property: SELFTEST. Value: the copy's own id,
+   the long code between /d/ and /edit in the copy's address bar. Save.
+   The test refuses to run unless SELFTEST holds the id of the file it
+   runs in, so it can never run in the real tracker.
+4. Pick selfTestOnCopy in the function list next to Debug and press Run.
+   Allow the permission prompt if one appears.
+5. The Execution log names the POI it used, shows one line per step and
+   ends with ALL PASS. It picks the first POI whose N and Left hold a
+   number above 0 or nothing, so a hand-typed 0 is never touched.
+   Any FAIL line: stop, do not update the real tracker, and send the log
+   to the planning chat.
+6. Delete the copy (File > Move to trash).
+
+Then update the real tracker as below. Never add SELFTEST to it.
+
 ## Updating the code later
 
 Never create a second deployment. A new deployment gets a new URL, and
@@ -107,7 +136,20 @@ Running setupTargetColumn after an update is always safe.
 - pull reads text in B..H as 0 and does not report it. Column S of the
   sheet shows that error, the pull answer does not.
 - Rejection reasons for a single event in push: bad-request, no-route,
-  no-poi, text-in-cell, below-zero, bad-target, error.
+  no-poi, text-in-cell, below-zero, already-removed, bad-target, error.
+- Every event id is a UUID. Any other id is bad-request (v1.4).
+- A removal (delta -1) must carry ref, the id of the pass it removes. A
+  removal without a ref is bad-request, and a second removal of the same
+  pass is already-removed (v1.4).
+- After error nothing of that event stays in the tracker, so it may be
+  sent again (v1.4). The one limit: if a cell cannot be put back, twice,
+  the Log row stays too, so a resend answers duplicate, and column S
+  shows a pass left half written.
+- A push stops taking new events after 4 minutes, since Apps Script ends
+  any run at 6. Its answer then names only the events it handled. Send
+  the others again (v1.4).
+- pull waits for a running push, like push does, and answers busy when
+  it cannot (v1.4).
 - The tablet treats applied and duplicate alike as delivered.
 - A count that a removal brings to 0 is left as an empty cell, because
   a 0 typed by hand means "impossible maneuver".

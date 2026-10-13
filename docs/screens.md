@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.39 — 2026-10-13
+v0.40 — 2026-10-13
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -187,6 +187,8 @@ last skips a pass that History is handling (item 9). The interface says
 "sheet", never "tracker" (intro). Also fixed from the audit: this
 header, the intro's panels, items 18, 32, 46, 54, 61, 63, 67, 70 and
 the note under the states not drawn.
+v0.40 2026-10-13 — mailbox v1.4: a second removal of the same pass is
+refused as already-removed, with its own reason line (item 47).
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -571,7 +573,7 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     "Not Delivered". "Send again" queues the same event once more, for
     when its cause has been fixed in the sheet: the mailbox keeps no
     trace of a refused event, so it applies once (data-model.md
-    "Mailbox" names the one gap). "Delete" drops it from
+    "Mailbox", since mailbox v1.4). "Delete" drops it from
     this tablet after the dialog of item 63, and nothing is sent, since
     nothing reached the sheet. A refused removal offers "Send again" and
     "Cancel removal" (item 13). A refused type change offers "Send again"
@@ -581,7 +583,8 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     item 64 asks first. An event is never edited (data-model.md): it
     keeps the route and the POI it was recorded with, so its cause is
     fixed in the sheet. The one exception is a route not checked yet,
-    whose code can still be corrected in Settings (item 22). The sync control reads "1 pass not accepted", "1 removal
+    whose code can still be corrected in Settings (item 22). The sync
+    control reads "1 pass not accepted", "1 removal
     not accepted" or "1 type change not accepted", and "2 changes not
     accepted" when they are mixed, with its dot in the error colour. The
     reason line under the row, by the mailbox's code: text-in-cell "The
@@ -593,7 +596,9 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     R20890-058 has no row for POI 136. Add the row in the sheet, then
     send again, or delete this pass." below-zero, which only a removal
     can meet, "The sheet’s count is already 0, so there is nothing left
-    to remove." bad-request and bad-target "The sheet could not read this
+    to remove." already-removed, which also only a removal can meet,
+    "The sheet already took this pass out. Cancel this removal."
+    bad-request and bad-target "The sheet could not read this
     change. Send it again or delete it." error "The sheet could not write
     this change. Send it again." On a removal or a type change the words
     follow its own row: "this removal takes from" for "this pass adds

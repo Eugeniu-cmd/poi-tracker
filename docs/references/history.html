@@ -75,12 +75,15 @@
           was recorded with. The interface says "sheet", never
           "tracker" (glossary in screens.md). The count of finished POIs
           leaves out a not-drivable POI (item 46).
+  v0.14 2026-10-13 — mailbox v1.4 (screens.md v0.40): the map of frame F
+          lists the reason line of already-removed, a second removal of
+          a pass already removed.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.13</title>
+<title>POI Tracker — History Reference v0.14</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -881,13 +884,13 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.13 — 2026-10-13.</b> The consistency audit and the user's five decisions:
+  <p class="meta"><b>v0.14 — 2026-10-13.</b> The consistency audit and the user's five decisions:
      frame I shows a refused removal and a refused type change (items 13, 47). The History panel
      covers the main area beside the live POI column, in POI or Route scope, and lists
      every pass this tablet recorded and every type change not yet in the sheet, newest first, with "Delete" on each pass, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
      "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.11</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.39</b>. The shell
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.40</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
      <b>main-screen.html v0.27</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
@@ -1221,6 +1224,7 @@
         <li><b>47</b> no-route: "Vienna’s sheet has no tab named R20890-058. Rename the route’s tab to R20890-058, then send again." The pass keeps its route code, since events are never edited, so the tab is renamed in the sheet. On a route not checked yet the line reads "Vienna’s sheet has no tab named R20890-085. Correct the route code in Settings.", since its code can still change there (item 22).</li>
         <li><b>47</b> no-poi: "Tab R20890-058 has no row for POI 136. Add the row in the sheet, then send again, or delete this pass."</li>
         <li><b>47</b> below-zero (only a removal can meet it): "The sheet's count is already 0, so there is nothing left to remove."</li>
+        <li><b>47</b> already-removed (only a removal can meet it, mailbox v1.4): "The sheet already took this pass out. Cancel this removal."</li>
         <li><b>47</b> bad-request and bad-target: "The sheet could not read this change. Send it again or delete it."</li>
         <li><b>47</b> error: "The sheet could not write this change. Send it again."</li>
       </ul></aside>
