@@ -165,12 +165,18 @@
           in every frame (item 73). New frame Q: a tablet without a city
           shows "Add your first city" (item 76). The maps of the menus
           say that a tap outside only closes them (item 66).
+  v0.27 2026-10-13 — the consistency audit and the user's five
+          decisions (screens.md v0.39). New frame R: the Sync panel when
+          the tracker's script refuses the access key (items 16, 72).
+          The count of finished POIs leaves out a not-drivable POI, so
+          route R20890-058 reads "79 of 196 done" (item 46). A map line
+          citing the wrong item is gone, another cites item 66.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.26</title>
+<title>POI Tracker — Working Screen Reference v0.27</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -851,10 +857,11 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.26 — 2026-10-12.</b> The user's decisions on Settings: a gear in the top
-     bar opens it (item 73), and a tablet without a city has its own state (item 76). Every value inside
+  <p class="meta"><b>v0.27 — 2026-10-13.</b> The consistency audit and the user's five decisions:
+     frame R draws the Sync panel when the tracker's script refuses the access key (item 72), and
+     the count of finished POIs leaves out a not-drivable POI (item 46). Every value inside
      the frames is a token of <b>_tokens.css v0.11</b> (size C, screens.md item 67) and
-     every rule follows <b>screens.md v0.37</b>. Icons are
+     every rule follows <b>screens.md v0.39</b>. Icons are
      Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
      presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and
@@ -863,7 +870,7 @@
      shape: side by side when wider than tall, stacked when taller (item 51). Below
      700px of height the compact step applies: smaller display numbers, a one-line
      grid button instead of the mini-map and, in landscape, narrower margins and gaps
-     so the card keeps its paddings (item 70). Seventeen states, A to Q.</p>
+     so the card keeps its paddings (item 70). Eighteen states, A to R.</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>
@@ -928,7 +935,7 @@
         <li><b>16</b> Sync status always visible, with a timestamp. It is a tap target that opens the Sync panel under itself (frame O), so its chevron points down.</li>
         <li><b>73</b> The gear at the right end of the top bar opens Settings (settings.html).</li>
         <li><b>2, 56</b> POI column on the left: number, bar, "N to go"; rows 66px (--row-h). A whole row sits at the top edge, the cut row at the bottom fades (item 56).</li>
-        <li><b>58</b> Mini-map as the column's header (item 58): one square per POI, coloured by state, "79 of 197 done", "Open" with a chevron; a hairline under it. Below 700px of height it is a one-line grid button (item 70).</li>
+        <li><b>58</b> Mini-map as the column's header (item 58): one square per POI, coloured by state, "79 of 196 done" (drivable POIs only, POI 168 is not drivable, item 46), "Open" with a chevron; a hairline under it. Below 700px of height it is a one-line grid button (item 70).</li>
         <li><b>57</b> Index rail along the column's right edge: 1, 40, 80, 120, 160, 197.</li>
         <li><b>40</b> Active row: amber tint, edge of --s-1, number in the amber foreground.</li>
         <li><b>4</b> Big POI number, "41 of 70" beside it, "29 to go" under the counter.</li>
@@ -998,7 +1005,6 @@
         <li><b>70</b> In the compact landscape step the disc zone is --s-2 narrower on each side; the open compass keeps its size and its clearances (v0.32).</li>
         <li><b>8</b> "Cancel" visible only while the compass is open, at the trailing end of the bar; tapping Left again also closes it.</li>
         <li><b>7, 62</b> A tap on a side records the pass (chime, vibration, bounce, toast): motion lives in the prototype, not here.</li>
-        <li><b>26</b> Nothing else on the screen changes while the compass is open.</li>
       </ul></aside>
     </section>
 
@@ -1565,10 +1571,10 @@
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>1</b> The route picker opens the city's routes under itself; the active route is marked with a check (item 60); the picker's chevron points up while it is open.</li>
-        <li><b>1</b> Each row: the route code and "N of 197 done".</li>
+        <li><b>1, 46</b> Each row: the route code and "N of T done", T counting the drivable POIs (196 on R20890-058, whose POI 168 is not drivable).</li>
         <li><b>22</b> Routes are typed in by hand in Settings: code and POI count; nothing here edits them.</li>
         <li><b>66</b> A menu closes by a choice or a tap outside, and a tap outside only closes it: nothing under it reacts.</li>
-        <li><b>26</b> The rest of the screen stays as it is while the menu is open.</li>
+        <li><b>66</b> The rest of the screen stays as it is while the menu is open.</li>
       </ul></aside>
     </section>
 
@@ -1850,13 +1856,76 @@
       </ul></aside>
     </section>
 
+    <!-- ================= R · Sync panel, access key rejected ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="R"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync bad" type="button" aria-expanded="true"><span class="dot"></span>Access key rejected<svg class="ic"><use href="#i-chev-up"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(40 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
+    <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp">70 passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28 ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14 ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="sph"><span class="spt">STILL NEEDED</span></div>
+      <div class="need">
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      </div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
+    </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+    </div></div></div>
+    </div>
+    <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><div class="summary sumbar" data-summary></div></div>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+      <div class="pop syncpop" role="dialog" aria-label="Sync">
+        <div class="pt">SYNC · VIENNA</div>
+        <div class="sstat bad"><span class="dot"></span><span class="ol"><b>Access key rejected</b><small>The sheet’s script refused the key. Passes wait on this tablet until it is fixed.</small></span></div>
+        <button class="opt" type="button"><span class="ol"><b>Fix the access key</b><small>3 passes waiting</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        <div class="sdiv"></div>
+        <button class="opt off" type="button" aria-disabled="true"><span class="ol"><b>Send now</b><small>Access key rejected</small></span></button>
+        <button class="opt off" type="button" aria-disabled="true"><span class="ol"><b>Load from sheet</b><small>Access key rejected</small></span></button>
+        <div class="sdiv"></div>
+        <button class="opt" type="button"><span class="ol"><b>Connection</b><small>Script URL and access key for Vienna</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+      </div>
+</div>
+        </div></div>
+        <p class="caption"><b>R</b> · Sync panel, access key rejected</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>72</b> The tracker's script answered "auth": the key saved on this tablet is not the script's. The sync control reads "Access key rejected" with its dot in the error colour. Passes wait on this tablet and nothing is lost.</li>
+        <li><b>72</b> Under the state: "The sheet’s script refused the key. Passes wait on this tablet until it is fixed." Then "Fix the access key", right under the state as "Show in History" sits for a refused pass (frame P). It opens Vienna's Connection page (settings.html frame J), and its line counts the passes waiting.</li>
+        <li><b>26, 27</b> "Send now" and "Load from sheet" stay in place, dimmed, with the reason "Access key rejected".</li>
+        <li><b>25</b> On the Connection page "Test connection" says whether a new key works. The next answer that is not "auth" clears this state.</li>
+        <li><b>72</b> A short "busy" answer (another send holds the script) is never shown: the app tries again by itself.</li>
+        <li><b>9</b> The 3 passes still count, so the counter keeps "41 of 70" and "Undo last" stays live.</li>
+      </ul></aside>
+    </section>
+
   </div>
 
 <script>
 /* Checking-tool script (screens.md item 54) and sample-data generator.
    It fills the repeated markup of every frame (mini-map squares, POI rows,
    rail labels, grid tiles, the bottom summary) from one fixed table, so all
-   seventeen frames show the same route. No randomness: the same picture on
+   eighteen frames show the same route. No randomness: the same picture on
    every load. It also wires the presets, the drag corner and the theme
    switch. Nothing here runs in the app. */
 (function () {
@@ -1902,9 +1971,10 @@
     if (base === 'row' && s === 'part') s = '';
     return base + (s ? ' ' + s : '') + (p.n === active ? ' active' : '');
   }
-  var done = 0, togo = 0, poisDone = 0, errs = 0;
+  var done = 0, togo = 0, poisDone = 0, errs = 0, drivable = 0;
   pois.forEach(function (p) {
     done += Math.min(p.c, p.T); togo += Math.max(0, p.T - p.c);
+    if (p.T) drivable += 1;
     if (p.T && p.c >= p.T) poisDone += 1;
     if (p.err) errs += 1;
   });
@@ -1933,16 +2003,16 @@
     if (finger) rail += '<div class="finger" style="' + railTop(+finger) + '" aria-hidden="true"></div>';
     var bubble = finger ? '<div class="bubble" style="' + railTop(+finger) + '" aria-hidden="true">' + finger + '</div>' : '';
     col.innerHTML = '<button class="mmap" type="button" aria-label="Open the grid of all POIs"><span class="mm"><span class="dots">' + dots +
-      '</span><span class="mcap"><span>' + poisDone + ' of ' + N + ' done</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></span>' +
-      '<span class="mline"><svg class="gi"><use href="#i-grid"/></svg><span>' + poisDone + ' of ' + N + '</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></button>' +
+      '</span><span class="mcap"><span>' + poisDone + ' of ' + drivable + ' done</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></span>' +
+      '<span class="mline"><svg class="gi"><use href="#i-grid"/></svg><span>' + poisDone + ' of ' + drivable + '</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></button>' +
       '<div class="colbody"><div class="list">' + rows + '</div><div class="rail" aria-label="Jump through the POI list">' + rail + '</div>' + bubble + '</div>';
   });
   each('[data-summary]', function (el) {
-    var seg = ['Done ' + fmt(done), fmt(togo) + ' to go', poisDone + ' of ' + N + ' POIs done'];
+    var seg = ['Done ' + fmt(done), fmt(togo) + ' to go', poisDone + ' of ' + drivable + ' POIs done'];
     if (errs) seg.push(errs + (errs === 1 ? ' error' : ' errors'));
     el.innerHTML = seg.map(function (t, i) { return '<span' + (errs && i === seg.length - 1 ? ' class="err"' : '') + '>' + t + (i < seg.length - 1 ? ' ·' : '') + '</span>'; }).join(' ');
   });
-  each('[data-donecount]', function (el) { el.textContent = poisDone + ' of ' + N + ' done'; });
+  each('[data-donecount]', function (el) { el.textContent = poisDone + ' of ' + drivable + ' done'; });
   each('.grid[data-active]', function (g) {
     var active = +g.getAttribute('data-active'), cells = '';
     pois.forEach(function (p) {

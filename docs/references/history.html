@@ -66,12 +66,21 @@
           fix it, and the end of the list counts passes and removals,
           not "events". The maps now cite the items instead of
           "proposal".
+  v0.13 2026-10-13 — the consistency audit and the user's five
+          decisions (screens.md v0.39). New frame I: a refused removal
+          and a refused type change, each with "Send again" and its own
+          "Cancel", and the sync control's word for both, "2 changes not
+          accepted" (items 12, 13, 47). A missing tab or POI row is
+          fixed in the sheet, because a pass keeps the route and POI it
+          was recorded with. The interface says "sheet", never
+          "tracker" (glossary in screens.md). The count of finished POIs
+          leaves out a not-drivable POI (item 46).
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.12</title>
+<title>POI Tracker — History Reference v0.13</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -125,7 +134,7 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.26. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.27. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
@@ -807,6 +816,11 @@
   .hst .dot { display: inline-block; vertical-align: calc(0.5cap - var(--s-1)); margin-right: var(--s-1);
               background: var(--warn); }
   .hst.rej { color: var(--err); }
+  /* a type change (items 12, 47): no maneuver icon, the type in --t-body.
+     Where the slot is narrow (720 x 1000 in Route scope) it wraps after
+     "Type:", and the type's own name never breaks */
+  .hmv.ty { font-size: var(--t-body); white-space: normal; }
+  .hmv.ty span { white-space: nowrap; }
   /* "Delete" (items 13, 28): red text on the red tint, at the right edge, a
      tap target; the filled red button stays reserved for the dialog. Its box
      is --tap-min + --s-5 wide: --s-3 of padding less the hairline keeps the
@@ -867,18 +881,18 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.11 — 2026-10-12.</b> The shell is that of main-screen.html v0.26: the top
-     bar carries the gear that opens Settings (item 73). The History panel
+  <p class="meta"><b>v0.13 — 2026-10-13.</b> The consistency audit and the user's five decisions:
+     frame I shows a refused removal and a refused type change (items 13, 47). The History panel
      covers the main area beside the live POI column, in POI or Route scope, and lists
-     every pass this tablet recorded, newest first, with "Delete" on each, a deleted pass
+     every pass this tablet recorded and every type change not yet in the sheet, newest first, with "Delete" on each pass, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
      "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.11</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.38</b>. The shell
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.39</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.26</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.27</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
-     <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Eight states,
-     A to H. The twelve proposals of v0.8 are approved (v0.12, screens.md v0.38).</p>
+     <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Nine states,
+     A to I. The twelve proposals of v0.8 are approved (v0.12, screens.md v0.38).</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>
@@ -943,7 +957,7 @@
         <li><b>61, 3</b> In portrait the panel covers the main area and the summary under it keeps its place; in landscape it covers the whole main area, action bar and compass included.</li>
         <li><b>14, 45</b> Footer: "History shows only what this tablet recorded".</li>
         <li><b>56</b> The list shows a whole row at its top edge and fades the cut row at its bottom, like the POI column; rows are --row-h tall, as the POI rows beside them.</li>
-        <li><b>67, 68</b> Size C; every value inside the frame is a token; the shell is main-screen v0.23's.</li>
+        <li><b>67, 68</b> Size C; every value inside the frame is a token; the shell is main-screen v0.27's.</li>
       </ul></aside>
     </section>
 
@@ -1052,7 +1066,7 @@
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>13, 38</b> The 21:31 Straight · West pass was already in the sheet: it stays in the list struck through and labelled "Removal waiting" with the amber dot of a waiting pass, without buttons, until its removal is delivered. Then it leaves the list (v0.10).</li>
         <li><b>26</b> The deleted row is not dimmed: opacity marks an unavailable control, and this row is a state, not a control.</li>
-        <li><b>13</b> A line above the list counts the removals still queued: "1 removal waiting to be sent".</li>
+        <li><b>13</b> A line above the list counts the removals still queued: "1 removal waiting to be sent", whatever holds them up. The sync control names the cause, here the network (item 33).</li>
         <li><b>33</b> The sync control reads "1 removal waiting for network" with its dot in the warning colour: a queued removal counts like a waiting pass (item 33).</li>
         <li><b>data-model</b> The waiting removal already counts: the neutral chip reads "40 passes" and POI 136's row in the column "30 to go".</li>
       </ul></aside>
@@ -1200,14 +1214,15 @@
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>47</b> The newest pass was refused by the mailbox: its row grows to three lines, "Not accepted" in the error colour, the reason as a sentence, and the two actions "Send again" and "Delete" at the right edge, --s-2 apart, never on the line with the time.</li>
         <li><b>47</b> "Send again" queues the same event once more, for when its cause has been fixed in the sheet; "Delete" drops it from this tablet after the dialog, and nothing is sent.</li>
+        <li><b>63</b> The dialog's line for a refused pass: "The sheet refused it, so it is simply dropped from this tablet."</li>
         <li><b>47</b> A refused pass does not count: the neutral chip stays "41 passes", as the counter's "41 of 70".</li>
         <li><b>47</b> The sync control reads "1 pass not accepted" with its dot in the error colour.</li>
         <li><b>47</b> text-in-cell: "The sheet has text in a cell this pass adds to. Fix the cell, then send again."</li>
-        <li><b>47</b> no-route: "Vienna’s tracker has no tab named R20890-058. Check the route code in Settings, then send again."</li>
-        <li><b>47</b> no-poi: "Tab R20890-058 has no row for POI 136. Check the number of POIs in Settings, then send again."</li>
+        <li><b>47</b> no-route: "Vienna’s sheet has no tab named R20890-058. Rename the route’s tab to R20890-058, then send again." The pass keeps its route code, since events are never edited, so the tab is renamed in the sheet. On a route not checked yet the line reads "Vienna’s sheet has no tab named R20890-085. Correct the route code in Settings.", since its code can still change there (item 22).</li>
+        <li><b>47</b> no-poi: "Tab R20890-058 has no row for POI 136. Add the row in the sheet, then send again, or delete this pass."</li>
         <li><b>47</b> below-zero (only a removal can meet it): "The sheet's count is already 0, so there is nothing left to remove."</li>
-        <li><b>47</b> bad-request and bad-target: "The tracker could not read this change. Send it again or delete it."</li>
-        <li><b>47</b> error: "The tracker could not write this change. Send it again."</li>
+        <li><b>47</b> bad-request and bad-target: "The sheet could not read this change. Send it again or delete it."</li>
+        <li><b>47</b> error: "The sheet could not write this change. Send it again."</li>
       </ul></aside>
     </section>
 
@@ -1295,14 +1310,61 @@
       </ul></aside>
     </section>
 
+    <!-- ================= I · A refused removal and a refused type change ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="I"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync bad" type="button"><span class="dot"></span>2 changes not accepted<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+<section class="hist" aria-label="History">
+  <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg" type="button" role="tab" aria-selected="false">POI</button><button class="sg on" type="button" role="tab" aria-selected="true">Route</button></div></header>
+  <div class="hsub"><span class="chip amber">R20890-058</span><span class="hctx">Vienna</span><span class="chip">2,184 passes</span></div>
+  <div class="hlist" data-scope="route">
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:38</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr rej"><div class="hl1"><div class="htx"><span class="hn">152</span><span class="htm">21:35</span><span class="hmv ty">Type: <span>Straight only</span></span><span class="hst rej">Not accepted</span></div></div><p class="hwhy">The sheet could not write this change. Send it again.</p><div class="hacts"><button class="btn" type="button">Send again</button><button class="btn" type="button">Cancel change</button></div></div>
+    <div class="hr rej del"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:31</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst rej">Not accepted</span></div></div><p class="hwhy">The sheet’s count is already 0, so there is nothing left to remove.</p><div class="hacts"><button class="btn" type="button">Send again</button><button class="btn" type="button">Cancel removal</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:27</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:22</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">135</span><span class="htm">21:18</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>East</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">135</span><span class="htm">21:12</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">135</span><span class="htm">21:07</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+    <div class="hr"><div class="hl1"><div class="htx"><span class="hn">135</span><span class="htm">21:01</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
+  </div>
+  <p class="hfoot">History shows only what this tablet recorded</p>
+</section>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>I</b> · A refused removal and a refused type change</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>13, 47</b> A removal the tracker's script refused: the pass stays struck through, "Not accepted" in the error colour, the reason, then "Send again" and "Cancel removal". "Cancel removal" asks nothing: the pass simply returns to "Sent", since nothing changes in the sheet.</li>
+        <li><b>47</b> A refused removal does not count: the pass is still in the sheet, so POI 136 keeps its 41 passes and the chip "2,184 passes".</li>
+        <li><b>12, 47</b> A type change is listed as "Type: Straight only", with the POI number in Route scope. It reads "Waiting" with the warning-colour dot while it waits, and leaves the list once it is in the sheet. Refused, it reads "Not accepted" with the reason, "Send again" and "Cancel change", which puts the old type back without a dialog. A waiting type change has no button: choosing the old type again on the type pill drops it. When putting the old type back has a consequence of item 64 for passes recorded since, the dialog of item 64 asks first.</li>
+        <li><b>30, data-model</b> While the change waits or is refused, POI 152 stays Straight only on this tablet, and "Load from sheet" leaves its type alone.</li>
+        <li><b>47</b> The reason lines name the button of their own row: "or delete this pass" on a pass, "or cancel the removal" on a removal, "or cancel the change" on a type change.</li>
+        <li><b>47, 72</b> The sync control reads "2 changes not accepted": one removal and one type change. Alone they read "1 removal not accepted" and "1 type change not accepted", as a pass reads "1 pass not accepted".</li>
+      </ul></aside>
+    </section>
+
   </div>
 
 <script>
 /* Checking-tool script (screens.md item 54) and sample-data generator,
-   copied from main-screen.html v0.23 with two additions marked "History".
+   copied from main-screen.html v0.27 with two additions marked "History".
    It fills the repeated markup of every frame (mini-map squares, POI rows,
    rail labels, grid tiles, the bottom summary) from one fixed table, so all
-   eight frames show the same route as main-screen. No randomness: the same picture on
+   nine frames show the same route as main-screen. No randomness: the same picture on
    every load. It also wires the presets, the drag corner and the theme
    switch. Nothing here runs in the app. */
 (function () {
@@ -1348,9 +1410,10 @@
     if (base === 'row' && s === 'part') s = '';
     return base + (s ? ' ' + s : '') + (p.n === active ? ' active' : '');
   }
-  var done = 0, togo = 0, poisDone = 0, errs = 0;
+  var done = 0, togo = 0, poisDone = 0, errs = 0, drivable = 0;
   pois.forEach(function (p) {
     done += Math.min(p.c, p.T); togo += Math.max(0, p.T - p.c);
+    if (p.T) drivable += 1;
     if (p.T && p.c >= p.T) poisDone += 1;
     if (p.err) errs += 1;
   });
@@ -1382,18 +1445,18 @@
     if (finger) rail += '<div class="finger" style="' + railTop(+finger) + '" aria-hidden="true"></div>';
     var bubble = finger ? '<div class="bubble" style="' + railTop(+finger) + '" aria-hidden="true">' + finger + '</div>' : '';
     col.innerHTML = '<button class="mmap" type="button" aria-label="Open the grid of all POIs"><span class="mm"><span class="dots">' + dots +
-      '</span><span class="mcap"><span>' + poisDone + ' of ' + N + ' done</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></span>' +
-      '<span class="mline"><svg class="gi"><use href="#i-grid"/></svg><span>' + poisDone + ' of ' + N + '</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></button>' +
+      '</span><span class="mcap"><span>' + poisDone + ' of ' + drivable + ' done</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></span>' +
+      '<span class="mline"><svg class="gi"><use href="#i-grid"/></svg><span>' + poisDone + ' of ' + drivable + '</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></button>' +
       '<div class="colbody"><div class="list">' + rows + '</div><div class="rail" aria-label="Jump through the POI list">' + rail + '</div>' + bubble + '</div>';
   });
   each('[data-summary]', function (el) {
     var adj = 0, oc = el.closest('.app') && el.closest('.app').querySelector('.col[data-count]');
     if (oc) { adj = +oc.getAttribute('data-count') - pois[+oc.getAttribute('data-active') - 1].c; }
-    var seg = ['Done ' + fmt(done + adj), fmt(togo - adj) + ' to go', poisDone + ' of ' + N + ' POIs done'];
+    var seg = ['Done ' + fmt(done + adj), fmt(togo - adj) + ' to go', poisDone + ' of ' + drivable + ' POIs done'];
     if (errs) seg.push(errs + (errs === 1 ? ' error' : ' errors'));
     el.innerHTML = seg.map(function (t, i) { return '<span' + (errs && i === seg.length - 1 ? ' class="err"' : '') + '>' + t + (i < seg.length - 1 ? ' ·' : '') + '</span>'; }).join(' ');
   });
-  each('[data-donecount]', function (el) { el.textContent = poisDone + ' of ' + N + ' done'; });
+  each('[data-donecount]', function (el) { el.textContent = poisDone + ' of ' + drivable + ' done'; });
   each('.grid[data-active]', function (g) {
     var active = +g.getAttribute('data-active'), cells = '';
     pois.forEach(function (p) {

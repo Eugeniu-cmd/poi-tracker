@@ -1,6 +1,6 @@
 # Spreadsheets
 
-v0.5 — 2026-10-05
+v0.6 — 2026-10-13
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-04 — extracted from docs/inputs/handoff_v2.md (Russian,
 2026-09-02) and verified against the two workbooks in docs/inputs/.
@@ -14,6 +14,9 @@ v0.4 2026-10-04 — Vienna tracker documented after the mailbox install:
 sheets, target column X, formulas switched to it, locale, time zone, Log.
 v0.5 2026-10-05 — "target" now means column X only: T1:V1 is called the
 maneuver balance everywhere; the Vienna section gets the letter F.
+v0.6 2026-10-13 — consistency audit: section A is marked as the layout
+of 2026-09-02 and points to section F for column X, and a 0 in X is
+called a not-drivable POI, the app's name for it.
 -->
 
 Two separate Google Sheets exist. The app writes to the user's tracker only,
@@ -42,7 +45,13 @@ column A, 197 POIs per route.
 | T1, U1, V1 | maneuver balance per POI: Left 28 / Straight 14 / Right 28 |
 | T (below row 1) | user's own notes |
 
-Columns I..S are formulas. The app writes to B..H only, numbers only.
+Columns I..S are formulas. The app writes numbers to B..H, and the
+POI's target to X.
+
+This table is the layout of 2026-09-02, before targets per POI. Every
+tracker now also needs column X, the POI's target, with I and S reading
+from it (section F and data-model.md "Targets per POI"). A new city's
+tracker is built from section F.
 
 ### Generator
 Builds the 70-rows-per-POI block the user pastes into the client's file.
@@ -149,7 +158,7 @@ Snapshot: docs/inputs/POI_tracker_Vienna_v1.xlsx.
   J..R helper sums (J hidden), S status, T1:V1 the maneuver balance
   28 / 14 / 28.
 - Column X, header Target in X1, holds the POI's target. Empty means 70.
-  40 marks a POI on a straight road, 0 a closed POI. The mailbox writes
+  40 marks a POI on a straight road, 0 a not-drivable POI. The mailbox writes
   it, and the user may type it by hand.
 - I (To go) and S (status) read the target from X: 40 or 0 when X holds
   that number, otherwise Generator!$B$4 (70). The summary's Норма is the

@@ -48,12 +48,23 @@
           controls keep them, and the placeholder takes --ink-2. Every
           text in the sheet reads at 4.5:1 or more in both themes, and
           light looks as before.
+  v0.11 2026-10-13 — the consistency audit and the user's five
+          decisions (screens.md v0.39). Frame E: a route whose passes
+          still wait keeps its code, dimmed with the reason, and the
+          sync control says they wait (item 22). New frame J: the
+          Connection page when the tracker's script refuses the access
+          key, with the four answers of "Test connection" (item 25).
+          The Erase and Delete city texts name the POI types that leave
+          with them (items 18, 24). The Sound caption names both chimes,
+          the New city hint points to the city's page, the interface
+          says "sheet", never "tracker", and the count of finished POIs
+          leaves out a not-drivable POI (item 46).
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Settings Reference v0.10</title>
+<title>POI Tracker — Settings Reference v0.11</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -107,7 +118,7 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.26. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.27. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
@@ -804,6 +815,14 @@
           line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
   .sstate { flex: none; display: flex; align-items: center; gap: var(--s-2); padding: var(--s-3) var(--s-2) 0;
             font-size: var(--t-body); font-weight: var(--w-bold); }
+  /* the answers of "Test connection" (item 25): the dot of the sync control */
+  .sstate.bad .dot { background: var(--err); }
+  .sstate.off .dot { background: var(--ink-3); }
+  /* a field kept while passes carry its value (item 22): the box dims, its
+     label and its reason stay readable (items 26, 27) */
+  .field.off .fbox { opacity: var(--o-off); }
+  .fwhy { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+          line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
   .sacts { flex: none; display: flex; gap: var(--s-3); padding-top: var(--s-4); }
   .sacts .dbtn { flex: 1; }
   /* APP END */
@@ -831,17 +850,19 @@
 
   <p class="eyebrow">Design Reference · docs/references/settings.html</p>
   <h1>POI Tracker — Settings</h1>
-  <p class="meta"><b>v0.10 — 2026-10-13.</b> Settings on the canon after the user's five
+  <p class="meta"><b>v0.11 — 2026-10-13.</b> Settings on the canon after the user's five
      decisions: the gear opens it (item 73), a city is put in use from its page (item 21), a route
      has its own page and loads from the sheet when it is added (item 22), and the dialogs name
      the passes they would lose (items 18, 24). Every value inside the frames is a token of
-     <b>_tokens.css v0.11</b> and every rule follows <b>screens.md v0.37</b>. The shell (top bar,
-     POI column, presets, drag corner, light and dark) is that of <b>main-screen.html v0.26</b>,
+     <b>_tokens.css v0.11</b> and every rule follows <b>screens.md v0.39</b>. The shell (top bar,
+     POI column, presets, drag corner, light and dark) is that of <b>main-screen.html v0.27</b>,
      copied unchanged: presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b>, <b>1333 × 800</b> and <b>1000 × 600</b>. Every frame also drags at its
      bottom-right corner. In portrait Settings is one column that drills down, in landscape the
-     list stays beside the page (item 74). Nine states, A to I. Graz, Linz and the R20891 codes
-     are sample data. Every text in the sheet reads at 4.5:1 or more in both themes (v0.10).</p>
+     list stays beside the page (item 74). Ten states, A to J. Graz, Linz and the R20891 codes
+     are sample data. Every text in the sheet reads at 4.5:1 or more in both themes (v0.10).
+     The consistency audit added frame J, the kept route code of frame E and the POI types in the
+     two dialogs (v0.11).</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>
@@ -912,7 +933,7 @@
         <div class="sgh">THIS TABLET</div>
         <div class="sgroup">
           <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
-          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>Chimes for passes and removals</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
         </div>
         <div class="sgap"></div>
         <div class="sgroup">
@@ -932,7 +953,7 @@
           <button class="srow" type="button"><span class="ol"><b>R20890-055</b><small>197 POIs · 197 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
           <button class="srow" type="button"><span class="ol"><b>R20890-056</b><small>197 POIs · 141 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
           <button class="srow" type="button"><span class="ol"><b>R20890-057</b><small>197 POIs · 88 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
-          <button class="srow" type="button"><span class="ol"><b>R20890-058</b><small>197 POIs · 79 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-058</b><small>197 POIs · 79 of 196 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
           <button class="srow" type="button"><span class="ol"><b>R20890-059</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
           <button class="srow" type="button"><span class="ol"><b>R20890-060</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
           <button class="srow" type="button"><span class="ol"><b>R20890-061</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
@@ -1012,7 +1033,7 @@
         <div class="sgh">THIS TABLET</div>
         <div class="sgroup">
           <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
-          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>Chimes for passes and removals</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
         </div>
         <div class="sgap"></div>
         <div class="sgroup">
@@ -1032,7 +1053,7 @@
           <button class="srow" type="button"><span class="ol"><b>R20890-055</b><small>197 POIs · 197 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
           <button class="srow" type="button"><span class="ol"><b>R20890-056</b><small>197 POIs · 141 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
           <button class="srow" type="button"><span class="ol"><b>R20890-057</b><small>197 POIs · 88 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
-          <button class="srow" type="button"><span class="ol"><b>R20890-058</b><small>197 POIs · 79 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-058</b><small>197 POIs · 79 of 196 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
           <button class="srow" type="button"><span class="ol"><b>R20890-059</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
           <button class="srow" type="button"><span class="ol"><b>R20890-060</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
           <button class="srow" type="button"><span class="ol"><b>R20890-061</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
@@ -1050,7 +1071,7 @@
         <p class="caption"><b>B</b> · The city in use</p>
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
-        <li><b>21</b> The city's page: its name with "In use", the Connection row with its state and the time of the last test, its routes with "N of 197 done", "Add route".</li>
+        <li><b>21</b> The city's page: its name with "In use", the Connection row with its state and the time of the last test, its routes with "N of T done", T counting the drivable POIs (item 46), "Add route".</li>
         <li><b>74</b> In portrait a back link "Settings" leads up. In landscape the list is beside the page, so that link is not shown.</li>
         <li><b>21, 26, 27</b> "Delete city" stays at the bottom, dimmed, with the reason "Switch to another city first".</li>
       </ul></aside>
@@ -1110,7 +1131,7 @@
         <div class="sgh">THIS TABLET</div>
         <div class="sgroup">
           <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
-          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>Chimes for passes and removals</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
         </div>
         <div class="sgap"></div>
         <div class="sgroup">
@@ -1137,7 +1158,7 @@
         </div>
         <div class="sgap"></div>
         <div class="sgroup">
-          <button class="srow danger" type="button"><span class="ol"><b>Delete city</b><small>Its routes, connection and History leave this tablet. The sheet stays as it is.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow danger" type="button"><span class="ol"><b>Delete city</b><small>Its routes, connection, POI types and History leave this tablet. The sheet stays as it is.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
         </div>
       </div>
   </div>
@@ -1208,7 +1229,7 @@
         <div class="sgh">THIS TABLET</div>
         <div class="sgroup">
           <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
-          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>Chimes for passes and removals</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
         </div>
         <div class="sgap"></div>
         <div class="sgroup">
@@ -1218,7 +1239,7 @@
       <div class="sdet">
         <button class="back" type="button"><svg><use href="#i-chev-left"/></svg>Vienna</button>
         <div class="dh"><h3>Connection · Vienna</h3></div>
-        <div class="sgh">THE TRACKER’S SCRIPT</div>
+        <div class="sgh">THE SHEET’S SCRIPT</div>
         <div class="sgroup">
           <div class="field"><label>Script URL</label><div class="fbox"><span class="fv">https://script.google.com/macros/s/…/exec</span></div></div>
           <div class="field"><label>Access key</label><div class="fbox"><span class="fv">••••••••••••</span><b>Show</b></div></div>
@@ -1235,6 +1256,7 @@
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>25</b> "Script URL" and "Access key" (masked, "Show"), the hint that both stay on this tablet, the state with the time of the last test, "Test connection" and "Save".</li>
+        <li><b>25</b> "Test connection" answers in that line: "Connected · tested 18:20" with the green dot, "Access key rejected" (frame J) or "No answer from this address. Check the Script URL." with the red dot, "No network" with the muted dot.</li>
         <li><b>29</b> "Send now" and "Load from sheet" are not here: they live in the Sync panel (item 72).</li>
         <li><b>74</b> A deeper page: the back link names the city, "Vienna", in both orientations.</li>
         <li><b>rule 5</b> The address shown is elided. No real address or key ever appears in a reference.</li>
@@ -1248,7 +1270,7 @@
 <header class="topbar">
   <span class="city">Vienna</span>
   <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
-  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="sync wait" type="button"><span class="dot"></span>2 passes waiting for network<svg class="ic"><use href="#i-chev-down"/></svg></button>
   <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
@@ -1295,7 +1317,7 @@
         <div class="sgh">THIS TABLET</div>
         <div class="sgroup">
           <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
-          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>Chimes for passes and removals</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
         </div>
         <div class="sgap"></div>
         <div class="sgroup">
@@ -1307,10 +1329,10 @@
         <div class="dh"><h3>R20890-058</h3></div>
         <div class="sgh">ROUTE</div>
         <div class="sgroup">
-          <div class="field"><label>Route code</label><div class="fbox"><span class="fv">R20890-058</span></div></div>
+          <div class="field off"><label>Route code</label><div class="fbox" aria-disabled="true"><span class="fv">R20890-058</span></div><span class="fwhy">2 passes not yet sent carry this code. It can change once they are in the sheet.</span></div>
           <div class="field"><label>Number of POIs</label><div class="fbox"><span class="fv">197</span></div></div>
         </div>
-        <p class="shint">The code must match the tab in Vienna’s tracker exactly, or passes have nowhere to go. Targets are set per POI on the working screen.</p>
+        <p class="shint">The code must match the tab in Vienna’s sheet exactly, or passes have nowhere to go. Targets are set per POI on the working screen.</p>
         <div class="sacts"><button class="dbtn primary" type="button">Save</button></div>
         <div class="sgap"></div>
         <div class="sgroup">
@@ -1325,7 +1347,10 @@
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>22</b> Its own page: "Route code" and "Number of POIs", the hint on the tab's name, "Save".</li>
+        <li><b>22, 26, 27</b> "Route code" stays, dimmed, with its reason: R20890-058 is a checked route and its 2 waiting passes carry this code, and events are never edited (data-model.md). A tab not found is renamed in the sheet instead (item 47). A change not accepted holds the code the same way.</li>
+        <li><b>22</b> A route not checked yet keeps its code editable: a code typed wrong offline is corrected here, and its waiting changes move to the new code. That changes no layout, so it is not drawn.</li>
         <li><b>24, 26, 27</b> "Delete route" stays, dimmed, with the reason: 2 passes not yet sent.</li>
+        <li><b>33</b> The sync control reads "2 passes waiting for network": the same 2 passes that both reasons name.</li>
         <li><b>46</b> Targets are set per POI on the working screen, never here.</li>
       </ul></aside>
     </section>
@@ -1384,7 +1409,7 @@
         <div class="sgh">THIS TABLET</div>
         <div class="sgroup">
           <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
-          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>Chimes for passes and removals</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
         </div>
         <div class="sgap"></div>
         <div class="sgroup">
@@ -1396,10 +1421,10 @@
         <div class="dh"><h3>New route · Vienna</h3></div>
         <div class="sgh">ROUTE</div>
         <div class="sgroup">
-          <div class="field bad"><label>Route code</label><div class="fbox"><span class="fv">R20890-602</span></div><span class="ferr">No tab named R20890-602 in Vienna’s tracker. Check the code.</span></div>
+          <div class="field bad"><label>Route code</label><div class="fbox"><span class="fv">R20890-602</span></div><span class="ferr">No tab named R20890-602 in Vienna’s sheet. Check the code.</span></div>
           <div class="field"><label>Number of POIs</label><div class="fbox"><span class="fv">197</span></div></div>
         </div>
-        <p class="shint">The code must match the tab in Vienna’s tracker exactly. The route loads from the sheet when it is added.</p>
+        <p class="shint">The code must match a tab in Vienna’s sheet exactly. The route loads from it when it is added.</p>
         <div class="sacts"><button class="dbtn primary" type="button">Add route</button></div>
       </div>
   </div>
@@ -1411,7 +1436,7 @@
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>22</b> A new route loads from the sheet when it is added. The mailbox answered "no-route", so the code field says so in the error colour and the route is not saved until the code is right.</li>
         <li><b>22</b> Without a network the route is saved as "Not checked yet" and loads when the network is back. That changes a line of text only, so it is not drawn.</li>
-        <li><b>30</b> A route that has never been loaded loads when it is first opened.</li>
+        <li><b>22</b> A route that has never been loaded loads when it is first opened.</li>
       </ul></aside>
     </section>
 
@@ -1469,7 +1494,7 @@
         <div class="sgh">THIS TABLET</div>
         <div class="sgroup">
           <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
-          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>Chimes for passes and removals</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
         </div>
         <div class="sgap"></div>
         <div class="sgroup">
@@ -1483,7 +1508,7 @@
         <div class="sgroup">
           <div class="field"><label>City name</label><div class="fbox"><span class="fv ph">As the crew calls it, e.g. Salzburg</span></div></div>
         </div>
-        <p class="shint">Next comes its connection: the address and the key of the script in the city’s tracker.</p>
+        <p class="shint">Then set up its connection from the city’s page.</p>
         <div class="sacts"><button class="dbtn primary" type="button">Save</button></div>
       </div>
   </div>
@@ -1552,7 +1577,7 @@
         <div class="sgh">THIS TABLET</div>
         <div class="sgroup">
           <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
-          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>Chimes for passes and removals</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
         </div>
         <div class="sgap"></div>
         <div class="sgroup">
@@ -1572,7 +1597,7 @@
           <button class="srow" type="button"><span class="ol"><b>R20890-055</b><small>197 POIs · 197 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
           <button class="srow" type="button"><span class="ol"><b>R20890-056</b><small>197 POIs · 141 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
           <button class="srow" type="button"><span class="ol"><b>R20890-057</b><small>197 POIs · 88 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
-          <button class="srow" type="button"><span class="ol"><b>R20890-058</b><small>197 POIs · 79 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>R20890-058</b><small>197 POIs · 79 of 196 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
           <button class="srow" type="button"><span class="ol"><b>R20890-059</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
           <button class="srow" type="button"><span class="ol"><b>R20890-060</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
           <button class="srow" type="button"><span class="ol"><b>R20890-061</b><small>197 POIs · 0 of 197 done</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
@@ -1588,7 +1613,7 @@
 <button class="scrim top" type="button" aria-label="Cancel"></button>
 <div class="dlg" role="alertdialog" aria-modal="true" aria-label="Erase everything on this tablet?">
   <div class="dtitle">Erase everything on this tablet?</div>
-  <div class="dbody">12 passes have not reached a sheet yet and will be lost. Cities, routes, connections and History leave this tablet. The sheets stay as they are.</div>
+  <div class="dbody">12 passes have not reached a sheet yet and will be lost. Cities, routes, connections, POI types and History leave this tablet. The sheets stay as they are.</div>
   <div class="dbtns"><button class="dbtn" type="button">Cancel</button><button class="dbtn danger" type="button">Erase and lose 12 passes</button></div>
 </div>
 </div>
@@ -1597,6 +1622,7 @@
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>18, 63</b> The dialog of item 63. 12 passes are still waiting, so the text gives their number and the red button names the loss.</li>
+        <li><b>18</b> The text names the POI types too: the sheet keeps only the targets, so No straight, No left and No right come back as Intersection after a load (data-model.md).</li>
         <li><b>76</b> Afterwards the tablet has no city: main-screen frame Q.</li>
         <li><b>28</b> The button is red, "Cancel" on the left.</li>
       </ul></aside>
@@ -1656,7 +1682,7 @@
         <div class="sgh">THIS TABLET</div>
         <div class="sgroup">
           <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
-          <div class="srow"><span class="ol"><b>Sound</b><small>A chime when a pass is recorded</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>Chimes for passes and removals</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
         </div>
         <div class="sgap"></div>
         <div class="sgroup">
@@ -1683,7 +1709,7 @@
         </div>
         <div class="sgap"></div>
         <div class="sgroup">
-          <button class="srow danger" type="button"><span class="ol"><b>Delete city</b><small>Its routes, connection and History leave this tablet. The sheet stays as it is.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow danger" type="button"><span class="ol"><b>Delete city</b><small>Its routes, connection, POI types and History leave this tablet. The sheet stays as it is.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
         </div>
       </div>
   </div>
@@ -1691,7 +1717,7 @@
 <button class="scrim top" type="button" aria-label="Cancel"></button>
 <div class="dlg" role="alertdialog" aria-modal="true" aria-label="Delete Graz?">
   <div class="dtitle">Delete Graz?</div>
-  <div class="dbody">Its 6 routes, its connection and its History leave this tablet. Every pass already reached the sheet, which stays as it is.</div>
+  <div class="dbody">Its 6 routes, its connection, its POI types and its History leave this tablet. Every pass already reached the sheet, which stays as it is.</div>
   <div class="dbtns"><button class="dbtn" type="button">Cancel</button><button class="dbtn danger" type="button">Delete</button></div>
 </div>
 </div>
@@ -1703,13 +1729,100 @@
       </ul></aside>
     </section>
 
+    <!-- ================= J · Connection, access key rejected ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="J"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync bad" type="button"><span class="dot"></span>Access key rejected<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(40 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
+    <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp">70 passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg>28 ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg>14 ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg>28</span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="sph"><span class="spt">STILL NEEDED</span></div>
+      <div class="need">
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
+        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      </div>
+      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
+      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
+    </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+    </div></div></div>
+    </div>
+    <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><div class="summary sumbar" data-summary></div></div>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+<button class="scrim" type="button" aria-label="Close Settings"></button>
+<div class="sheet set" role="dialog" aria-label="Settings">
+  <div class="shead"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><span class="stt"><span class="stitle">Settings</span></span></div>
+  <div class="sbody" data-depth="1">
+      <div class="slist">
+        <div class="sgh">CITIES</div>
+        <div class="sgroup">
+          <button class="srow on" type="button"><span class="ol"><b>Vienna</b><small>8 routes · Access key rejected</small></span><span class="inuse"><svg class="ic"><use href="#i-check"/></svg>In use</span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Graz</b><small>6 routes · Connected</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow" type="button"><span class="ol"><b>Linz</b><small>4 routes · Connection not set up</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+          <button class="srow add" type="button"><svg class="plus"><use href="#i-plus"/></svg><span class="ol"><b>Add city</b></span></button>
+        </div>
+        <div class="sgh">THIS TABLET</div>
+        <div class="sgroup">
+          <div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme"><button class="sg" type="button">System</button><button class="sg on" type="button">Light</button><button class="sg" type="button">Dark</button></div></div>
+          <div class="srow"><span class="ol"><b>Sound</b><small>Chimes for passes and removals</small></span><span class="switch" role="switch" aria-checked="true" aria-label="Sound"></span></div>
+        </div>
+        <div class="sgap"></div>
+        <div class="sgroup">
+          <button class="srow danger" type="button"><span class="ol"><b>Erase everything on this tablet</b><small>Passes not yet sent are lost. The sheets stay as they are.</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        </div>
+      </div>
+      <div class="sdet">
+        <button class="back" type="button"><svg><use href="#i-chev-left"/></svg>Vienna</button>
+        <div class="dh"><h3>Connection · Vienna</h3></div>
+        <div class="sgh">THE SHEET’S SCRIPT</div>
+        <div class="sgroup">
+          <div class="field"><label>Script URL</label><div class="fbox"><span class="fv">https://script.google.com/macros/s/…/exec</span></div></div>
+          <div class="field bad"><label>Access key</label><div class="fbox"><span class="fv">••••••••••••</span><b>Show</b></div></div>
+        </div>
+        <p class="shint">Both stay on this tablet only. Apps Script gives the address when the script is deployed.</p>
+        <div class="sstate bad"><span class="dot"></span>Access key rejected</div>
+        <div class="sacts"><button class="dbtn" type="button">Test connection</button><button class="dbtn primary" type="button">Save</button></div>
+      </div>
+  </div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>J</b> · Connection, access key rejected</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>25</b> "Test connection" answered "Access key rejected" with the red dot: the address answers, the key is not the script's. The Access key field takes the error colour's border, as a field with a problem does (frame F).</li>
+        <li><b>72</b> The same state reaches the sync control, "Access key rejected", and Vienna's row in the list, so it shows wherever the city is named. Passes wait on this tablet meanwhile.</li>
+        <li><b>25</b> The other answers: "Connected · tested 18:20" with the green dot, "No answer from this address. Check the Script URL." with the red dot, "No network" with the muted dot.</li>
+        <li><b>rule 5</b> The address shown is elided. No real address or key ever appears in a reference.</li>
+      </ul></aside>
+    </section>
+
   </div>
 
 <script>
 /* Checking-tool script (screens.md item 54) and sample-data generator.
    It fills the repeated markup of every frame (mini-map squares, POI rows,
    rail labels, grid tiles, the bottom summary) from one fixed table, so all
-   nine frames show the same route. No randomness: the same picture on
+   ten frames show the same route. No randomness: the same picture on
    every load. It also wires the presets, the drag corner and the theme
    switch. Nothing here runs in the app. */
 (function () {
@@ -1755,9 +1868,10 @@
     if (base === 'row' && s === 'part') s = '';
     return base + (s ? ' ' + s : '') + (p.n === active ? ' active' : '');
   }
-  var done = 0, togo = 0, poisDone = 0, errs = 0;
+  var done = 0, togo = 0, poisDone = 0, errs = 0, drivable = 0;
   pois.forEach(function (p) {
     done += Math.min(p.c, p.T); togo += Math.max(0, p.T - p.c);
+    if (p.T) drivable += 1;
     if (p.T && p.c >= p.T) poisDone += 1;
     if (p.err) errs += 1;
   });
@@ -1786,16 +1900,16 @@
     if (finger) rail += '<div class="finger" style="' + railTop(+finger) + '" aria-hidden="true"></div>';
     var bubble = finger ? '<div class="bubble" style="' + railTop(+finger) + '" aria-hidden="true">' + finger + '</div>' : '';
     col.innerHTML = '<button class="mmap" type="button" aria-label="Open the grid of all POIs"><span class="mm"><span class="dots">' + dots +
-      '</span><span class="mcap"><span>' + poisDone + ' of ' + N + ' done</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></span>' +
-      '<span class="mline"><svg class="gi"><use href="#i-grid"/></svg><span>' + poisDone + ' of ' + N + '</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></button>' +
+      '</span><span class="mcap"><span>' + poisDone + ' of ' + drivable + ' done</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></span>' +
+      '<span class="mline"><svg class="gi"><use href="#i-grid"/></svg><span>' + poisDone + ' of ' + drivable + '</span><span class="iw">Open' + ICON('i-chev-right') + '</span></span></button>' +
       '<div class="colbody"><div class="list">' + rows + '</div><div class="rail" aria-label="Jump through the POI list">' + rail + '</div>' + bubble + '</div>';
   });
   each('[data-summary]', function (el) {
-    var seg = ['Done ' + fmt(done), fmt(togo) + ' to go', poisDone + ' of ' + N + ' POIs done'];
+    var seg = ['Done ' + fmt(done), fmt(togo) + ' to go', poisDone + ' of ' + drivable + ' POIs done'];
     if (errs) seg.push(errs + (errs === 1 ? ' error' : ' errors'));
     el.innerHTML = seg.map(function (t, i) { return '<span' + (errs && i === seg.length - 1 ? ' class="err"' : '') + '>' + t + (i < seg.length - 1 ? ' ·' : '') + '</span>'; }).join(' ');
   });
-  each('[data-donecount]', function (el) { el.textContent = poisDone + ' of ' + N + ' done'; });
+  each('[data-donecount]', function (el) { el.textContent = poisDone + ' of ' + drivable + ' done'; });
   each('.grid[data-active]', function (g) {
     var active = +g.getAttribute('data-active'), cells = '';
     pois.forEach(function (p) {

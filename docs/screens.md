@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.35 — 2026-10-11
+v0.39 — 2026-10-13
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -172,13 +172,37 @@ sync control's words for a removal and a refused pass, the reason
 lines of a refused event, the empty list and the end of the list
 (items 12, 33, 45, 47, 48). A missing route or POI row names the tab,
 as Settings does.
+v0.39 2026-10-13 — the consistency audit and the user's six decisions.
+A pass keeps the route and POI it was recorded with, so a missing tab or
+POI row is fixed in the sheet, and a checked route keeps its code while
+its changes wait or were refused. A route not checked yet keeps its code
+editable, and its waiting changes move to the new code (items 22, 24,
+47). Nothing waiting or not accepted ever leaves History, and its limit
+of 3,000 counts passes and removals only (item 48). A refused removal
+and a type change have rows of their own in History, and the sync
+control has words for both (items 12, 13, 33, 47, 72). A rejected
+access key has a state of its own (items 16, 20, 21, 25, 72). A load
+leaves alone a type change that waits or was refused (item 30). Undo
+last skips a pass that History is handling (item 9). The interface says
+"sheet", never "tracker" (intro). Also fixed from the audit: this
+header, the intro's panels, items 18, 32, 46, 54, 61, 63, 67, 70 and
+the note under the states not drawn.
 -->
 
-The app is one working screen plus two slide-in panels, on a tablet held
-either way. Its size and layout follow "Screen size, orientation and
-layout" below. All UI copy is English, values from the user's spreadsheet
-included: the interface describes such a value in English and never quotes
-it ("The sheet will flag it as over target", not the sheet's own word).
+The app is one working screen, on a tablet held either way. History
+covers its main area (item 61), Settings and the grid of all POIs cover
+the whole screen (items 59, 74), and the type, route and Sync menus open
+under their controls (items 60, 66, 72). Its size and layout follow
+"Screen size, orientation and layout" below. All UI copy is English,
+values from the user's spreadsheet included: the interface describes
+such a value in English and never quotes it ("The sheet will flag it as
+over target", not the sheet's own word).
+Words on screen: "sheet" is the city's Google Sheets file, which these
+documents call the tracker ("in the sheet", "Vienna’s sheet", "Load from
+sheet"). A "tab" is one route's page in it ("No tab named R20890-602").
+A "change" is a pass, a removal or a type change ("2 changes not
+accepted"). The word "tracker" stays in these documents and never
+appears on screen. An apostrophe on screen is the typographic one (’).
 
 ## Screen size, orientation and layout (applies to every screen)
 49. The user's tablet, measured on 2026-10-05 with tools/viewport.html:
@@ -228,10 +252,6 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     rules the app will use (CSS container queries). A reference is drawn
     at the user's full screen and checked at the minimum sizes. The frame
     and its buttons are a checking tool and never appear in the app.
-   The references drawn before v0.25 (main-screen.html v0.17,
-   settings.html v0.8, history.html v0.7) are still fixed 1000 × 600
-   pictures. Their meta lines describe the frame they were drawn at and
-   stay until each reference is redrawn.
 70. Compact step. When the app is less than 700px tall (the 1000 × 600
     minimum, and the user's tablet in landscape inside a Chrome tab at
     1333 × 680), display-only text shrinks so more fits: the big POI
@@ -239,7 +259,7 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     --t-small, the values in the "Still needed" tiles and the side chips
     --t-label. The mini-map becomes a one-line button at the top of the
     column: the Lucide layout-grid icon, the count of finished POIs
-    ("79 of 197") and "Open", as tall as a tap target, so the column
+    ("79 of 196") and "Open", as tall as a tap target, so the column
     shows more POI rows. Discs and every tap target keep their size,
     since they are what the passenger hits in a moving car. The compass
     takes --compass-compact (item 19).
@@ -272,7 +292,7 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     POI column 208px, text 14 / 17 / 19px, POI numbers in the column
     23px, titles 26px, the big POI number 92px, a block gap of 18px,
     maneuver discs 118px and side discs 92px set 124px from the centre.
-    The values live in docs/references/_tokens.css (v0.6), and item 52
+    The values live in docs/references/_tokens.css, and item 52
     keeps them fixed on every screen.
 68. Every colour, font size and weight, size, spacing, radius, opacity,
     shadow and motion value of the app screen comes from
@@ -344,10 +364,10 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     stray touch while driving cannot change a type. A change with
     consequences for passes already recorded asks first (item 64). The
     counter beside the number carries no chevron.
-61. In portrait the History panel covers the main area while the POI
-    column stays live beside it, so item 44 holds unchanged. The compass
-    keeps its place at the top right of the main area in both layouts
-    (item 19).
+61. History covers the main area in both layouts, the compass and the
+    action bar included, while the POI column stays live beside it, so
+    item 44 holds unchanged. In portrait the summary under the main area
+    keeps its place.
 
 ## Working screen — left
 1. Active city and route picker, side by side. The city name is always
@@ -396,6 +416,10 @@ it ("The sheet will flag it as over target", not the sheet's own word).
    pressed repeatedly. Each press asks first (item 63). A pass still
    waiting is dropped from the queue. A pass already in the sheet has a
    removal queued for it, exactly as History does.
+   Undo last acts on the most recent pass that counts. It skips a pass
+   that was not accepted and a pass whose removal already waits or was
+   not accepted, since History handles those (items 13, 47), so a pass
+   never gets a second removal.
    The button is dimmed only on a POI this tablet has never written to —
    a one-time state on a route filled in by hand before the app was used.
 10. A POI that has reached its target, or has a spreadsheet error, has
@@ -465,7 +489,9 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     share again. If a share cannot be reached in the field, the type is
     changed instead. Approach sides have no limit. A not-drivable POI has
     its discs locked at once with a caption, is never counted among POIs
-    "to go", and must read as neither done nor in error. New POIs start
+    "to go", is left out of the route's count of POIs ("79 of 196 done"
+    on a route of 197 with one not drivable), and must read as neither
+    done nor in error. New POIs start
     as Intersection. "Only Left" and "only Right" are not types: they are
     too rare to add.
 62. Sound and motion. Recording a pass plays a short rising two-note
@@ -497,12 +523,26 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     "maneuver + side". The time sits right-aligned in its slot. Each row
     ends with its state: "Waiting" and "Removal waiting" with the dot in
     the warning colour, "Sent" quiet, "Not accepted" in the error colour.
+    A type change that sent a target event (item 64) has a row of its
+    own, "Type: Straight only", with the POI number in Route scope. It
+    reads "Waiting" while it waits and leaves the list once it is in the
+    sheet, since the type itself is stored apart (item 48). A refused one
+    reads "Not accepted" (item 47). A waiting type change carries no
+    button: it is undone from the type pill, and choosing the old type
+    again drops it (data-model.md). Where the slot is narrow the type's
+    name wraps under "Type:".
 13. Every pass has "Delete", which asks first (item 63). A pass still
     waiting on the tablet is removed outright. A pass already in the
     sheet stays in the list, struck through and labelled "Removal
     waiting" with the warning-colour dot of a waiting pass, only until
     its removal has been delivered. Then it leaves the list. A line
-    above the list counts the removals still queued.
+    above the list counts the removals still queued, "1 removal waiting
+    to be sent", whatever holds them up. The sync control names the
+    cause (items 33, 72). A removal the mailbox refused keeps the row
+    struck through and reads "Not accepted" in the error colour, with
+    the reason, "Send again" and "Cancel removal". "Cancel removal" asks
+    nothing: the pass returns to "Sent", since nothing changed in the
+    sheet (history.html frame I).
 14. Passes entered earlier by hand in the spreadsheet are not shown — they
     are corrected in the spreadsheet.
 38. A pass that has already reached the sheet can still be deleted here;
@@ -524,36 +564,55 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     with one line naming how many passes reached the sheet by hand and
     that they are corrected in the sheet.
 47. An event the mailbox refused stays on the tablet as "rejected", with
-    the mailbox's reason. History shows it in its row, and the working
-    screen's sync control counts rejected events alongside waiting ones.
-    A refused pass offers two actions in its row, as Apple's Messages
-    offers "Try Again" on a message that was "Not Delivered". "Send
-    again" queues the same event once more, for when its cause has been
-    fixed in the sheet: the mailbox keeps no trace of a refused event, so
-    it applies once. "Delete" drops it from this tablet after the dialog
-    of item 63, and nothing is sent, since nothing reached the sheet. The
-    sync control reads "1 pass not accepted" with its dot in the error
-    colour. The reason line under the row, by the mailbox's code:
-    text-in-cell "The sheet has text in a cell this pass adds to. Fix
-    the cell, then send again." no-route "Vienna’s tracker has no tab
-    named R20890-058. Check the route code in Settings, then send
-    again." no-poi "Tab R20890-058 has no row for POI 136. Check the
-    number of POIs in Settings, then send again." below-zero, which only
-    a removal can meet, "The sheet's count is already 0, so there is
-    nothing left to remove." bad-request and bad-target "The tracker
-    could not read this change. Send it again or delete it." error "The
-    tracker could not write this change. Send it again." The look of
-    the row is drawn in history.html.
-48. History holds the newest 3,000 events this tablet recorded. Older
-    delivered events drop off the list; nothing still waiting is ever
-    dropped, whatever its age. Under the last row: "This tablet keeps
-    its newest 3,000 passes and removals. Older sent ones are no longer
-    listed."
+    the mailbox's reason, and is never trimmed (item 48). History shows
+    it in its row, and the working screen's sync control counts rejected
+    events alongside waiting ones. A refused pass offers two actions in
+    its row, as Apple's Messages offers "Try Again" on a message that was
+    "Not Delivered". "Send again" queues the same event once more, for
+    when its cause has been fixed in the sheet: the mailbox keeps no
+    trace of a refused event, so it applies once (data-model.md
+    "Mailbox" names the one gap). "Delete" drops it from
+    this tablet after the dialog of item 63, and nothing is sent, since
+    nothing reached the sheet. A refused removal offers "Send again" and
+    "Cancel removal" (item 13). A refused type change offers "Send again"
+    and "Cancel change", which puts the old type back without a dialog,
+    since nothing changed in the sheet. When putting the old type back
+    has a consequence of item 64 for passes recorded since, the dialog of
+    item 64 asks first. An event is never edited (data-model.md): it
+    keeps the route and the POI it was recorded with, so its cause is
+    fixed in the sheet. The one exception is a route not checked yet,
+    whose code can still be corrected in Settings (item 22). The sync control reads "1 pass not accepted", "1 removal
+    not accepted" or "1 type change not accepted", and "2 changes not
+    accepted" when they are mixed, with its dot in the error colour. The
+    reason line under the row, by the mailbox's code: text-in-cell "The
+    sheet has text in a cell this pass adds to. Fix the cell, then send
+    again." no-route "Vienna’s sheet has no tab named R20890-058. Rename
+    the route’s tab to R20890-058, then send again.", and on a route not
+    checked yet "Vienna’s sheet has no tab named R20890-085. Correct the
+    route code in Settings." no-poi "Tab
+    R20890-058 has no row for POI 136. Add the row in the sheet, then
+    send again, or delete this pass." below-zero, which only a removal
+    can meet, "The sheet’s count is already 0, so there is nothing left
+    to remove." bad-request and bad-target "The sheet could not read this
+    change. Send it again or delete it." error "The sheet could not write
+    this change. Send it again." On a removal or a type change the words
+    follow its own row: "this removal takes from" for "this pass adds
+    to", and "or cancel the removal" or "or cancel the change" for "or
+    delete it" and "or delete this pass". The look of the rows is drawn
+    in history.html (frames F and I).
+48. History holds the newest 3,000 passes and removals this tablet
+    recorded. Older delivered ones drop off the list. Nothing waiting or
+    not accepted is ever dropped, whatever its age. Type changes are not
+    counted: a delivered one leaves the tablet at once, since the type
+    itself is stored apart (data-model.md). Under the last row: "This
+    tablet keeps its newest 3,000 passes and removals. Older sent ones
+    are no longer listed."
 
 ## Connection, sync status and tablet data
 16. Sync status is always visible on the working screen and carries a
     timestamp: "All sent · 12:41", "12 passes waiting for network", "No
-    connection". Tapping it opens the Sync panel of item 72 under it,
+    connection", "Access key rejected". Tapping it opens the Sync panel
+    of item 72 under it,
     and its chevron points down, up while the panel is open. Nothing is
     ever lost while it waits.
     Timestamps show the time alone for today and the date with the time
@@ -562,18 +621,34 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     and is built like the type menu (item 60). A small title reads "SYNC"
     and the city. Under it the state in words beside the sync control's
     dot ("All sent", "2 passes waiting for network", "1 pass not
-    accepted", "No connection", "Connection not set up") with one line:
-    the time of the last send, or what happens next. Then "Send now" and
-    "Load from sheet" (items 29, 30), the latter with the route and the
-    time of the last load. A control that cannot act stays in place,
-    dimmed, and its line names the reason: "Nothing to send", "No
-    network", "Connection not set up" (items 26, 27). Last comes
-    "Connection", which opens the city's Connection screen (item 25), or
-    "Set up connection" while there is none. When the mailbox refused
-    passes, a row "Show in History" sits right under the state and opens
-    History for the whole route, where each refused pass offers "Send
-    again" and "Delete" (item 47). The panel closes like a menu (item
-    66) and never sends or loads by itself.
+    accepted", "No connection", "Connection not set up", "Access key
+    rejected") with one line: the time of the last send, or what happens
+    next. Then "Send now" and "Load from sheet" (items 29, 30), the
+    latter with the route and the time of the last load. A control that
+    cannot act stays in place, dimmed, and its line names the reason:
+    "Nothing to send", "No network", "Connection not set up", "Access key
+    rejected" (items 26, 27). Last comes "Connection", which opens the
+    city's Connection screen (item 25), or "Set up connection" while
+    there is none. When the mailbox refused passes, removals or type
+    changes, a row "Show in History" sits right under the state and
+    opens History for the whole route, where each refused row offers
+    "Send again" and its "Delete" or "Cancel" (item 47). Its line names
+    what is left to do: "1 pass to fix or delete", "1 removal to fix or
+    cancel", "1 type change to fix or cancel", "2 changes to fix". The
+    panel closes like a menu (item 66) and never sends or loads by
+    itself.
+    When the tracker's script answers "auth", the access key saved on
+    this tablet is not the script's. The control reads "Access key
+    rejected" with its dot in the error colour, and the line under the
+    state reads "The sheet’s script refused the key. Passes wait on this
+    tablet until it is fixed." Right under the state a row "Fix the
+    access key", with the number of passes waiting, opens the city's
+    Connection page (item 25). Meanwhile the tablet stops sending on its
+    own. Saving the connection, or a test that connects, clears the
+    state and sending starts again at once. If the next send is refused
+    the same way, the state comes back. A "busy" answer (another send
+    holds the script) is never shown: the app tries again by itself
+    (main-screen frame R).
 17. Theme: System, Light or Dark, a segmented control under "This
     tablet" in Settings (item 74).
 65. Sound: on / off, on by default, a switch under "This tablet". It
@@ -583,8 +658,11 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     Settings list, in red (item 28). It asks first with the dialog of
     item 63. When passes have not reached a sheet yet, the dialog gives
     their number and the red button names the loss: "Erase and lose 12
-    passes". The spreadsheets are not touched. Afterwards the tablet has
-    no city (item 76).
+    passes". The text names what leaves the tablet: cities, routes,
+    connections, POI types and History. The POI types are lost for good,
+    since the sheet keeps only the targets (data-model.md). The
+    spreadsheets are not touched. Afterwards the tablet has no city
+    (item 76).
 
 ## "Settings" panel — cities and routes
 74. Settings is a sheet over the whole screen, as the grid of all POIs
@@ -599,14 +677,18 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     row (item 40). With nothing chosen, the city in use is shown there.
     A city's page needs no back link in landscape, the list is beside it.
 20. A list of cities under "CITIES". Each row: the city name, how many
-    routes it holds and whether its connection is set up. The city in
+    routes it holds and the state of its connection, in the words of
+    the city's page (item 21). The city in
     use carries an "In use" chip. Tapping a row opens that city. "Add
     city" ends the list (item 75).
 75. "Add city" opens a page with the city's name only. After "Save" the
     city's page opens, its connection not set up, and its "Connection"
     row leads to the Connection page (item 25).
 21. City page: the city name, then a single "Connection" row with the
-    status (connected and when it was last tested, or not set up) that
+    status ("Connected · tested 18:20", "Not tested yet", "Access key
+    rejected", "No answer from this address" after a failed test, or
+    "Connection not set up", while a test without a network changes
+    nothing) that
     opens the Connection page, then the city's routes and "Add route".
     A city not in use shows "Use this city" beside its name, with one
     line under it: the working screen switches to that city and opens
@@ -621,23 +703,46 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     set per POI from the working screen (item 46). A new route loads
     from the sheet at once (item 30). The mailbox answers "no-route" for
     a tab it cannot find, so the load also checks the code: the field
-    says "No tab named R20890-602 in Vienna's tracker" and the route is
-    not saved until the code is right. Without a network the route is
-    saved as "Not checked yet" and loads when the network is back. A
-    route that has never been loaded loads when it is first opened.
-    "Delete route" sits at the bottom, in red.
+    says "No tab named R20890-602 in Vienna’s sheet. Check the code." and
+    the route is not saved until the code is right. Without a network,
+    or while the access key is rejected, the route is saved as "Not
+    checked yet" and loads when it can. A route that has never been
+    loaded loads when it is first opened.
+    A route is checked once its first load succeeds or its first change
+    reaches the sheet. Until then its code stays editable, even with
+    changes waiting or not accepted: a code typed wrong offline is
+    corrected here, and the route's waiting and refused changes move to
+    the new code and go out on their own (data-model.md). Once the route
+    is checked its code is proven, and while any change of the route
+    waits or was not accepted "Route code" is dimmed with its reason: "2
+    passes not yet sent carry this code. It can change once they are in
+    the sheet." The reason names what waits ("1 type change not yet sent
+    carries this code"), and for a refused one it reads "1 change not
+    accepted carries this code. Fix it in History first." Those changes
+    keep the code they were recorded with, because events are never
+    edited (data-model.md), so a tab the mailbox cannot find is renamed
+    in the sheet instead (item 47). "Delete route" sits at the bottom, in
+    red.
 23. Adding a city or a route never touches any spreadsheet; the tracker
     for a new city is created by the user in Google Sheets first.
 24. Deleting a city asks first with the dialog of item 63: its routes,
-    its connection and its History leave this tablet, and the sheet
-    stays as it is. When some of its passes have not reached the sheet,
-    the dialog gives their number and the red button reads "Delete and
-    lose 4 passes". Deleting a route is refused while that route holds
-    undelivered passes: the control stays, dimmed, with the reason.
+    its connection, its POI types and its History leave this tablet, and
+    the sheet stays as it is. When some of its passes have not reached
+    the sheet, the dialog gives their number and the red button reads
+    "Delete and lose 4 passes". Deleting a route is refused while any
+    change of that route waits or was not accepted: the control stays,
+    dimmed, with the reason, "2 passes not yet sent. Delete works once
+    they are in the sheet." (naming what waits, as item 22 does) or "1
+    change not accepted. Fix it in History first."
 25. Connection screen, one per city: "Script URL" (the address Apps Script
     returns after deployment) and "Access key" (masked), with the hint
     that both are stored on this tablet only, plus "Test connection" and
-    "Save". The word "Mailbox" never appears in the interface.
+    "Save". The word "Mailbox" never appears in the interface. "Test
+    connection" answers in one line under the fields: "Connected · tested
+    18:20" with the green dot, "Access key rejected" or "No answer from
+    this address. Check the Script URL." with the red dot, and "No
+    network" with the muted dot. A rejected key also gives the Access key
+    field the error colour's border (settings.html frame J).
 29. "Send now" and "Load from sheet" live in the Sync panel (item 72),
     with the time of the last successful send and the last load, and
     nowhere else. Sending is automatic whenever the network is up. The
@@ -646,7 +751,10 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 30. "Load from sheet" replaces the active route's counts and targets with
     what the tracker currently holds. Passes still waiting on the tablet
     are kept and sent as usual: they are not in the sheet yet, so the
-    loaded numbers plus the waiting passes are exactly right.
+    loaded numbers plus the waiting passes are exactly right. A type
+    change that waits or was not accepted is kept the same way: the POI
+    keeps its new type on this tablet until the change is in the sheet or
+    cancelled (item 47), and the next load then agrees with the sheet.
 
 ## Control states (applies to every screen)
 26. A control that is unavailable keeps its normal colour and is dimmed,
@@ -668,10 +776,17 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     and Google share. A dialog sits in the middle of the screen over a
     dimmed background. Its title names the action: "Remove the last
     pass?", "Delete this pass?", "Change POI 122 to Straight only?". A
-    removal shows the pass itself (POI, maneuver, side, time) and one
-    line on what happens: a waiting pass is simply dropped from this
-    tablet, a pass already in the sheet gets a removal sent with the
-    next sync. Two buttons side by side: "Cancel" on the left, the action
+    removal shows the pass itself in a chip (POI, maneuver, side, time).
+    The chip names the side with "from" ("Left from South"), since it
+    stands alone there, while a row of History names the side alone
+    (item 12). One line says what happens: a waiting pass is simply
+    dropped from this tablet, a pass already in the sheet gets a removal
+    sent with the next sync, and a refused pass, which never reached the
+    sheet, is dropped like a waiting one ("The sheet refused it, so it is
+    simply dropped from this tablet."). A waiting pass that turns out to
+    have reached the sheet while the dialog was open gets a removal
+    instead, and History shows it as "Removal waiting" (data-model.md).
+    Two buttons side by side: "Cancel" on the left, the action
     as a verb on the right ("Remove", "Delete", "Change"), never "OK" or
     "Yes". A removing button is red (item 28). A type change button keeps
     the ordinary dark style, since nothing is deleted. A tap outside the
@@ -689,12 +804,16 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     close. Confirmation dialogs keep "Cancel" (item 63).
 
 ## Working-screen states not drawn as separate reference screens
-32. Empty POI: counters read "0 of 70" and "70 to go", all mini counters
-    zero, the discs are live. Nothing else differs.
+32. Empty POI: the counter reads "0 of 70" and "70 to go". The "Still
+    needed" tiles show the full split of the type as "more" (28, 14 and
+    28 on an Intersection) over empty bars, the sides read zero and fade
+    (item 39), and the discs are live. Nothing else differs.
 33. Passes waiting: the sync control reads "N passes waiting for network"
     with the dot in the warning colour. A queued removal counts like a
-    waiting pass: "1 removal waiting for network". Everything else is
-    unchanged.
+    waiting pass: "1 removal waiting for network", and so does a type
+    change: "1 type change waiting for network", "3 changes waiting for
+    network" when they are mixed. "Send now" counts them all. Everything
+    else is unchanged.
 34. No connection: the sync control reads "No connection" with the dot in
     the muted colour. Nothing is lost meanwhile. A city whose connection
     is not set up yet reads "Connection not set up" with the same muted
@@ -718,7 +837,9 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     live, because undo follows what this tablet recorded, not the POI's
     progress. The sync control reads "N passes waiting for network".
    These states change a line of text or a colour, never the layout, and
-   so are specified here rather than drawn.
+   so are specified here rather than drawn. Items 35 and 76 are the
+   exceptions: they change the column and are drawn as main-screen
+   frames N and Q.
 
 Decided (v0.3): the passenger taps. Step-2 candidates: 3×4 grid (one tap
 per pass), "repeat last", GPS/auto-POI from GPX.

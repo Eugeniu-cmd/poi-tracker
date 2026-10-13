@@ -1,6 +1,6 @@
 # Data model
 
-v0.10 — 2026-10-06
+v0.11 — 2026-10-13
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -36,6 +36,21 @@ lives on the tablet only and the tracker keeps only the target, so the
 mailbox and the trackers do not change. A type change sends a target
 event only when the target changes. Loading from the sheet keeps a type
 that matches the loaded target.
+v0.11 2026-10-13 — the consistency audit and the user's six decisions.
+A rejected event is never trimmed, the limit of 3,000 counts passes and
+removals only, and a delivered target event leaves the tablet at once. A
+rejected event can be sent again or dropped. An event inside a push that
+has not been answered is never dropped. A pass has at most one removal
+that waits or was rejected.
+A target event keeps the type it replaced, on the tablet only. A route
+has an id on the tablet, and its code can change while the route is not
+checked yet: its waiting and rejected events are recorded again under
+the new code. A load keeps a type whose target event waits or was
+rejected. The mailbox's 'auth' answer stops sending until the connection
+is saved or tested again, 'busy' is retried silently. The mailbox must
+leave no Log row for a rejected event, which v1.3 can break on 'error'.
+The fields the screens need are listed. "Load from sheet" serves a new
+route too.
 -->
 
 ## Pass (one crossing of an intersection)
@@ -59,11 +74,46 @@ that matches the loaded target.
   deleted.
 - A target event carries target: 70, 40 or 0 — the POI's new target (see
   "Targets per POI").
+- On the tablet only, a target event also keeps fromType, the type it
+  replaced, so that "Cancel change" can put it back (screens.md item
+  47). fromType is never sent. A POI holds at most one target event that
+  waits or was rejected: a new type change drops it (but see the rule on
+  unanswered pushes below), and queues a new one only when the new
+  target differs from the baseline's target. The new one keeps the
+  dropped one's fromType.
+- On the tablet only, every event also keeps routeId, the id of its
+  route (see "Cities and routes"), so History and Undo last find a
+  route's events whatever its code. routeId is never sent. A new event,
+  a removal too, carries the route's code at the time it is recorded,
+  looked up by routeId.
 - Events are never edited. An event still waiting on the tablet may be
   dropped from the queue before delivery (it never reached the sheet, so
   there is nothing to reverse); a delivered event is never changed, only
   countered by a later event, and may be trimmed from the tablet by the
   History limit below.
+- A rejected event never reached the sheet either, so it may be dropped
+  the same way ("Delete", "Cancel removal", "Cancel change"). "Send
+  again" makes it a waiting event again with the same id, and the
+  mailbox applies it once, as long as it wrote no Log row for it (see
+  "Mailbox").
+- An event, once posted, is never dropped until an answer names it
+  (applied, duplicate or rejected), whatever happened to the push that
+  carried it: a push that timed out or lost the network is sent again
+  first. A Delete, Undo last, type change or code change that would
+  drop it waits for that answer, then applies to the result: a
+  delivered pass gets a removal, a rejected one is dropped. Until then
+  the screens show it as waiting.
+- A pass has at most one removal that waits or was rejected. Undo last
+  skips a pass that has one (screens.md item 9).
+- An event keeps its city, route and POI for good, so a rejection for a
+  missing tab or row is fixed in the tracker. The one exception is a
+  route not checked yet (see "Cities and routes"). When its code
+  changes, its waiting and rejected events are dropped and recorded
+  again under the new code, with new ids and their original times,
+  sides, maneuvers, targets and fromType. None of them reached the
+  sheet, so nothing is counted twice. Once the route is checked, its
+  code cannot change while any of its events waits or was rejected
+  (screens.md item 22).
 
 ## Tablet storage (localStorage)
 - baseline — per POI, per route, per city: the 7 counts and the target,
@@ -83,12 +133,21 @@ that matches the loaded target.
   History only and takes no part in the arithmetic.
 - Numbers on screen = baseline + sum of waiting pass events. Loading from
   the sheet replaces the baseline and cannot count anything twice,
-  because delivered events are already inside the sheet's numbers.
-- History limit: the tablet keeps the newest 3,000 events. Only delivered
-  or rejected events are ever trimmed, oldest first; a waiting event —
-  a pass or a removal — is never trimmed, whatever its age. If the
-  browser refuses to store more, the app trims delivered events beyond
-  the limit and says so, and never drops a waiting event.
+  because delivered events are already inside the sheet's numbers. A
+  rejected event takes no part, as if it were never recorded. The type
+  on screen, and the target that follows from it, is the stored type,
+  which a waiting or rejected target event has already changed.
+- History limit: the tablet keeps the newest 3,000 pass events (passes
+  and removals). Only delivered ones are ever trimmed, oldest first. A
+  waiting or rejected event is never trimmed, whatever its age. A target
+  event leaves the tablet as soon as it is delivered: the baseline then
+  holds the target, types holds the type, and History does not list
+  sent type changes. A delivered pass whose removal waits or was
+  rejected is not trimmed either. If the browser refuses to store more,
+  the app trims delivered events beyond the limit and says so, and never
+  drops a waiting or rejected event.
+- device: the city in use, Theme ('system', 'light' or 'dark', 'system'
+  by default) and Sound (on by default).
 - Empty storage = clean start; the app must work correctly in that
   state.
 
@@ -129,15 +188,29 @@ that matches the loaded target.
   A), 'text-in-cell' (one of the two cells holds text), 'below-zero',
   'bad-target' (not 70, 40 or 0), 'error' (anything else failed for
   that event; the rest of the batch still runs).
+- The mailbox must leave no Log row for an event it rejects, so that
+  "Send again" applies it once. Mailbox v1.3 writes the Log row before
+  the cells, so an 'error' while writing a cell can leave the row behind,
+  and the resend then answers 'duplicate' although the cells never
+  changed. To be fixed in the mailbox before chapter 6. The mailbox does
+  not check that a ref is removed only once: the tablet guarantees it
+  (see "Event").
 - A push waits up to 30 s for the script lock; if another push still
-  holds it → {ok:false, error:'busy'}, and the tablet retries later.
+  holds it → {ok:false, error:'busy'}, and the tablet retries a few
+  seconds later without telling the user.
 - POST {token, action:'pull', route} → {ok:true,
   counts:{poi:[N,S,W,E,L,St,R]}, targets:{poi:target}} — one route per
   call; a missing target cell reads as 70. A route with no sheet of that
   name → {ok:false, error:'no-route'}. Text in B..H reads as 0 and is not
   reported; column S of the sheet shows it, the answer does not.
 - POST {token, action:'ping'} → {ok:true, version}
-- Wrong token → {ok:false, error:'auth'}.
+- Wrong token → {ok:false, error:'auth'}. The tablet keeps every event
+  waiting, sets the city's keyRejected and shows "Access key rejected"
+  (screens.md item 72). While it is set, the tablet stops sending on its
+  own. Saving the connection, or a ping that answers ok ("Test
+  connection"), clears it and sending starts again at once. 'no-answer'
+  and 'offline' leave it set. A load that answers 'auth' leaves a new
+  route "Not checked yet".
 - GET → {ok:false, error:'use-post', version}.
 
 ## Sync
@@ -152,12 +225,14 @@ that matches the loaded target.
   2026-10-04: Log holds only tablet passes while B..H also holds
   hand-entered counts, so the two never match on a route started by hand,
   and column S already flags text, mismatched halves and overruns.
-- "Load from sheet" pulls one route — the active one — and replaces that
-  route's baseline (counts and targets) with what the tracker holds.
-  Passes still waiting on the tablet are kept and sent as usual: they
-  are not in the sheet yet, so the loaded numbers plus the waiting
-  passes are exactly right. Nothing is discarded and no warning is
-  needed.
+- "Load from sheet" pulls one route per call and replaces that route's
+  baseline (counts and targets) with what the tracker holds. The user
+  loads the active route from the Sync panel. A new route loads right
+  after it is added, and the 'no-route' answer keeps it from being
+  saved. A route never loaded loads when it is first opened. Passes
+  still waiting on the tablet are kept and sent as usual: they are not
+  in the sheet yet, so the loaded numbers plus the waiting passes are
+  exactly right. Nothing is discarded and no warning is needed.
 
 ## Heading (compass)
 - Two sources, because neither alone is trustworthy in a car:
@@ -175,11 +250,21 @@ that matches the loaded target.
   rest of the GPS work in step 2.
 
 ## Cities and routes
-- A city = { id, name, mailboxUrl, token, routes[] }. Every city has its
-  own Google tracker, so its own mailbox address and password.
-- A route = { code, poiCount }. Both are typed in by hand. The route code
-  must match the sheet name in that city's tracker exactly, or the mailbox
-  finds nothing to write to.
+- A city = { id, name, mailboxUrl, token, routes[], lastRoute, testedAt,
+  testResult, sentAt, keyRejected }. Every city has its own Google
+  tracker, so its own mailbox address and password. lastRoute is the
+  route the working screen opens when the city is put in use. testedAt
+  and testResult ('ok', 'auth', 'no-answer' or 'offline') record the
+  last "Test connection". sentAt is the time of the last successful
+  send. keyRejected is set by an 'auth' answer (see "Mailbox").
+- A route = { id, code, poiCount, checked, loadedAt }. code and
+  poiCount are typed in by hand. The route code must match the sheet
+  name in that city's tracker exactly, or the mailbox finds nothing to
+  write to. id is made on the tablet and never changes, and the tablet
+  keys every stored value of a route by it, never by its code. checked
+  is set by the route's first successful load or its first delivered
+  event. Until then the route reads "Not checked yet" and its code can
+  still change (see "Event"). loadedAt is the time of the last load.
 - The target per POI is not a route setting: see "Targets per POI".
 - Cities are never deleted automatically. Moving from one city to the next
   adds a city; the previous one keeps its routes and its baseline.
@@ -214,8 +299,10 @@ that matches the loaded target.
   through the same queue as passes, written by the mailbox into the
   tracker. A change between types with the same target (the four types
   at 70) sends no event.
-- Loading from the sheet keeps a stored type while its target equals the
-  tracker's. Otherwise the type follows the tracker's target: 70
+- Loading from the sheet keeps a stored type while a target event for
+  that POI waits or was rejected, since the tracker does not hold that
+  change yet. Otherwise it keeps a stored type while its target equals
+  the tracker's, and else the type follows the tracker's target: 70
   Intersection, 40 Straight only, 0 Not drivable. If the tablet's data is
   lost, No straight, No left and No right come back as Intersection and
   are set again. Counts and passes are not affected.
