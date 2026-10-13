@@ -166,6 +166,12 @@ the tablet and deleting a city name the passes they would lose on the
 red button (items 18, 24). A new city starts from its name (item 75),
 and a tablet without a city shows "Add your first city" (item 76). A tap
 outside an open menu only closes it (item 66).
+v0.38 2026-10-13 — the user approved the twelve wording proposals of
+history.html: the states of a pass row, the right-aligned time, the
+sync control's words for a removal and a refused pass, the reason
+lines of a refused event, the empty list and the end of the list
+(items 12, 33, 45, 47, 48). A missing route or POI row names the tab,
+as Settings does.
 -->
 
 The app is one working screen plus two slide-in panels, on a tablet held
@@ -488,7 +494,9 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 
 ## "History" panel
 12. Pass list: "POI" / "Route" scope control; each entry shows time and
-    "maneuver + side".
+    "maneuver + side". The time sits right-aligned in its slot. Each row
+    ends with its state: "Waiting" and "Removal waiting" with the dot in
+    the warning colour, "Sent" quiet, "Not accepted" in the error colour.
 13. Every pass has "Delete", which asks first (item 63). A pass still
     waiting on the tablet is removed outright. A pass already in the
     sheet stays in the list, struck through and labelled "Removal
@@ -511,7 +519,10 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 45. History lists only passes this tablet recorded. Numbers that reached
     the sheet by hand have no individual passes behind them — the sheet
     holds seven totals per POI — so they can be continued from, through
-    "Load from sheet", but never listed.
+    "Load from sheet", but never listed. A POI with no passes from this
+    tablet shows "No passes from this tablet" in the middle of the list,
+    with one line naming how many passes reached the sheet by hand and
+    that they are corrected in the sheet.
 47. An event the mailbox refused stays on the tablet as "rejected", with
     the mailbox's reason. History shows it in its row, and the working
     screen's sync control counts rejected events alongside waiting ones.
@@ -521,11 +532,23 @@ it ("The sheet will flag it as over target", not the sheet's own word).
     fixed in the sheet: the mailbox keeps no trace of a refused event, so
     it applies once. "Delete" drops it from this tablet after the dialog
     of item 63, and nothing is sent, since nothing reached the sheet. The
-    wording of the reasons and the look of the row are drawn in
-    history.html.
+    sync control reads "1 pass not accepted" with its dot in the error
+    colour. The reason line under the row, by the mailbox's code:
+    text-in-cell "The sheet has text in a cell this pass adds to. Fix
+    the cell, then send again." no-route "Vienna’s tracker has no tab
+    named R20890-058. Check the route code in Settings, then send
+    again." no-poi "Tab R20890-058 has no row for POI 136. Check the
+    number of POIs in Settings, then send again." below-zero, which only
+    a removal can meet, "The sheet's count is already 0, so there is
+    nothing left to remove." bad-request and bad-target "The tracker
+    could not read this change. Send it again or delete it." error "The
+    tracker could not write this change. Send it again." The look of
+    the row is drawn in history.html.
 48. History holds the newest 3,000 events this tablet recorded. Older
     delivered events drop off the list; nothing still waiting is ever
-    dropped, whatever its age.
+    dropped, whatever its age. Under the last row: "This tablet keeps
+    its newest 3,000 passes and removals. Older sent ones are no longer
+    listed."
 
 ## Connection, sync status and tablet data
 16. Sync status is always visible on the working screen and carries a
@@ -669,7 +692,9 @@ it ("The sheet will flag it as over target", not the sheet's own word).
 32. Empty POI: counters read "0 of 70" and "70 to go", all mini counters
     zero, the discs are live. Nothing else differs.
 33. Passes waiting: the sync control reads "N passes waiting for network"
-    with the dot in the warning colour. Everything else is unchanged.
+    with the dot in the warning colour. A queued removal counts like a
+    waiting pass: "1 removal waiting for network". Everything else is
+    unchanged.
 34. No connection: the sync control reads "No connection" with the dot in
     the muted colour. Nothing is lost meanwhile. A city whose connection
     is not set up yet reads "Connection not set up" with the same muted

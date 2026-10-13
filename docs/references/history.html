@@ -60,12 +60,18 @@
   v0.11 2026-10-12 — the shell and the sprite are copied again from
           main-screen.html v0.26 (screens.md v0.37): every frame's top
           bar carries the gear that opens Settings (item 73).
+  v0.12 2026-10-13 — the user approved the twelve proposals of the
+          maps (screens.md v0.38). Three are reworded: a missing route
+          or POI row names the tab, as Settings does, and says where to
+          fix it, and the end of the list counts passes and removals,
+          not "events". The maps now cite the items instead of
+          "proposal".
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.11</title>
+<title>POI Tracker — History Reference v0.12</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -867,12 +873,12 @@
      every pass this tablet recorded, newest first, with "Delete" on each, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
      "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.11</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.37</b>. The shell
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.38</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
      <b>main-screen.html v0.26</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Eight states,
-     A to H; wording the registry has not settled yet is tagged "proposal" in the maps.</p>
+     A to H. The twelve proposals of v0.8 are approved (v0.12, screens.md v0.38).</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>
@@ -932,7 +938,7 @@
         <li><b>41</b> Sub-header ranks its facts: the POI in an amber chip, the route and city as quiet context, the count of passes listed in a neutral chip. The title is in --t-row and the chips in --t-body, a step under the rows, so the rows lead (v0.9).</li>
         <li><b>13, 28</b> "Delete" on every pass, red text on the red tint at the right edge, apart from the routine controls; the filled red button stays in the dialog (item 63).</li>
         <li><b>33</b> Two newest passes "Waiting", the sync control reads "2 passes waiting for network" with its dot in the warning colour.</li>
-        <li><b>proposal</b> State labels: "Waiting" and "Removal waiting" with an amber dot (the amber text itself falls short of 4.5:1 at this size), "Sent" quiet, "Not accepted" in the error colour.</li>
+        <li><b>12, 13, 47</b> State labels: "Waiting" and "Removal waiting" with an amber dot (the amber text itself falls short of 4.5:1 at this size), "Sent" quiet, "Not accepted" in the error colour.</li>
         <li><b>44</b> The POI column stays live beside the panel, the active row amber: tapping another POI reloads the panel for it without closing. The panel never carries a second POI picker.</li>
         <li><b>61, 3</b> In portrait the panel covers the main area and the summary under it keeps its place; in landscape it covers the whole main area, action bar and compass included.</li>
         <li><b>14, 45</b> Footer: "History shows only what this tablet recorded".</li>
@@ -1001,7 +1007,7 @@
         <li><b>41</b> The route in the amber chip, the city as context, "2,184 passes" in the neutral chip. The title is in --t-row and the chips in --t-body, a step under the rows, so the rows lead (v0.9).</li>
         <li><b>12</b> The POI number leads each row in a fixed slot as wide as the widest number, digits right-aligned; the time slot fits a date and a time, right-aligned so the clock times line up.</li>
         <li><b>16</b> A pass from today shows the time alone, an older one the date and the time ("10.10 18:52"), as the timestamp rule says.</li>
-        <li><b>proposal</b> The time slot is right-aligned (the rule names the slot, not its alignment).</li>
+        <li><b>12</b> The time slot is right-aligned (the rule names the slot, not its alignment).</li>
       </ul></aside>
     </section>
 
@@ -1047,7 +1053,7 @@
         <li><b>13, 38</b> The 21:31 Straight · West pass was already in the sheet: it stays in the list struck through and labelled "Removal waiting" with the amber dot of a waiting pass, without buttons, until its removal is delivered. Then it leaves the list (v0.10).</li>
         <li><b>26</b> The deleted row is not dimmed: opacity marks an unavailable control, and this row is a state, not a control.</li>
         <li><b>13</b> A line above the list counts the removals still queued: "1 removal waiting to be sent".</li>
-        <li><b>proposal</b> The sync control reads "1 removal waiting for network" with its dot in the warning colour: a queued removal counts like a waiting pass (item 33).</li>
+        <li><b>33</b> The sync control reads "1 removal waiting for network" with its dot in the warning colour: a queued removal counts like a waiting pass (item 33).</li>
         <li><b>data-model</b> The waiting removal already counts: the neutral chip reads "40 passes" and POI 136's row in the column "30 to go".</li>
       </ul></aside>
     </section>
@@ -1195,13 +1201,13 @@
         <li><b>47</b> The newest pass was refused by the mailbox: its row grows to three lines, "Not accepted" in the error colour, the reason as a sentence, and the two actions "Send again" and "Delete" at the right edge, --s-2 apart, never on the line with the time.</li>
         <li><b>47</b> "Send again" queues the same event once more, for when its cause has been fixed in the sheet; "Delete" drops it from this tablet after the dialog, and nothing is sent.</li>
         <li><b>47</b> A refused pass does not count: the neutral chip stays "41 passes", as the counter's "41 of 70".</li>
-        <li><b>proposal</b> The sync control reads "1 pass not accepted" with its dot in the error colour.</li>
-        <li><b>proposal</b> text-in-cell: "The sheet has text in a cell this pass adds to. Fix the cell, then send again."</li>
-        <li><b>proposal</b> no-route: "The tracker has no sheet named R20890-058. Check the route code, then send again."</li>
-        <li><b>proposal</b> no-poi: "The sheet has no row for POI 136. Check the route, then send again."</li>
-        <li><b>proposal</b> below-zero (only a removal can meet it): "The sheet's count is already 0, so there is nothing left to remove."</li>
-        <li><b>proposal</b> bad-request and bad-target: "The tracker could not read this change. Send it again or delete it."</li>
-        <li><b>proposal</b> error: "The tracker could not write this change. Send it again."</li>
+        <li><b>47</b> The sync control reads "1 pass not accepted" with its dot in the error colour.</li>
+        <li><b>47</b> text-in-cell: "The sheet has text in a cell this pass adds to. Fix the cell, then send again."</li>
+        <li><b>47</b> no-route: "Vienna’s tracker has no tab named R20890-058. Check the route code in Settings, then send again."</li>
+        <li><b>47</b> no-poi: "Tab R20890-058 has no row for POI 136. Check the number of POIs in Settings, then send again."</li>
+        <li><b>47</b> below-zero (only a removal can meet it): "The sheet's count is already 0, so there is nothing left to remove."</li>
+        <li><b>47</b> bad-request and bad-target: "The tracker could not read this change. Send it again or delete it."</li>
+        <li><b>47</b> error: "The tracker could not write this change. Send it again."</li>
       </ul></aside>
     </section>
 
@@ -1234,7 +1240,7 @@
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>44</b> POI 139 chosen in the column, which keeps its place: the panel reloaded for it without closing.</li>
         <li><b>14, 45</b> POI 139's 12 passes were typed into the sheet by hand, so there are no individual passes behind them: nothing is listed, and they are corrected in the sheet.</li>
-        <li><b>proposal</b> Empty state in the middle of the list area: "No passes from this tablet" and "The 12 passes of POI 139 reached the sheet another way, typed in by hand. Correct them in the sheet."</li>
+        <li><b>45</b> Empty state in the middle of the list area: "No passes from this tablet" and "The 12 passes of POI 139 reached the sheet another way, typed in by hand. Correct them in the sheet."</li>
         <li><b>41</b> The neutral chip reads "0 passes". The title is in --t-row and the chips in --t-body, a step under the rows, so the rows lead (v0.9).</li>
       </ul></aside>
     </section>
@@ -1270,7 +1276,7 @@
     <div class="hr"><div class="hl1"><div class="htx"><span class="hn">4</span><span class="htm">02.10 17:07</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="hn">4</span><span class="htm">02.10 17:06</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="hn">3</span><span class="htm">02.10 17:05</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
-    <p class="hend"><span>This tablet keeps its newest 3,000 events.</span><span>Older sent passes are no longer listed.</span></p>
+    <p class="hend"><span>This tablet keeps its newest 3,000 passes and removals.</span><span>Older sent ones are no longer listed.</span></p>
   </div>
   <p class="hfoot">History shows only what this tablet recorded</p>
 </section>
@@ -1283,7 +1289,7 @@
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>48</b> The route scope scrolled to its end: the oldest rows, dated "02.10", are the oldest of the 3,000 events this tablet keeps.</li>
-        <li><b>proposal</b> Under the last row: "This tablet keeps its newest 3,000 events. Older sent passes are no longer listed."</li>
+        <li><b>48</b> Under the last row: "This tablet keeps its newest 3,000 passes and removals. Older sent ones are no longer listed."</li>
         <li><b>56</b> Scrolled to the end, the list still shows a whole row at its top edge and drops the fade, since no row is cut at the bottom.</li>
         <li><b>14, 45</b> The standard footer follows the list.</li>
       </ul></aside>
