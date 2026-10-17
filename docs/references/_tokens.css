@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.11 — 2026-10-11
+   v0.12 — 2026-10-17
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -50,6 +50,11 @@
    --compass-compact 96px, the old size, for a short screen. New
    --compass-n, the red of the letter N and of the needle's north end,
    and --compass-s, the blue of its south end, as a magnet is painted.
+   v0.12 2026-10-17 — a dedicated decision on the compass redesign
+   (screens.md v0.41, item 19): the compass is one arrow in the screen's
+   own two colours, its halves --disc and --side, on a --panel-raised
+   face with --shadow and a --line edge. --compass-n and --compass-s are
+   removed, since nothing uses them any more.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -85,8 +90,6 @@
   --panel-raised: #FFFFFF;
   --danger: var(--err);
   --on-danger: #FFFFFF;
-  --compass-n: #B42E26;
-  --compass-s: #1F5EFF;
   --shadow: 0 6px 20px rgba(50, 65, 120, 0.14);
   --shadow-lift: 0 10px 26px rgba(40, 50, 90, 0.26);
   --r-sm: 12px;
@@ -173,8 +176,6 @@
     --panel-raised: #303749;
     --danger: #D7373F;
     --on-danger: #FFFFFF;
-    --compass-n: #FF6B62;
-    --compass-s: #7FA2FF;
     --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
     --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
   }
@@ -211,8 +212,6 @@
   --panel-raised: #303749;
   --danger: #D7373F;
   --on-danger: #FFFFFF;
-  --compass-n: #FF6B62;
-  --compass-s: #7FA2FF;
   --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
   --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
 }

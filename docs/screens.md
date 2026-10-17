@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.40 — 2026-10-13
+v0.41 — 2026-10-17
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -189,6 +189,12 @@ header, the intro's panels, items 18, 32, 46, 54, 61, 63, 67, 70 and
 the note under the states not drawn.
 v0.40 2026-10-13 — mailbox v1.4: a second removal of the same pass is
 refused as already-removed, with its own reason line (item 47).
+v0.41 2026-10-17 — the compass redesign after the car tests of
+prototype v19.1. The compass is one arrow on a raised round face, its
+left half --disc like the maneuver discs and its right half --side like
+the side discs. No tail, no red and no blue. The dial stays fixed with
+N up, so the test of a turning dial is closed. The arrow stays pale
+while there is no heading (item 19).
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -433,18 +439,23 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     one gap under the top bar and flush with the main area's right edge,
     so it stands in the same place with the same air on every screen. In
     portrait the head keeps room for it and the type pill sits one gap
-    under it. It is a drawn widget (item 69): a ring with the letters N,
-    E, S and W inside, minor ticks every 30 degrees, four marks outside
-    the ring, and a needle with a red north end and a blue south end, as
-    a magnet is painted. The letter N is red too. It is 128px
+    under it. It is a drawn widget (item 69) on a raised round face
+    (--panel-raised, --shadow, a --line edge): minor ticks every 30
+    degrees, longer marks at N, E, S and W, and the four letters inside,
+    N heavy in --ink and the others in --ink-2. One arrow shows where the
+    car drives. Its left half is --disc, the colour of the maneuver
+    discs, and its right half is --side, the colour of the side discs. It
+    has no tail and nothing marks the side the car comes from: the
+    approach side is the one opposite the arrow. There is no red and no
+    blue, since red is the error colour and a red needle reads as north.
+    The arrow turns to the car's heading while the dial stays fixed with
+    N up. Until the sensors give a heading, and while the heading is only
+    a last known course, the arrow stays pale (--o-off). It is 128px
     (--compass), 144px on a landscape screen more than 700px tall
-    (--compass-wide) and 96px on a short screen (--compass-compact,
-    item 70). The needle turns to the car's heading while the ring stays
-    fixed. Whether the ring should turn instead, so that the letter at
-    the bottom names the approach side, is tested in the car with
-    tools/compass-prototype.html before chapter 6. The heading comes
-    from the tablet's sensors as data-model.md "Heading" describes.
-    Minimum gap between any two discs on the screen is 8px.
+    (--compass-wide) and 96px on a short screen (--compass-compact, item
+    70). The heading comes from the tablet's sensors as data-model.md
+    "Heading" describes. Minimum gap between any two discs on the screen
+    is 8px.
 39. The per-POI mini counters live in the "Still needed" card under the
     type pill. Its top row shows, per maneuver, what is still needed
     against the split of the POI's type (item 46): a large "12 more" and

@@ -78,12 +78,16 @@
   v0.14 2026-10-13 — mailbox v1.4 (screens.md v0.40): the map of frame F
           lists the reason line of already-removed, a second removal of
           a pass already removed.
+  v0.15 2026-10-17 — the compass redesign (main-screen.html v0.28,
+          screens.md v0.41, _tokens.css v0.12): the shell's compass
+          styles are copied again from main-screen v0.28. No frame draws
+          the compass, since the panel covers it (item 61).
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.14</title>
+<title>POI Tracker — History Reference v0.15</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -137,11 +141,11 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.27. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.28. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.11 or a calc() over
+     line height below is a var() from _tokens.css v0.12 or a calc() over
      them. Literal values are limited to 0, 1px hairlines, 50% for round
      shapes, percentages and fr of a layout, em, ch, lh and cap ratios of
      a token font size, keywords, SVG geometry, the 1200px breakpoint of
@@ -393,17 +397,24 @@
           line-height: var(--lh-tight); text-box: trim-both cap alphabetic; }
   .rest span { white-space: nowrap; }
   .rest.ok { color: var(--ok); font-weight: var(--w-bold); }
-  /* the compass (item 19): a drawn widget, its ring, letters and needle
-     in tokens; the needle's north end and the letter N share --compass-n */
+  /* the compass (item 19): a drawn widget on a raised round face, all in
+     tokens. One arrow shows where the car drives: its left half --disc,
+     the colour of the maneuver discs, its right half --side, the colour of
+     the side discs. The dial stays fixed with N up. */
   .compass { position: absolute; right: anchor(--main right); top: anchor(--main top);
-             width: var(--compass); height: var(--compass); color: var(--ink); z-index: 2; }
-  .compass .marks, .compass .ring { fill: none; stroke: var(--ink-2); }
+             width: var(--compass); height: var(--compass); border-radius: 50%;
+             background: var(--panel-raised); box-shadow: var(--shadow); z-index: 2; }
+  .compass .edge { fill: none; stroke: var(--line); }
   .compass .minor { fill: none; stroke: var(--ink-3); stroke-linecap: round; }
-  .compass text { font-size: var(--t-small); fill: var(--ink-2); font-weight: var(--w-bold); }
-  .compass .cn { fill: var(--compass-n); font-weight: var(--w-heavy); }
-  .compass .nn { fill: var(--compass-n); }
-  .compass .ns { fill: var(--compass-s); }
-  .compass .hub { fill: currentColor; }
+  .compass .major { fill: none; stroke: var(--ink-2); stroke-linecap: round; }
+  .compass text { font-size: var(--t-small); fill: var(--ink-2); font-weight: var(--w-bold);
+                  text-anchor: middle; dominant-baseline: central; }
+  .compass .cn { fill: var(--ink); font-weight: var(--w-heavy); }
+  .compass .halo { fill: none; stroke: var(--panel-raised); stroke-linejoin: round; }
+  .compass .dark { fill: var(--disc); }
+  .compass .amber { fill: var(--side); }
+  /* no heading yet, or only a last known course: the arrow stays pale */
+  .compass.idle .arrow { opacity: var(--o-off); }
 
   /* ---- type pill and its menu (items 46, 60, 69) ---- */
   .typewrap { anchor-name: --pill; }
@@ -884,15 +895,16 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.14 — 2026-10-13.</b> The consistency audit and the user's five decisions:
-     frame I shows a refused removal and a refused type change (items 13, 47). The History panel
+  <p class="meta"><b>v0.15 — 2026-10-17.</b> The compass of main-screen v0.28 reaches the shell's
+     styles, though no frame draws it (item 61). Frame I shows a refused removal and a refused
+     type change (items 13, 47). The History panel
      covers the main area beside the live POI column, in POI or Route scope, and lists
      every pass this tablet recorded and every type change not yet in the sheet, newest first, with "Delete" on each pass, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
-     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.11</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.40</b>. The shell
+     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.12</b>
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.41</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.27</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.28</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Nine states,
      A to I. The twelve proposals of v0.8 are approved (v0.12, screens.md v0.38).</p>
@@ -960,7 +972,7 @@
         <li><b>61, 3</b> In portrait the panel covers the main area and the summary under it keeps its place; in landscape it covers the whole main area, action bar and compass included.</li>
         <li><b>14, 45</b> Footer: "History shows only what this tablet recorded".</li>
         <li><b>56</b> The list shows a whole row at its top edge and fades the cut row at its bottom, like the POI column; rows are --row-h tall, as the POI rows beside them.</li>
-        <li><b>67, 68</b> Size C; every value inside the frame is a token; the shell is main-screen v0.27's.</li>
+        <li><b>67, 68</b> Size C; every value inside the frame is a token; the shell is main-screen v0.28's.</li>
       </ul></aside>
     </section>
 
@@ -1365,7 +1377,7 @@
 
 <script>
 /* Checking-tool script (screens.md item 54) and sample-data generator,
-   copied from main-screen.html v0.27 with two additions marked "History".
+   copied from main-screen.html v0.28 with two additions marked "History".
    It fills the repeated markup of every frame (mini-map squares, POI rows,
    rail labels, grid tiles, the bottom summary) from one fixed table, so all
    nine frames show the same route as main-screen. No randomness: the same picture on
