@@ -1,0 +1,2369 @@
+<!doctype html>
+<!--
+  POI Tracker — working prototype v19
+  One file, for the tablet. Open it in Chrome from GitHub Pages
+  (tools/poi-tracker-prototype-v19.html): a downloaded copy gets no
+  location, and the compass needs it.
+
+  The look is the approved references, copied, not redrawn:
+  - the app CSS of docs/references/main-screen.html v0.27 and the History
+    rules of docs/references/history.html v0.9, byte for byte
+  - docs/references/_tokens.css v0.11, inlined so the file works alone
+  - the Lucide sprite of main-screen.html
+  What this file adds is behaviour: sample routes, tapping passes, the
+  compass that blooms, undo and delete with their dialogs, History, the
+  type menu, the route menu, the grid, the rail, a simulated sync, and the
+  live compass from the tablet's sensors (data-model.md "Heading").
+  Nothing is sent anywhere and nothing is stored on the tablet. The
+  sensor log stays in memory until "Save sensor log" in Tools.
+
+  v17 2026-10-12 — first prototype on the canon: main-screen v0.24,
+          history v0.9, tokens v0.11, screens v0.35. Replaces the
+          prototype v16 of 2026-10-06.
+  v18 2026-10-12 — the car test of v17: the Lenovo Tab M10 Plus (3rd Gen)
+          has no magnetometer, so the compass now takes the GPS course
+          and carries it through stops with the gyroscope. The Tools menu
+          shows each source's state. The sync panel (decided 2026-10-12),
+          "No connection" (item 34), "Removal waiting" in History, the
+          amber chip in ink, and the real network as well as the switch.
+  v19 2026-10-17: the car tests of 2026-10-17 (project doc
+          claude/tablet-sensor-test-2026-10-17.md): the compass takes the
+          GPS course from 11 km/h and carries it with the raw gyroscope
+          (Generic Sensor API, devicemotion as the fallback), turned about
+          "up" from the accelerometer. A sensor counts only with a reading
+          in the last second. Location is asked before the motion sensors
+          start, and the sensors restart when the page comes back. No
+          magnet and no offset. Tools shows the sensors, the pauses and
+          how they ended, and saves a sensor log. Working screen from
+          main-screen v0.27: the gear (item 73, Settings come in v20),
+          "Last sent", "last loaded", "79 of 196 done" counting drivable
+          POIs (item 46), and a tap outside an open menu only closes it
+          (item 66). "Sheet" on screen, never "tracker".
+-->
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EFF3FA">
+<title>POI Tracker — prototype v19</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
+<style>
+/* ===== _tokens.css v0.11, inlined ===== */
+/* POI Tracker — design tokens.
+   v0.11 — 2026-10-11
+   Version history (append-only, never rewrite old entries):
+   v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
+   v0.2 2026-09-03 — header translated to English; token values unchanged.
+   v0.3 2026-09-04 — "glass" direction: gradient page background,
+   translucent panels with a blur token, softer lines, cooler neutrals.
+   Controls stay SOLID on purpose (sunlight legibility; CarPlay rule that
+   interactive and non-interactive surfaces must not share a color).
+   --blur is a single knob: set it to 0px if the tablet GPU struggles.
+   v0.4 2026-09-09 — two soft chip tints added for the mini counters:
+   --side-soft and --man-soft. The counters adopt the disc language
+   (amber = side, dark = maneuver) at low volume; a dedicated decision.
+   v0.5 2026-09-09 — --active becomes an amber tint rather than white, so
+   the current POI row is findable at a glance on a glass panel; the badge
+   behind its number reuses --side.
+   v0.6 2026-10-06 — canon for size C (screens.md items 67 and 68). Tap
+   targets grow to 56px. Sizes, type, spacing, radius, opacity and motion
+   get tokens, so references and the app carry no literal values. Token
+   oddities settled: --active-line now points to --side (one amber), the
+   dark --side-ring stays in the amber family, --focus gets a dark value,
+   and the 18px block gap is --gap, no longer a coincidence with --r-md.
+   References drawn before this version (main-screen v0.17, settings
+   v0.8, history v0.7) use 44px targets in a 1000 × 600 frame and may
+   look crowded until they are redrawn.
+   v0.7 2026-10-09 — a dedicated decision after the pixel audit of
+   main-screen v0.18. New --scrim for the dimmed layer behind dialogs and
+   sheets. It painted --ink before, which turns near white in the dark
+   theme, so the dimming brightened the screen. Small green and red text
+   now reaches 4.5:1 on its tints (WCAG): light --ok #11855A to #0E7450,
+   light --err #C8342B to #B42E26, dark --err #FF6B62 to #FF9189.
+   v0.8 2026-10-09 — a dedicated decision after the audit of
+   main-screen v0.19. New --panel-raised for menus, dialogs and sheets.
+   In the dark theme they used --panel-solid, darker than what they
+   cover, and read as holes. New --danger and --on-danger for the fill
+   and the text of a destructive button. The dark --err is a text colour
+   and looked coral as a fill. Light values stay as they were.
+   v0.9 2026-10-09 — a dedicated decision on the user's review of
+   main-screen v0.20. New --t-num-compact for the big POI number on a
+   short screen (screens.md item 70). Every other compact size reuses an
+   existing token.
+   v0.10 2026-10-11 — a dedicated decision on the user's review of
+   main-screen v0.22. New --t-stat for the values in the "Still needed"
+   tiles on the roomy card of a tall landscape screen (screens.md item
+   71). Every other roomy size reuses an existing token.
+   v0.11 2026-10-11 — a dedicated decision on the user's review of
+   main-screen v0.23: the compass is redrawn with its four letters and a
+   two-colour needle, and grows (screens.md item 19). --compass becomes
+   128px, with --compass-wide 144px for a tall landscape screen and
+   --compass-compact 96px, the old size, for a short screen. New
+   --compass-n, the red of the letter N and of the needle's north end,
+   and --compass-s, the blue of its south end, as a magnet is painted.
+   Rules: every reference imports this file; tokens are never edited in
+   passing — only by a dedicated decision. */
+
+:root {
+  --bg: #EFF3FA;
+  --bg-grad: linear-gradient(135deg, #EAF2FF 0%, #F6F0FF 45%, #FFF2E8 100%);
+  --panel: rgba(255, 255, 255, 0.62);
+  --panel-strong: rgba(255, 255, 255, 0.88);
+  --panel-solid: #FFFFFF;
+  --panel-edge: rgba(255, 255, 255, 0.85);
+  --blur: 14px;
+  --line: rgba(90, 110, 170, 0.16);
+  --ink: #1B2033;
+  --ink-2: #5C6580;
+  --ink-3: #8E96AC;
+  --disc: #1C2030;
+  --disc-glyph: #FFFFFF;
+  --side: #F2A81D;
+  --side-glyph: #1B2033;
+  --side-ring: rgba(242, 168, 29, 0.45);
+  --side-soft: rgba(242, 168, 29, 0.16);
+  --man-soft: rgba(28, 32, 48, 0.08);
+  --ok: #0E7450;
+  --ok-bg: rgba(214, 244, 228, 0.85);
+  --err: #B42E26;
+  --err-bg: rgba(255, 226, 223, 0.85);
+  --warn: #B87400;
+  --warn-bg: rgba(255, 238, 209, 0.85);
+  --active: rgba(242, 168, 29, 0.18);
+  --active-line: var(--side);
+  --focus: #1F5EFF;
+  --scrim: rgba(16, 20, 32, 0.32);
+  --panel-raised: #FFFFFF;
+  --danger: var(--err);
+  --on-danger: #FFFFFF;
+  --compass-n: #B42E26;
+  --compass-s: #1F5EFF;
+  --shadow: 0 6px 20px rgba(50, 65, 120, 0.14);
+  --shadow-lift: 0 10px 26px rgba(40, 50, 90, 0.26);
+  --r-sm: 12px;
+  --r-md: 18px;
+  --font: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --tap-min: 56px;
+
+  /* Size C (screens.md item 67) */
+  --row-h: 66px;
+  --col-narrow: 208px;
+  --col-wide: 330px;
+  --gap: 18px;
+  --disc-man: 118px;
+  --disc-side: 92px;
+  --side-reach: 124px;
+  --compass: 128px;
+  --compass-wide: 144px;
+  --compass-compact: 96px;
+
+  /* Type */
+  --t-small: 14px;
+  --t-body: 17px;
+  --t-label: 19px;
+  --t-row: 23px;
+  --t-title: 26px;
+  --t-stat: 40px;
+  --t-num: 92px;
+  --t-num-compact: 64px;
+  --w-medium: 600;
+  --w-bold: 700;
+  --w-heavy: 800;
+  --lh-tight: 1;
+  --lh-body: 1.45;
+
+  /* Spacing */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+
+  /* Radius, opacity, motion */
+  --r-lg: 24px;
+  --o-locked: 0.28;
+  --o-off: 0.4;
+  --o-zero: 0.45;
+  --dur-fade: 160ms;
+  --dur-move: 260ms;
+  --dur-bounce: 420ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1420;
+    --bg-grad: linear-gradient(135deg, #121A2B 0%, #171526 50%, #1E1A16 100%);
+    --panel: rgba(255, 255, 255, 0.07);
+    --panel-strong: rgba(255, 255, 255, 0.13);
+    --panel-solid: #171C29;
+    --panel-edge: rgba(255, 255, 255, 0.14);
+    --line: rgba(255, 255, 255, 0.12);
+    --ink: #EEF1F8;
+    --ink-2: #A8B0C4;
+    --ink-3: #737C93;
+    --disc: #F1F3FA;
+    --disc-glyph: #101420;
+    --side: #F2A81D;
+    --side-glyph: #10131C;
+    --side-ring: rgba(242, 168, 29, 0.5);
+    --side-soft: rgba(242, 168, 29, 0.22);
+    --man-soft: rgba(255, 255, 255, 0.10);
+    --ok: #3ECC82;
+    --ok-bg: rgba(22, 60, 40, 0.7);
+    --err: #FF9189;
+    --err-bg: rgba(70, 28, 25, 0.7);
+    --warn: #FFB13D;
+    --warn-bg: rgba(62, 44, 16, 0.7);
+    --active: rgba(242, 168, 29, 0.22);
+    --active-line: var(--side);
+    --focus: #7FA3FF;
+    --scrim: rgba(0, 0, 0, 0.55);
+    --panel-raised: #303749;
+    --danger: #D7373F;
+    --on-danger: #FFFFFF;
+    --compass-n: #FF6B62;
+    --compass-s: #7FA2FF;
+    --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0F1420;
+  --bg-grad: linear-gradient(135deg, #121A2B 0%, #171526 50%, #1E1A16 100%);
+  --panel: rgba(255, 255, 255, 0.07);
+  --panel-strong: rgba(255, 255, 255, 0.13);
+  --panel-solid: #171C29;
+  --panel-edge: rgba(255, 255, 255, 0.14);
+  --line: rgba(255, 255, 255, 0.12);
+  --ink: #EEF1F8;
+  --ink-2: #A8B0C4;
+  --ink-3: #737C93;
+  --disc: #F1F3FA;
+  --disc-glyph: #101420;
+  --side: #F2A81D;
+  --side-glyph: #10131C;
+  --side-ring: rgba(242, 168, 29, 0.5);
+  --side-soft: rgba(242, 168, 29, 0.22);
+  --man-soft: rgba(255, 255, 255, 0.10);
+  --ok: #3ECC82;
+  --ok-bg: rgba(22, 60, 40, 0.7);
+  --err: #FF9189;
+  --err-bg: rgba(70, 28, 25, 0.7);
+  --warn: #FFB13D;
+  --warn-bg: rgba(62, 44, 16, 0.7);
+  --active: rgba(242, 168, 29, 0.22);
+  --active-line: var(--side);
+  --focus: #7FA3FF;
+  --scrim: rgba(0, 0, 0, 0.55);
+  --panel-raised: #303749;
+  --danger: #D7373F;
+  --on-danger: #FFFFFF;
+  --compass-n: #FF6B62;
+  --compass-s: #7FA2FF;
+  --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
+}
+
+</style>
+<style>
+  html, body { margin: 0; height: 100%; background: var(--bg); }
+  body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+  .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+  .host { position: fixed; inset: 0; }
+  /* APP START */
+  /* ============================================================
+     THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
+     Every colour, size, spacing, radius, opacity, shadow, weight and
+     line height below is a var() from _tokens.css v0.11 or a calc() over
+     them. Literal values are limited to 0, 1px hairlines, 50% for round
+     shapes, percentages and fr of a layout, em, ch, lh and cap ratios of
+     a token font size, keywords, SVG geometry, the 1200px breakpoint of
+     item 51, the 700px height of the compact step (item 70), the 400px
+     width of the compact card, the 1000px width of the compact landscape
+     card (v0.22) and the 520px width of the roomy card (item 71). Icons
+     are Lucide symbols (rule 10, item 69); an inline icon is 1em of its
+     text. A chevron's path ends
+     inside its 24-unit box (chevron-down at 18/24, chevron-right at
+     15/24, check at 20/24), so a negative em margin of that remainder
+     puts the drawn end, not the box, on the padding. Line boxes that set
+     a block's height are rounded up to whole pixels.
+     ============================================================ */
+  .app { position: relative; container-type: size; width: 100%; height: 100%;
+         overflow: hidden; background: var(--bg); background-image: var(--bg-grad);
+         font-family: var(--font); font-size: var(--t-body); font-weight: var(--w-medium);
+         line-height: var(--lh-body); color: var(--ink); }
+  /* .app is the container the queries measure: no padding, so its box is the
+     frame. .scr inside it carries the padding and the stack, and is the
+     containing block of the menus and the compass. */
+  .scr { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column;
+         gap: var(--gap);
+         padding: var(--s-4) var(--s-5) calc(var(--s-5) + env(safe-area-inset-bottom, 0px)); }
+  .app *, .app *::before, .app *::after { box-sizing: border-box; }
+  :where(.app) button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
+                        margin: 0; cursor: pointer; text-align: left; }
+  .app svg { display: block; }
+  .ic { width: 1em; height: 1em; flex: none; }
+  .iw { display: inline-flex; align-items: center; gap: var(--s-1); white-space: nowrap; }
+  /* tabular figures only where numbers stand in a column; rail labels are
+     centred one under another, so they keep proportional figures and their
+     ink keeps clear of the finger pad */
+  .rn, .rt, .cn, .ritem small { font-variant-numeric: tabular-nums; }
+
+  /* ---- top bar (items 1, 16) ---- */
+  .topbar { display: flex; align-items: center; gap: var(--s-3); flex: none; }
+  .city { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+          color: var(--ink); }
+  .pickwrap { anchor-name: --pick; }
+  .route, .sync { display: inline-flex; align-items: center; gap: var(--s-2);
+                  height: var(--tap-min); padding: 0 var(--s-4); background: var(--panel-strong);
+                  border: 1px solid var(--panel-edge); border-radius: var(--r-sm);
+                  box-shadow: var(--shadow); white-space: nowrap; }
+  .route { font-size: var(--t-label); font-weight: var(--w-heavy); }
+  .sync { margin-left: auto; font-size: var(--t-body); font-weight: var(--w-medium); }
+  .route .ic { margin-right: -0.25em; }
+  .sync .ic { margin-right: -0.375em; }
+  /* the gear (item 73): a square tap target on the sync control's surface */
+  .gear { flex: none; display: inline-flex; align-items: center; justify-content: center;
+          width: var(--tap-min); height: var(--tap-min); background: var(--panel-strong);
+          border: 1px solid var(--panel-edge); border-radius: var(--r-sm);
+          box-shadow: var(--shadow); color: var(--ink); }
+  .gear svg { width: var(--s-5); height: var(--s-5); }
+  .dot { width: var(--s-2); height: var(--s-2); border-radius: 50%; background: var(--ok); flex: none; }
+  /* the sync control anchors the Sync panel (item 72). Its dot follows the
+     queue: waiting in the warning colour (item 33), a refused pass in the
+     error colour (item 47), no connection in the muted colour (item 34) */
+  .sync { anchor-name: --sync; }
+  .sync.wait .dot { background: var(--warn); }
+  .sync.bad .dot { background: var(--err); }
+  .sync.off .dot { background: var(--ink-3); }
+
+  /* ---- menus (items 1, 60, 66): one build for both. Anchored --s-2 under
+     their control and snapped to whole pixels; a menu that does not fit
+     there moves up just enough to keep --s-5 and the safe-area inset from
+     the frame's bottom. The checking tool re-creates an open menu when a
+     preset or theme changes, as the app closes menus when the screen
+     turns, so the position never depends on the order of clicks. ---- */
+  @position-try --shift { top: auto; bottom: calc(var(--s-5) + env(safe-area-inset-bottom, 0px)); }
+  .rmenu, .pop { position: absolute; background: var(--panel-raised);
+                 border: 1px solid var(--panel-edge); border-radius: var(--r-md);
+                 box-shadow: var(--shadow-lift); padding: var(--s-2);
+                 position-try-fallbacks: --shift; }
+  .rmenu { z-index: 30; left: round(anchor(--pick left), 1px);
+           top: calc(anchor(--pick bottom) + var(--s-2)); width: var(--col-wide); }
+  /* the type menu is as wide as the pill, and at least as wide as its split
+     lines need on one line; sized, not inset, so a position fallback can apply */
+  .pop { z-index: 9; left: anchor(--pill left); top: calc(anchor(--pill bottom) + var(--s-2));
+         width: max(anchor-size(--pill width), calc(var(--col-wide) + 2 * var(--s-6))); }
+  .ritem, .opt { width: 100%; min-height: var(--tap-min); display: flex; align-items: center;
+                 gap: var(--s-3); padding: var(--s-2);
+                 border-radius: calc(var(--r-md) - var(--s-2) - 1px); }
+  .ritem b { flex: 1; font-size: var(--t-label); font-weight: var(--w-heavy); }
+  .ritem small { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2); }
+  .chk { width: 1em; height: 1em; flex: none; font-size: var(--t-label); color: var(--ink);
+         visibility: hidden; margin-right: -0.167em; }
+  .ritem.on, .opt.on { background: var(--active); }
+  .ritem.on .chk, .opt.on .chk { visibility: visible; }
+  .ritem.on small, .opt.on .ol small { color: var(--ink); }
+  .pt { font-size: var(--t-small); letter-spacing: calc(var(--s-1) / 2);
+        font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight);
+        padding: var(--s-2) var(--s-2) var(--s-3); }
+  .ol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
+  .ol b { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  /* ---- the Sync panel (item 72): under the sync control, right edges
+     aligned, built like the type menu. The state's line wraps. A control
+     that cannot act dims its label and keeps its reason legible ---- */
+  .pop.syncpop { z-index: 30; left: auto; right: anchor(--sync right);
+                 top: calc(anchor(--sync bottom) + var(--s-2));
+                 width: calc(var(--col-wide) + 2 * var(--s-6)); }
+  .sstat { display: flex; align-items: flex-start; gap: var(--s-3);
+           padding: var(--s-2) var(--s-2) var(--s-3); }
+  .sstat .dot { margin-top: round(down, calc((var(--t-label) - var(--s-2)) / 2), 1px); }
+  .sstat.wait .dot { background: var(--warn); }
+  .sstat.bad .dot { background: var(--err); }
+  .sstat.off .dot { background: var(--ink-3); }
+  .sstat .ol small { display: block; line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .sdiv { height: 1px; margin: var(--s-2); background: var(--line); }
+  .syncpop .opt.off b { opacity: var(--o-off); }
+  .syncpop .go { width: 1em; height: 1em; flex: none; font-size: var(--t-label); color: var(--ink-2); }
+
+  /* ---- body: the POI column beside the main area (items 51, 56); the
+     summary under the main area in portrait (item 3) ---- */
+  .body { position: relative; flex: 1; min-height: 0; display: grid; gap: var(--gap);
+          grid-template-columns: var(--col-narrow) minmax(0, 1fr);
+          grid-template-rows: minmax(0, 1fr) auto;
+          grid-template-areas: "col main" "col sum"; }
+  .colwrap { grid-area: col; position: relative; min-height: 0; display: flex; }
+  /* the rail's touch area also takes in the gap beside the column (item 57) */
+  .colwrap::after { content: ""; position: absolute; top: 0; bottom: 0; left: 100%;
+                    width: var(--gap); }
+  .col { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column;
+         background: var(--panel); border: 1px solid var(--panel-edge);
+         border-radius: var(--r-md); box-shadow: var(--shadow); overflow: hidden; }
+  .main { grid-area: main; min-width: 0; min-height: 0; anchor-name: --main;
+          display: flex; flex-direction: column; gap: var(--gap); }
+  /* the left group is a container: the card and the pill go compact when it is narrow */
+  .mleft { flex: none; display: flex; flex-direction: column; gap: var(--gap); min-width: 0;
+           container-type: inline-size; container-name: info; }
+  .mright { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  /* the summary is one balanced block; every "·" belongs to the unit before
+     it and a segment never breaks. Its line height is --lh-body rounded up to
+     an even number of pixels, so it centres in the action bar on a whole pixel
+     and the blocks around it land on whole pixels. The portrait copy
+     sits under the main area, the landscape copy inside the action bar. */
+  .summary { display: block; text-align: center; text-wrap: balance; column-gap: var(--s-1);
+             font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+             line-height: round(up, calc(var(--lh-body) * var(--t-small)), 2px);
+             min-height: 1lh; }
+  .summary span { white-space: nowrap; }
+  .summary .err { color: var(--err); font-weight: var(--w-bold); }
+  .sumport { grid-area: sum; }
+  .sumbar { display: none; flex: 1; min-width: 0; }
+
+  /* ---- mini-map, the column's header (item 58); on a short screen a
+     one-line grid button in its place (item 70) ---- */
+  .mmap { flex: none; width: 100%; padding: var(--s-3); background: var(--panel-strong);
+          border-bottom: 1px solid var(--line); display: flex; flex-direction: column;
+          align-items: center; }
+  .mm { display: flex; flex-direction: column; gap: var(--s-2); }
+  .dots { display: grid; grid-template-columns: repeat(20, var(--s-2)); gap: 1px; }
+  .dots i { display: block; width: var(--s-2); height: var(--s-2); background: var(--line); }
+  .dots i.done { background: var(--ok); }
+  .dots i.err { background: var(--err); }
+  .dots i.part { background: var(--ink-3); }
+  .dots i.nd { background: transparent; box-shadow: inset 0 0 0 1px var(--ink-2); }
+  .dots i.act { background: var(--side); box-shadow: 0 0 0 1px var(--side-ring); }
+  .mcap { width: 100%; display: flex; justify-content: space-between; align-items: center;
+          font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
+          line-height: var(--lh-tight); }
+  .mcap .ic, .mline .iw .ic { margin-right: -0.375em; }
+  .mline { display: none; width: 100%; align-items: center; gap: var(--s-2);
+           font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
+           line-height: var(--lh-tight); white-space: nowrap; }
+  .mline .gi { width: var(--s-5); height: var(--s-5); color: var(--ink); }
+  .mline .iw { margin-left: auto; }
+
+  /* ---- POI rows (items 2, 31, 40, 46, 56) and the index rail (57) ---- */
+  .colbody { flex: 1; display: flex; min-height: 0; position: relative; }
+  .list { flex: 1; min-width: 0; overflow: hidden;
+          mask-image: linear-gradient(var(--ink) calc(100% - var(--s-3)), transparent); }
+  .row { width: 100%; height: var(--row-h); display: flex; align-items: center; gap: var(--s-2);
+         padding: 0 var(--s-3); border-bottom: 1px solid var(--line); }
+  .rn { width: 3ch; flex: none; text-align: right; font-size: var(--t-row);
+        font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .rc { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
+  .rb { display: block; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
+        overflow: hidden; }
+  .rb i, .nb i, .cb i { display: block; height: 100%; background: var(--ink-3);
+                        border-radius: inherit; }
+  .rt { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+        line-height: var(--lh-tight); white-space: nowrap; }
+  .row.done { background: var(--ok-bg); }
+  .row.done .rn, .row.done .rt { color: var(--ok); }
+  .row.done .rb i { background: var(--ok); }
+  .row.err { background: var(--err-bg); box-shadow: inset var(--s-1) 0 0 0 var(--err); }
+  .row.err .rn, .row.err .rt { color: var(--err); }
+  .row.err .rb i { background: var(--err); }
+  .row.nd .rn, .row.nd .rt { color: var(--ink-2); }
+  .row.nd .rb { opacity: var(--o-off); }
+  /* item 40: the tint and the edge stay amber in every state; a done or error
+     row shows its state in the colour of its number, text and bar */
+  .row.active { background: var(--active); box-shadow: inset var(--s-1) 0 0 0 var(--active-line); }
+  .row.active .rn { color: var(--warn); }
+  .row.active .rt { color: var(--ink); font-weight: var(--w-heavy); }
+  .row.active.done .rn, .row.active.done .rt { color: var(--ok); }
+  .row.active.err .rn, .row.active.err .rt { color: var(--err); }
+  /* rail labels sit on a linear track inset by --s-2 and half a label, so the
+     first and last keep clear of the hairline and the corner; the finger pad
+     spans the rail's inner width */
+  .rail { position: relative; width: var(--s-6); flex: none; border-left: 1px solid var(--line);
+          background: var(--panel-strong); }
+  .rail span { position: absolute; left: 0; right: 0; text-align: center;
+               transform: translateY(-50%); font-size: var(--t-small);
+               font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight); }
+  .finger { position: absolute; left: 0; right: 0; height: var(--tap-min);
+            border-radius: var(--r-md); background: var(--man-soft);
+            box-shadow: inset 0 0 0 1px var(--line); transform: translateY(-50%); }
+  .bubble { position: absolute; right: calc(var(--s-6) + var(--s-2)); min-width: var(--tap-min);
+            height: var(--tap-min); padding: 0 var(--s-4); border-radius: var(--r-md);
+            background: var(--disc); color: var(--disc-glyph); font-size: var(--t-title);
+            font-weight: var(--w-heavy); display: flex; align-items: center;
+            justify-content: center; box-shadow: var(--shadow-lift);
+            transform: translateY(-50%); z-index: 12; }
+  /* "Add routes in Settings" (item 35): the action bar's button look, its
+     radius concentric with the column's */
+  .colbtn { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2);
+            margin: var(--s-3); width: calc(100% - 2 * var(--s-3)); min-height: var(--tap-min);
+            padding: var(--s-3) var(--s-4); font-size: var(--t-body); font-weight: var(--w-bold);
+            line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px);
+            text-wrap: balance; color: var(--ink);
+            background: var(--panel-strong); border: 1px solid var(--line);
+            border-radius: calc(var(--r-md) - var(--s-3) - 1px); }
+  .colbtn .ic { margin-right: -0.375em; }
+
+  /* ---- head (items 4, 19, 43). The number's box is trimmed to its cap
+     height and baseline and rounded up to a whole pixel; the counter column
+     keeps --s-3 between its trimmed lines, so its cap top and last baseline
+     are level with the number's. In portrait the head keeps room for the
+     compass, which sits at the main area's top, one gap under the top bar:
+     the head is at least as tall as the compass, so the type pill sits one
+     gap under it (item 19). ---- */
+  .head { display: flex; flex-wrap: nowrap; align-items: flex-start; gap: var(--s-4);
+          min-height: var(--compass);
+          padding-right: calc(var(--compass) + var(--s-2)); }
+  /* ink shifted left by the digits' side bearing: Manrope ExtraBold sets a
+     "1" 3px and a "5" 5px in at 92px, so the midpoint keeps both within 1px */
+  .big { flex: none; font-size: var(--t-num); line-height: var(--lh-tight);
+         font-weight: var(--w-heavy); text-box: trim-both cap alphabetic;
+         height: round(up, 1cap, 1px); margin-left: -0.0435em; }
+  .big.dash { color: var(--ink-3); }
+  .hcol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-3); }
+  .plabel { font-size: var(--t-small); letter-spacing: calc(var(--s-1) / 2);
+            font-weight: var(--w-bold); color: var(--ink-2); line-height: var(--lh-tight);
+            text-box: trim-both cap alphabetic; }
+  .cnt { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+         text-wrap: balance; text-box: trim-both cap alphabetic; }
+  .rest { font-size: var(--t-body); font-weight: var(--w-medium); color: var(--ink-2);
+          line-height: var(--lh-tight); text-box: trim-both cap alphabetic; }
+  .rest span { white-space: nowrap; }
+  .rest.ok { color: var(--ok); font-weight: var(--w-bold); }
+  /* the compass (item 19): a drawn widget, its ring, letters and needle
+     in tokens; the needle's north end and the letter N share --compass-n */
+  .compass { position: absolute; right: anchor(--main right); top: anchor(--main top);
+             width: var(--compass); height: var(--compass); color: var(--ink); z-index: 2; }
+  .compass .marks, .compass .ring { fill: none; stroke: var(--ink-2); }
+  .compass .minor { fill: none; stroke: var(--ink-3); stroke-linecap: round; }
+  .compass text { font-size: var(--t-small); fill: var(--ink-2); font-weight: var(--w-bold); }
+  .compass .cn { fill: var(--compass-n); font-weight: var(--w-heavy); }
+  .compass .nn { fill: var(--compass-n); }
+  .compass .ns { fill: var(--compass-s); }
+  .compass .hub { fill: currentColor; }
+
+  /* ---- type pill and its menu (items 46, 60, 69) ---- */
+  .typewrap { anchor-name: --pill; }
+  .typebtn { width: 100%; display: flex; align-items: center; gap: var(--s-3);
+             min-height: var(--tap-min); padding: var(--s-2) var(--s-4);
+             background: var(--panel-strong); border: 1px solid var(--panel-edge);
+             border-radius: var(--r-md); box-shadow: var(--shadow); }
+  /* the tile is a map of the maneuvers: three fixed slots, Left, Straight,
+     Right; an absent maneuver leaves its slot empty. One size for every
+     type (the pill's inner height less its two hairlines), radius concentric
+     with the pill's. */
+  .ticon { flex: none; display: grid; grid-template-columns: repeat(3, var(--s-5));
+           gap: var(--s-1); justify-content: center; align-content: center;
+           width: calc(3 * var(--s-5) + 2 * var(--s-1) + 2 * var(--s-2));
+           height: calc(var(--tap-min) - 2 * (var(--s-2) + 1px));
+           border-radius: calc(var(--r-md) - var(--s-2) - 1px); background: var(--disc);
+           color: var(--disc-glyph); }
+  .ticon svg { width: var(--s-5); height: var(--s-5); }
+  .ticon .sl { grid-column: 1; }
+  .ticon .ss, .ticon .sb { grid-column: 2; }
+  .ticon .sr { grid-column: 3; }
+  .typebtn.nd { background: transparent; border: 1px dashed var(--ink-2); box-shadow: none; }
+  .typebtn.nd .ticon, .ticon.nd { background: transparent;
+                                  box-shadow: inset 0 0 0 1px var(--ink-2); color: var(--ink-2); }
+  .typebtn.off { opacity: var(--o-off); }
+  .tl { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
+  .tl b { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+          white-space: nowrap; }
+  .tl small, .ol small { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--s-1);
+                         row-gap: var(--s-1); font-size: var(--t-small); font-weight: var(--w-bold);
+                         color: var(--ink-2); line-height: var(--lh-tight); }
+  .tchg { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--t-small);
+          font-weight: var(--w-heavy); color: var(--ink-2); white-space: nowrap; }
+  .tchg .ic { margin-right: -0.25em; }
+
+  /* ---- "Still needed" card (item 39). A tile is its label, its value and
+     its bar (v0.32). The text lines are trimmed to cap height and baseline
+     and rounded up, so the inset above the label and the inset below the
+     bar are both the tile's padding. ---- */
+  .card { background: var(--panel); border: 1px solid var(--panel-edge);
+          border-radius: var(--r-md); box-shadow: var(--shadow); padding: var(--s-4);
+          display: flex; flex-direction: column; gap: var(--s-3); }
+  .sph { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-2); }
+  .sph.sides { margin-top: var(--s-3); }
+  .spt { font-size: var(--t-small); letter-spacing: calc(var(--s-1) / 2);
+         font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight); }
+  .spn { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
+         line-height: var(--lh-tight); }
+  .need { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); }
+  .nc { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0;
+        padding: var(--s-3); border-radius: var(--r-sm); background: var(--panel-strong); }
+  .nh { display: block; font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
+        line-height: var(--lh-tight); white-space: nowrap; text-box: trim-both cap alphabetic;
+        height: round(up, 1cap, 1px); }
+  /* the inline icon sits centred on the cap height: its bottom 0.15em under the baseline */
+  .nh .ic { display: inline-block; vertical-align: -0.15em; margin-right: var(--s-1); }
+  .nv { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+        white-space: nowrap; text-box: trim-both cap alphabetic; height: round(up, 1cap, 1px); }
+  .nv small { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
+              margin-left: var(--s-1); }
+  /* "Done" is a label, not a number: smaller, on the numbers' baseline */
+  .nv .dn { font-size: var(--t-label); }
+  .nb { display: block; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
+        overflow: hidden; }
+  .nc.ok .nv { color: var(--ok); }
+  .nc.ok .nb i { background: var(--ok); }
+  .nc.over .nv { color: var(--warn); }
+  .nc.over .nb i { background: var(--warn); }
+  .nc.off .nv, .nc.off .nb { opacity: var(--o-zero); }
+  .sides4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-2); }
+  /* Manrope sets the digits' cap-to-baseline box about 1.3px above the centre
+     of its line box, so a quarter step of padding moves from top to bottom */
+  .sv { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-2);
+        min-width: 0; border-radius: var(--r-sm);
+        padding: calc(var(--s-2) - var(--s-1) / 4) var(--s-3) calc(var(--s-2) + var(--s-1) / 4);
+        background: var(--side-soft); }
+  .svl { font-size: var(--t-label); font-weight: var(--w-heavy); color: var(--warn);
+         line-height: var(--lh-tight); }
+  .svv { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .sv.z .svv { opacity: var(--o-zero); }
+
+  /* ---- discs (items 5, 6, 10, 19, 26, 46). The closed cluster sits in the
+     middle of its free space. Where the zone is too short for centred discs
+     plus one caption line, the cluster rises just enough for the caption to
+     keep --s-4 from the action bar. The open compass is centred too and, where
+     it does not fit, keeps --s-2 from the bar and rises over the card. The
+     placement depends on the zone's height only, never on a caption, and is
+     rounded to a whole pixel. ---- */
+  .stagezone { flex: 1; min-height: 0; position: relative; }
+  .stagebox { position: absolute; left: 0; right: 0; height: calc(2 * var(--disc-man));
+              top: round(max(0px, min(calc((100% - 2 * var(--disc-man)) / 2),
+                                      calc(100% + var(--gap) - var(--s-4) - 2 * var(--disc-man)
+                                           - (var(--s-4) + round(up, calc(var(--lh-body) * var(--t-body)), 1px) + 2 * var(--s-1))))), 1px); }
+  .stagebox:has(.stage.open) { height: calc(2 * var(--side-reach) + var(--disc-side));
+              top: round(min(calc((100% - (2 * var(--side-reach) + var(--disc-side))) / 2),
+                             calc(100% + var(--gap) - var(--s-2) - var(--s-1)
+                                  - (2 * var(--side-reach) + var(--disc-side)))), 1px); }
+  .stage { position: relative; margin: 0 auto; height: 100%;
+           width: calc(2 * var(--side-reach) + 2 * var(--s-2) + var(--disc-man)); }
+  .disc { position: absolute; left: 50%; top: 50%; width: var(--disc-man); height: var(--disc-man);
+          border-radius: 50%; transform: translate(-50%, -50%); display: flex;
+          align-items: center; justify-content: center; background: var(--disc);
+          color: var(--disc-glyph); box-shadow: var(--shadow-lift); z-index: 3; }
+  .disc svg { width: 56%; height: 56%; }
+  .disc.l { left: calc(50% - var(--side-reach) - var(--s-2));
+            top: calc(50% + (var(--side-reach) - var(--s-2)) / 2); }
+  .disc.st { top: calc(50% - (var(--side-reach) - var(--s-2)) / 2); }
+  .disc.r { left: calc(50% + var(--side-reach) + var(--s-2));
+            top: calc(50% + (var(--side-reach) - var(--s-2)) / 2); }
+  .stage.open .disc.on { left: 50%; top: 50%; }
+  .stage.open .disc:not(.on) { visibility: hidden; }
+  .disc.locked { opacity: var(--o-locked); box-shadow: var(--shadow); }
+  .side { position: absolute; left: 50%; top: 50%; width: var(--disc-side); height: var(--disc-side);
+          border-radius: 50%; transform: translate(-50%, -50%); display: flex;
+          align-items: center; justify-content: center; font-size: var(--t-title);
+          font-weight: var(--w-heavy); line-height: var(--lh-tight); background: var(--side);
+          color: var(--side-glyph); box-shadow: 0 0 0 var(--s-1) var(--side-ring), var(--shadow-lift);
+          z-index: 4; }
+  .side-n { top: calc(50% - var(--side-reach)); }
+  .side-s { top: calc(50% + var(--side-reach)); }
+  .side-w { left: calc(50% - var(--side-reach)); }
+  .side-e { left: calc(50% + var(--side-reach)); }
+  /* the caption sits --s-4 under the lowest disc, centred, on one line, as
+     wide as its text up to the zone's width plus --s-2 on each side, so a
+     wider font rendering never wraps it */
+  .lock { position: absolute; left: 50%; top: calc(100% + var(--s-4)); translate: -50% 0;
+          width: max-content; max-width: calc(100% + 2 * var(--s-2)); text-wrap: balance;
+          font-size: var(--t-body); font-weight: var(--w-bold); border-radius: var(--r-sm);
+          padding: var(--s-1) var(--s-3); text-align: center;
+          line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px); }
+  .lock.ok { color: var(--ok); background: var(--ok-bg); }
+  .lock.err { color: var(--err); background: var(--err-bg); }
+  .lock.info { color: var(--ink-2); background: var(--panel-strong); }
+
+  /* ---- action bar (items 3, 8, 9, 10, 26, 27, 42, 51): buttons concentric
+     with the bar; in landscape the bar runs under the whole main area and
+     holds the summary; a dimmed control carries its caption ---- */
+  .bar { flex: none; display: flex; align-items: center; gap: var(--s-2); padding: var(--s-2);
+         background: var(--panel); border: 1px solid var(--panel-edge);
+         border-radius: var(--r-md); box-shadow: var(--shadow); }
+  .btn { display: inline-flex; align-items: center; height: var(--tap-min);
+         padding: 0 var(--s-4); font-size: var(--t-body); font-weight: var(--w-bold);
+         background: var(--panel-strong); border: 1px solid var(--line);
+         border-radius: calc(var(--r-md) - var(--s-2) - 1px); white-space: nowrap; }
+  .btn.off { opacity: var(--o-off); }
+  .btn.cancel { margin-left: auto; }
+  .barnote { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+             line-height: var(--lh-tight); white-space: nowrap; }
+
+  /* ---- overlays: dimmed background, dialogs (item 63), the grid (59, 66).
+     Raised surfaces in both themes; dialogs snap to whole pixels. ---- */
+  .scrim { position: absolute; inset: 0; z-index: 25; background: var(--scrim); }
+  .scrim.top { z-index: 50; }
+  .dlg { position: absolute; z-index: 51; left: round(50%, 1px); top: round(50%, 1px);
+         translate: round(-50%, 1px) round(-50%, 1px);
+         width: calc(100% - 2 * var(--s-6)); max-width: calc(var(--col-narrow) + var(--col-wide));
+         background: var(--panel-raised); border: 1px solid var(--panel-edge);
+         border-radius: var(--r-lg); box-shadow: var(--shadow-lift); padding: var(--s-5);
+         display: flex; flex-direction: column; gap: var(--s-4); }
+  .dtitle { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .dchip { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--s-1);
+           padding: var(--s-2) var(--s-3); border-radius: var(--r-sm); background: var(--man-soft);
+           font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .dbody { font-size: var(--t-body); font-weight: var(--w-medium);
+           line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px);
+           text-wrap: balance; color: var(--ink-2); }
+  .dbtns { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); margin-top: var(--s-2); }
+  .dbtn { height: calc(var(--tap-min) + var(--s-2)); border-radius: var(--r-sm);
+          font-size: var(--t-label); font-weight: var(--w-heavy); background: var(--man-soft);
+          border: 1px solid var(--line); display: inline-flex; align-items: center;
+          justify-content: center; }
+  .dbtn.danger { background: var(--danger); border-color: var(--danger); color: var(--on-danger); }
+  .dbtn.primary { background: var(--disc); border-color: var(--disc); color: var(--disc-glyph); }
+  .sheet { position: absolute; inset: var(--s-4); z-index: 26; background: var(--panel-raised);
+           border: 1px solid var(--panel-edge); border-radius: var(--r-lg);
+           box-shadow: var(--shadow-lift); padding: var(--s-5); display: flex;
+           flex-direction: column; gap: var(--s-3); }
+  .shead { display: flex; align-items: center; gap: var(--s-3); }
+  .stt { display: flex; align-items: baseline; gap: var(--s-3); min-width: 0; }
+  .xbtn { width: var(--tap-min); height: var(--tap-min); flex: none; display: flex;
+          align-items: center; justify-content: center; border-radius: 50%;
+          background: var(--man-soft); border: 1px solid var(--line); color: var(--ink); }
+  .xbtn svg { width: var(--s-5); height: var(--s-5); }
+  .stitle { font-size: var(--t-title); font-weight: var(--w-heavy); color: var(--ink);
+            line-height: var(--lh-tight); white-space: nowrap; }
+  .sroute { font-size: var(--t-body); font-weight: var(--w-bold); white-space: nowrap; }
+  .legend { display: flex; gap: var(--s-4); flex-wrap: wrap; font-size: var(--t-small);
+            font-weight: var(--w-bold); color: var(--ink-2); }
+  .lg { display: inline-flex; align-items: center; gap: var(--s-2); }
+  /* six states, as the mini-map's squares: each tile and its swatch carry
+     the state's colour on the border, so any two differ in fill or border;
+     "not started" has no fill, so it never reads as a hole */
+  .sw { width: var(--t-small); height: var(--t-small); border-radius: calc(var(--r-sm) / 3);
+        display: inline-block; background: transparent; border: 1px solid var(--line); }
+  .sw.part, .cell.part { background: var(--man-soft); border-color: var(--ink-2); }
+  .sw.done, .cell.done { background: var(--ok-bg); border-color: var(--ok); }
+  .sw.err, .cell.err { background: var(--err-bg); border-color: var(--err); }
+  .sw.nd, .cell.nd { background: transparent; border: 1px dashed var(--ink-2); }
+  .sw.act, .cell.active { background: var(--active); border-color: var(--active-line); }
+  .sw.act { box-shadow: inset 0 0 0 1px var(--active-line); }
+  .grid { flex: 1; min-height: 0; overflow: hidden; display: grid; align-content: start;
+          grid-template-columns: repeat(10, minmax(0, 1fr)); grid-auto-rows: var(--row-h);
+          gap: var(--s-2);
+          mask-image: linear-gradient(var(--ink) calc(100% - var(--s-3)), transparent); }
+  .cell { border-radius: var(--r-sm); background: transparent; border: 1px solid var(--line);
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          gap: var(--s-2); }
+  .cn { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .cb { width: 60%; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
+        overflow: hidden; display: block; }
+  .cell.done .cn { color: var(--ok); }
+  .cell.done .cb i { background: var(--ok); }
+  .cell.err .cn { color: var(--err); }
+  .cell.err .cb i { background: var(--err); }
+  .cell.nd .cn { color: var(--ink-2); }
+  .cell.active { box-shadow: inset 0 0 0 var(--s-1) var(--active-line); }
+  .cell.active .cn { color: var(--warn); }
+
+  /* ---- item 51: the column is wide from 1200px; the main area follows the
+     shape of the app: side by side when wider than tall, stacked when taller.
+     In landscape the action bar runs under both groups and holds the summary,
+     and the column runs down to the bottom. These rules come last so they win
+     over the component rules above. ---- */
+  @container (min-width: 1200px) {
+    .body { grid-template-columns: var(--col-wide) minmax(0, 1fr); }
+    /* the wide column's mini-map uses larger squares, still 20 to a row */
+    .dots { grid-template-columns: repeat(20, var(--s-3)); }
+    .dots i { width: var(--s-3); height: var(--s-3); }
+  }
+  @container (orientation: landscape) {
+    .body { grid-template-rows: minmax(0, 1fr); grid-template-areas: "col main"; }
+    .sumport { display: none; }
+    .sumbar { display: block; }
+    .main { display: grid; column-gap: var(--gap); row-gap: var(--gap);
+            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-rows: minmax(0, 1fr) auto;
+            grid-template-areas: "left zone" "bar bar"; }
+    .mleft { grid-area: left; }
+    .mright { grid-area: zone; width: calc(2 * var(--side-reach) + 2 * var(--s-2) + var(--disc-man)); }
+    .bar { grid-area: bar; }
+    .head { padding-right: 0; min-height: 0; }
+    /* the free space runs from the top of the main area to the bar */
+    .stagebox { top: round(max(0px, min(calc((100% + var(--gap) - 2 * var(--disc-man)) / 2),
+                                        calc(100% + var(--gap) - var(--s-4) - 2 * var(--disc-man)
+                                             - (var(--s-4) + round(up, calc(var(--lh-body) * var(--t-body)), 1px) + 2 * var(--s-1))))), 1px); }
+    .stagebox:has(.stage.open) {
+      top: round(min(calc((100% + var(--gap) - (2 * var(--side-reach) + var(--disc-side))) / 2),
+                     calc(100% + var(--gap) - var(--s-2) - var(--s-1)
+                          - (2 * var(--side-reach) + var(--disc-side)))), 1px); }
+  }
+  /* the compact card and pill: beside the discs the left group can be
+     narrow; the card and its tiles tighten, columns size to their content so
+     every line keeps to one line, and the pill shows its chevron without the
+     word and its split without the passes prefix */
+  @container info (max-width: 400px) {
+    .card { padding: var(--s-3); }
+    .need { grid-template-columns: repeat(3, auto); }
+    .nc { padding: var(--s-2); }
+    .need, .sides4 { gap: var(--s-1); }
+    .sv { padding-left: var(--s-2); padding-right: var(--s-2); gap: var(--s-1); }
+    .tchg span, .tl small .tp { display: none; }
+  }
+  /* ---- the compact step (item 70): on a short screen display text shrinks
+     and the mini-map becomes a one-line grid button; discs, the compass and
+     tap targets keep their size ---- */
+  @container (max-height: 700px) {
+    .big { font-size: var(--t-num-compact); }
+    .cnt { font-size: var(--t-label); }
+    .rest { font-size: var(--t-small); }
+    .nv, .svv { font-size: var(--t-label); }
+    /* half a step between the counter lines keeps them level with the smaller number */
+    .hcol { gap: calc(var(--s-3) / 2); }
+    .mmap { flex-direction: row; align-items: center; height: var(--tap-min);
+            padding: 0 var(--s-3); }
+    .mm { display: none; }
+    .mline { display: flex; }
+  }
+  /* ---- the compact landscape step (item 70, v0.32): the side margins
+     become --s-4, the gaps beside the column and the discs --s-3 and the
+     closed side discs sit --s-2 nearer to Straight. The disc size, the
+     vertical offsets and the open compass do not change. ---- */
+  @container (max-height: 700px) and (orientation: landscape) {
+    .scr { padding-left: var(--s-4); padding-right: var(--s-4); }
+    .body { column-gap: var(--s-3); }
+    .main { column-gap: var(--s-3); }
+    .mright, .stage { width: calc(2 * var(--side-reach) + var(--disc-man)); }
+    .disc.l { left: calc(50% - var(--side-reach)); }
+    .disc.r { left: calc(50% + var(--side-reach)); }
+    /* the caption keeps one line and its spare width in the narrower zone */
+    .lock { padding-left: var(--s-2); padding-right: var(--s-2); }
+  }
+  /* with that width the card and its tiles keep their normal paddings
+     instead of the compact ones: from the landscape minimum of 1000px the
+     left group is at least 370px wide, enough for every label, value and
+     chip to keep its spare width. In a frame dragged narrower the compact
+     card stays. The pill keeps its compact look. */
+  @container (max-height: 700px) and (orientation: landscape) and (min-width: 1000px) {
+    .card { padding: var(--s-4) var(--s-3); }
+    /* --s-4 between the two sections over the card's --s-3 row gap */
+    .sph.sides { margin-top: calc(var(--s-4) - var(--s-3)); }
+    .need { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); }
+    .nc { padding: var(--s-3); }
+    .sides4 { gap: var(--s-2); }
+    .sv { padding-left: var(--s-3); padding-right: var(--s-3); gap: var(--s-2); }
+  }
+  /* ---- the compass's sizes (item 19, v0.35): 128px, 144px on a tall
+     landscape screen, 96px on a short one. The compass and the head read
+     --compass, so one step sets it for both. ---- */
+  @container (orientation: landscape) and (height > 700px) {
+    .scr { --compass: var(--compass-wide); }
+  }
+  @container (max-height: 700px) {
+    .scr { --compass: var(--compass-compact); }
+  }
+  /* ---- the roomy card (item 71, v0.33): on a tall landscape screen the
+     "Still needed" card steps up one size, the mirror of the compact
+     step, so it keeps its 1000 × 600 proportion beside the discs. Only
+     its text sizes and paddings change. Where the left group is narrower
+     than 520px the larger values would lose their spare width, so the
+     normal card stays. ---- */
+  @container (orientation: landscape) and (height > 700px) {
+    @container info (width >= 520px) {
+      .card { padding: var(--s-5); gap: var(--s-4); }
+      /* --s-5 between the sections: the card's --s-4 gap plus --s-2 */
+      .sph.sides { margin-top: var(--s-2); }
+      .spt, .spn { font-size: var(--t-body); }
+      .need, .sides4 { gap: var(--s-3); }
+      .nc { padding: var(--s-4); gap: var(--s-3); }
+      .nh { font-size: var(--t-body); }
+      .nv { font-size: var(--t-stat); }
+      .nv small { font-size: var(--t-body); margin-left: var(--s-2); }
+      .nv .dn { font-size: var(--t-title); }
+      .nb { height: var(--s-2); }
+      /* taller chips, the same text: the sides are secondary */
+      .sv { padding: calc(var(--s-3) - var(--s-1) / 4) var(--s-4)
+                     calc(var(--s-3) + var(--s-1) / 4); }
+    }
+  }
+
+  /* ============================================================
+     HISTORY (screens.md items 12, 13, 14, 38, 41, 44, 45, 47, 48, 61,
+     63, 66). The panel fills the main area of the shell above and takes
+     the column's surface, so the two read as a pair. Tokens only, as
+     the canon note above says.
+     ============================================================ */
+  .hist { flex: 1; min-height: 0; grid-area: 1 / 1 / -1 / -1; position: relative;
+          display: flex; flex-direction: column; gap: var(--s-3); padding: var(--s-4);
+          background: var(--panel); border: 1px solid var(--panel-edge);
+          border-radius: var(--r-md); box-shadow: var(--shadow); }
+  /* header: the round close button (item 66), the title, the scope control
+     (item 12), a segmented control in the iOS style: a soft track with --s-1
+     of inset, the chosen segment raised; radii concentric; the segments
+     --s-2 apart so each is its own tap target, both as wide as the wider */
+  .hh { flex: none; display: flex; align-items: center; gap: var(--s-3); }
+  .ht { flex: 1; min-width: 0; margin: 0; font-size: var(--t-row); font-weight: var(--w-heavy);
+        line-height: var(--lh-tight); white-space: nowrap; }
+  .seg { flex: none; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--s-2);
+         padding: var(--s-1); background: var(--man-soft); border-radius: var(--r-md); }
+  .sg { height: var(--tap-min); min-width: calc(var(--tap-min) + var(--s-6)); padding: 0 var(--s-4);
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: var(--t-body); font-weight: var(--w-heavy); color: var(--ink-2);
+        border-radius: calc(var(--r-md) - var(--s-1)); white-space: nowrap; }
+  .sg.on { background: var(--panel-raised); box-shadow: var(--shadow); color: var(--ink); }
+  /* sub-header (item 41): amber chip, quiet context, neutral chip */
+  .hsub { flex: none; display: flex; align-items: center; gap: var(--s-3); }
+  .chip { flex: none; display: inline-flex; align-items: center; padding: var(--s-1) var(--s-2);
+          border-radius: var(--r-sm); background: var(--man-soft); color: var(--ink);
+          font-size: var(--t-body); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+          white-space: nowrap; }
+  .chip.amber { background: var(--side-soft); color: var(--warn); }
+  .hctx { flex: 1; min-width: 0; font-size: var(--t-small); font-weight: var(--w-bold);
+          color: var(--ink-2); line-height: var(--lh-tight); white-space: nowrap; }
+  /* queue line (item 13), only while removals are queued */
+  .hq { flex: none; display: flex; align-items: center; gap: var(--s-2); font-size: var(--t-small);
+        font-weight: var(--w-bold); color: var(--ink-2); line-height: var(--lh-tight);
+        white-space: nowrap; }
+  .hq .dot { background: var(--warn); }
+  /* the sync control's dot follows the queue: waiting in the warning colour
+     (item 33), a refused pass in the error colour (item 47) */
+  .sync.wait .dot { background: var(--warn); }
+  .sync.bad .dot { background: var(--err); }
+  /* the list: a grid whose columns are shared by every row, so the POI
+     number and the time each sit in one fixed slot as wide as the widest. A
+     row element has no box of its own (display: contents): its lines are
+     items of the list's grid and the subgrid reaches every one of them. The
+     first line is --row-h tall with a hairline, as the POI rows beside it;
+     its content is --tap-min tall, --s-1 under the row's top, so the "Delete"
+     button and the texts land on whole pixels. The texts share a baseline
+     inside their own block; each is trimmed to its cap height and baseline,
+     so the block's centre is the ink's centre. A whole row sits at the top
+     edge, the cut row at the bottom fades (item 56). */
+  .hlist { flex: 1; min-height: 0; overflow: hidden; overflow-anchor: none; display: grid; align-content: start;
+           column-gap: var(--s-2);
+           grid-template-columns: [time] max-content [side] minmax(0, 1fr) [label] max-content [act] max-content;
+           mask-image: linear-gradient(var(--ink) calc(100% - var(--s-3)), transparent); }
+  .hlist[data-scope="route"] { grid-template-columns: [num] max-content [time] max-content [side] minmax(0, 1fr) [label] max-content [act] max-content; }
+  .hlist.end { mask-image: none; padding-bottom: var(--row-h); }
+  .hr { display: contents; }
+  .hl1 { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: center;
+         height: var(--row-h); padding-top: var(--s-1);
+         padding-bottom: calc(var(--row-h) - var(--tap-min) - var(--s-1) - 1px);
+         border-bottom: 1px solid var(--line); }
+  .htx { grid-column: 1 / -2; display: grid; grid-template-columns: subgrid; align-items: baseline; }
+  .hn, .htm, .hmv, .hst { text-box: trim-both cap alphabetic; }
+  .hn { font-size: var(--t-row); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+        text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .htm { font-size: var(--t-body); font-weight: var(--w-medium); color: var(--ink-2);
+         line-height: var(--lh-tight); text-align: right; font-variant-numeric: tabular-nums;
+         white-space: nowrap; }
+  .hmv { min-width: 0; font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+         white-space: nowrap; }
+  /* the inline icon sits centred on the cap height, as in the card's tiles */
+  .hmv .ic { display: inline-block; vertical-align: -0.15em; margin-right: var(--s-1); }
+  .hst { font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
+         line-height: var(--lh-tight); white-space: nowrap; }
+  .hst.wait { color: var(--ink); }
+  .hst .dot { display: inline-block; vertical-align: calc(0.5cap - var(--s-1)); margin-right: var(--s-1);
+              background: var(--warn); }
+  .hst.rej { color: var(--err); }
+  /* "Delete" (items 13, 28): red text on the red tint, at the right edge, a
+     tap target; the filled red button stays reserved for the dialog. Its box
+     is --tap-min + --s-5 wide: --s-3 of padding less the hairline keeps the
+     word inside that width, so the box lands on whole pixels. */
+  .hdel { align-self: center; justify-self: end; display: inline-flex; align-items: center;
+          justify-content: center; height: var(--tap-min); min-width: calc(var(--tap-min) + var(--s-5));
+          padding: 0 calc(var(--s-3) - 1px); font-size: var(--t-body); font-weight: var(--w-bold);
+          color: var(--err); background: var(--err-bg); border: 1px solid var(--line);
+          border-radius: var(--r-sm); white-space: nowrap; }
+  /* a deleted pass (items 13, 38): struck through, labelled, no buttons, not dimmed */
+  .hr.del .htm, .hr.del .hmv { text-decoration: line-through; }
+  /* a refused pass (item 47): three lines with --s-3 above and below, the
+     reason as a sentence, its two actions at the right edge, never on the
+     line with the time; the hairline closes the row under the actions */
+  .hr.rej .hl1 { height: var(--tap-min); padding: 0; border: 0; margin-top: var(--s-3); }
+  .hwhy { grid-column: 1 / -1; margin: var(--s-2) 0 0; font-size: var(--t-small); font-weight: var(--w-medium);
+          color: var(--ink-2); line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px);
+          text-wrap: balance; }
+  .hacts { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: var(--s-2);
+           margin-top: var(--s-2); padding-bottom: var(--s-3); border-bottom: 1px solid var(--line); }
+  .hacts .btn { min-width: calc(3 * var(--tap-min) - var(--s-6)); justify-content: center; }
+  /* the end of the list (item 48) and the empty state (items 14, 45) */
+  .hend { grid-column: 1 / -1; margin: 0; padding: var(--s-4) var(--s-3); text-align: center;
+          font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+          line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .hend span { display: block; white-space: nowrap; }
+  .hlist.empty { display: flex; align-items: center; justify-content: center; mask-image: none; }
+  .hempty { display: flex; flex-direction: column; gap: var(--s-2); text-align: center;
+            max-width: 40ch; }
+  .hempty b { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+              white-space: nowrap; }
+  .hempty p { margin: 0; font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+              line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); text-wrap: balance; }
+  /* footer (items 14, 45) */
+  .hfoot { flex: none; margin: 0; padding-top: var(--s-1); text-align: center; font-size: var(--t-small);
+           font-weight: var(--w-medium); color: var(--ink-2); line-height: var(--lh-tight);
+           white-space: nowrap; }
+
+  /* ============================================================
+     PROTOTYPE ONLY: motion, the toast, the tools menu and the states
+     the static references draw as separate frames. Tokens only.
+     ============================================================ */
+  .main.histopen > :not(.hist) { display: none !important; }
+  .list, .grid, .hlist { overflow-y: auto; scrollbar-width: none; overscroll-behavior: contain; }
+  .list::-webkit-scrollbar, .grid::-webkit-scrollbar, .hlist::-webkit-scrollbar { display: none; }
+  .rail { touch-action: none; }
+  .stage:not(.open) .side { display: none; }
+  .disc { transition: left var(--dur-move) var(--ease-out), top var(--dur-move) var(--ease-out),
+                      opacity var(--dur-fade) var(--ease-out); }
+  .disc:active:not(.locked) { scale: 0.96; }
+  .side { animation: bloom var(--dur-move) var(--ease-out) both; }
+  .side.bounce { animation: bounce var(--dur-bounce) var(--ease-spring) both; }
+  @keyframes bloom { from { opacity: 0; scale: 0.6; } to { opacity: 1; scale: 1; } }
+  @keyframes bounce { 0% { scale: 1; } 40% { scale: 1.18; } 100% { scale: 1; } }
+  .cnt { transform-origin: left center; }
+  .cnt.bump { animation: bump var(--dur-bounce) var(--ease-spring); }
+  @keyframes bump { 0% { scale: 1; } 40% { scale: 1.12; } 100% { scale: 1; } }
+  .row, .cell, .opt, .ritem, .btn, .hdel, .sg { transition: background-color var(--dur-fade) var(--ease-out); }
+  /* the toast of item 36: over the working area, just above the bar */
+  .toast { position: absolute; position-anchor: --main; left: anchor(center);
+           top: calc(anchor(bottom) - var(--tap-min) - 2 * var(--s-2) - var(--gap) - var(--s-2));
+           translate: -50% -100%; z-index: 40; display: inline-flex; align-items: center;
+           gap: var(--s-2); max-width: calc(100% - 2 * var(--s-5)); padding: var(--s-3) var(--s-5);
+           border-radius: var(--r-md); background: var(--disc); color: var(--disc-glyph);
+           box-shadow: var(--shadow-lift); font-size: var(--t-body); font-weight: var(--w-bold);
+           line-height: var(--lh-tight); white-space: nowrap; pointer-events: none;
+           opacity: 0; transition: opacity var(--dur-fade) var(--ease-out); }
+  .toast.on { opacity: 1; }
+  .toast .ic { width: 1.1em; height: 1.1em; }
+  /* the History chip decision of 2026-10-12: ink text, amber by its fill */
+  .chip.amber { color: var(--ink); }
+  /* no reading yet: the needle stays pale, so a silent sensor shows */
+  .compass.idle .needle { opacity: var(--o-off); }
+  /* the tools menu: a checking tool of the prototype, never in the app */
+  .toolwrap { anchor-name: --tools; }
+  .tools { display: inline-flex; align-items: center; height: var(--tap-min); padding: 0 var(--s-4);
+           border-radius: var(--r-sm); border: 1px dashed var(--line); color: var(--ink-2);
+           font-size: var(--t-small); font-weight: var(--w-bold); white-space: nowrap; }
+  .rmenu.toolsmenu { left: round(anchor(--tools left), 1px); top: calc(anchor(--tools bottom) + var(--s-2));
+                     width: calc(var(--col-wide) + var(--s-6)); max-height: calc(100% - var(--tap-min) - var(--s-6));
+                     overflow: auto; }
+  .toolsmenu .ritem small { white-space: nowrap; }
+  .toolsmenu .tnote.diag { border-bottom: 1px solid var(--line); margin-bottom: var(--s-2); padding-bottom: var(--s-3); }
+  .toolsmenu .tnote.diag b { color: var(--ink); }
+  .toolsmenu .tnote { padding: var(--s-2) var(--s-3); font-size: var(--t-small); color: var(--ink-2);
+                      line-height: var(--lh-body); }
+  @media (prefers-reduced-motion: reduce) {
+    .app *, .app *::before, .app *::after { animation: none !important; transition: none !important; }
+  }
+  /* APP END */
+</style>
+</head>
+<body>
+<svg class="sprite" aria-hidden="true">
+  <!-- Lucide icons (CLAUDE.md rule 10, screens.md item 69): path data verbatim
+       from the Lucide source, stroke-width 2.6, colour from currentColor -->
+  <symbol id="i-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20v-7a4 4 0 0 0-4-4H4"/><path d="M9 14 4 9l5-5"/></symbol>
+  <symbol id="i-straight" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></symbol>
+  <symbol id="i-ban" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.929 4.929 19.07 19.071"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-chev-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-chev-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></symbol>
+  <symbol id="i-chev-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></symbol>
+</svg>
+<div class="host"><div class="app" id="app"><div class="scr" id="scr">
+<header class="topbar">
+  <span class="city" id="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button" data-act="routes" id="routeBtn"></button></span>
+  <span class="toolwrap"><button class="tools" type="button" data-act="tools">Tools</button></span>
+  <button class="sync" type="button" data-act="sync" id="syncBtn"></button>
+  <button class="gear" type="button" data-act="settings" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" id="col"></div></div>
+  <div class="main" id="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(0 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <div class="mleft">
+      <section class="head" id="head"></section>
+      <div class="typewrap"><button class="typebtn" type="button" data-act="typemenu" id="pill"></button></div>
+      <div class="card" id="card"></div>
+    </div>
+    <div class="mright">
+      <div class="stagezone"><div class="stagebox"><div class="stage" id="stage">
+        <button class="disc l" type="button" data-man="L" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+        <button class="disc st" type="button" data-man="St" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+        <button class="disc r" type="button" data-man="R" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+        <button class="side side-n" type="button" data-side="N" aria-label="North">N</button>
+        <button class="side side-s" type="button" data-side="S" aria-label="South">S</button>
+        <button class="side side-w" type="button" data-side="W" aria-label="West">W</button>
+        <button class="side side-e" type="button" data-side="E" aria-label="East">E</button>
+      </div><div class="lock" id="lock" hidden></div></div></div>
+    </div>
+    <div class="bar" id="bar"></div>
+  </div>
+  <div class="summary sumport" id="sumport"></div>
+</div>
+<div id="overlays"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div></div></div>
+<script>
+  // ---- the compass maths. Angles in degrees; a heading runs clockwise
+  // from north, 0 up to 360. Decided 2026-10-11 (data-model.md, Heading). ----
+  var Heading = (function () {
+    var RAD = Math.PI / 180;
+    function norm(deg) { deg = deg % 360; return deg < 0 ? deg + 360 : deg; }
+    // The heading of the axis that points into the screen, from the three
+    // angles of a deviceorientation event (alpha, beta, gamma: Z-X'-Y''
+    // intrinsic, as the W3C specification defines them). For a tablet that
+    // stands in a car mount that axis points through the windscreen,
+    // whatever the screen's orientation, since the screen turns around it.
+    // Returns null while the tablet lies nearly flat, where that axis has
+    // no horizontal direction to speak of.
+    function fromOrientation(alpha, beta, gamma) {
+      if (alpha == null || beta == null || gamma == null) return null;
+      var cA = Math.cos(alpha * RAD), sA = Math.sin(alpha * RAD);
+      var sB = Math.sin(beta * RAD);
+      var cG = Math.cos(gamma * RAD), sG = Math.sin(gamma * RAD);
+      var east = -(cA * sG + sA * sB * cG);
+      var north = -(sA * sG - cA * sB * cG);
+      var level = Math.sqrt(east * east + north * north); // 1 upright, 0 flat
+      if (level < 0.3) return null;
+      return norm(Math.atan2(east, north) / RAD);
+    }
+    // Exponential smoothing on the unit vector, so that 359 and 1 average
+    // to 0 and not to 180. tau is the time constant in seconds.
+    function Smoother(tau) { this.tau = tau; this.reset(); }
+    Smoother.prototype.reset = function () { this.x = 0; this.y = 0; this.t = -1; };
+    Smoother.prototype.push = function (deg, nowMs) {
+      var k = this.t < 0 ? 1 : 1 - Math.exp(-(nowMs - this.t) / 1000 / this.tau);
+      this.t = nowMs;
+      this.x += k * (Math.sin(deg * RAD) - this.x);
+      this.y += k * (Math.cos(deg * RAD) - this.y);
+      return this.value();
+    };
+    Smoother.prototype.value = function () {
+      if (Math.abs(this.x) < 1e-9 && Math.abs(this.y) < 1e-9) return null;
+      return norm(Math.atan2(this.x, this.y) / RAD);
+    };
+    // The turn from heading a to heading b, in (-180, 180].
+    function delta(a, b) { var d = norm(b - a); return d > 180 ? d - 360 : d; }
+    // The quarter a heading falls in: N, E, S or W, each 90 degrees wide
+    // and centred on its letter.
+    function cardinal(deg) { return 'NESW'[Math.round(norm(deg) / 90) % 4]; }
+    // The side the car approaches from: the quarter behind it.
+    function approachSide(deg) { return cardinal(deg + 180); }
+    return { norm: norm, fromOrientation: fromOrientation, Smoother: Smoother,
+             delta: delta, cardinal: cardinal, approachSide: approachSide };
+  }());
+
+(function () {
+  'use strict';
+
+  // ================= constants (screens.md items 39, 46, 60) =================
+  var N_POI = 197;
+  var TYPES = {
+    int:  { label: 'Intersection',  target: 70, split: { L: 28, St: 14, R: 28 } },
+    nost: { label: 'No straight',   target: 70, split: { L: 35, St: 0, R: 35 }, cap: 'No straight at this POI' },
+    nol:  { label: 'No left',       target: 70, split: { L: 0, St: 14, R: 56 }, cap: 'No left turn at this POI' },
+    nor:  { label: 'No right',      target: 70, split: { L: 56, St: 14, R: 0 }, cap: 'No right turn at this POI' },
+    str:  { label: 'Straight only', target: 40, split: { L: 0, St: 40, R: 0 }, cap: 'Straight only at this POI' },
+    nd:   { label: 'Not drivable',  target: 0,  split: { L: 0, St: 0, R: 0 } }
+  };
+  var TYPE_ORDER = ['int', 'nost', 'nol', 'nor', 'str', 'nd'];
+  var MANS = ['L', 'St', 'R'];
+  var MAN_NAME = { L: 'Left', St: 'Straight', R: 'Right' };
+  var MAN_ICON = { L: 'i-left', St: 'i-straight', R: 'i-right' };
+  var SLOT = { L: 'sl', St: 'ss', R: 'sr' };
+  var SIDES = ['N', 'S', 'W', 'E'];
+  var SIDE_NAME = { N: 'North', S: 'South', W: 'West', E: 'East' };
+  var ROUTES = ['R20890-054', 'R20890-055', 'R20890-056', 'R20890-057', 'R20890-058', 'R20890-059', 'R20890-060', 'R20890-061'];
+  var REASON = {
+    'text-in-cell': 'The sheet has text in a cell this pass adds to. Fix the cell, then send again.'
+  };
+  var RAIL = [1, 40, 80, 120, 160, 197];
+  var SYNC_DELAY = 2500;   // ms after the last change, while online
+  var OPEN_TIMEOUT = 12000; // item 8: the open compass closes after 12 s
+
+  // ================= helpers =================
+  var app = document.getElementById('app');
+  var scr = document.getElementById('scr');
+  function $(id) { return document.getElementById(id); }
+  function icon(id, cls) { return '<svg class="' + (cls || 'ic') + '"><use href="#' + id + '"/></svg>'; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function fmt(x) { return x.toLocaleString('en-US'); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function sameDay(a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+  // item 16: the time alone for today, the date with the time when older
+  function stamp(ms) {
+    var d = new Date(ms), now = new Date();
+    var t = pad(d.getHours()) + ':' + pad(d.getMinutes());
+    return sameDay(d, now) ? t : pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + ' ' + t;
+  }
+  function sum(o, keys) { var s = 0; keys.forEach(function (k) { s += o[k]; }); return s; }
+  function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
+  // writes only when the markup changed, so a background sync never swaps a
+  // button out from under a finger
+  function setHTML(el, html) { if (el._h !== html) { el._h = html; el.innerHTML = html; return true; } return false; }
+
+  // ================= sample data, the same route as the references =================
+  // Distributes c over keys in proportion to the weights, whole numbers.
+  function spread(c, keys, weights) {
+    var total = 0, out = {}, given = 0;
+    keys.forEach(function (k) { total += weights[k]; });
+    keys.forEach(function (k) { out[k] = total ? Math.floor(c * weights[k] / total) : 0; given += out[k]; });
+    var i = 0;
+    while (given < c && total) { var k = keys[i % keys.length]; if (weights[k] > 0) { out[k] += 1; given += 1; } i += 1; }
+    return out;
+  }
+  function poiOf058(n) {
+    // the table of main-screen.html's sample generator, plus each POI's split
+    if (n === 57) return { t: 'int', m: { L: 18, St: 9, R: 17 }, s: { N: 18, S: 14, W: 9, E: 5 } };
+    if (n === 168) return { t: 'nd', c: 0 };
+    if (n === 122) return { t: 'int', m: { L: 26, St: 13, R: 27 } , c: 66 };
+    if (n === 124) return { t: 'int', m: { L: 28, St: 13, R: 27 }, s: { N: 24, S: 20, W: 14, E: 10 } };
+    if (n === 135) return { t: 'int', m: { L: 28, St: 14, R: 28 }, s: { N: 25, S: 21, W: 14, E: 10 } };
+    if (n === 136) return { t: 'int', m: { L: 16, St: 8, R: 17 }, s: { N: 16, S: 14, W: 11, E: 0 } };
+    if (n === 138) return { t: 'nost', m: { L: 15, St: 0, R: 15 }, s: { N: 12, S: 9, W: 6, E: 3 } };
+    if (n <= 48) return { t: 'int', c: 70 };
+    var t = n % 19 === 0 ? 'str' : (n % 23 === 0 ? 'nost' : 'int');
+    var T = TYPES[t].target, k = (n * 37) % 23;
+    if (k < 5) return { t: t, c: T };
+    if (k < 9) return { t: t, c: 0 };
+    return { t: t, c: 1 + ((n * 11) % (T - 1)) };
+  }
+  function buildRoute(code) {
+    var num = parseInt(code.slice(-3), 10), pois = {};
+    for (var n = 1; n <= N_POI; n++) {
+      var p;
+      if (code === 'R20890-058') p = poiOf058(n);
+      else {
+        var t = n % 19 === 0 ? 'str' : (n % 23 === 0 ? 'nost' : 'int');
+        var T = TYPES[t].target;
+        var doneUpTo = { 54: 197, 55: 197, 56: 141, 57: 88 }[num] || 0;
+        p = { t: t, c: n <= doneUpTo ? T : 0 };
+      }
+      var type = p.t, split = TYPES[type].split;
+      var m = p.m || spread(p.c, MANS, split);
+      var c = sum(m, MANS);
+      var s = p.s || spread(c, SIDES, { N: 3 + (n * 7) % 5, S: 3 + (n * 3) % 4, W: 2 + (n * 5) % 4, E: 1 + (n * 11) % 3 });
+      pois[n] = { n: n, type: type, base: { m: m, s: s } };
+    }
+    return { code: code, pois: pois, active: code === 'R20890-058' ? 136 : firstOpen(pois) };
+  }
+  function firstOpen(pois) {
+    for (var n = 1; n <= N_POI; n++) { var T = TYPES[pois[n].type].target; if (T && sum(pois[n].base.m, MANS) < T) return n; }
+    return 1;
+  }
+
+  // ================= state =================
+  var state;
+  var seq = 0;
+  function freshState() {
+    var routes = {};
+    ROUTES.forEach(function (r) { routes[r] = buildRoute(r); });
+    var passes = [];
+    // the passes this tablet recorded earlier on route 058, all delivered and
+    // inside the sheet's numbers already (frame A of history.html)
+    var now = Date.now(), MIN = 60000;
+    var fake = [
+      [136, 'L', 'S', 2], [136, 'R', 'N', 4], [136, 'St', 'W', 11], [136, 'L', 'N', 15], [136, 'R', 'S', 20],
+      [136, 'L', 'W', 24], [136, 'St', 'N', 30], [136, 'R', 'W', 35], [136, 'L', 'S', 41], [136, 'R', 'N', 46],
+      [135, 'R', 'E', 52], [135, 'L', 'S', 55], [135, 'St', 'N', 59], [135, 'R', 'W', 63], [135, 'L', 'E', 68],
+      [134, 'L', 'N', 74], [134, 'R', 'S', 78], [134, 'St', 'W', 83], [133, 'St', 'N', 1440 + 62],
+      [133, 'St', 'S', 1440 + 66], [133, 'St', 'N', 1440 + 71], [132, 'L', 'E', 1440 + 80]
+    ];
+    fake.reverse().forEach(function (f) {
+      seq += 1;
+      passes.push({ id: 'p' + seq, seq: seq, route: 'R20890-058', poi: f[0], man: f[1], side: f[2], at: now - f[3] * MIN, status: 'sent' });
+    });
+    return {
+      route: 'R20890-058', routes: routes, passes: passes, open: null, menu: null, overlay: null,
+      scope: 'poi', dialog: null, online: true, refuseNext: false, sound: true, theme: 'light',
+      lastSync: now - 2 * MIN, lastLoad: now - 29 * 60 * MIN, conn: true, bounce: null, dial: 'needle', railN: null
+    };
+  }
+  state = freshState();
+
+  function route() { return state.routes[state.route]; }
+  // online only when the test switch is on and the tablet has a network
+  function netOn() { return state.online && navigator.onLine !== false; }
+  function poi(n) { return route().pois[n === undefined ? route().active : n]; }
+  function passesOf(r, n) { return state.passes.filter(function (x) { return x.route === r && (n === undefined || x.poi === n); }); }
+  // numbers on screen = the baseline plus the waiting events (data-model.md):
+  // a waiting pass adds one, a queued removal of a delivered pass takes one away
+  function counts(p) {
+    var m = { L: p.base.m.L, St: p.base.m.St, R: p.base.m.R };
+    var s = { N: p.base.s.N, S: p.base.s.S, W: p.base.s.W, E: p.base.s.E };
+    passesOf(state.route, p.n).forEach(function (x) {
+      var d = x.status === 'waiting' ? 1 : x.status === 'deleted' ? -1 : 0;
+      m[x.man] += d; s[x.side] += d;
+    });
+    var mt = sum(m, MANS), st = sum(s, SIDES);
+    return { m: m, s: s, total: st, mt: mt, err: mt !== st };
+  }
+  function statusOf(p, k) {
+    var T = TYPES[p.type].target;
+    k = k || counts(p);
+    if (!T) return 'nd';
+    if (k.err) return 'err';
+    if (k.total >= T) return 'done';
+    return k.total > 0 ? 'part' : '';
+  }
+  function routeTotals() {
+    var done = 0, togo = 0, poisDone = 0, errs = 0, drivable = 0;
+    for (var n = 1; n <= N_POI; n++) {
+      var p = poi(n), T = TYPES[p.type].target, k = counts(p);
+      if (T) drivable += 1;
+      done += Math.min(k.total, T); togo += Math.max(0, T - k.total);
+      if (T && k.total >= T && !k.err) poisDone += 1;
+      if (k.err && T) errs += 1;
+    }
+    return { done: done, togo: togo, poisDone: poisDone, errs: errs, drivable: drivable };
+  }
+
+  // the reason a maneuver cannot take a pass now, or null
+  function lockOf(p, k, man) {
+    var T = TYPES[p.type], st = statusOf(p, k);
+    if (st === 'nd') return { cls: 'info', text: 'This POI is not drivable', all: true };
+    if (st === 'err') return { cls: 'err', text: 'Sheet error: sides and maneuvers disagree', all: true };
+    if (st === 'done') return { cls: 'ok', text: 'This POI is done: ' + k.total + ' of ' + T.target, all: true };
+    if (man) {
+      if (!T.split[man]) return { cls: 'info', text: T.cap };
+      if (k.m[man] >= T.split[man]) return { cls: 'info', text: MAN_NAME[man] + ' is done: ' + k.m[man] + ' of ' + T.split[man] };
+    }
+    return null;
+  }
+
+  // ================= rendering =================
+  function render() {
+    renderTop();
+    renderColumn();
+    renderHead();
+    renderPill();
+    renderCard();
+    renderStage();
+    renderBar();
+    renderSummary();
+    renderOverlays();
+    renderHistory();
+    document.documentElement.setAttribute('data-theme', state.theme);
+    if (typeof compass !== 'undefined' && compass) compass.draw();
+  }
+
+  function renderTop() {
+    setHTML($('routeBtn'), esc(state.route) + icon(state.menu === 'routes' ? 'i-chev-up' : 'i-chev-down'));
+    var adds = state.passes.filter(function (x) { return x.status === 'waiting'; }).length;
+    var rems = state.passes.filter(function (x) { return x.status === 'deleted'; }).length;
+    var waiting = adds + rems;
+    var refused = state.passes.filter(function (x) { return x.status === 'rejected'; }).length;
+    var b = $('syncBtn'), text, cls = '';
+    var what = adds && rems ? plural(waiting, 'change', 'changes') : adds ? plural(adds, 'pass', 'passes') : plural(rems, 'removal', 'removals');
+    if (!state.conn) { text = 'Connection not set up'; cls = 'off'; }
+    else if (refused && waiting) { text = waiting + ' waiting · ' + refused + ' not accepted'; cls = 'bad'; }
+    else if (refused) { text = plural(refused, 'pass', 'passes') + ' not accepted'; cls = 'bad'; }
+    else if (waiting) { text = what + ' waiting for network'; cls = 'wait'; }
+    else if (!netOn()) { text = 'No connection'; cls = 'off'; }
+    else text = 'All sent · ' + stamp(state.lastSync);
+    b.className = 'sync' + (cls ? ' ' + cls : '');
+    b.setAttribute('aria-expanded', state.menu === 'sync' ? 'true' : 'false');
+    setHTML(b, '<span class="dot"></span>' + esc(text) + icon(state.menu === 'sync' ? 'i-chev-up' : 'i-chev-down'));
+  }
+
+  var colBuilt = null;
+  function renderColumn() {
+    var col = $('col');
+    var key = state.route;
+    var tot = routeTotals();
+    var dots = '', rows = '';
+    var active = route().active;
+    for (var n = 1; n <= N_POI; n++) {
+      var p = poi(n), k = counts(p), st = statusOf(p, k), T = TYPES[p.type].target;
+      dots += '<i class="' + (n === active ? 'act' : st) + '"></i>';
+      var tag = st === 'nd' ? 'not drivable' : st === 'err' ? 'error' : st === 'done' ? (k.total > T ? 'done +' + (k.total - T) : 'done') : (T - k.total) + ' to go';
+      var pct = T ? Math.round(Math.min(k.total, T) / T * 100) : 0;
+      var rcls = 'row' + (st && st !== 'part' ? ' ' + st : '') + (n === active ? ' active' : '');
+      rows += '<button class="' + rcls + '" type="button" data-poi="' + n + '" aria-label="POI ' + n + '">' +
+        '<span class="rn">' + n + '</span><span class="rc"><span class="rb"><i style="width: ' + pct + '%"></i></span>' +
+        '<span class="rt">' + tag + '</span></span></button>';
+    }
+    var rail = RAIL.map(function (r) { return '<span style="' + railTop(r) + '">' + r + '</span>'; }).join('');
+    if (state.railN) rail += '<div class="finger" style="' + railTop(state.railN) + '" aria-hidden="true"></div>';
+    var bubble = state.railN ? '<div class="bubble" style="' + railTop(state.railN) + '" aria-hidden="true">' + state.railN + '</div>' : '';
+    var list = col.querySelector('.list');
+    var keep = list && colBuilt === key ? list.scrollTop : null;
+    var html = '<button class="mmap" type="button" data-act="grid" aria-label="Open the grid of all POIs"><span class="mm"><span class="dots">' + dots +
+      '</span><span class="mcap"><span>' + tot.poisDone + ' of ' + tot.drivable + ' done</span><span class="iw">Open' + icon('i-chev-right') + '</span></span></span>' +
+      '<span class="mline"><svg class="gi"><use href="#i-grid"/></svg><span>' + tot.poisDone + ' of ' + tot.drivable + '</span><span class="iw">Open' + icon('i-chev-right') + '</span></span></button>' +
+      '<div class="colbody"><div class="list">' + rows + '</div><div class="rail" aria-label="Jump through the POI list">' + rail + '</div>' + bubble + '</div>';
+    if (!setHTML(col, html) && colBuilt === key) return;
+    list = col.querySelector('.list');
+    if (keep !== null) list.scrollTop = keep;
+    else centreList(active);
+    colBuilt = key;
+  }
+  function railTop(n) {
+    var f = ((n - 1) / (N_POI - 1)).toFixed(4);
+    return 'top: calc(var(--s-2) + var(--t-small) / 2 + ' + f + ' * (100% - 2 * var(--s-2) - var(--t-small)))';
+  }
+  // a whole row at the top edge (item 56)
+  function centreList(n) {
+    var list = $('col').querySelector('.list');
+    var row = list && list.firstElementChild;
+    if (!row) return;
+    var rh = row.offsetHeight || 1;
+    var top = Math.min((n - 1) * rh + rh / 2 - list.clientHeight / 2, list.scrollHeight - list.clientHeight);
+    list.scrollTop = Math.max(0, Math.floor(top / rh) * rh);
+  }
+
+  function renderHead() {
+    var p = poi(), k = counts(p), T = TYPES[p.type], st = statusOf(p, k);
+    var cnt, rest, restCls = 'rest';
+    if (st === 'nd') { cnt = 'Not drivable'; rest = 'Not counted'; }
+    else {
+      cnt = k.total + ' of ' + T.target;
+      if (st === 'err') rest = '<span>Sides ' + k.total + ' ·</span> <span>maneuvers ' + k.mt + '</span>';
+      else if (st === 'done') { restCls += ' ok'; rest = k.total > T.target ? 'Done · ' + (k.total - T.target) + ' over target' : 'Done'; }
+      else rest = (T.target - k.total) + ' to go';
+    }
+    setHTML($('head'), '<div class="big">' + p.n + '</div><div class="hcol"><div class="plabel">POI</div>' +
+      '<div class="cnt" id="cnt">' + cnt + '</div><div class="' + restCls + '">' + rest + '</div></div>');
+  }
+
+  function ticon(type) {
+    if (type === 'nd') return '<span class="ticon nd"><svg class="sb"><use href="#i-ban"/></svg></span>';
+    var sp = TYPES[type].split, h = '<span class="ticon">';
+    MANS.forEach(function (m) { if (sp[m]) h += '<svg class="' + SLOT[m] + '"><use href="#' + MAN_ICON[m] + '"/></svg>'; });
+    return h + '</span>';
+  }
+  function splitLine(type, withPasses) {
+    var T = TYPES[type];
+    if (type === 'nd') return 'Not counted';
+    var parts = MANS.filter(function (m) { return T.split[m]; });
+    var h = withPasses ? '<span class="tp">' + T.target + ' passes ·</span> ' : T.target + ' passes · ';
+    return h + parts.map(function (m, i) {
+      return '<span class="iw">' + icon(MAN_ICON[m]) + T.split[m] + (i < parts.length - 1 ? ' ·' : '') + '</span>';
+    }).join(' ');
+  }
+  function renderPill() {
+    var p = poi();
+    var b = $('pill');
+    b.setAttribute('aria-label', 'POI type, tap to ' + (state.menu === 'type' ? 'close' : 'change'));
+    setHTML(b, ticon(p.type) + '<span class="tl"><b>' + TYPES[p.type].label + '</b><small>' + splitLine(p.type, true) +
+      '</small></span><span class="tchg"><span>Change</span>' + icon(state.menu === 'type' ? 'i-chev-up' : 'i-chev-down') + '</span>');
+  }
+
+  function renderCard() {
+    var p = poi(), k = counts(p), T = TYPES[p.type];
+    var tiles = MANS.map(function (m) {
+      var share = T.split[m], have = k.m[m], cls = 'nc', val, pct;
+      if (!share) { cls += ' off'; val = '—'; pct = 0; }
+      else if (have < share) { val = (share - have) + '<small>more</small>'; pct = Math.round(have / share * 100); }
+      else if (have === share) { cls += ' ok'; val = '<b class="dn">Done</b>'; pct = 100; }
+      else { cls += ' over'; val = '+' + (have - share) + '<small>over</small>'; pct = 100; }
+      return '<div class="' + cls + '"><span class="nh">' + icon(MAN_ICON[m]) + MAN_NAME[m] + '</span><span class="nv">' + val +
+        '</span><span class="nb"><i style="width: ' + pct + '%"></i></span></div>';
+    }).join('');
+    var sides = SIDES.map(function (s) {
+      return '<div class="sv' + (k.s[s] ? '' : ' z') + '"><span class="svl">' + s + '</span><span class="svv">' + k.s[s] + '</span></div>';
+    }).join('');
+    setHTML($('card'), '<div class="sph"><span class="spt">STILL NEEDED</span></div><div class="need">' + tiles + '</div>' +
+      '<div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">' + plural(k.total, 'pass', 'passes') + '</span></div>' +
+      '<div class="sides4">' + sides + '</div>');
+  }
+
+  function renderStage() {
+    var p = poi(), k = counts(p);
+    var stage = $('stage');
+    stage.classList.toggle('open', !!state.open);
+    var caption = null;
+    MANS.forEach(function (m) {
+      var d = stage.querySelector('[data-man="' + m + '"]');
+      var lk = lockOf(p, k, m);
+      d.classList.toggle('locked', !!lk);
+      d.classList.toggle('on', state.open === m);
+      d.setAttribute('aria-label', MAN_NAME[m] + (lk ? ', locked' : ''));
+      if (lk && (!caption || lk.all)) caption = lk;
+    });
+    SIDES.forEach(function (s) {
+      var b = stage.querySelector('[data-side="' + s + '"]');
+      b.classList.toggle('bounce', state.bounce === s);
+    });
+    var lock = $('lock');
+    if (caption && !state.open) { lock.hidden = false; lock.className = 'lock ' + caption.cls; lock.textContent = caption.text; }
+    else { lock.hidden = true; }
+  }
+
+  function renderBar() {
+    var p = poi();
+    var mine = passesOf(state.route, p.n).filter(function (x) { return x.status === 'waiting' || x.status === 'sent'; });
+    var ever = passesOf(state.route, p.n).length > 0;
+    var h = '<button class="btn' + (ever && mine.length ? '' : ' off') + '" type="button" data-act="undo">Undo last</button>' +
+      '<button class="btn" type="button" data-act="history">History</button>';
+    if (!(ever && mine.length)) h += '<span class="barnote">Nothing to undo</span>';
+    h += '<div class="summary sumbar" id="sumbar"></div>';
+    if (state.open) h += '<button class="btn cancel" type="button" data-act="cancel">Cancel</button>';
+    setHTML($('bar'), h);
+  }
+
+  function summaryHtml() {
+    var t = routeTotals();
+    var seg = ['Done ' + fmt(t.done), fmt(t.togo) + ' to go', t.poisDone + ' of ' + t.drivable + ' POIs done'];
+    if (t.errs) seg.push(plural(t.errs, 'error', 'errors'));
+    return seg.map(function (s, i) {
+      return '<span' + (t.errs && i === seg.length - 1 ? ' class="err"' : '') + '>' + s + (i < seg.length - 1 ? ' ·' : '') + '</span>';
+    }).join(' ');
+  }
+  function renderSummary() {
+    var h = summaryHtml();
+    setHTML($('sumport'), h);
+    var sb = $('sumbar'); if (sb) setHTML(sb, h);
+  }
+
+  // ---- overlays: menus, the grid, dialogs, the tools ----
+  function renderOverlays() {
+    var h = '';
+    if (state.menu === 'routes') {
+      h += '<div class="rmenu" role="listbox" aria-label="Routes">' + ROUTES.map(function (r) {
+        var R = state.routes[r], done = 0, drivable = 0;
+        for (var n = 1; n <= N_POI; n++) { var q = R.pois[n], T = TYPES[q.type].target; if (T) drivable += 1; if (T && sum(q.base.m, MANS) >= T) done += 1; }
+        if (r === state.route) done = routeTotals().poisDone;
+        return '<button class="ritem' + (r === state.route ? ' on' : '') + '" type="button" data-route="' + r + '"><b>' + r + '</b><small>' + done + ' of ' + drivable + ' done</small>' + icon('i-check', 'chk') + '</button>';
+      }).join('') + '</div>';
+    }
+    if (state.menu === 'type') {
+      var p = poi();
+      h += '<div class="pop" role="dialog" aria-label="POI type"><div class="pt">POI ' + p.n + ' TYPE</div>' + TYPE_ORDER.map(function (t) {
+        return '<button class="opt' + (t === p.type ? ' on' : '') + '" type="button" data-type="' + t + '">' + ticon(t) +
+          '<span class="ol"><b>' + TYPES[t].label + '</b><small>' + splitLine(t, false) + '</small></span>' + icon('i-check', 'chk') + '</button>';
+      }).join('') + '</div>';
+    }
+    if (state.menu === 'sync') h += syncHtml();
+    if (state.menu === 'tools') h += toolsHtml();
+    if (state.overlay === 'grid') {
+      var cells = '', active = route().active;
+      for (var n = 1; n <= N_POI; n++) {
+        var q = poi(n), k = counts(q), st = statusOf(q, k), T = TYPES[q.type].target;
+        var pct = T ? Math.round(Math.min(k.total, T) / T * 100) : 0;
+        cells += '<button class="cell' + (st ? ' ' + st : '') + (n === active ? ' active' : '') + '" type="button" data-poi="' + n + '" aria-label="POI ' + n + '">' +
+          '<span class="cn">' + n + '</span><span class="cb"><i style="width: ' + pct + '%"></i></span></button>';
+      }
+      h += '<button class="scrim" type="button" data-act="close" aria-label="Close the grid"></button>' +
+        '<div class="sheet" role="dialog" aria-label="All POIs"><div class="shead"><button class="xbtn" type="button" data-act="close" aria-label="Close"><svg><use href="#i-x"/></svg></button>' +
+        '<span class="stt"><span class="stitle">All POIs</span><span class="sroute">' + state.route + '</span></span></div>' +
+        '<div class="legend"><span class="lg"><span class="sw act"></span>Current</span><span class="lg"><span class="sw done"></span>Done</span>' +
+        '<span class="lg"><span class="sw part"></span>In progress</span><span class="lg"><span class="sw"></span>Not started</span>' +
+        '<span class="lg"><span class="sw err"></span>Sheet error</span><span class="lg"><span class="sw nd"></span>Not drivable</span></div>' +
+        '<div class="grid" id="grid">' + cells + '</div></div>';
+    }
+    if (state.dialog) {
+      var d = state.dialog;
+      h += '<button class="scrim top" type="button" data-act="dlg-cancel" aria-label="Cancel"></button>' +
+        '<div class="dlg" role="alertdialog" aria-modal="true" aria-label="' + esc(d.title) + '"><div class="dtitle">' + esc(d.title) + '</div>' +
+        (d.chip ? '<div class="dchip">' + d.chip + '</div>' : '') + '<div class="dbody">' + esc(d.body) + '</div>' +
+        '<div class="dbtns"><button class="dbtn" type="button" data-act="dlg-cancel">Cancel</button>' +
+        '<button class="dbtn ' + d.okCls + '" type="button" data-act="dlg-ok">' + esc(d.ok) + '</button></div></div>';
+    }
+    var ov = $('overlays');
+    var gridKeep = null, g0 = $('grid');
+    if (g0) gridKeep = g0.scrollTop;
+    if (!setHTML(ov, h)) return;
+    var g = $('grid');
+    if (g) {
+      if (gridKeep !== null) g.scrollTop = gridKeep;
+      else centreGrid(g);
+    }
+  }
+  function centreGrid(g) {
+    var cell = g.firstElementChild;
+    if (!cell) return;
+    var rh = g.children[10] ? g.children[10].offsetTop - cell.offsetTop : cell.offsetHeight;
+    var row = Math.floor((route().active - 1) / 10);
+    var top = Math.min(row * rh + rh / 2 - g.clientHeight / 2, g.scrollHeight - g.clientHeight);
+    g.scrollTop = Math.max(0, Math.floor(top / rh) * rh);
+  }
+
+  // ---- History (items 12, 13, 14, 38, 41, 44, 45, 47, 48) ----
+  function renderHistory() {
+    var main = $('main');
+    var open = state.overlay === 'history';
+    main.classList.toggle('histopen', open);
+    var old = main.querySelector('.hist');
+    if (!open) { if (old) old.remove(); return; }
+    var keep = old ? old.querySelector('.hlist').scrollTop : 0;
+    var p = poi(), all = state.scope === 'poi' ? passesOf(state.route, p.n) : passesOf(state.route);
+    all = all.slice().sort(function (a, b) { return b.seq - a.seq; });
+    var counted = all.filter(function (x) { return x.status === 'waiting' || x.status === 'sent'; }).length;
+    var removals = passesOf(state.route).filter(function (x) { return x.status === 'deleted'; }).length;
+    var rows = all.map(function (x) {
+      var num = state.scope === 'route' ? '<span class="hn">' + x.poi + '</span>' : '';
+      var mv = '<span class="hmv">' + icon(MAN_ICON[x.man]) + SIDE_NAME[x.side] + '</span>';
+      var tm = '<span class="htm">' + stamp(x.at) + '</span>';
+      if (x.status === 'deleted') {
+        return '<div class="hr del"><div class="hl1"><div class="htx">' + num + tm + mv + '<span class="hst wait"><span class="dot"></span>Removal waiting</span></div></div></div>';
+      }
+      var del = '<button class="hdel" type="button" data-del="' + x.id + '" aria-label="Delete this pass">Delete</button>';
+      if (x.status === 'rejected') {
+        return '<div class="hr rej"><div class="hl1"><div class="htx">' + num + tm + mv + '<span class="hst rej">Not accepted</span></div></div>' +
+          '<p class="hwhy">' + esc(REASON[x.reason] || 'The sheet could not write this change. Send it again.') + '</p>' +
+          '<div class="hacts"><button class="btn" type="button" data-again="' + x.id + '">Send again</button>' + del + '</div></div>';
+      }
+      var lab = x.status === 'waiting' ? '<span class="hst wait"><span class="dot"></span>Waiting</span>' : '<span class="hst">Sent</span>';
+      return '<div class="hr"><div class="hl1"><div class="htx">' + num + tm + mv + lab + '</div>' + del + '</div></div>';
+    }).join('');
+    var list;
+    if (!all.length) {
+      var k = counts(p);
+      var line = k.total ? 'The ' + plural(k.total, 'pass', 'passes') + ' of POI ' + p.n + ' reached the sheet another way, typed in by hand. Correct them in the sheet.'
+        : 'Nothing has been recorded at POI ' + p.n + ' yet.';
+      list = '<div class="hlist empty"><div class="hempty"><b>No passes from this tablet</b><p>' + line + '</p></div></div>';
+    } else {
+      list = '<div class="hlist" data-scope="' + state.scope + '">' + rows + '</div>';
+    }
+    var sub = state.scope === 'poi'
+      ? '<span class="chip amber">POI ' + p.n + '</span><span class="hctx">' + state.route + ' · Vienna</span>'
+      : '<span class="chip amber">' + state.route + '</span><span class="hctx">Vienna</span>';
+    var h = '<header class="hh"><button class="xbtn" type="button" data-act="close" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2>' +
+      '<div class="seg" role="tablist" aria-label="Scope"><button class="sg' + (state.scope === 'poi' ? ' on' : '') + '" type="button" role="tab" data-scope="poi">POI</button>' +
+      '<button class="sg' + (state.scope === 'route' ? ' on' : '') + '" type="button" role="tab" data-scope="route">Route</button></div></header>' +
+      '<div class="hsub">' + sub + '<span class="chip">' + plural(counted, 'pass', 'passes') + '</span></div>' +
+      (removals ? '<div class="hq"><span class="dot"></span>' + plural(removals, 'removal', 'removals') + ' waiting to be sent</div>' : '') +
+      list + '<p class="hfoot">History shows only what this tablet recorded</p>';
+    var sec = old || document.createElement('section');
+    sec.className = 'hist'; sec.setAttribute('aria-label', 'History');
+    if (!setHTML(sec, h) && old) return;
+    if (!old) main.appendChild(sec);
+    var hl = sec.querySelector('.hlist');
+    if (hl && old) hl.scrollTop = keep;
+  }
+
+  // ---- the sync panel: status, Send now, Load from sheet, Connection ----
+  function syncHtml() {
+    var adds = state.passes.filter(function (x) { return x.status === 'waiting'; }).length;
+    var rems = state.passes.filter(function (x) { return x.status === 'deleted'; }).length;
+    var waiting = adds + rems;
+    var refused = state.passes.filter(function (x) { return x.status === 'rejected'; }).length;
+    var what = adds && rems ? plural(waiting, 'change', 'changes') : adds ? plural(adds, 'pass', 'passes') : plural(rems, 'removal', 'removals');
+    var cls = '', title, line;
+    if (!state.conn) { cls = 'off'; title = 'Connection not set up'; line = 'Passes are kept on this tablet until it is set up.'; }
+    else if (refused) { cls = 'bad'; title = plural(refused, 'pass', 'passes') + ' not accepted'; line = 'The sheet refused ' + (refused === 1 ? 'it' : 'them') + '. Fix the cause in the sheet, then send ' + (refused === 1 ? 'it' : 'them') + ' again from History.'; }
+    else if (waiting && !netOn()) { cls = 'wait'; title = what + ' waiting for network'; line = 'Kept on this tablet. They go out on their own when the network is back.'; }
+    else if (waiting) { cls = 'wait'; title = 'Sending ' + what; line = 'Last sent ' + stamp(state.lastSync); }
+    else if (!netOn()) { cls = 'off'; title = 'No connection'; line = 'Nothing is waiting. Last sent ' + stamp(state.lastSync) + '.'; }
+    else { title = 'All sent'; line = 'Last sent ' + stamp(state.lastSync); }
+    var noNet = !netOn(), noConn = !state.conn;
+    function row(act, label, small, off, go) {
+      return '<button class="opt' + (off ? ' off' : '') + '" type="button" data-act="' + act + '"' + (off ? ' aria-disabled="true"' : '') + '>' +
+        '<span class="ol"><b>' + label + '</b><small>' + esc(small) + '</small></span>' + (go ? icon('i-chev-right', 'go') : '') + '</button>';
+    }
+    var sendWhy = noConn ? 'Connection not set up' : noNet ? 'No network' : !waiting ? 'Nothing to send' : plural(waiting, 'change', 'changes') + ' go out now';
+    var loadWhy = noConn ? 'Connection not set up' : noNet ? 'No network' : state.route + ' · last loaded ' + stamp(state.lastLoad);
+    return '<div class="pop syncpop" role="dialog" aria-label="Sync">' +
+      '<div class="pt">SYNC · ' + esc($('city').textContent.toUpperCase()) + '</div>' +
+      '<div class="sstat' + (cls ? ' ' + cls : '') + '"><span class="dot"></span><span class="ol"><b>' + esc(title) + '</b><small>' + esc(line) + '</small></span></div>' +
+      (refused && state.conn ? row('showhist', 'Show in History', plural(refused, 'pass', 'passes') + ' to fix or delete', false, true) : '') +
+      '<div class="sdiv"></div>' +
+      row('sendnow', 'Send now', sendWhy, noConn || noNet || !waiting, false) +
+      row('loadsheet', 'Load from sheet', loadWhy, noConn || noNet, false) +
+      '<div class="sdiv"></div>' +
+      row('conn', noConn ? 'Set up connection' : 'Connection', 'Script URL and access key for ' + $('city').textContent, false, true) +
+      '</div>';
+  }
+
+  // ---- the tools menu: checking tool of the prototype ----
+  function toolsHtml() {
+    var c = compass.status();
+    var items = [
+      ['theme', 'Theme', state.theme === 'dark' ? 'Dark' : 'Light'],
+      ['sound', 'Sound', state.sound ? 'On' : 'Off'],
+      ['network', 'Network', !state.online ? 'Offline (test)' : navigator.onLine === false ? 'No network on the tablet' : 'Online'],
+      ['refuse', 'Next send', state.refuseNext ? 'Refused (test)' : 'Accepted'],
+      ['conn', 'Connection', state.conn ? 'Set up' : 'Not set up'],
+      ['dial', 'Compass dial', state.dial === 'needle' ? 'Needle turns' : 'Card turns'],
+      ['gps', 'GPS', compass.gpsOn() ? 'On' : 'Off'],
+      ['savelog', 'Save sensor log', compass.rows() + ' rows, no coordinates'],
+      ['full', 'Full screen', document.fullscreenElement ? 'On' : 'Off'],
+      ['reset', 'Reset sample data', 'Back to the start']
+    ];
+    return '<div class="rmenu toolsmenu" role="menu" aria-label="Prototype tools">' +
+      '<div class="tnote diag">' + c.lines.map(function (l) { return '<b>' + esc(l[0]) + '</b> ' + esc(l[1]); }).join('<br>') + '</div>' +
+      items.map(function (it) {
+        return '<button class="ritem" type="button" data-tool="' + it[0] + '"><b>' + it[1] + '</b><small>' + esc(it[2]) + '</small></button>';
+      }).join('') + '<div class="tnote">Prototype v19. Nothing is sent anywhere.</div></div>';
+  }
+
+  // ================= feedback: toast, chime, vibration =================
+  var toastTimer;
+  function toast(html) {
+    var t = $('toast');
+    t.innerHTML = html;
+    t.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('on'); }, 2000);
+  }
+  var audio;
+  function chime(up) {
+    if (!state.sound) return;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      audio = audio || new AC();
+      if (audio.state === 'suspended') audio.resume();
+      (up ? [988, 1319] : [660, 494]).forEach(function (f, i) {
+        var t = audio.currentTime + i * 0.07;
+        var o = audio.createOscillator(), g = audio.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(f, t);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.3, t + 0.008);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+        o.connect(g); g.connect(audio.destination); o.start(t); o.stop(t + 0.18);
+      });
+    } catch (e) { /* no sound is fine */ }
+  }
+  function buzz() { try { if (navigator.vibrate) navigator.vibrate(25); } catch (e) { /* none */ } }
+
+  // ================= actions =================
+  var openTimer;
+  function tapMan(m) {
+    if (state.overlay || state.dialog) return;
+    var p = poi(), k = counts(p);
+    if (lockOf(p, k, m)) return;
+    state.menu = null;
+    state.open = state.open === m ? null : m;
+    clearTimeout(openTimer);
+    if (state.open) openTimer = setTimeout(function () {
+      if (state.open) { state.open = null; render(); toast('Closed after 12 s: nothing recorded'); }
+    }, OPEN_TIMEOUT);
+    render();
+  }
+  var busy = false;
+  function record(side) {
+    var m = state.open;
+    if (!m || busy) return;
+    busy = true;
+    clearTimeout(openTimer);
+    var p = poi();
+    seq += 1;
+    state.passes.push({ id: 'p' + seq, seq: seq, route: state.route, poi: p.n, man: m, side: side, at: Date.now(), status: 'waiting' });
+    var k = counts(p);
+    chime(true); buzz();
+    state.bounce = side;
+    render();
+    var c = $('cnt'); if (c) c.classList.add('bump');
+    toast('Saved:' + icon(MAN_ICON[m]) + esc(SIDE_NAME[side]) + ' · ' + k.total + ' of ' + TYPES[p.type].target);
+    scheduleSync();
+    setTimeout(function () { state.open = null; state.bounce = null; busy = false; render(); }, 420);
+  }
+  function passChip(x) {
+    return 'POI ' + x.poi + ' · <span class="iw">' + icon(MAN_ICON[x.man]) + MAN_NAME[x.man] + ' from ' + SIDE_NAME[x.side] + '</span> · ' + stamp(x.at);
+  }
+  function askRemove(x, viaUndo) {
+    state.menu = null;
+    state.dialog = {
+      title: viaUndo ? 'Remove the last pass?' : 'Delete this pass?',
+      chip: passChip(x),
+      body: x.status === 'sent' ? 'It is already in the sheet, so a removal is sent with the next sync.'
+        : x.status === 'rejected' ? 'It never reached the sheet, so it is simply dropped from this tablet.'
+        : 'It has not been sent yet, so it is simply dropped from this tablet.',
+      ok: viaUndo ? 'Remove' : 'Delete', okCls: 'danger',
+      run: function () { removePass(x.id); }
+    };
+    render();
+  }
+  function removePass(id) {
+    var x = state.passes.find(function (y) { return y.id === id; });
+    if (!x) return;
+    var label = icon(MAN_ICON[x.man]) + esc(SIDE_NAME[x.side]);
+    if (x.status === 'sent') { x.status = 'deleted'; toast('Removal queued:' + label); }
+    else { state.passes = state.passes.filter(function (y) { return y.id !== id; }); toast('Removed:' + label); }
+    chime(false);
+    scheduleSync();
+  }
+  function undo() {
+    var p = poi();
+    var mine = passesOf(state.route, p.n).filter(function (x) { return x.status === 'waiting' || x.status === 'sent'; });
+    if (!mine.length) return;
+    mine.sort(function (a, b) { return b.seq - a.seq; });
+    askRemove(mine[0], true);
+  }
+  // item 64: a type change with consequences asks first
+  function pickType(t) {
+    var p = poi(), from = p.type;
+    if (t === from) { state.menu = null; render(); return; }
+    var k = counts(p), T = TYPES[t], lines = [];
+    if (t === 'nd' && k.total > 0) lines.push('It already has ' + k.total + ' passes. They stay in the sheet, but a not drivable POI has no target: the app stops counting it and locks its buttons.');
+    else if (T.target > 0 && k.total > T.target) lines.push('It already has ' + k.total + ' passes. ' + T.label + ' needs ' + T.target + ', so the POI becomes done with ' + plural(k.total - T.target, 'pass', 'passes') + ' over its target. The sheet will flag it as over target.');
+    if (t !== 'nd') {
+      var off = MANS.filter(function (m) { return !T.split[m] && k.m[m] > 0; });
+      var n = off.reduce(function (a, m) { return a + k.m[m]; }, 0);
+      if (n > 0) lines.push(n + (n === 1 ? ' of its passes is ' : ' of its passes are ') + off.map(function (m) { return MAN_NAME[m]; }).join(' or ') + ', which ' + T.label + ' does not allow. They stay in the sheet; delete them in History if they were a mistake.');
+    }
+    function apply() { p.type = t; state.menu = null; state.open = null; toast('POI ' + p.n + ' is now ' + esc(T.label)); }
+    if (!lines.length) { apply(); render(); return; }
+    state.menu = null;
+    state.dialog = { title: 'Change POI ' + p.n + ' to ' + T.label + '?', chip: null, body: lines.join(' '), ok: 'Change', okCls: 'primary', run: apply };
+    render();
+  }
+  function selectPoi(n, centre) {
+    route().active = n;
+    state.open = null; state.menu = null;
+    clearTimeout(openTimer);
+    render();
+    if (centre) centreList(n);
+  }
+
+  // ---- the simulated sync (data-model.md "Sync") ----
+  var syncTimer;
+  function scheduleSync() {
+    clearTimeout(syncTimer);
+    if (!netOn() || !state.conn) return;
+    syncTimer = setTimeout(runSync, SYNC_DELAY);
+  }
+  function runSync() {
+    if (!netOn() || !state.conn) return;
+    var refuse = state.refuseNext, any = false;
+    state.passes = state.passes.filter(function (x) {
+      var R = state.routes[x.route], p = R && R.pois[x.poi];
+      if (x.status === 'waiting') {
+        any = true;
+        if (refuse) { x.status = 'rejected'; x.reason = 'text-in-cell'; return true; }
+        p.base.m[x.man] += 1; p.base.s[x.side] += 1; x.status = 'sent'; return true;
+      }
+      if (x.status === 'deleted') {
+        any = true;
+        if (refuse) { return true; }
+        p.base.m[x.man] -= 1; p.base.s[x.side] -= 1; return false;
+      }
+      return true;
+    });
+    if (refuse && any) state.refuseNext = false;
+    if (any && !refuse) state.lastSync = Date.now();
+    render();
+  }
+
+  // ---- overlays and the Android back gesture (item 66) ----
+  function openOverlay(name) {
+    state.overlay = name; state.menu = null; state.open = null;
+    try { history.pushState({ poi: name }, ''); } catch (e) { /* file:// may refuse */ }
+    render();
+  }
+  function closeTop() {
+    if (state.dialog) { state.dialog = null; render(); return true; }
+    if (state.menu) { state.menu = null; render(); return true; }
+    if (state.overlay) { state.overlay = null; render(); return true; }
+    if (state.open) { state.open = null; render(); return true; }
+    return false;
+  }
+  window.addEventListener('popstate', function () { closeTop(); });
+  window.addEventListener('online', function () { render(); scheduleSync(); });
+  window.addEventListener('offline', function () { render(); });
+  function closeButton() {
+    if (state.overlay && history.state && history.state.poi) { try { history.back(); return; } catch (e) { /* fall through */ } }
+    closeTop();
+  }
+
+  // ---- tools ----
+  function tool(name) {
+    if (name === 'theme') state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    else if (name === 'sound') state.sound = !state.sound;
+    else if (name === 'network') { state.online = !state.online; if (state.online) scheduleSync(); }
+    else if (name === 'refuse') state.refuseNext = !state.refuseNext;
+    else if (name === 'conn') { state.conn = !state.conn; if (state.conn) scheduleSync(); }
+    else if (name === 'dial') state.dial = state.dial === 'needle' ? 'card' : 'needle';
+    else if (name === 'gps') compass.toggleGps();
+    else if (name === 'savelog') { toast('Saved ' + compass.saveLog() + ' rows'); }
+    else if (name === 'full') {
+      try {
+        if (document.fullscreenElement) document.exitFullscreen();
+        else document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(function () { toast('Full screen is blocked here'); });
+      } catch (e) { toast('Full screen is not available here'); }
+    } else if (name === 'reset') { state = freshState(); colBuilt = null; toast('Sample data restored'); }
+    render();
+  }
+
+  // ================= events =================
+  app.addEventListener('click', function (e) {
+    var t = e.target.closest('button');
+    if (!t || !app.contains(t)) return;
+    var a = t.getAttribute('data-act');
+    if (t.hasAttribute('data-man')) { tapMan(t.getAttribute('data-man')); return; }
+    if (t.hasAttribute('data-side')) { record(t.getAttribute('data-side')); return; }
+    if (t.hasAttribute('data-poi')) {
+      var n = +t.getAttribute('data-poi');
+      if (state.overlay === 'grid') { closeButton(); selectPoi(n, true); return; }
+      selectPoi(n, false); return;
+    }
+    if (t.hasAttribute('data-type')) { pickType(t.getAttribute('data-type')); return; }
+    if (t.hasAttribute('data-route')) {
+      state.route = t.getAttribute('data-route'); state.menu = null; state.open = null; colBuilt = null; render(); return;
+    }
+    if (t.hasAttribute('data-scope')) { state.scope = t.getAttribute('data-scope'); render(); return; }
+    if (t.hasAttribute('data-del')) {
+      var x = state.passes.find(function (y) { return y.id === t.getAttribute('data-del'); });
+      if (x) askRemove(x, false); return;
+    }
+    if (t.hasAttribute('data-again')) {
+      var y = state.passes.find(function (z) { return z.id === t.getAttribute('data-again'); });
+      if (y) { y.status = 'waiting'; delete y.reason; toast('Queued again'); scheduleSync(); render(); }
+      return;
+    }
+    if (t.hasAttribute('data-tool')) { tool(t.getAttribute('data-tool')); return; }
+    switch (a) {
+      case 'routes': state.menu = state.menu === 'routes' ? null : 'routes'; state.open = null; render(); break;
+      case 'typemenu': state.menu = state.menu === 'type' ? null : 'type'; state.open = null; render(); break;
+      case 'tools': state.menu = state.menu === 'tools' ? null : 'tools'; render(); break;
+      case 'sync': state.menu = state.menu === 'sync' ? null : 'sync'; state.open = null; render(); break;
+      case 'sendnow': if (t.getAttribute('aria-disabled')) break; clearTimeout(syncTimer); runSync(); break;
+      case 'loadsheet': if (t.getAttribute('aria-disabled')) break; state.lastLoad = Date.now(); state.menu = null; toast('Loaded ' + esc(state.route) + ' from the sheet'); render(); break;
+      case 'showhist': state.scope = 'route'; openOverlay('history'); break;
+      case 'conn': state.menu = null; toast('Connection opens in Settings, not in this prototype'); render(); break;
+      case 'settings': toast('Settings come in prototype v20'); break;
+      case 'grid': openOverlay('grid'); break;
+      case 'history': openOverlay('history'); break;
+      case 'close': closeButton(); break;
+      case 'undo': undo(); break;
+      case 'cancel': clearTimeout(openTimer); state.open = null; render(); break;
+      case 'dlg-cancel': state.dialog = null; render(); break;
+      case 'dlg-ok': var d = state.dialog; state.dialog = null; if (d && d.run) d.run(); render(); break;
+    }
+  });
+  // a tap outside an open menu only closes it: nothing under it reacts,
+  // another menu's control included (item 66). Its own control still
+  // toggles it shut through the click.
+  var MENU_OWN = { routes: '[data-act="routes"]', type: '[data-act="typemenu"]', tools: '[data-act="tools"]', sync: '[data-act="sync"]' };
+  var swallowAt = 0;
+  document.addEventListener('pointerdown', function (e) {
+    if (!state.menu) return;
+    if (e.target.closest('.rmenu, .pop')) return;
+    if (MENU_OWN[state.menu] && e.target.closest(MENU_OWN[state.menu])) return;
+    state.menu = null; render();
+    swallowAt = Date.now();
+    e.stopPropagation(); e.preventDefault();
+  }, true);
+  document.addEventListener('click', function (e) {
+    if (swallowAt && Date.now() - swallowAt < 800) { swallowAt = 0; e.stopPropagation(); e.preventDefault(); }
+  }, true);
+  // menus close when the screen turns (item 66)
+  var lastShape = innerWidth > innerHeight;
+  window.addEventListener('resize', function () {
+    var shape = innerWidth > innerHeight;
+    if (shape !== lastShape) { lastShape = shape; if (state.menu) { state.menu = null; } render(); centreList(route().active); }
+  });
+
+  // ---- the rail: drag along it to run through the list (item 57) ----
+  var dragging = false;
+  function railAt(e) {
+    var rail = $('col').querySelector('.rail');
+    var r = rail.getBoundingClientRect();
+    var f = Math.max(0, Math.min(1, (e.clientY - r.top) / r.height));
+    var n = Math.round(1 + f * (N_POI - 1));
+    if (n !== state.railN) { state.railN = n; renderColumn(); centreList(n); }
+  }
+  $('col').addEventListener('pointerdown', function (e) {
+    if (!e.target.closest('.rail')) return;
+    dragging = true;
+    try { e.target.closest('.rail').setPointerCapture(e.pointerId); } catch (err) { /* fine */ }
+    railAt(e);
+    e.preventDefault();
+  });
+  window.addEventListener('pointermove', function (e) { if (dragging) railAt(e); });
+  window.addEventListener('pointerup', function () { if (dragging) { dragging = false; state.railN = null; var keep = $('col').querySelector('.list').scrollTop; renderColumn(); $('col').querySelector('.list').scrollTop = keep; } });
+
+  // the screen stays awake (item 11); sensors may need a gesture first
+  var woke = false;
+  document.addEventListener('pointerdown', function () {
+    compass.tap();
+    if (woke) return;
+    woke = true;
+    try { if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(function () { /* fine */ }); } catch (e) { /* fine */ }
+    compass.permit();
+  }, true);
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') { woke = false; }
+  });
+
+  // ================= the compass (item 19, data-model.md "Heading") =================
+  // Decided 2026-10-17 after the car tests of the Lenovo Tab M10 Plus (3rd Gen),
+  // project doc claude/tablet-sensor-test-2026-10-17.md:
+  // 1. The GPS course while the car moves at 11 km/h or more. Below that
+  //    speed the course jumps by tens of degrees, and standing it has none.
+  // 2. Between fixes, at stops and through slow turns, the raw gyroscope.
+  //    Its rotation about "up" is the car's turn, "up" being a slow average
+  //    of the accelerometer, so the angle of the mount does not matter. The
+  //    heading is the course at the last good fix plus the turn since then.
+  //    The Generic Sensor API (Gyroscope, Accelerometer) is read first and
+  //    "devicemotion" fills in while it is silent. Android's ready-made
+  //    orientation is not read: on this tablet it gives only zeros. No
+  //    magnet either: this tablet has none.
+  // 3. The motion sensors pause without an error while something else has
+  //    the focus (W3C Generic Sensor, the focus and origin check). A sensor
+  //    counts as working only if a reading came in the last second, on this
+  //    page's own clock. While they are silent the compass keeps the last
+  //    course, dimmed, and the sensors are restarted when the page is
+  //    visible and focused again. Location is asked before the motion
+  //    sensors start, because Chrome's question takes the focus.
+  var compass = (function () {
+    var MOVING = 3;             // m/s (11 km/h): the GPS course is trusted from here
+    var FRESH = 3000;           // ms: a fix older than this is not live
+    var LIVE = 1000;            // ms: a sensor silent longer than this is paused
+    var GYRO_MAX = 10 * 60000;  // ms: the turn is trusted this long after a good fix
+    var DT_MAX = 0.2;           // s: the longest step added up at once
+    var STOPPED = 0.3;          // m/s: below this the car stands, for the drift
+    var STILL_MS = 3000;        // ms: a standing car for this long measures the drift
+    var STILL_SPREAD = 2;       // deg/s: a wider spread on any axis means it moved
+    var DRIFT_MAX = 3;          // deg/s: a larger turn is a slow turn, not drift. Below
+                                // 1 km/h a car turns at most about 3 deg/s (5 m radius)
+    var RESTART_GAP = 5000;     // ms: the watchdog restarts the sensors at most this often
+    var CREDIT = 1500;          // ms: a reading this soon after a tap or a restart is credited to it
+    var LOG_MAX = 20000;        // rows: about three hours
+    var RAD = 180 / Math.PI;
+    var car = new Heading.Smoother(0.6);
+
+    function num(v) { return typeof v === 'number' && isFinite(v) ? v : null; }
+    function now() { return performance.now(); }
+    function source(name) {
+      return { name: name, n: 0, empty: 0, err: null, at: 0, prevT: null, w: null, hz: 0, cnt: 0, cntAt: 0 };
+    }
+    var gy = { api: source('api'), dm: source('dm') };
+    var acc = { v: null, up: null, mag: null, n: 0, at: 0, apiAt: 0, first: 0, prevT: null, from: null, err: null };
+    var turn = 0, rate = 0, bias = [0, 0, 0], biasSet = false;
+    var still = { from: 0, sum: null, cnt: 0, min: null, max: null };
+    var motion = 'off', motionAt = 0, apiObj = { g: null, a: null };
+    var fix = null, watch = null, gps = 'off', gpsAt = 0, gpsWanted = true;
+    var anchor = null, heading = null, from = null, pending = false;
+    var everLive = false, paused = false, pausedAt = 0, lastTap = 0, lastRestart = 0;
+    var tally = { pauses: 0, restarts: 0, tap: 0, restart: 0, itself: 0 };
+    var t0 = now(), lastRow = 0, log = [];
+
+    function live(s, t) { return s.n > 0 && t - s.at < LIVE; }
+    function alive(t) { return live(gy.api, t) || live(gy.dm, t); }
+    function gyroOk(t) { return alive(t) && !!acc.up; }
+    function gpsLive(t) {
+      return !!fix && fix.course !== null && fix.speed !== null && fix.speed >= MOVING && t - fix.at < FRESH;
+    }
+
+    // ---- the log: what the sensors did, for the chat (no coordinates) ----
+    var COLS = ['t_s', 'kind', 'note', 'speed_kmh', 'course_deg', 'acc_m', 'heading_deg', 'from',
+      'turn_deg', 'rate_dps', 'api_hz', 'dm_hz', 'gyro_live', 'w_x', 'w_y', 'w_z', 'up_x', 'up_y', 'up_z', 'drift_dps'];
+    function r(v, n) { if (v === null || v === undefined) return ''; var p = Math.pow(10, n); return Math.round(v * p) / p; }
+    function row(kind, note, t) {
+      if (log.length >= LOG_MAX) return;
+      var f = kind === 'gps' ? fix : null, s = live(gy.api, t) ? gy.api : gy.dm, up = acc.up;
+      log.push([r((t - t0) / 1000, 2), kind, note || '',
+        f && f.speed !== null ? r(f.speed * 3.6, 1) : '', f && f.course !== null ? r(f.course, 1) : '', f ? r(f.acc, 1) : '',
+        heading === null ? '' : r(heading, 1), from || '', r(turn, 2), r(rate, 3), r(gy.api.hz, 1), r(gy.dm.hz, 1),
+        alive(t) ? 1 : 0, s.w ? r(s.w[0], 3) : '', s.w ? r(s.w[1], 3) : '', s.w ? r(s.w[2], 3) : '',
+        up ? r(up[0], 3) : '', up ? r(up[1], 3) : '', up ? r(up[2], 3) : '', biasSet ? r(drift(), 3) : '']);
+    }
+    function event(note) { row('ev', note, now()); }
+
+    // ---- the accelerometer: which way is up, in the tablet's own axes ----
+    // At rest it reads +9.8 m/s² pointing up. The tablet stands still in its
+    // mount, so a slow average of the reading is the up direction.
+    function feedAcc(v, stamp, by) {
+      var t = now();
+      if (by === 'dm' && t - acc.apiAt < LIVE) return;
+      if (by === 'api') acc.apiAt = t;
+      if (acc.from !== by) acc.prevT = null;
+      acc.from = by; acc.n += 1; acc.at = t;
+      if (!acc.first) acc.first = t;
+      if (!acc.v) acc.v = v.slice();
+      else {
+        var dt = acc.prevT === null ? 0 : Math.min(Math.max((stamp - acc.prevT) / 1000, 0), DT_MAX);
+        var k = 1 - Math.exp(-dt / (t - acc.first < 2000 ? 0.3 : 3));
+        for (var i = 0; i < 3; i++) acc.v[i] += (v[i] - acc.v[i]) * k;
+      }
+      acc.prevT = stamp;
+      var m = Math.hypot(acc.v[0], acc.v[1], acc.v[2]);
+      acc.mag = m;
+      if (m > 1) acc.up = [acc.v[0] / m, acc.v[1] / m, acc.v[2] / m];
+    }
+
+    // ---- the gyroscope: how fast the car turns, seen from above ----
+    // w is the rotation in deg/s about the tablet's x, y and z axes, by the
+    // right-hand rule. Its part along "up" is the car's turn, positive
+    // counter-clockwise, so the minus sign makes a right turn positive, the
+    // way a heading grows. The stamp is the reading's own time, used only
+    // for the step between two readings of the same source.
+    function feedGyro(s, w, stamp) {
+      var t = now();
+      s.n += 1; s.at = t; s.w = w;
+      if (!s.cntAt) { s.cntAt = t; s.cnt = 0; }
+      s.cnt += 1;
+      if (t - s.cntAt >= 1000) { s.hz = s.cnt * 1000 / (t - s.cntAt); s.cnt = 0; s.cntAt = t; }
+      var lead = s === gy.api || !live(gy.api, t);
+      if (lead) {
+        stillSample(w, t);
+        if (s.prevT !== null && acc.up) {
+          var dt = Math.min(Math.max((stamp - s.prevT) / 1000, 0), DT_MAX);
+          var x = w[0] - bias[0], y = w[1] - bias[1], z = w[2] - bias[2];
+          rate = -(x * acc.up[0] + y * acc.up[1] + z * acc.up[2]);
+          turn += rate * dt;
+        }
+      }
+      s.prevT = stamp;
+      everLive = true;
+      if (paused) resumed(t);
+      if (lead) choose(t);
+    }
+    function resumed(t) {
+      paused = false;
+      // the later of a tap and a restart gets the credit, if it was recent
+      var how = lastTap >= lastRestart ? (t - lastTap < CREDIT ? 'tap' : 'itself') : (t - lastRestart < CREDIT ? 'restart' : 'itself');
+      tally[how] += 1;
+      event('resume by ' + how + ' after ' + Math.round((t - pausedAt) / 1000) + ' s');
+    }
+
+    // ---- the drift: the gyroscope's reading while the car stands ----
+    function drift() { var u = acc.up; return u ? -(bias[0] * u[0] + bias[1] * u[1] + bias[2] * u[2]) : 0; }
+    function stillSample(w, t) {
+      var st = still, i;
+      var stopped = !!fix && fix.speed !== null && fix.speed < STOPPED && t - fix.at < FRESH;
+      if (!stopped) { st.from = 0; return; }
+      if (!st.from) { st.from = t; st.sum = [0, 0, 0]; st.cnt = 0; st.min = w.slice(); st.max = w.slice(); }
+      for (i = 0; i < 3; i++) {
+        st.sum[i] += w[i];
+        if (w[i] < st.min[i]) st.min[i] = w[i];
+        if (w[i] > st.max[i]) st.max[i] = w[i];
+        if (st.max[i] - st.min[i] > STILL_SPREAD) { st.from = 0; return; }
+      }
+      st.cnt += 1;
+      if (t - st.from >= STILL_MS && st.cnt >= 30) {
+        var b = [st.sum[0] / st.cnt, st.sum[1] / st.cnt, st.sum[2] / st.cnt], u = acc.up;
+        st.from = 0;
+        if (u && Math.abs(b[0] * u[0] + b[1] * u[1] + b[2] * u[2]) > DRIFT_MAX) { event('not drift: turning'); return; }
+        for (i = 0; i < 3; i++) bias[i] = biasSet ? bias[i] + (b[i] - bias[i]) * 0.5 : b[i];
+        biasSet = true;
+        event('drift ' + drift().toFixed(2));
+      }
+    }
+
+    // ---- reading the sensors ----
+    function onMotion(e) {
+      var stamp = num(e.timeStamp) || now(), a = e.accelerationIncludingGravity, q = e.rotationRate;
+      if (a && num(a.x) !== null && num(a.y) !== null && num(a.z) !== null) feedAcc([a.x, a.y, a.z], stamp, 'dm');
+      // W3C: alpha is the rate about X, beta about Y, gamma about Z, in deg/s
+      if (q && num(q.alpha) !== null && num(q.beta) !== null && num(q.gamma) !== null) feedGyro(gy.dm, [q.alpha, q.beta, q.gamma], stamp);
+      else gy.dm.empty += 1;
+    }
+    function startApi() {
+      if (typeof window.Gyroscope !== 'function') gy.api.err = 'absent';
+      else {
+        try {
+          var g = new window.Gyroscope({ frequency: 60 });
+          g.addEventListener('reading', function () {
+            if (apiObj.g !== g) return;
+            if (num(g.x) === null || num(g.y) === null || num(g.z) === null) { gy.api.empty += 1; return; }
+            feedGyro(gy.api, [g.x * RAD, g.y * RAD, g.z * RAD], num(g.timestamp) || now());
+          });
+          g.addEventListener('error', function (ev) { if (apiObj.g === g) gy.api.err = ev.error ? ev.error.name : 'error'; });
+          gy.api.err = null;
+          apiObj.g = g;
+          g.start();
+        } catch (e) { gy.api.err = e.name || 'error'; }
+      }
+      if (typeof window.Accelerometer === 'function') {
+        try {
+          var a = new window.Accelerometer({ frequency: 60 });
+          a.addEventListener('reading', function () {
+            if (apiObj.a !== a) return;
+            if (num(a.x) !== null && num(a.y) !== null && num(a.z) !== null) feedAcc([a.x, a.y, a.z], num(a.timestamp) || now(), 'api');
+          });
+          a.addEventListener('error', function (ev) { if (apiObj.a === a) acc.err = ev.error ? ev.error.name : 'error'; });
+          acc.err = null;
+          apiObj.a = a;
+          a.start();
+        } catch (e) { acc.err = e.name || 'error'; }
+      }
+    }
+    function stopApi() {
+      try { if (apiObj.g) apiObj.g.stop(); } catch (e) { /* fine */ }
+      try { if (apiObj.a) apiObj.a.stop(); } catch (e) { /* fine */ }
+      apiObj.g = null; apiObj.a = null;
+    }
+    function startMotion(why) {
+      if (motion === 'on') return;
+      motion = 'on'; motionAt = now();
+      event('motion sensors start: ' + why);
+      startApi();
+      window.addEventListener('devicemotion', onMotion);
+    }
+    function restart(why) {
+      if (motion !== 'on') return;
+      lastRestart = now(); tally.restarts += 1;
+      event('restart: ' + why);
+      stopApi(); startApi();
+      window.removeEventListener('devicemotion', onMotion);
+      window.addEventListener('devicemotion', onMotion);
+    }
+    // after a focus or a return to the page: restart if the sensors stay silent
+    function checkSoon(why) {
+      setTimeout(function () { if (motion === 'on' && !alive(now())) restart(why); }, LIVE + 200);
+    }
+    window.addEventListener('focus', function () { event('focus'); checkSoon('focus'); });
+    window.addEventListener('blur', function () { event('blur'); });
+    document.addEventListener('visibilitychange', function () {
+      event(document.visibilityState);
+      if (document.visibilityState === 'visible') checkSoon('visible');
+    });
+    function watchdog() {
+      var t = now();
+      if (motion === 'on') {
+        if (!alive(t) && !paused && (everLive || t - motionAt > 3000)) {
+          paused = true; pausedAt = t;
+          if (everLive) tally.pauses += 1;
+          event('pause');
+        }
+        if (paused && document.visibilityState === 'visible' && t - lastRestart > RESTART_GAP) restart('watchdog');
+      }
+      choose(t);
+      if (t - lastRow >= 1000) { lastRow = t; row('s', '', t); }
+    }
+    setInterval(watchdog, 500);
+
+    // ---- GPS ----
+    function startGps() {
+      if (!navigator.geolocation) { gps = 'none'; startMotion('no location in this browser'); return; }
+      gps = 'asking'; gpsAt = now();
+      watch = navigator.geolocation.watchPosition(onFix, onFixError, { enableHighAccuracy: true, maximumAge: 0 });
+      // the motion sensors wait for the answer about location: its question takes the focus
+      try {
+        navigator.permissions.query({ name: 'geolocation' }).then(function (p) {
+          if (p.state !== 'prompt') startMotion('location ' + p.state);
+        }).catch(function () { /* the first fix or error starts them */ });
+      } catch (e) { /* the same */ }
+      setTimeout(function () { startMotion('no location answer in 15 s'); }, 15000);
+    }
+    function onFix(pos) {
+      var c = pos.coords, t = now();
+      fix = { course: num(c.heading) === null ? null : Heading.norm(c.heading), speed: num(c.speed), acc: num(c.accuracy), at: t };
+      gps = 'fix';
+      startMotion('location allowed');
+      if (gpsLive(t)) anchor = { car: fix.course, turn: turn, at: t };
+      choose(t);
+      row('gps', '', t);
+    }
+    function onFixError(err) {
+      gps = err && err.code === 1 ? 'denied' : err && err.code === 2 ? 'unavailable' : fix ? 'fix' : 'asking';
+      event('location error ' + (err ? err.code : ''));
+      startMotion('location answered');
+    }
+    function toggleGps() {
+      if (watch !== null) {
+        navigator.geolocation.clearWatch(watch); watch = null; fix = null; gps = 'off'; gpsWanted = false;
+        startMotion('GPS turned off');
+        return;
+      }
+      gpsWanted = true;
+      startGps();
+    }
+
+    // ---- the heading ----
+    function choose(t) {
+      var target = null;
+      if (gpsLive(t)) {
+        from = 'gps';
+        target = anchor && anchor.at === fix.at && gyroOk(t) ? anchor.car + turn - anchor.turn : fix.course;
+      } else if (anchor && gyroOk(t) && t - anchor.at < GYRO_MAX) {
+        from = 'gyro';
+        target = anchor.car + turn - anchor.turn;
+      } else if (anchor) {
+        from = 'stale';
+        target = anchor.car + turn - anchor.turn;
+      } else from = null;
+      heading = target === null ? null : car.push(Heading.norm(target), t);
+      draw();
+    }
+    function draw() {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(function () {
+        pending = false;
+        var svg = document.querySelector('.app svg.compass');
+        if (!svg) return;
+        var needle = svg.querySelector('.needle'), dial = svg.querySelector('.card');
+        var h = heading === null ? 0 : Math.round(heading * 10) / 10;
+        if (state.dial === 'card') { needle.setAttribute('transform', 'rotate(0 48 48)'); dial.setAttribute('transform', 'rotate(' + Heading.norm(-h) + ' 48 48)'); }
+        else { needle.setAttribute('transform', 'rotate(' + h + ' 48 48)'); dial.setAttribute('transform', 'rotate(0 48 48)'); }
+        svg.classList.toggle('idle', heading === null || from === 'stale');
+        svg.setAttribute('aria-label', heading === null ? 'Heading: no reading yet' : 'Heading ' + Math.round(heading) + ' degrees, coming from ' + Heading.approachSide(heading));
+      });
+    }
+
+    // ---- what the Tools menu says ----
+    function kmh(ms) { return Math.round(ms * 3.6); }
+    function secs(ms) { return Math.round(ms / 1000) + ' s'; }
+    function errText(name) {
+      if (name === 'absent') return 'not in this browser';
+      if (name === 'NotAllowedError') return 'blocked: allow Motion sensors for this site';
+      if (name === 'NotReadableError') return 'cannot read the sensor';
+      return 'error: ' + name;
+    }
+    function status() {
+      var t = now(), lines = [], p = location.protocol;
+      lines.push(['Page', p === 'file:' || p === 'content:' ? 'opened from a file: GPS is blocked. Open the GitHub Pages copy'
+        : window.isSecureContext === false ? 'not secure: the browser blocks the sensors. Open the GitHub Pages copy'
+        : 'secure · ' + location.host]);
+      var g;
+      if (gps === 'off') g = gpsWanted ? 'waiting for the first tap' : 'off';
+      else if (gps === 'none') g = 'not in this browser';
+      else if (gps === 'denied') g = 'blocked: allow location for this site and for Chrome';
+      else if (gps === 'unavailable' && !fix) g = 'no position: turn on Location in the tablet settings';
+      else if (!fix) g = 'waiting for a fix (' + secs(t - gpsAt) + ')';
+      else {
+        var age = t - fix.at;
+        g = (fix.acc === null ? 'no accuracy' : '±' + Math.round(fix.acc) + ' m') + ' · ' +
+            (fix.speed === null ? 'no speed' : kmh(fix.speed) + ' km/h') + ' · ' +
+            (fix.course === null ? 'no course' : 'course ' + Math.round(fix.course) + '°') + (age > 3000 ? ' · ' + secs(age) + ' old' : '');
+      }
+      lines.push(['GPS', g]);
+      var y, s = live(gy.api, t) ? gy.api : live(gy.dm, t) ? gy.dm : null;
+      if (motion !== 'on') y = gps === 'off' && gpsWanted ? 'waiting for the first tap' : 'starts after the answer about location';
+      else if (s) y = 'working · ' + Math.round(s.hz) + ' a second · ' + (s === gy.api ? 'Sensor API' : 'devicemotion') + ' · ' +
+        (Math.abs(rate) < 0.5 ? 'not turning' : 'turning ' + (rate > 0 ? 'right ' : 'left ') + Math.abs(rate).toFixed(1) + '°/s');
+      else if (!everLive && gy.api.err && gy.api.err !== 'absent' && !gy.dm.n) y = errText(gy.api.err);
+      else if (!everLive && gy.dm.empty && !gy.dm.n && (!gy.api.n)) y = 'none on this tablet';
+      else if (paused) y = 'paused ' + secs(t - pausedAt) + ', restarting. A tap on the screen wakes it';
+      else y = 'no data yet';
+      lines.push(['Gyroscope', y]);
+      lines.push(['Accelerometer', !acc.n ? (acc.err ? errText(acc.err) : 'no data yet')
+        : t - acc.at < LIVE ? 'working · ' + acc.mag.toFixed(1) + ' m/s²' : 'paused ' + secs(t - acc.at)]);
+      lines.push(['Drift', biasSet ? 'removed · ' + Math.abs(drift()).toFixed(2) + '°/s' : 'not measured yet: it is measured while the car stands']);
+      lines.push(['Pauses', !everLive ? 'no readings yet' : !tally.pauses && !paused ? 'none so far'
+        : tally.pauses + ' · back by restart ' + tally.restart + ', after a tap ' + tally.tap + ', by itself ' + tally.itself +
+          (paused ? ' · paused now' : '')]);
+      var c;
+      if (heading === null) c = 'no heading yet. Drive above 11 km/h so GPS gives the course';
+      else c = (from === 'gps' ? 'from GPS' : from === 'gyro' ? 'from the gyroscope, ' + secs(t - anchor.at) + ' since GPS'
+        : 'last course, ' + secs(t - anchor.at) + ' since GPS, gyroscope ' + (gyroOk(t) ? 'too long without GPS' : 'paused')) +
+        ' · ' + Math.round(heading) + '° · coming from ' + Heading.approachSide(heading);
+      lines.push(['Compass', c]);
+      return { lines: lines };
+    }
+
+    // ---- the first tap starts GPS, every tap is noted ----
+    function permit() { if (watch === null && gps === 'off' && gpsWanted) startGps(); }
+    function tap() { lastTap = now(); }
+    function saveLog() {
+      var head = '# POI Tracker prototype v19 sensor log · started ' + new Date(Date.now() - (now() - t0)).toISOString() +
+        ' · ' + navigator.userAgent;
+      var text = head + '\n' + COLS.join(',') + '\n' + log.map(function (x) { return x.join(','); }).join('\n') + '\n';
+      var a = document.createElement('a'), d = new Date();
+      function two(n) { return (n < 10 ? '0' : '') + n; }
+      a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv' }));
+      a.download = 'prototype-v19-sensors-' + d.getFullYear() + two(d.getMonth() + 1) + two(d.getDate()) + '-' + two(d.getHours()) + two(d.getMinutes()) + '.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 10000);
+      return log.length;
+    }
+    setInterval(function () { if (state.menu === 'tools') render(); }, 1000);
+    return { permit: permit, tap: tap, draw: draw, toggleGps: toggleGps, status: status, saveLog: saveLog,
+             gpsOn: function () { return watch !== null; }, rows: function () { return log.length; } };
+  }());
+
+  render();
+  compass.draw();
+  requestAnimationFrame(function () { centreList(route().active); });
+}());
+
+</script>
+</body>
+</html>
