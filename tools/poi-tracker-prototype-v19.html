@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  POI Tracker — working prototype v19
+  POI Tracker — working prototype v19.1
   One file, for the tablet. Open it in Chrome from GitHub Pages
   (tools/poi-tracker-prototype-v19.html): a downloaded copy gets no
   location, and the compass needs it.
@@ -39,13 +39,21 @@
           "Last sent", "last loaded", "79 of 196 done" counting drivable
           POIs (item 46), and a tap outside an open menu only closes it
           (item 66). "Sheet" on screen, never "tracker".
+  v19.1 2026-10-17: the car test of v19 (claude/prototype-v19.md). The
+          GPS course lags the car by 2 to 3 s in a turn, and v19 took it as
+          north at every fix, mid-turn too. Now the gyroscope drives the
+          needle all the time and GPS checks north only while the car
+          drives straight above 11 km/h, closing 30% of the gap per fix
+          (a gap over 30 degrees at once). Tools adds "GPS checks". On the
+          log of the test drive the error after a manoeuvre falls from a
+          mean of 24.5 degrees (worst 62) to 8 (worst 13).
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#EFF3FA">
-<title>POI Tracker — prototype v19</title>
+<title>POI Tracker — prototype v19.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -1687,7 +1695,7 @@
       '<div class="tnote diag">' + c.lines.map(function (l) { return '<b>' + esc(l[0]) + '</b> ' + esc(l[1]); }).join('<br>') + '</div>' +
       items.map(function (it) {
         return '<button class="ritem" type="button" data-tool="' + it[0] + '"><b>' + it[1] + '</b><small>' + esc(it[2]) + '</small></button>';
-      }).join('') + '<div class="tnote">Prototype v19. Nothing is sent anywhere.</div></div>';
+      }).join('') + '<div class="tnote">Prototype v19.1. Nothing is sent anywhere.</div></div>';
   }
 
   // ================= feedback: toast, chime, vibration =================
@@ -1982,13 +1990,18 @@
 
   // ================= the compass (item 19, data-model.md "Heading") =================
   // Decided 2026-10-17 after the car tests of the Lenovo Tab M10 Plus (3rd Gen),
-  // project doc claude/tablet-sensor-test-2026-10-17.md:
-  // 1. The GPS course while the car moves at 11 km/h or more. Below that
-  //    speed the course jumps by tens of degrees, and standing it has none.
-  // 2. Between fixes, at stops and through slow turns, the raw gyroscope.
-  //    Its rotation about "up" is the car's turn, "up" being a slow average
-  //    of the accelerometer, so the angle of the mount does not matter. The
-  //    heading is the course at the last good fix plus the turn since then.
+  // project docs claude/tablet-sensor-test-2026-10-17.md and claude/prototype-v19.md:
+  // 1. The raw gyroscope drives the needle all the time. Its rotation about
+  //    "up" is the car's turn, "up" being a slow average of the
+  //    accelerometer, so the angle of the mount does not matter. It follows
+  //    a turn at once and drifts about 0.02 deg/s.
+  // 2. GPS tells where north is, but only while the car drives straight at
+  //    11 km/h or more (the gyroscope saw less than 3 deg in the last 2 s).
+  //    In a turn the GPS course lags the car by 2 to 3 s, and v19 took that
+  //    lag in as an error of up to 62 deg. Each straight fix pulls the
+  //    heading 30% of the way to the GPS course, a gap over 30 deg is taken
+  //    whole. Below 11 km/h the course jumps by tens of degrees, standing it
+  //    has none. With the gyroscope silent, the live GPS course is shown.
   //    The Generic Sensor API (Gyroscope, Accelerometer) is read first and
   //    "devicemotion" fills in while it is silent. Android's ready-made
   //    orientation is not read: on this tablet it gives only zeros. No
@@ -2004,7 +2017,11 @@
     var MOVING = 3;             // m/s (11 km/h): the GPS course is trusted from here
     var FRESH = 3000;           // ms: a fix older than this is not live
     var LIVE = 1000;            // ms: a sensor silent longer than this is paused
-    var GYRO_MAX = 10 * 60000;  // ms: the turn is trusted this long after a good fix
+    var GYRO_MAX = 10 * 60000;  // ms: the turn is trusted this long after a GPS check
+    var STRAIGHT_MS = 2000;     // ms: the window that must be straight for a GPS check
+    var STRAIGHT_DEG = 3;       // deg: the most the car may turn in that window
+    var PULL = 0.3;             // the share of the gap to GPS closed at each straight fix
+    var SNAP = 30;              // deg: a gap larger than this is closed at once
     var DT_MAX = 0.2;           // s: the longest step added up at once
     var STOPPED = 0.3;          // m/s: below this the car stands, for the drift
     var STILL_MS = 3000;        // ms: a standing car for this long measures the drift
@@ -2028,7 +2045,7 @@
     var still = { from: 0, sum: null, cnt: 0, min: null, max: null };
     var motion = 'off', motionAt = 0, apiObj = { g: null, a: null };
     var fix = null, watch = null, gps = 'off', gpsAt = 0, gpsWanted = true;
-    var anchor = null, heading = null, from = null, pending = false;
+    var off = null, checkedAt = 0, checks = 0, lastPull = null, hist = [], unsure = false, heading = null, from = null, pending = false;
     var everLive = false, paused = false, pausedAt = 0, lastTap = 0, lastRestart = 0;
     var tally = { pauses: 0, restarts: 0, tap: 0, restart: 0, itself: 0 };
     var t0 = now(), lastRow = 0, log = [];
@@ -2097,6 +2114,10 @@
           var x = w[0] - bias[0], y = w[1] - bias[1], z = w[2] - bias[2];
           rate = -(x * acc.up[0] + y * acc.up[1] + z * acc.up[2]);
           turn += rate * dt;
+          if (!hist.length || t - hist[hist.length - 1].t >= 100) {
+            hist.push({ t: t, turn: turn });
+            while (hist.length && t - hist[0].t > 3 * STRAIGHT_MS) hist.shift();
+          }
         }
       }
       s.prevT = stamp;
@@ -2109,6 +2130,8 @@
       // the later of a tap and a restart gets the credit, if it was recent
       var how = lastTap >= lastRestart ? (t - lastTap < CREDIT ? 'tap' : 'itself') : (t - lastRestart < CREDIT ? 'restart' : 'itself');
       tally[how] += 1;
+      // the car may have turned while the gyroscope was silent: north waits for a GPS check
+      if (t - pausedAt > 2000) unsure = true;
       event('resume by ' + how + ' after ' + Math.round((t - pausedAt) / 1000) + ' s');
     }
 
@@ -2237,9 +2260,10 @@
       fix = { course: num(c.heading) === null ? null : Heading.norm(c.heading), speed: num(c.speed), acc: num(c.accuracy), at: t };
       gps = 'fix';
       startMotion('location allowed');
-      if (gpsLive(t)) anchor = { car: fix.course, turn: turn, at: t };
+      var note = '';
+      if (gpsLive(t) && gyroOk(t) && straight(t)) note = check(t);
       choose(t);
-      row('gps', '', t);
+      row('gps', note, t);
     }
     function onFixError(err) {
       gps = err && err.code === 1 ? 'denied' : err && err.code === 2 ? 'unavailable' : fix ? 'fix' : 'asking';
@@ -2257,18 +2281,30 @@
     }
 
     // ---- the heading ----
+    // straight: the gyroscope has read the last 2 s without a gap and saw the
+    // car turn less than 3 deg in them
+    function straight(t) {
+      if (!hist.length || t - hist[hist.length - 1].t > 300) return false;
+      var old = null;
+      for (var i = hist.length - 1; i >= 0; i--) { if (t - hist[i].t >= STRAIGHT_MS) { old = hist[i]; break; } }
+      if (!old || t - old.t > STRAIGHT_MS + 300) return false;
+      for (var j = hist.indexOf(old) + 1; j < hist.length; j++) if (hist[j].t - hist[j - 1].t > 300) return false;
+      return Math.abs(turn - old.turn) < STRAIGHT_DEG;
+    }
+    // a GPS check: move north toward the GPS course
+    function check(t) {
+      var gap = off === null ? null : Heading.delta(Heading.norm(turn + off), fix.course);
+      if (off === null || Math.abs(gap) > SNAP) off = fix.course - turn;
+      else off += PULL * gap;
+      checkedAt = t; checks += 1; lastPull = gap; unsure = false;
+      return gap === null ? 'check first' : 'check ' + gap.toFixed(1);
+    }
     function choose(t) {
       var target = null;
-      if (gpsLive(t)) {
-        from = 'gps';
-        target = anchor && anchor.at === fix.at && gyroOk(t) ? anchor.car + turn - anchor.turn : fix.course;
-      } else if (anchor && gyroOk(t) && t - anchor.at < GYRO_MAX) {
-        from = 'gyro';
-        target = anchor.car + turn - anchor.turn;
-      } else if (anchor) {
-        from = 'stale';
-        target = anchor.car + turn - anchor.turn;
-      } else from = null;
+      if (off !== null && gyroOk(t) && !unsure && t - checkedAt < GYRO_MAX) { from = 'gyro'; target = turn + off; }
+      else if (gpsLive(t)) { from = 'gps'; target = fix.course; }
+      else if (off !== null) { from = 'stale'; target = turn + off; }
+      else from = null;
       heading = target === null ? null : car.push(Heading.norm(target), t);
       draw();
     }
@@ -2331,10 +2367,13 @@
         : tally.pauses + ' · back by restart ' + tally.restart + ', after a tap ' + tally.tap + ', by itself ' + tally.itself +
           (paused ? ' · paused now' : '')]);
       var c;
-      if (heading === null) c = 'no heading yet. Drive above 11 km/h so GPS gives the course';
-      else c = (from === 'gps' ? 'from GPS' : from === 'gyro' ? 'from the gyroscope, ' + secs(t - anchor.at) + ' since GPS'
-        : 'last course, ' + secs(t - anchor.at) + ' since GPS, gyroscope ' + (gyroOk(t) ? 'too long without GPS' : 'paused')) +
+      if (heading === null) c = 'no heading yet. Drive straight above 11 km/h so GPS can set north';
+      else c = (from === 'gyro' ? 'from the gyroscope, GPS check ' + secs(t - checkedAt) + ' ago'
+        : from === 'gps' ? 'from GPS, ' + (gyroOk(t) ? 'waiting for a straight road to set north' : 'the gyroscope is silent')
+        : 'last course, gyroscope ' + (!gyroOk(t) ? 'paused' : unsure ? 'was paused, waiting for a GPS check' : 'without a GPS check for ' + secs(t - checkedAt))) +
         ' · ' + Math.round(heading) + '° · coming from ' + Heading.approachSide(heading);
+      lines.push(['GPS checks', !checks ? 'none yet: they come on a straight road above 11 km/h'
+        : checks + ' · ' + (lastPull === null ? 'the first one set north' : 'the last one found the needle ' + Math.abs(lastPull).toFixed(1) + '° off')]);
       lines.push(['Compass', c]);
       return { lines: lines };
     }
@@ -2343,13 +2382,13 @@
     function permit() { if (watch === null && gps === 'off' && gpsWanted) startGps(); }
     function tap() { lastTap = now(); }
     function saveLog() {
-      var head = '# POI Tracker prototype v19 sensor log · started ' + new Date(Date.now() - (now() - t0)).toISOString() +
+      var head = '# POI Tracker prototype v19.1 sensor log · started ' + new Date(Date.now() - (now() - t0)).toISOString() +
         ' · ' + navigator.userAgent;
       var text = head + '\n' + COLS.join(',') + '\n' + log.map(function (x) { return x.join(','); }).join('\n') + '\n';
       var a = document.createElement('a'), d = new Date();
       function two(n) { return (n < 10 ? '0' : '') + n; }
       a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv' }));
-      a.download = 'prototype-v19-sensors-' + d.getFullYear() + two(d.getMonth() + 1) + two(d.getDate()) + '-' + two(d.getHours()) + two(d.getMinutes()) + '.csv';
+      a.download = 'prototype-v19.1-sensors-' + d.getFullYear() + two(d.getMonth() + 1) + two(d.getDate()) + '-' + two(d.getHours()) + two(d.getMinutes()) + '.csv';
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 10000);
       return log.length;
