@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<!--
+  ================================================================
+  POI Tracker - sensor test
+  File: tools/sensor-test.html
+
+  A test page for the car. Does Chrome on the tablet give a web page
+  what the live compass needs: GPS speed and course, the raw gyroscope
+  (the "devicemotion" event and the Generic Sensor API) and the
+  accelerometer? It also shows whether Android's ready-made orientation
+  is empty, as CPU-Z showed on 2026-10-17.
+
+  From the gyroscope and the accelerometer it adds up how far the car
+  has turned. The heading is the GPS course while the car moves faster
+  than 11 km/h, then the course at the last good fix plus the turn
+  since that fix.
+
+  Open it on the tablet over https (GitHub Pages), never as a
+  downloaded file: a file gets no location. Nothing here is part of the
+  app. The page stores nothing on the tablet. The log it saves holds no
+  coordinates.
+
+  v1.0 2026-10-17 first version.
+  ================================================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>POI Tracker - sensor test</title>
+<style>
+  :root {
+    --bg: #f3f4f7; --panel: #ffffff; --text: #141821; --muted: #566074; --line: #dde1e8;
+    --accent: #1f5fd6; --accent-text: #ffffff; --button: #e7eaf0;
+    --ok: #1a7f45; --warn: #9a5800; --bad: #c0262d; --idle: #8a93a6;
+    --radius: 16px; --gap: 12px; --tap: 56px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1218; --panel: #181c25; --text: #eef1f7; --muted: #9ca5b7; --line: #2b3142;
+      --accent: #5b8ff9; --accent-text: #0b0e14; --button: #252b38;
+      --ok: #3ecc82; --warn: #f2a81d; --bad: #ff6b6b; --idle: #6b7489;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 18px; line-height: 1.35; -webkit-text-size-adjust: 100%; }
+  main { max-width: 820px; margin: 0 auto; padding: 16px 16px 24px; display: grid; gap: var(--gap); }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  h1 { font-size: 24px; margin: 0; }
+  .ver { color: var(--muted); font-size: 15px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+  .label { color: var(--muted); font-size: 15px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; }
+  .big { font-size: 60px; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .mid { font-size: 38px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .sub { color: var(--muted); font-size: 16px; }
+  .none { color: var(--muted); font-size: 32px; font-weight: 700; }
+  .head { display: grid; grid-template-columns: 150px 1fr; gap: 20px; align-items: center; }
+  .head svg { width: 150px; height: 150px; display: block; }
+  .ring { fill: none; stroke: var(--line); stroke-width: 4; }
+  .tick { stroke: var(--muted); stroke-width: 3; stroke-linecap: round; }
+  .north { fill: var(--muted); font-size: 16px; font-weight: 700; text-anchor: middle; }
+  .arrow { fill: var(--accent); }
+  .idle .arrow { fill: var(--idle); opacity: .45; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 6px; }
+  .list { padding: 6px 16px; }
+  .r { display: grid; grid-template-columns: 14px 236px 1fr; gap: 10px; align-items: start; padding: 9px 0; border-top: 1px solid var(--line); }
+  .r:first-child { border-top: 0; }
+  .k { font-weight: 600; }
+  .v { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; margin-top: 6px; background: var(--idle); }
+  .dot[data-s="ok"] { background: var(--ok); }
+  .dot[data-s="warn"] { background: var(--warn); }
+  .dot[data-s="bad"] { background: var(--bad); }
+  .page { margin: 0; color: var(--muted); font-size: 16px; }
+  .page b { color: var(--text); font-weight: 600; }
+  .buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); }
+  button { min-height: var(--tap); border: 0; border-radius: 14px; background: var(--button); color: var(--text);
+    font: inherit; font-weight: 700; padding: 0 12px; cursor: pointer; }
+  button:active { transform: scale(.98); }
+  button:disabled { opacity: .45; cursor: default; transform: none; }
+  button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  #start { grid-column: 1 / -1; background: var(--accent); color: var(--accent-text); font-size: 20px; }
+  .how { margin: 0; padding: 0 0 0 22px; color: var(--muted); font-size: 16px; }
+  .how li { margin: 4px 0; }
+  #toast { position: fixed; left: 50%; bottom: 24px; translate: -50% 0; background: var(--text); color: var(--bg);
+    padding: 12px 18px; border-radius: 12px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  #toast.on { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { #toast { transition: none; } button:active { transform: none; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Sensor test</h1>
+    <span class="ver">v1.0 · 2026-10-17</span>
+  </header>
+  <p class="page">Page: <b id="page">checking</b></p>
+
+  <section class="card head" aria-label="Heading">
+    <svg id="dial" class="idle" viewBox="0 0 120 120" aria-hidden="true">
+      <circle class="ring" cx="60" cy="60" r="52"/>
+      <line class="tick" x1="112" y1="60" x2="104" y2="60"/>
+      <line class="tick" x1="60" y1="112" x2="60" y2="104"/>
+      <line class="tick" x1="8" y1="60" x2="16" y2="60"/>
+      <text class="north" x="60" y="25">N</text>
+      <g id="arrow"><path class="arrow" d="M60 32 L76 82 L60 72 L44 82 Z"/></g>
+    </svg>
+    <div>
+      <div class="label">Heading</div>
+      <div id="hdeg" class="big none">none yet</div>
+      <div id="hsrc" class="sub">tap Start</div>
+    </div>
+  </section>
+
+  <section class="card" aria-label="Turned since reset">
+    <div class="label">Turned since reset</div>
+    <div class="two">
+      <div><div id="tdm" class="mid none">none yet</div><div class="sub">devicemotion</div></div>
+      <div><div id="tapi" class="mid none">none yet</div><div class="sub">Sensor API</div></div>
+    </div>
+    <div id="tagree" class="sub" style="margin-top:6px">tap Start</div>
+  </section>
+
+  <section class="card list" aria-label="Sensors">
+    <div class="r"><span class="dot" id="d-gps"></span><span class="k">GPS</span><span class="v" id="v-gps">tap Start</span></div>
+    <div class="r"><span class="dot" id="d-dm"></span><span class="k">Gyroscope (devicemotion)</span><span class="v" id="v-dm">tap Start</span></div>
+    <div class="r"><span class="dot" id="d-api"></span><span class="k">Gyroscope (Sensor API)</span><span class="v" id="v-api">tap Start</span></div>
+    <div class="r"><span class="dot" id="d-acc"></span><span class="k">Accelerometer</span><span class="v" id="v-acc">tap Start</span></div>
+    <div class="r"><span class="dot" id="d-ori"></span><span class="k">Ready-made orientation</span><span class="v" id="v-ori">tap Start</span></div>
+    <div class="r"><span class="dot" id="d-still"></span><span class="k">Gyroscope drift</span><span class="v" id="v-still">tap Start</span></div>
+    <div class="r"><span class="dot" id="d-wake"></span><span class="k">Screen</span><span class="v" id="v-wake">tap Start</span></div>
+  </section>
+
+  <div class="buttons">
+    <button id="start" type="button">Start</button>
+    <button id="reset" type="button" disabled>Reset turn</button>
+    <button id="still" type="button" disabled>Measure still</button>
+    <button id="save" type="button" disabled>Save log</button>
+  </div>
+
+  <ol class="how">
+    <li>Tablet in its holder, car parked. Tap Start and allow location. Keep the tablet still for 5 seconds.</li>
+    <li>Record the screen or let a passenger watch. Do not read it while driving.</li>
+    <li>Drive. After a right turn, Turned grows by about 90° right. Both numbers should agree.</li>
+    <li>At a stop, Heading should hold and say "from the gyroscope".</li>
+    <li>At the end, tap Save log and send the file to the chat.</li>
+  </ol>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var VERSION = 'sensor-test v1.0 2026-10-17';
+  var MOVING = 3;          // m/s (11 km/h): the GPS course is trusted above this
+  var FRESH = 3000;        // ms: a GPS fix older than this is not live
+  var DT_MAX = 0.2;        // s: the longest step added up at once
+  var STILL_MS = 5000;     // ms: how long Measure still listens
+  var STILL_SPREAD = 2;    // deg/s: a wider spread on any axis means the tablet moved
+  var STILL_TRIES = 3;     // retries before Measure still gives up
+  var LIVE_MS = 1000;      // ms: a sensor silent longer than this is not live
+  var LOG_MAX = 20000;     // rows: about 2.5 hours
+  var RAD = 180 / Math.PI;
+  var SIDES = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+
+  function $(id) { return document.getElementById(id); }
+  function now() { return performance.now(); }
+  function num(v) { return typeof v === 'number' && isFinite(v) ? v : null; }
+  function norm(d) { d = d % 360; return d < 0 ? d + 360 : d; }
+  function round(v, n) { if (v === null) return null; var p = Math.pow(10, n || 0); return Math.round(v * p) / p; }
+
+  function makeGyro(key) {
+    return { key: key, n: 0, empty: 0, err: null, last: 0, prevT: null,
+             w: null, bias: [0, 0, 0], biasSet: false, turn: 0, rate: 0,
+             hz: 0, cnt: 0, cntT: 0 };
+  }
+
+  var S = {
+    started: false, t0: 0, lastLog: 0,
+    gps: { state: 'off', fix: null, at0: 0, fixes: 0, gaps: [] },
+    dm: makeGyro('dm'),
+    api: makeGyro('api'),
+    acc: { v: null, up: null, mag: null, src: null, lastDm: 0, n: 0, first: 0, prevT: null, err: null },
+    ori: { rel: 0, relEmpty: 0, abs: 0, absEmpty: 0 },
+    still: { state: 'idle', until: 0, retryAt: 0, retries: 0, sum: {}, cnt: {}, min: {}, max: {} },
+    anchor: null, heading: null, src: null,
+    wake: { state: 'off' },
+    log: []
+  };
+
+  // ---------- accelerometer: which way is up, in the tablet's own axes ----------
+  // At rest the accelerometer reads +9.8 m/s² pointing up (W3C: a tablet
+  // lying face up reads z = +9.8). The tablet sits still in its holder, so
+  // a slow average of the reading is the up direction.
+  function feedAcc(v, t, src) {
+    var a = S.acc;
+    if (src === 'api' && a.src === 'dm' && t - a.lastDm < LIVE_MS) return;
+    if (src === 'dm') a.lastDm = t;
+    if (a.src !== src) a.prevT = null;
+    a.src = src;
+    a.n += 1;
+    if (!a.first) a.first = t;
+    if (!a.v) a.v = v.slice();
+    else {
+      var tau = t - a.first < 2000 ? 0.3 : 3;
+      var dt = a.prevT === null ? 0 : Math.min(Math.max((t - a.prevT) / 1000, 0), DT_MAX);
+      var k = 1 - Math.exp(-dt / tau);
+      for (var i = 0; i < 3; i++) a.v[i] += (v[i] - a.v[i]) * k;
+    }
+    a.prevT = t;
+    var m = Math.hypot(a.v[0], a.v[1], a.v[2]);
+    a.mag = m;
+    a.up = m > 1 ? [a.v[0] / m, a.v[1] / m, a.v[2] / m] : null;
+  }
+
+  // ---------- gyroscope: how fast the tablet turns about the vertical ----------
+  // w is the rotation in deg/s about the tablet's x, y, z axes (right-hand
+  // rule). Its part along "up" is the turn of the car seen from above:
+  // counter-clockwise is positive, so the minus sign makes a right turn
+  // positive, the way a compass heading grows.
+  function feedGyro(g, w, t) {
+    g.n += 1;
+    g.last = t;
+    g.w = w;
+    if (!g.cntT) { g.cntT = t; g.cnt = 0; }
+    g.cnt += 1;
+    if (t - g.cntT >= 1000) { g.hz = g.cnt * 1000 / (t - g.cntT); g.cnt = 0; g.cntT = t; }
+    if (S.still.state === 'measuring') stillSample(g, w);
+    var up = S.acc.up;
+    if (g.prevT !== null && up) {
+      var dt = Math.min(Math.max((t - g.prevT) / 1000, 0), DT_MAX);
+      var x = w[0] - g.bias[0], y = w[1] - g.bias[1], z = w[2] - g.bias[2];
+      g.rate = -(x * up[0] + y * up[1] + z * up[2]);
+      g.turn += g.rate * dt;
+    }
+    g.prevT = t;
+  }
+
+  function onMotion(e) {
+    var t = num(e.timeStamp) || now();
+    var a = e.accelerationIncludingGravity, r = e.rotationRate;
+    if (a && num(a.x) !== null && num(a.y) !== null && num(a.z) !== null) feedAcc([a.x, a.y, a.z], t, 'dm');
+    // W3C: rotationRate.alpha is about X, beta about Y, gamma about Z, in deg/s
+    if (r && num(r.alpha) !== null && num(r.beta) !== null && num(r.gamma) !== null) feedGyro(S.dm, [r.alpha, r.beta, r.gamma], t);
+    else S.dm.empty += 1;
+  }
+
+  function startSensorApi() {
+    if (typeof window.Gyroscope !== 'function') S.api.err = 'absent';
+    else {
+      try {
+        var gy = new window.Gyroscope({ frequency: 60 });
+        gy.addEventListener('reading', function () {
+          if (num(gy.x) === null || num(gy.y) === null || num(gy.z) === null) { S.api.empty += 1; return; }
+          feedGyro(S.api, [gy.x * RAD, gy.y * RAD, gy.z * RAD], num(gy.timestamp) || now());
+        });
+        gy.addEventListener('error', function (ev) { S.api.err = ev.error ? ev.error.name : 'error'; });
+        gy.start();
+      } catch (e) { S.api.err = e.name || 'error'; }
+    }
+    if (typeof window.Accelerometer === 'function') {
+      try {
+        var ac = new window.Accelerometer({ frequency: 60 });
+        ac.addEventListener('reading', function () {
+          if (num(ac.x) === null || num(ac.y) === null || num(ac.z) === null) return;
+          feedAcc([ac.x, ac.y, ac.z], num(ac.timestamp) || now(), 'api');
+        });
+        ac.addEventListener('error', function (ev) { S.acc.err = ev.error ? ev.error.name : 'error'; });
+        ac.start();
+      } catch (e) { S.acc.err = e.name || 'error'; }
+    }
+  }
+
+  // ---------- Android's ready-made orientation (expected empty on this tablet) ----------
+  function isEmpty(e) { return e.alpha == null && e.beta == null && e.gamma == null; }
+  function onOri(e) {
+    if (e.absolute === true) { if (isEmpty(e)) S.ori.absEmpty += 1; else S.ori.abs += 1; }
+    else if (isEmpty(e)) S.ori.relEmpty += 1;
+    else S.ori.rel += 1;
+  }
+  function onOriAbs(e) { if (isEmpty(e)) S.ori.absEmpty += 1; else S.ori.abs += 1; }
+
+  // ---------- GPS ----------
+  function startGps() {
+    if (!('geolocation' in navigator)) { S.gps.state = 'none'; return; }
+    S.gps.state = 'waiting';
+    S.gps.at0 = now();
+    navigator.geolocation.watchPosition(onFix, onFixError, { enableHighAccuracy: true, maximumAge: 0 });
+  }
+  function onFix(p) {
+    var c = p.coords, t = now(), g = S.gps;
+    if (g.fix) { g.gaps.push(t - g.fix.at); if (g.gaps.length > 10) g.gaps.shift(); }
+    g.fix = { acc: num(c.accuracy), speed: num(c.speed), course: num(c.heading), at: t };
+    g.fixes += 1;
+    g.state = 'fix';
+    if (gpsLive(t)) S.anchor = { course: g.fix.course, at: t, turn: { dm: S.dm.turn, api: S.api.turn } };
+    addLog('gps', t);
+  }
+  function onFixError(e) {
+    if (e.code === 1) S.gps.state = 'denied';
+    else if (e.code === 2) S.gps.state = 'unavailable';
+    else S.gps.state = S.gps.fix ? 'fix' : 'waiting';
+  }
+  function gpsLive(t) {
+    var f = S.gps.fix;
+    return !!f && f.course !== null && f.speed !== null && f.speed >= MOVING && t - f.at < FRESH;
+  }
+
+  // ---------- heading: GPS while moving, then the last course plus the turn ----------
+  function live(g, t) { return g.n > 0 && t - g.last < LIVE_MS && !!S.acc.up; }
+  function pick(t) { return live(S.dm, t) ? S.dm : live(S.api, t) ? S.api : null; }
+  function updateHeading(t) {
+    var g = pick(t);
+    if (gpsLive(t)) { S.heading = S.gps.fix.course; S.src = 'gps'; }
+    else if (S.anchor && g) { S.heading = norm(S.anchor.course + g.turn - S.anchor.turn[g.key]); S.src = 'gyro'; }
+    else if (S.anchor) { S.heading = S.anchor.course; S.src = 'stale'; }
+    else { S.heading = null; S.src = null; }
+  }
+  function resetTurn() {
+    [S.dm, S.api].forEach(function (g) {
+      if (S.anchor) S.anchor.turn[g.key] -= g.turn;
+      g.turn = 0;
+    });
+  }
+
+  // ---------- Measure still: the gyroscope's offset at rest ----------
+  function beginStill(t) {
+    var st = S.still;
+    st.state = 'measuring';
+    st.until = t + STILL_MS;
+    ['dm', 'api'].forEach(function (k) {
+      st.sum[k] = [0, 0, 0]; st.cnt[k] = 0;
+      st.min[k] = [Infinity, Infinity, Infinity]; st.max[k] = [-Infinity, -Infinity, -Infinity];
+    });
+  }
+  function stillSample(g, w) {
+    var st = S.still, k = g.key, i;
+    for (i = 0; i < 3; i++) {
+      st.sum[k][i] += w[i];
+      if (w[i] < st.min[k][i]) st.min[k][i] = w[i];
+      if (w[i] > st.max[k][i]) st.max[k][i] = w[i];
+    }
+    st.cnt[k] += 1;
+    for (i = 0; i < 3; i++) {
+      if (st.max[k][i] - st.min[k][i] > STILL_SPREAD) {
+        st.retries += 1;
+        st.state = st.retries > STILL_TRIES ? 'failed' : 'moved';
+        st.retryAt = now() + 1000;
+        return;
+      }
+    }
+  }
+  function finishStill() {
+    var st = S.still, any = false;
+    [S.dm, S.api].forEach(function (g) {
+      var c = st.cnt[g.key];
+      if (c >= 10) {
+        for (var i = 0; i < 3; i++) g.bias[i] = st.sum[g.key][i] / c;
+        g.biasSet = true;
+        any = true;
+      }
+    });
+    st.state = any ? 'done' : 'nogyro';
+    if (any) resetTurn();
+  }
+  function stillTick(t) {
+    var st = S.still;
+    if (st.state === 'measuring' && t >= st.until) finishStill();
+    else if ((st.state === 'moved' || st.state === 'wait') && t >= st.retryAt) beginStill(t);
+  }
+
+  // ---------- keep the screen on ----------
+  function wake() {
+    if (!('wakeLock' in navigator)) { S.wake.state = 'none'; return; }
+    navigator.wakeLock.request('screen').then(function (lock) {
+      S.wake.state = 'on';
+      lock.addEventListener('release', function () { S.wake.state = 'off'; });
+    }).catch(function () { S.wake.state = 'failed'; });
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (S.started && document.visibilityState === 'visible') wake();
+  });
+
+  // ---------- log (no coordinates) ----------
+  var COLS = ['t_s', 'kind', 'acc_m', 'speed_kmh', 'course_deg', 'heading_deg', 'heading_src',
+    'turn_dm_deg', 'turn_api_deg', 'rate_dm_dps', 'rate_api_dps', 'dm_hz', 'api_hz',
+    'w_dm_x', 'w_dm_y', 'w_dm_z', 'w_api_x', 'w_api_y', 'w_api_z', 'up_x', 'up_y', 'up_z', 'acc_ms2'];
+  function addLog(kind, t) {
+    if (S.log.length >= LOG_MAX) return;
+    var f = kind === 'gps' ? S.gps.fix : null, up = S.acc.up, dm = S.dm, api = S.api;
+    function w(g, i) { return g.w ? round(g.w[i], 3) : null; }
+    S.log.push([
+      round((t - S.t0) / 1000, 2), kind,
+      f ? round(f.acc, 1) : null,
+      f && f.speed !== null ? round(f.speed * 3.6, 1) : null,
+      f && f.course !== null ? round(f.course, 1) : null,
+      S.heading === null ? null : round(S.heading, 1), S.src,
+      dm.n ? round(dm.turn, 2) : null, api.n ? round(api.turn, 2) : null,
+      dm.n ? round(dm.rate, 3) : null, api.n ? round(api.rate, 3) : null,
+      round(dm.hz, 1), round(api.hz, 1),
+      w(dm, 0), w(dm, 1), w(dm, 2), w(api, 0), w(api, 1), w(api, 2),
+      up ? round(up[0], 3) : null, up ? round(up[1], 3) : null, up ? round(up[2], 3) : null,
+      S.acc.mag === null ? null : round(S.acc.mag, 2)
+    ]);
+  }
+  function cell(v) { return v === null || v === undefined ? '' : String(v); }
+  function stamp() {
+    var d = new Date();
+    function two(n) { return (n < 10 ? '0' : '') + n; }
+    return d.getFullYear() + two(d.getMonth() + 1) + two(d.getDate()) + '-' + two(d.getHours()) + two(d.getMinutes());
+  }
+  function save() {
+    var head = '# ' + VERSION + ' · started ' + new Date(Date.now() - (now() - S.t0)).toISOString() +
+      ' · drift dm ' + S.dm.bias.map(function (b) { return round(b, 3); }).join('/') +
+      ' · drift api ' + S.api.bias.map(function (b) { return round(b, 3); }).join('/') +
+      ' · ' + navigator.userAgent;
+    var text = head + '\n' + COLS.join(',') + '\n' +
+      S.log.map(function (r) { return r.map(cell).join(','); }).join('\n') + '\n';
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv' }));
+    a.download = 'sensor-test-' + stamp() + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 10000);
+    toast('Saved ' + S.log.length + ' rows');
+  }
+  var toastTimer = 0;
+  function toast(text) {
+    var el = $('toast');
+    el.textContent = text;
+    el.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('on'); }, 2500);
+  }
+
+  // ---------- what the screen says ----------
+  function turnText(d) {
+    var a = Math.round(Math.abs(d));
+    return a === 0 ? '0°' : a + '° ' + (d > 0 ? 'right' : 'left');
+  }
+  function rateText(r) {
+    var a = Math.abs(r);
+    return a < 0.5 ? 'not turning' : 'turning ' + (r > 0 ? 'right ' : 'left ') + a.toFixed(1) + '°/s';
+  }
+  function errText(name) {
+    if (name === 'absent') return 'not in this browser';
+    if (name === 'NotAllowedError') return 'blocked: allow Motion sensors for this site';
+    if (name === 'NotReadableError') return 'cannot read the sensor';
+    return 'error: ' + name;
+  }
+  function pageLine() {
+    var p = location.protocol;
+    if (p === 'file:' || p === 'content:') return 'opened from a file: GPS will be blocked. Open the GitHub Pages link';
+    if (window.isSecureContext === false) return 'not secure: the browser blocks the sensors. Open the GitHub Pages link';
+    return 'secure · ' + location.host;
+  }
+  function gpsLine(t) {
+    var g = S.gps;
+    if (!S.started) return ['idle', 'tap Start'];
+    if (g.state === 'none') return ['bad', 'not in this browser'];
+    if (g.state === 'denied') return ['bad', 'blocked: allow location for this site and for Chrome'];
+    if (g.state === 'unavailable' && !g.fix) return ['bad', 'no position: turn on Location in the tablet settings'];
+    if (!g.fix) return ['warn', 'waiting for a fix (' + Math.round((t - g.at0) / 1000) + ' s)'];
+    var f = g.fix, age = (t - f.at) / 1000, parts = [];
+    parts.push(f.acc === null ? 'no accuracy' : '±' + Math.round(f.acc) + ' m');
+    parts.push(f.speed === null ? 'no speed' : Math.round(f.speed * 3.6) + ' km/h');
+    parts.push(f.course === null ? 'no course' : 'course ' + Math.round(f.course) + '°');
+    if (g.gaps.length) {
+      var sum = 0;
+      g.gaps.forEach(function (x) { sum += x; });
+      parts.push((1000 / (sum / g.gaps.length)).toFixed(1) + ' fixes/s');
+    }
+    if (age > 3) parts.push(Math.round(age) + ' s old');
+    return [age > 3 ? 'warn' : 'ok', parts.join(' · ')];
+  }
+  function gyroLine(g, t) {
+    if (!S.started) return ['idle', 'tap Start'];
+    if (g.n === 0) {
+      if (g.err) return ['bad', errText(g.err)];
+      if (g.empty > 0) return ['bad', 'empty: Chrome sends no rotation'];
+      return t - S.t0 > 3000 ? ['bad', 'no data'] : ['warn', 'waiting'];
+    }
+    if (t - g.last > LIVE_MS) return ['bad', 'stopped ' + Math.round((t - g.last) / 1000) + ' s ago'];
+    return ['ok', 'working · ' + Math.round(g.hz) + ' readings/s · ' + (S.acc.up ? rateText(g.rate) : 'no accelerometer')];
+  }
+  function accLine(t) {
+    var a = S.acc;
+    if (!S.started) return ['idle', 'tap Start'];
+    if (!a.n) {
+      if (a.err) return ['bad', errText(a.err)];
+      return t - S.t0 > 3000 ? ['bad', 'no data'] : ['warn', 'waiting'];
+    }
+    return ['ok', 'working · ' + a.mag.toFixed(1) + ' m/s² · from ' + (a.src === 'dm' ? 'devicemotion' : 'Sensor API')];
+  }
+  function oriLine() {
+    if (!S.started) return ['idle', 'tap Start'];
+    var o = S.ori;
+    function one(n, e) { return n ? 'working' : e ? 'empty' : 'no events'; }
+    return [o.rel || o.abs ? 'ok' : 'idle',
+      'relative ' + one(o.rel, o.relEmpty) + ' · absolute ' + one(o.abs, o.absEmpty) + ' · not needed'];
+  }
+  function driftText() {
+    var up = S.acc.up, out = [];
+    [S.dm, S.api].forEach(function (g) {
+      if (!g.biasSet) return;
+      var name = g.key === 'dm' ? 'devicemotion ' : 'Sensor API ';
+      if (!up) { out.push(name + 'measured'); return; }
+      var d = Math.abs(g.bias[0] * up[0] + g.bias[1] * up[1] + g.bias[2] * up[2]);
+      out.push(name + d.toFixed(2) + '°/s');
+    });
+    return out.join(' · ');
+  }
+  function stillLine(t) {
+    var st = S.still;
+    if (!S.started) return ['idle', 'tap Start'];
+    if (st.state === 'wait') return ['warn', 'keep the tablet still'];
+    if (st.state === 'measuring') return ['warn', 'keep the tablet still · ' + Math.max(1, Math.ceil((st.until - t) / 1000)) + ' s'];
+    if (st.state === 'moved') return ['warn', 'the tablet moved, measuring again'];
+    if (st.state === 'failed') return ['bad', 'not measured: the tablet kept moving. Tap Measure still when parked'];
+    if (st.state === 'nogyro') return ['bad', 'not measured: no gyroscope data'];
+    if (st.state === 'done') return ['ok', 'removed · ' + driftText()];
+    return ['idle', 'not measured'];
+  }
+  function wakeLine() {
+    if (!S.started) return ['idle', 'tap Start'];
+    var w = S.wake.state;
+    if (w === 'on') return ['ok', 'stays on'];
+    if (w === 'none') return ['warn', 'may turn off: keep it awake in the tablet settings'];
+    return ['warn', 'may turn off'];
+  }
+  function setBig(id, text) {
+    var el = $(id);
+    el.textContent = text === null ? 'none yet' : text;
+    el.classList.toggle('none', text === null);
+  }
+  function setRow(id, pair) {
+    $('d-' + id).setAttribute('data-s', pair[0]);
+    $('v-' + id).textContent = pair[1];
+  }
+  function render(t) {
+    $('page').textContent = pageLine();
+    setRow('gps', gpsLine(t));
+    setRow('dm', gyroLine(S.dm, t));
+    setRow('api', gyroLine(S.api, t));
+    setRow('acc', accLine(t));
+    setRow('ori', oriLine());
+    setRow('still', stillLine(t));
+    setRow('wake', wakeLine());
+
+    var h = S.heading, dial = $('dial');
+    dial.setAttribute('class', h === null || S.src === 'stale' ? 'idle' : '');
+    $('arrow').setAttribute('transform', 'rotate(' + (h === null ? 0 : round(h, 1)) + ' 60 60)');
+    setBig('hdeg', h === null ? null : Math.round(h) % 360 + '° ' + SIDES[Math.round(h / 45) % 8]);
+    var src;
+    if (!S.started) src = 'tap Start';
+    else if (S.src === 'gps') src = 'from GPS';
+    else if (S.src === 'gyro') src = 'from the gyroscope · ' + Math.round((t - S.anchor.at) / 1000) + ' s since GPS';
+    else if (S.src === 'stale') src = 'last GPS course, ' + Math.round((t - S.anchor.at) / 1000) + ' s old · no gyroscope';
+    else src = 'no heading yet · drive above 11 km/h so GPS gives the course';
+    $('hsrc').textContent = src;
+
+    setBig('tdm', S.dm.n ? turnText(S.dm.turn) : null);
+    setBig('tapi', S.api.n ? turnText(S.api.turn) : null);
+    var a = live(S.dm, t), b = live(S.api, t), agree;
+    if (!S.started) agree = 'tap Start';
+    else if (a && b) {
+      var diff = Math.abs(S.dm.turn - S.api.turn);
+      agree = diff <= Math.max(3, 0.05 * Math.max(Math.abs(S.dm.turn), Math.abs(S.api.turn)))
+        ? 'Both agree' : 'They differ by ' + Math.round(diff) + '°';
+    }
+    else if (a) agree = 'Only devicemotion works';
+    else if (b) agree = 'Only the Sensor API works';
+    else agree = 'No turn yet: no gyroscope or accelerometer data';
+    $('tagree').textContent = agree;
+  }
+
+  function tick() {
+    var t = now();
+    if (S.started) {
+      stillTick(t);
+      updateHeading(t);
+      if (t - S.lastLog >= 1000) { S.lastLog = t; addLog('s', t); }
+    }
+    render(t);
+  }
+
+  function start() {
+    if (S.started) return;
+    S.started = true;
+    S.t0 = now();
+    S.lastLog = S.t0;
+    window.addEventListener('devicemotion', onMotion);
+    window.addEventListener('deviceorientation', onOri);
+    if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', onOriAbs);
+    startSensorApi();
+    startGps();
+    wake();
+    // the tap itself shakes the tablet, so Measure still starts a second later
+    S.still.state = 'wait';
+    S.still.retries = 0;
+    S.still.retryAt = S.t0 + 1000;
+    $('start').hidden = true;
+    ['reset', 'still', 'save'].forEach(function (id) { $(id).disabled = false; });
+    tick();
+  }
+
+  $('start').addEventListener('click', start);
+  $('reset').addEventListener('click', function () { resetTurn(); toast('Turn set to 0'); });
+  $('still').addEventListener('click', function () {
+    S.still.retries = 0;
+    S.still.state = 'wait';
+    S.still.retryAt = now() + 1000;
+  });
+  $('save').addEventListener('click', save);
+  setInterval(tick, 250);
+  tick();
+})();
+</script>
+</body>
+</html>
