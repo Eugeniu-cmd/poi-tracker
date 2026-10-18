@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.43 — 2026-10-18
+v0.44 — 2026-10-18
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -203,6 +203,13 @@ v0.43 2026-10-18 — the user's rule for the side of a pass: the direction
 the car drives as it enters the intersection, so driving north and
 turning right is North Right. The passenger reads it from the arrow
 before the turn. v0.41 had it the other way round (item 19).
+v0.44 2026-10-18 — the user's decisions on the POI states and the
+dialog buttons. In the grid of all POIs and the mini-map the three grey
+states blended, worst under sun glare. A POI in progress is now blue,
+and done, sheet error and not drivable carry a sign besides their
+colour (items 2, 58, 59, 69). Dialog buttons and the Settings buttons
+take the size of the action bar's buttons, and a red button that loses
+passes reads "Erase anyway" or "Delete anyway" (items 18, 24, 63).
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -328,8 +335,9 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     and toasts. A text arrow (←, ↑, →, ›) never stands in for an icon.
     Manrope draws ↑ but not ← or →, so text arrows would mix two fonts.
     An arrow written in this document stands for the Lucide icon of that
-    maneuver. Not drivable uses Lucide ban, the current menu choice
-    Lucide check, closing Lucide x, menus and links Lucide chevrons. The
+    maneuver. Not drivable uses Lucide ban, the current menu choice and
+    a done tile of the grid Lucide check, a sheet error in the grid
+    Lucide triangle-alert, closing Lucide x, menus and links Lucide chevrons. The
     live compass of item 19 is a drawn widget, not an icon.
 
 ## POI column, mini-map and grid (applies to both layouts)
@@ -352,9 +360,10 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     column. The POI is then chosen by tapping its row: the rail scrolls,
     it never selects.
 58. A mini-map of the route sits at the top of the column in both
-    layouts: one small square per POI, coloured by state (current, done,
-    in progress, spreadsheet error, not drivable), with the number of finished
-    POIs and the word "Open". It is the column's header, not a card
+    layouts: one small square per POI, coloured by state as the tiles of
+    item 59 (current amber, done green, in progress blue, spreadsheet
+    error red, not drivable striped, not started pale), with the number
+    of finished POIs and the word "Open". It is the column's header, not a card
     inside the column: the squares and the caption share one width and
     keep at least 12px from the column's edges, and a hairline divides
     the header from the rows. It works for any POI count (item 22). How
@@ -362,7 +371,14 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     is drawn. On a short screen it becomes a one-line button (item 70).
 59. Tapping the mini-map opens a grid of all POIs of the route over the
     whole screen, ten to a row, coloured like the mini-map, with a
-    legend. Tapping a tile makes that POI active, closes the grid and
+    legend whose swatches are small tiles. Every state has its colour and
+    a second sign that needs no colour, for sun glare and for eyes that
+    mix red and green. Current: an amber tint and a thick amber edge.
+    Done: green with a check. In progress: blue with its bar. Not
+    started: an empty bar and a grey edge. Sheet error: red with a
+    warning triangle. Not drivable: grey stripes with a ban sign. Three
+    grey states blended in the car (decided 2026-10-18). Tapping a
+    tile makes that POI active, closes the grid and
     scrolls the column to it. The ✕ of item 66 or a tap outside the grid
     closes it and changes nothing.
 60. The POI type of item 46 is shown and set by the type pill, a
@@ -393,8 +409,9 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     after the sync control, opens Settings (item 74). It is a square tap
     target as tall as the sync control, on the same raised surface.
 2. POI list 1…N for the route's POI count: number, progress bar, "N to
-   go". Row turns green at its target, red on error, not-drivable POI in a
-   state of its own (item 46), active POI highlighted.
+   go". Row turns green at its target, red on error, its bar is blue while
+   in progress, not-drivable POI in a state of its own (item 46), active
+   POI highlighted.
 3. Bottom summary: "Done N · M to go" and the count of finished POIs. The
    error count appears only when it is not zero. In portrait it sits
    under the main area. In landscape it sits inside the action bar, so
@@ -685,8 +702,9 @@ appears on screen. An apostrophe on screen is the typographic one (’).
 18. "Erase everything on this tablet" sits apart at the bottom of the
     Settings list, in red (item 28). It asks first with the dialog of
     item 63. When passes have not reached a sheet yet, the dialog gives
-    their number and the red button names the loss: "Erase and lose 12
-    passes". The text names what leaves the tablet: cities, routes,
+    their number in its text and the red button reads "Erase anyway"
+    ("Erase" when no pass waits): a button title keeps to one or two
+    words, as Apple asks. The text names what leaves the tablet: cities, routes,
     connections, POI types and History. The POI types are lost for good,
     since the sheet keeps only the targets (data-model.md). The
     spreadsheets are not touched. Afterwards the tablet has no city
@@ -757,7 +775,7 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     its connection, its POI types and its History leave this tablet, and
     the sheet stays as it is. When some of its passes have not reached
     the sheet, the dialog gives their number and the red button reads
-    "Delete and lose 4 passes". Deleting a route is refused while any
+    "Delete anyway", as in item 18. Deleting a route is refused while any
     change of that route waits or was not accepted: the control stays,
     dimmed, with the reason, "2 passes not yet sent. Delete works once
     they are in the sheet." (naming what waits, as item 22 does) or "1
@@ -818,7 +836,10 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     as a verb on the right ("Remove", "Delete", "Change"), never "OK" or
     "Yes". A removing button is red (item 28). A type change button keeps
     the ordinary dark style, since nothing is deleted. A tap outside the
-    dialog equals Cancel. There is no "don't ask again".
+    dialog equals Cancel. There is no "don't ask again". Dialog buttons,
+    like the Settings buttons (Save, Test connection, Add route), set
+    their words at --t-body in --w-bold, the size of the action bar's
+    buttons (decided 2026-10-18).
 66. An overlay that covers the screen or the main area (the grid of all
     POIs, History, Settings) closes with a round ✕ button in its top-left
     corner, as large as any tap target (item 31). There is no text

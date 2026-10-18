@@ -85,12 +85,18 @@
   v0.16 2026-10-18 — the compass styles of main-screen v0.29
           (screens.md v0.42): with no heading yet the dial shows no
           arrow.
+  v0.17 2026-10-18 — the POI states and the dialog buttons
+          (main-screen.html v0.30, screens.md v0.44, _tokens.css v0.13):
+          the shell is copied again. A POI in progress has a blue bar in
+          the column and a blue square in the mini-map, a not-drivable
+          square is striped (items 2, 58). The Delete dialog's buttons
+          take the size of the action bar's buttons (item 63).
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.16</title>
+<title>POI Tracker — History Reference v0.17</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -144,7 +150,7 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.29. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.30. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
@@ -303,8 +309,9 @@
   .dots i { display: block; width: var(--s-2); height: var(--s-2); background: var(--line); }
   .dots i.done { background: var(--ok); }
   .dots i.err { background: var(--err); }
-  .dots i.part { background: var(--ink-3); }
-  .dots i.nd { background: transparent; box-shadow: inset 0 0 0 1px var(--ink-2); }
+  .dots i.part { background: var(--prog); }
+  .dots i.nd { background: repeating-linear-gradient(135deg, var(--ink-3) 0 1px,
+                           transparent 1px calc(var(--s-1) - 1px)); }
   .dots i.act { background: var(--side); box-shadow: 0 0 0 1px var(--side-ring); }
   .mcap { width: 100%; display: flex; justify-content: space-between; align-items: center;
           font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
@@ -329,6 +336,8 @@
         overflow: hidden; }
   .rb i, .nb i, .cb i { display: block; height: 100%; background: var(--ink-3);
                         border-radius: inherit; }
+  /* items 2 and 59: a POI in progress has a --prog bar, in the column and in the grid */
+  .rb i, .cell.part .cb i { background: var(--prog); }
   .rt { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
         line-height: var(--lh-tight); white-space: nowrap; }
   .row.done { background: var(--ok-bg); }
@@ -586,8 +595,9 @@
            line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px);
            text-wrap: balance; color: var(--ink-2); }
   .dbtns { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); margin-top: var(--s-2); }
+  /* item 63: button words at the size of the action bar's buttons */
   .dbtn { height: calc(var(--tap-min) + var(--s-2)); border-radius: var(--r-sm);
-          font-size: var(--t-label); font-weight: var(--w-heavy); background: var(--man-soft);
+          font-size: var(--t-body); font-weight: var(--w-bold); background: var(--man-soft);
           border: 1px solid var(--line); display: inline-flex; align-items: center;
           justify-content: center; }
   .dbtn.danger { background: var(--danger); border-color: var(--danger); color: var(--on-danger); }
@@ -605,25 +615,32 @@
   .stitle { font-size: var(--t-title); font-weight: var(--w-heavy); color: var(--ink);
             line-height: var(--lh-tight); white-space: nowrap; }
   .sroute { font-size: var(--t-body); font-weight: var(--w-bold); white-space: nowrap; }
-  .legend { display: flex; gap: var(--s-4); flex-wrap: wrap; font-size: var(--t-small);
+  .legend { display: flex; gap: var(--s-3); flex-wrap: wrap; font-size: var(--t-small);
             font-weight: var(--w-bold); color: var(--ink-2); }
   .lg { display: inline-flex; align-items: center; gap: var(--s-2); }
-  /* six states, as the mini-map's squares: each tile and its swatch carry
-     the state's colour on the border, so any two differ in fill or border;
-     "not started" has no fill, so it never reads as a hole */
-  .sw { width: var(--t-small); height: var(--t-small); border-radius: calc(var(--r-sm) / 3);
-        display: inline-block; background: transparent; border: 1px solid var(--line); }
-  .sw.part, .cell.part { background: var(--man-soft); border-color: var(--ink-2); }
+  /* six states, as the mini-map's squares (item 59). Each has a colour and a
+     second sign that needs no colour, for sun glare and for eyes that mix red
+     and green: a check when done, a triangle on a sheet error, a ban sign on
+     stripes when not drivable, a --prog bar in progress. "Not started" keeps
+     an --ink-3 edge and an empty bar, so it never reads as a hole. Each
+     swatch is a small tile, and the legend's gap is --s-3, so it keeps
+     to one line from 720px wide. */
+  .sw { width: calc(var(--t-small) + var(--s-1)); height: calc(var(--t-small) + var(--s-1));
+        border-radius: calc(var(--r-sm) / 2); display: inline-flex; align-items: center;
+        justify-content: center; background: transparent; border: 1px solid var(--ink-3); }
+  .sw.part, .cell.part { background: var(--prog-bg); border-color: var(--prog); }
   .sw.done, .cell.done { background: var(--ok-bg); border-color: var(--ok); }
   .sw.err, .cell.err { background: var(--err-bg); border-color: var(--err); }
-  .sw.nd, .cell.nd { background: transparent; border: 1px dashed var(--ink-2); }
+  .sw.nd, .cell.nd { border-color: var(--line);
+                     background: repeating-linear-gradient(135deg, var(--hatch) 0 calc(var(--s-1) / 2),
+                                 transparent calc(var(--s-1) / 2) var(--s-2)); }
   .sw.act, .cell.active { background: var(--active); border-color: var(--active-line); }
   .sw.act { box-shadow: inset 0 0 0 1px var(--active-line); }
   .grid { flex: 1; min-height: 0; overflow: hidden; display: grid; align-content: start;
           grid-template-columns: repeat(10, minmax(0, 1fr)); grid-auto-rows: var(--row-h);
           gap: var(--s-2);
           mask-image: linear-gradient(var(--ink) calc(100% - var(--s-3)), transparent); }
-  .cell { border-radius: var(--r-sm); background: transparent; border: 1px solid var(--line);
+  .cell { border-radius: var(--r-sm); background: transparent; border: 1px solid var(--ink-3);
           display: flex; flex-direction: column; align-items: center; justify-content: center;
           gap: var(--s-2); }
   .cn { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
@@ -634,6 +651,14 @@
   .cell.err .cn { color: var(--err); }
   .cell.err .cb i { background: var(--err); }
   .cell.nd .cn { color: var(--ink-2); }
+  /* the sign takes the bar's place: its negative margins give it the bar's
+     height, so the numbers of a row of tiles stay on one line */
+  .cell .ci { width: var(--t-label); height: var(--t-label); flex: none;
+              margin-block: calc((var(--s-1) - var(--t-label)) / 2); }
+  .sw .ci { width: var(--s-3); height: var(--s-3); }
+  .sw.done .ci, .cell.done .ci { color: var(--ok); }
+  .sw.err .ci, .cell.err .ci { color: var(--err); }
+  .sw.nd .ci, .cell.nd .ci { color: var(--ink-2); }
   .cell.active { box-shadow: inset 0 0 0 var(--s-1) var(--active-line); }
   .cell.active .cn { color: var(--warn); }
 
@@ -899,16 +924,18 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.16 — 2026-10-18.</b> The compass of main-screen v0.29 reaches the shell's
+  <p class="meta"><b>v0.17 — 2026-10-18.</b> The shell of main-screen v0.30 brings a blue bar for a
+     POI in progress to the column and the mini-map (items 2, 58) and smaller dialog buttons
+     (item 63). The compass of main-screen v0.29 reaches the shell's
      styles, though no frame draws it (item 61). Frame I shows a refused removal and a refused
      type change (items 13, 47). The History panel
      covers the main area beside the live POI column, in POI or Route scope, and lists
      every pass this tablet recorded and every type change not yet in the sheet, newest first, with "Delete" on each pass, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
-     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.12</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.42</b>. The shell
+     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.13</b>
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.44</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.29</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.30</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Nine states,
      A to I. The twelve proposals of v0.8 are approved (v0.12, screens.md v0.38).</p>
@@ -976,7 +1003,7 @@
         <li><b>61, 3</b> In portrait the panel covers the main area and the summary under it keeps its place; in landscape it covers the whole main area, action bar and compass included.</li>
         <li><b>14, 45</b> Footer: "History shows only what this tablet recorded".</li>
         <li><b>56</b> The list shows a whole row at its top edge and fades the cut row at its bottom, like the POI column; rows are --row-h tall, as the POI rows beside them.</li>
-        <li><b>67, 68</b> Size C; every value inside the frame is a token; the shell is main-screen v0.29's.</li>
+        <li><b>67, 68</b> Size C; every value inside the frame is a token; the shell is main-screen v0.30's.</li>
       </ul></aside>
     </section>
 

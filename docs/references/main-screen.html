@@ -185,12 +185,23 @@
           v0.42): with no heading yet the dial shows no arrow, so a pale
           arrow never points north when nothing is known. With only a
           last known course the arrow stays pale (item 19).
+  v0.30 2026-10-18 — the user's decisions on the POI states and the
+          dialog buttons (screens.md v0.44, _tokens.css v0.13). The
+          three grey states of the grid and the mini-map blended in the
+          car. A POI in progress is blue (--prog), in the grid, the
+          mini-map and the column's bars. Done, sheet error and not
+          drivable carry a sign besides their colour: Lucide check,
+          triangle-alert and ban, the last on --hatch stripes. Not
+          started keeps an --ink-3 edge. The legend's swatches are small
+          tiles with the same signs (items 2, 58, 59, 69). Dialog buttons
+          set their words at --t-body in --w-bold, the size of the action
+          bar's buttons (item 63).
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.29</title>
+<title>POI Tracker — Working Screen Reference v0.30</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -402,8 +413,9 @@
   .dots i { display: block; width: var(--s-2); height: var(--s-2); background: var(--line); }
   .dots i.done { background: var(--ok); }
   .dots i.err { background: var(--err); }
-  .dots i.part { background: var(--ink-3); }
-  .dots i.nd { background: transparent; box-shadow: inset 0 0 0 1px var(--ink-2); }
+  .dots i.part { background: var(--prog); }
+  .dots i.nd { background: repeating-linear-gradient(135deg, var(--ink-3) 0 1px,
+                           transparent 1px calc(var(--s-1) - 1px)); }
   .dots i.act { background: var(--side); box-shadow: 0 0 0 1px var(--side-ring); }
   .mcap { width: 100%; display: flex; justify-content: space-between; align-items: center;
           font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
@@ -428,6 +440,8 @@
         overflow: hidden; }
   .rb i, .nb i, .cb i { display: block; height: 100%; background: var(--ink-3);
                         border-radius: inherit; }
+  /* items 2 and 59: a POI in progress has a --prog bar, in the column and in the grid */
+  .rb i, .cell.part .cb i { background: var(--prog); }
   .rt { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
         line-height: var(--lh-tight); white-space: nowrap; }
   .row.done { background: var(--ok-bg); }
@@ -685,8 +699,9 @@
            line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px);
            text-wrap: balance; color: var(--ink-2); }
   .dbtns { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); margin-top: var(--s-2); }
+  /* item 63: button words at the size of the action bar's buttons */
   .dbtn { height: calc(var(--tap-min) + var(--s-2)); border-radius: var(--r-sm);
-          font-size: var(--t-label); font-weight: var(--w-heavy); background: var(--man-soft);
+          font-size: var(--t-body); font-weight: var(--w-bold); background: var(--man-soft);
           border: 1px solid var(--line); display: inline-flex; align-items: center;
           justify-content: center; }
   .dbtn.danger { background: var(--danger); border-color: var(--danger); color: var(--on-danger); }
@@ -704,25 +719,32 @@
   .stitle { font-size: var(--t-title); font-weight: var(--w-heavy); color: var(--ink);
             line-height: var(--lh-tight); white-space: nowrap; }
   .sroute { font-size: var(--t-body); font-weight: var(--w-bold); white-space: nowrap; }
-  .legend { display: flex; gap: var(--s-4); flex-wrap: wrap; font-size: var(--t-small);
+  .legend { display: flex; gap: var(--s-3); flex-wrap: wrap; font-size: var(--t-small);
             font-weight: var(--w-bold); color: var(--ink-2); }
   .lg { display: inline-flex; align-items: center; gap: var(--s-2); }
-  /* six states, as the mini-map's squares: each tile and its swatch carry
-     the state's colour on the border, so any two differ in fill or border;
-     "not started" has no fill, so it never reads as a hole */
-  .sw { width: var(--t-small); height: var(--t-small); border-radius: calc(var(--r-sm) / 3);
-        display: inline-block; background: transparent; border: 1px solid var(--line); }
-  .sw.part, .cell.part { background: var(--man-soft); border-color: var(--ink-2); }
+  /* six states, as the mini-map's squares (item 59). Each has a colour and a
+     second sign that needs no colour, for sun glare and for eyes that mix red
+     and green: a check when done, a triangle on a sheet error, a ban sign on
+     stripes when not drivable, a --prog bar in progress. "Not started" keeps
+     an --ink-3 edge and an empty bar, so it never reads as a hole. Each
+     swatch is a small tile, and the legend's gap is --s-3, so it keeps
+     to one line from 720px wide. */
+  .sw { width: calc(var(--t-small) + var(--s-1)); height: calc(var(--t-small) + var(--s-1));
+        border-radius: calc(var(--r-sm) / 2); display: inline-flex; align-items: center;
+        justify-content: center; background: transparent; border: 1px solid var(--ink-3); }
+  .sw.part, .cell.part { background: var(--prog-bg); border-color: var(--prog); }
   .sw.done, .cell.done { background: var(--ok-bg); border-color: var(--ok); }
   .sw.err, .cell.err { background: var(--err-bg); border-color: var(--err); }
-  .sw.nd, .cell.nd { background: transparent; border: 1px dashed var(--ink-2); }
+  .sw.nd, .cell.nd { border-color: var(--line);
+                     background: repeating-linear-gradient(135deg, var(--hatch) 0 calc(var(--s-1) / 2),
+                                 transparent calc(var(--s-1) / 2) var(--s-2)); }
   .sw.act, .cell.active { background: var(--active); border-color: var(--active-line); }
   .sw.act { box-shadow: inset 0 0 0 1px var(--active-line); }
   .grid { flex: 1; min-height: 0; overflow: hidden; display: grid; align-content: start;
           grid-template-columns: repeat(10, minmax(0, 1fr)); grid-auto-rows: var(--row-h);
           gap: var(--s-2);
           mask-image: linear-gradient(var(--ink) calc(100% - var(--s-3)), transparent); }
-  .cell { border-radius: var(--r-sm); background: transparent; border: 1px solid var(--line);
+  .cell { border-radius: var(--r-sm); background: transparent; border: 1px solid var(--ink-3);
           display: flex; flex-direction: column; align-items: center; justify-content: center;
           gap: var(--s-2); }
   .cn { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
@@ -733,6 +755,14 @@
   .cell.err .cn { color: var(--err); }
   .cell.err .cb i { background: var(--err); }
   .cell.nd .cn { color: var(--ink-2); }
+  /* the sign takes the bar's place: its negative margins give it the bar's
+     height, so the numbers of a row of tiles stay on one line */
+  .cell .ci { width: var(--t-label); height: var(--t-label); flex: none;
+              margin-block: calc((var(--s-1) - var(--t-label)) / 2); }
+  .sw .ci { width: var(--s-3); height: var(--s-3); }
+  .sw.done .ci, .cell.done .ci { color: var(--ok); }
+  .sw.err .ci, .cell.err .ci { color: var(--err); }
+  .sw.nd .ci, .cell.nd .ci { color: var(--ink-2); }
   .cell.active { box-shadow: inset 0 0 0 var(--s-1) var(--active-line); }
   .cell.active .cn { color: var(--warn); }
 
@@ -869,6 +899,7 @@
   <symbol id="i-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></symbol>
   <symbol id="i-ban" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.929 4.929 19.07 19.071"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
   <symbol id="i-chev-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
   <symbol id="i-chev-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></symbol>
@@ -879,12 +910,14 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.29 — 2026-10-18.</b> The compass redesign: one arrow on a raised round
-     face, its left half dark like the maneuver discs and its right half amber like the side
-     discs, with the dial fixed and N up. With no heading yet the dial shows no arrow (item 19).
-     Every value inside
-     the frames is a token of <b>_tokens.css v0.12</b> (size C, screens.md item 67) and
-     every rule follows <b>screens.md v0.42</b>. Icons are
+  <p class="meta"><b>v0.30 — 2026-10-18.</b> The POI states read at a glance, also under sun
+     glare: a POI in progress is blue, and done, sheet error and not drivable carry a sign
+     besides their colour (items 58, 59). Dialog buttons take the size of the action bar's
+     buttons (item 63). The compass is one arrow on a raised round face, its left half dark
+     like the maneuver discs and its right half amber like the side discs, with the dial fixed
+     and N up. With no heading yet the dial shows no arrow (item 19). Every value inside
+     the frames is a token of <b>_tokens.css v0.13</b> (size C, screens.md item 67) and
+     every rule follows <b>screens.md v0.44</b>. Icons are
      Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
      presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and
@@ -1518,11 +1551,11 @@
   <div class="shead"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><span class="stt"><span class="stitle">All POIs</span><span class="sroute">R20890-058</span></span></div>
   <div class="legend">
     <span class="lg"><span class="sw act"></span>Current</span>
-    <span class="lg"><span class="sw done"></span>Done</span>
+    <span class="lg"><span class="sw done"><svg class="ci"><use href="#i-check"/></svg></span>Done</span>
     <span class="lg"><span class="sw part"></span>In progress</span>
     <span class="lg"><span class="sw"></span>Not started</span>
-    <span class="lg"><span class="sw err"></span>Sheet error</span>
-    <span class="lg"><span class="sw nd"></span>Not drivable</span>
+    <span class="lg"><span class="sw err"><svg class="ci"><use href="#i-alert"/></svg></span>Sheet error</span>
+    <span class="lg"><span class="sw nd"><svg class="ci"><use href="#i-ban"/></svg></span>Not drivable</span>
   </div>
   <div class="grid" data-active="136"></div>
 </div>
@@ -1530,12 +1563,12 @@
         <p class="caption"><b>K</b> · Grid of all POIs</p>
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
-        <li><b>59</b> Tapping the mini-map (item 58) opens a grid of all POIs over the whole screen, ten to a row, coloured like the mini-map, with a legend whose swatches are miniatures of the tiles.</li>
+        <li><b>59</b> Tapping the mini-map (item 58) opens a grid of all POIs over the whole screen, ten to a row, coloured like the mini-map, with a legend whose swatches are small tiles with the same signs.</li>
         <li><b>59</b> Tapping a tile makes that POI active, closes the grid and scrolls the column to it.</li>
         <li><b>66</b> Round ✕ in the top-left corner, as large as any tap target; no text "Close".</li>
         <li><b>66, 59</b> A tap on the dimmed background, or the Android back gesture, closes it and changes nothing.</li>
         <li><b>58, 22</b> Works for any POI count; the grid scrolls, a whole tile row under the legend, the cut row faded at the bottom (item 59).</li>
-        <li><b>59</b> Six tile states, as the mini-map: current, done, in progress, not started, sheet error, not drivable; each tile and swatch carries its state on the border, and "not started" has no fill.</li>
+        <li><b>59</b> Six tile states, as the mini-map. Current: amber tint and a thick amber edge. Done: green with a check. In progress: blue with its bar. Not started: an empty bar and a grey edge. Sheet error: red with a triangle. Not drivable: stripes with a ban sign.</li>
       </ul></aside>
     </section>
 
@@ -1989,6 +2022,13 @@
     return (p.T - p.c) + ' to go';
   }
   function pct(p) { return p.T ? Math.round(Math.min(p.c, p.T) / p.T * 100) : 0; }
+  // item 59: done, sheet error and not drivable show a sign in the bar's place
+  var SIGN = { done: 'i-check', err: 'i-alert', nd: 'i-ban' };
+  function sign(p) {
+    var id = SIGN[status(p)];
+    return id ? '<svg class="ci"><use href="#' + id + '"/></svg>'
+              : '<span class="cb"><i style="width: ' + pct(p) + '%"></i></span>';
+  }
   function cls(base, p, active) {
     var s = status(p);
     if (base === 'row' && s === 'part') s = '';
@@ -2040,7 +2080,7 @@
     var active = +g.getAttribute('data-active'), cells = '';
     pois.forEach(function (p) {
       cells += '<button class="' + cls('cell', p, active) + '" type="button" aria-label="POI ' + p.n + '">' +
-        '<span class="cn">' + p.n + '</span><span class="cb"><i style="width: ' + pct(p) + '%"></i></span></button>';
+        '<span class="cn">' + p.n + '</span>' + sign(p) + '</button>';
     });
     g.innerHTML = cells;
   });
