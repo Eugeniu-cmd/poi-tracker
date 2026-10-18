@@ -181,12 +181,16 @@
           N, E, S and W, the four letters inside, N heavy in --ink. The
           dial stays fixed with N up. Every frame keeps its heading. The
           arrow stays pale while there is no heading (item 19).
+  v0.29 2026-10-18 — the user's decision on the compass (screens.md
+          v0.42): with no heading yet the dial shows no arrow, so a pale
+          arrow never points north when nothing is known. With only a
+          last known course the arrow stays pale (item 19).
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.28</title>
+<title>POI Tracker — Working Screen Reference v0.29</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -511,7 +515,8 @@
   .compass .halo { fill: none; stroke: var(--panel-raised); stroke-linejoin: round; }
   .compass .dark { fill: var(--disc); }
   .compass .amber { fill: var(--side); }
-  /* no heading yet, or only a last known course: the arrow stays pale */
+  /* no heading yet: no arrow. Only a last known course: the arrow is pale */
+  .compass.none .arrow { visibility: hidden; }
   .compass.idle .arrow { opacity: var(--o-off); }
 
   /* ---- type pill and its menu (items 46, 60, 69) ---- */
@@ -874,11 +879,12 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.28 — 2026-10-17.</b> The compass redesign: one arrow on a raised round
+  <p class="meta"><b>v0.29 — 2026-10-18.</b> The compass redesign: one arrow on a raised round
      face, its left half dark like the maneuver discs and its right half amber like the side
-     discs, with the dial fixed and N up (item 19). Every value inside
+     discs, with the dial fixed and N up. With no heading yet the dial shows no arrow (item 19).
+     Every value inside
      the frames is a token of <b>_tokens.css v0.12</b> (size C, screens.md item 67) and
-     every rule follows <b>screens.md v0.41</b>. Icons are
+     every rule follows <b>screens.md v0.42</b>. Icons are
      Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
      presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and
@@ -956,7 +962,7 @@
         <li><b>57</b> Index rail along the column's right edge: 1, 40, 80, 120, 160, 197.</li>
         <li><b>40</b> Active row: amber tint, edge of --s-1, number in the amber foreground.</li>
         <li><b>4</b> Big POI number, "41 of 70" beside it, "29 to go" under the counter.</li>
-        <li><b>19</b> Compass at the top right of the main area, one gap under the top bar in both layouts. A raised round face with ticks and N, E, S and W, and one arrow turned to the car's heading, its left half dark like the maneuver discs and its right half amber like the side discs. The dial stays fixed with N up, and the arrow stays pale while there is no heading. 128px, 144px on a tall landscape screen, 96px on a short one (item 19).</li>
+        <li><b>19</b> Compass at the top right of the main area, one gap under the top bar in both layouts. A raised round face with ticks and N, E, S and W, and one arrow turned to the car's heading, its left half dark like the maneuver discs and its right half amber like the side discs. The dial stays fixed with N up. With no heading yet the dial shows no arrow, and with only a last known course the arrow stays pale. 128px, 144px on a tall landscape screen, 96px on a short one (item 19).</li>
         <li><b>60</b> Type pill under the number (item 60): a tile with three fixed slots, Left, Straight, Right; an absent maneuver leaves its slot empty. Name, split line with the same icons, "Change".</li>
         <li><b>39</b> "Still needed" card: per maneuver its Lucide icon (item 69), "N more" and a bar, no "N of T" line under it (v0.32); "Sides so far" with E at zero faded.</li>
         <li><b>5</b> Three discs in the middle of the free space, Straight higher; Lucide corner-up-left, arrow-up, corner-up-right (item 69).</li>

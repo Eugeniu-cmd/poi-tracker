@@ -1,21 +1,22 @@
 <!doctype html>
 <!--
-  POI Tracker — working prototype v19.1
+  POI Tracker — working prototype v19.2
   One file, for the tablet. Open it in Chrome from GitHub Pages
   (tools/poi-tracker-prototype-v19.html): a downloaded copy gets no
   location, and the compass needs it.
 
   The look is the approved references, copied, not redrawn:
-  - the app CSS of docs/references/main-screen.html v0.27 and the History
+  - the app CSS of docs/references/main-screen.html v0.29 and the History
     rules of docs/references/history.html v0.9, byte for byte
-  - docs/references/_tokens.css v0.11, inlined so the file works alone
+  - docs/references/_tokens.css v0.12, inlined so the file works alone
   - the Lucide sprite of main-screen.html
   What this file adds is behaviour: sample routes, tapping passes, the
   compass that blooms, undo and delete with their dialogs, History, the
   type menu, the route menu, the grid, the rail, a simulated sync, and the
   live compass from the tablet's sensors (data-model.md "Heading").
-  Nothing is sent anywhere and nothing is stored on the tablet. The
-  sensor log stays in memory until "Save sensor log" in Tools.
+  Nothing is sent anywhere. Only the sensor log is stored on the tablet,
+  in the browser's storage: the last 3 drives, no coordinates, until
+  "Save sensor logs" in Tools turns them into one file.
 
   v17 2026-10-12 — first prototype on the canon: main-screen v0.24,
           history v0.9, tokens v0.11, screens v0.35. Replaces the
@@ -47,20 +48,35 @@
           (a gap over 30 degrees at once). Tools adds "GPS checks". On the
           log of the test drive the error after a manoeuvre falls from a
           mean of 24.5 degrees (worst 62) to 8 (worst 13).
+  v19.2 2026-10-18: the compass of main-screen v0.29 (screens.md v0.42,
+          tokens v0.12): one arrow on a raised round face, its left half
+          dark like the maneuver discs and its right half amber like the
+          side discs, on a fixed dial. No heading yet: no arrow. Only a
+          last known course: the arrow is pale. "Compass dial" leaves
+          Tools. The drift is measured from half-second averages of the
+          gyroscope while the car stands: in v19.1 the engine's shake kept
+          it from ever being measured. A turn above 0.5 degrees a second
+          is no longer taken for drift, so a car creeping round a corner
+          while GPS reads 0 cannot bend the compass. Tools shows the turn
+          averaged over half a second. The sensor log is kept on the
+          tablet every 10 s, the last 3 drives, and a page opened again
+          within 10 min continues the same drive: the log of 2026-10-17
+          was lost with the page. Tools shows the drift being measured
+          and where the log is.
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#EFF3FA">
-<title>POI Tracker — prototype v19.1</title>
+<title>POI Tracker — prototype v19.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
 <style>
-/* ===== _tokens.css v0.11, inlined ===== */
+/* ===== _tokens.css v0.12, inlined ===== */
 /* POI Tracker — design tokens.
-   v0.11 — 2026-10-11
+   v0.12 — 2026-10-17
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -111,6 +127,11 @@
    --compass-compact 96px, the old size, for a short screen. New
    --compass-n, the red of the letter N and of the needle's north end,
    and --compass-s, the blue of its south end, as a magnet is painted.
+   v0.12 2026-10-17 — a dedicated decision on the compass redesign
+   (screens.md v0.41, item 19): the compass is one arrow in the screen's
+   own two colours, its halves --disc and --side, on a --panel-raised
+   face with --shadow and a --line edge. --compass-n and --compass-s are
+   removed, since nothing uses them any more.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -146,8 +167,6 @@
   --panel-raised: #FFFFFF;
   --danger: var(--err);
   --on-danger: #FFFFFF;
-  --compass-n: #B42E26;
-  --compass-s: #1F5EFF;
   --shadow: 0 6px 20px rgba(50, 65, 120, 0.14);
   --shadow-lift: 0 10px 26px rgba(40, 50, 90, 0.26);
   --r-sm: 12px;
@@ -234,8 +253,6 @@
     --panel-raised: #303749;
     --danger: #D7373F;
     --on-danger: #FFFFFF;
-    --compass-n: #FF6B62;
-    --compass-s: #7FA2FF;
     --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
     --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
   }
@@ -272,8 +289,6 @@
   --panel-raised: #303749;
   --danger: #D7373F;
   --on-danger: #FFFFFF;
-  --compass-n: #FF6B62;
-  --compass-s: #7FA2FF;
   --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
   --shadow-lift: 0 10px 26px rgba(0, 0, 0, 0.55);
 }
@@ -288,7 +303,7 @@
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.11 or a calc() over
+     line height below is a var() from _tokens.css v0.12 or a calc() over
      them. Literal values are limited to 0, 1px hairlines, 50% for round
      shapes, percentages and fr of a layout, em, ch, lh and cap ratios of
      a token font size, keywords, SVG geometry, the 1200px breakpoint of
@@ -540,17 +555,25 @@
           line-height: var(--lh-tight); text-box: trim-both cap alphabetic; }
   .rest span { white-space: nowrap; }
   .rest.ok { color: var(--ok); font-weight: var(--w-bold); }
-  /* the compass (item 19): a drawn widget, its ring, letters and needle
-     in tokens; the needle's north end and the letter N share --compass-n */
+  /* the compass (item 19): a drawn widget on a raised round face, all in
+     tokens. One arrow shows where the car drives: its left half --disc,
+     the colour of the maneuver discs, its right half --side, the colour of
+     the side discs. The dial stays fixed with N up. */
   .compass { position: absolute; right: anchor(--main right); top: anchor(--main top);
-             width: var(--compass); height: var(--compass); color: var(--ink); z-index: 2; }
-  .compass .marks, .compass .ring { fill: none; stroke: var(--ink-2); }
+             width: var(--compass); height: var(--compass); border-radius: 50%;
+             background: var(--panel-raised); box-shadow: var(--shadow); z-index: 2; }
+  .compass .edge { fill: none; stroke: var(--line); }
   .compass .minor { fill: none; stroke: var(--ink-3); stroke-linecap: round; }
-  .compass text { font-size: var(--t-small); fill: var(--ink-2); font-weight: var(--w-bold); }
-  .compass .cn { fill: var(--compass-n); font-weight: var(--w-heavy); }
-  .compass .nn { fill: var(--compass-n); }
-  .compass .ns { fill: var(--compass-s); }
-  .compass .hub { fill: currentColor; }
+  .compass .major { fill: none; stroke: var(--ink-2); stroke-linecap: round; }
+  .compass text { font-size: var(--t-small); fill: var(--ink-2); font-weight: var(--w-bold);
+                  text-anchor: middle; dominant-baseline: central; }
+  .compass .cn { fill: var(--ink); font-weight: var(--w-heavy); }
+  .compass .halo { fill: none; stroke: var(--panel-raised); stroke-linejoin: round; }
+  .compass .dark { fill: var(--disc); }
+  .compass .amber { fill: var(--side); }
+  /* no heading yet: no arrow. Only a last known course: the arrow is pale */
+  .compass.none .arrow { visibility: hidden; }
+  .compass.idle .arrow { opacity: var(--o-off); }
 
   /* ---- type pill and its menu (items 46, 60, 69) ---- */
   .typewrap { anchor-name: --pill; }
@@ -1041,8 +1064,6 @@
   .toast .ic { width: 1.1em; height: 1.1em; }
   /* the History chip decision of 2026-10-12: ink text, amber by its fill */
   .chip.amber { color: var(--ink); }
-  /* no reading yet: the needle stays pale, so a silent sensor shows */
-  .compass.idle .needle { opacity: var(--o-off); }
   /* the tools menu: a checking tool of the prototype, never in the app */
   .toolwrap { anchor-name: --tools; }
   .tools { display: inline-flex; align-items: center; height: var(--tap-min); padding: 0 var(--s-4);
@@ -1089,7 +1110,7 @@
 <div class="body">
   <div class="colwrap"><div class="col" id="col"></div></div>
   <div class="main" id="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><g class="marks" stroke-width="2"><path d="M48 0v8M48 88v8M0 48h8M88 48h8"/></g><g class="card"><circle class="ring" cx="48" cy="48" r="40" stroke-width="2"/><path class="minor" stroke-width="1.5" d="M68 13.36L65.5 17.69M82.64 28L78.31 30.5M82.64 68L78.31 65.5M68 82.64L65.5 78.31M28 82.64L30.5 78.31M13.36 68L17.69 65.5M13.36 28L17.69 30.5M28 13.36L30.5 17.69"/><text class="cn" x="48" y="25" text-anchor="middle">N</text><text class="cl" x="76" y="53" text-anchor="middle">E</text><text class="cl" x="48" y="81" text-anchor="middle">S</text><text class="cl" x="20" y="53" text-anchor="middle">W</text></g><g class="needle" transform="rotate(0 48 48)"><path class="nn" d="M48 28 54 48 42 48Z"/><path class="ns" d="M48 68 54 48 42 48Z"/></g><circle class="hub" cx="48" cy="48" r="3.5"/></svg>
+    <svg class="compass none" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(0 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="amber" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
       <section class="head" id="head"></section>
       <div class="typewrap"><button class="typebtn" type="button" data-act="typemenu" id="pill"></button></div>
@@ -1286,7 +1307,7 @@
     return {
       route: 'R20890-058', routes: routes, passes: passes, open: null, menu: null, overlay: null,
       scope: 'poi', dialog: null, online: true, refuseNext: false, sound: true, theme: 'light',
-      lastSync: now - 2 * MIN, lastLoad: now - 29 * 60 * MIN, conn: true, bounce: null, dial: 'needle', railN: null
+      lastSync: now - 2 * MIN, lastLoad: now - 29 * 60 * MIN, conn: true, bounce: null, railN: null
     };
   }
   state = freshState();
@@ -1685,9 +1706,8 @@
       ['network', 'Network', !state.online ? 'Offline (test)' : navigator.onLine === false ? 'No network on the tablet' : 'Online'],
       ['refuse', 'Next send', state.refuseNext ? 'Refused (test)' : 'Accepted'],
       ['conn', 'Connection', state.conn ? 'Set up' : 'Not set up'],
-      ['dial', 'Compass dial', state.dial === 'needle' ? 'Needle turns' : 'Card turns'],
       ['gps', 'GPS', compass.gpsOn() ? 'On' : 'Off'],
-      ['savelog', 'Save sensor log', compass.rows() + ' rows, no coordinates'],
+      ['savelog', 'Save sensor logs', compass.rows() + ' rows · ' + compass.drives() + (compass.drives() === 1 ? ' drive' : ' drives')],
       ['full', 'Full screen', document.fullscreenElement ? 'On' : 'Off'],
       ['reset', 'Reset sample data', 'Back to the start']
     ];
@@ -1695,7 +1715,7 @@
       '<div class="tnote diag">' + c.lines.map(function (l) { return '<b>' + esc(l[0]) + '</b> ' + esc(l[1]); }).join('<br>') + '</div>' +
       items.map(function (it) {
         return '<button class="ritem" type="button" data-tool="' + it[0] + '"><b>' + it[1] + '</b><small>' + esc(it[2]) + '</small></button>';
-      }).join('') + '<div class="tnote">Prototype v19.1. Nothing is sent anywhere.</div></div>';
+      }).join('') + '<div class="tnote">Prototype v19.2. Nothing is sent anywhere. The sensor log stays on this tablet, without coordinates.</div></div>';
   }
 
   // ================= feedback: toast, chime, vibration =================
@@ -1875,9 +1895,8 @@
     else if (name === 'network') { state.online = !state.online; if (state.online) scheduleSync(); }
     else if (name === 'refuse') state.refuseNext = !state.refuseNext;
     else if (name === 'conn') { state.conn = !state.conn; if (state.conn) scheduleSync(); }
-    else if (name === 'dial') state.dial = state.dial === 'needle' ? 'card' : 'needle';
     else if (name === 'gps') compass.toggleGps();
-    else if (name === 'savelog') { toast('Saved ' + compass.saveLog() + ' rows'); }
+    else if (name === 'savelog') { var sv = compass.saveLog(); toast('Saved ' + sv.drives + (sv.drives === 1 ? ' drive, ' : ' drives, ') + sv.rows + ' rows'); }
     else if (name === 'full') {
       try {
         if (document.fullscreenElement) document.exitFullscreen();
@@ -2013,6 +2032,26 @@
   //    course, dimmed, and the sensors are restarted when the page is
   //    visible and focused again. Location is asked before the motion
   //    sensors start, because Chrome's question takes the focus.
+  // 4. Decided 2026-10-18 (v19.2): the drift is measured while the car
+  //    stands, GPS below 1 km/h, from half-second averages of the
+  //    gyroscope. With the engine running the mount shakes the readings by
+  //    about 1 deg/s each way, so v19.1, which wanted every reading of 3 s
+  //    within 2 deg/s, almost never measured it. Now the averages must
+  //    agree within 1 deg/s for 3 s, and a turn of more than 0.5 deg/s
+  //    about "up" is not drift: a replay of the 12:01 log showed the car
+  //    creeping round a corner at 2.5 deg/s while GPS read 0, and v19.1's
+  //    limit of 3 deg/s took that in as drift.
+  // 5. Decided 2026-10-18 (v19.2): the log is kept in the browser's storage
+  //    on the tablet, written every 10 s, so a reload, a closed tab or
+  //    Chrome stopped in the background loses at most 10 s. A drive is kept
+  //    once the car has moved, a page opened again within 10 min continues
+  //    the same drive, and the last 3 drives are kept. "Save sensor logs"
+  //    turns them into one file. The log holds no coordinates.
+  //    Tools shows the turn averaged over half a second, so the shake of a
+  //    standing car no longer reads as turning.
+  // 6. Decided 2026-10-17 (screens.md item 19, v0.42): one arrow on a fixed
+  //    dial. With no heading yet the dial shows no arrow, with only a last
+  //    known course the arrow is pale.
   var compass = (function () {
     var MOVING = 3;             // m/s (11 km/h): the GPS course is trusted from here
     var FRESH = 3000;           // ms: a fix older than this is not live
@@ -2024,13 +2063,21 @@
     var SNAP = 30;              // deg: a gap larger than this is closed at once
     var DT_MAX = 0.2;           // s: the longest step added up at once
     var STOPPED = 0.3;          // m/s: below this the car stands, for the drift
-    var STILL_MS = 3000;        // ms: a standing car for this long measures the drift
-    var STILL_SPREAD = 2;       // deg/s: a wider spread on any axis means it moved
-    var DRIFT_MAX = 3;          // deg/s: a larger turn is a slow turn, not drift. Below
-                                // 1 km/h a car turns at most about 3 deg/s (5 m radius)
+    var STILL_MS = 3000;        // ms: a standing car steady this long measures the drift
+    var STILL_BLOCK = 500;      // ms: the gyroscope is averaged over blocks this long
+    var STILL_SPREAD = 1;       // deg/s: averages further apart on any axis mean it moved
+    var DRIFT_MAX = 0.5;        // deg/s: a larger turn is the car creeping round a corner
+                                // while GPS still reads 0, not drift. This tablet's
+                                // gyroscope drifted 0.01 to 0.02 deg/s in the car
     var RESTART_GAP = 5000;     // ms: the watchdog restarts the sensors at most this often
     var CREDIT = 1500;          // ms: a reading this soon after a tap or a restart is credited to it
-    var LOG_MAX = 20000;        // rows: about three hours
+    var LOG_MAX = 20000;        // rows in one drive: about three hours
+    var STORE = 'poi-proto-sensorlog'; // the key of the log in the browser's storage
+    var LOG_EVERY = 10000;      // ms: new rows go to the storage this often
+    var LOG_CHUNK = 500;        // rows in one stored piece
+    var LOG_KEEP = 3;           // drives kept on the tablet
+    var LOG_JOIN = 10 * 60000;  // ms: a page opened again this soon continues the drive
+    var VERSION = 'v19.2';
     var RAD = 180 / Math.PI;
     var car = new Heading.Smoother(0.6);
 
@@ -2041,8 +2088,9 @@
     }
     var gy = { api: source('api'), dm: source('dm') };
     var acc = { v: null, up: null, mag: null, n: 0, at: 0, apiAt: 0, first: 0, prevT: null, from: null, err: null };
-    var turn = 0, rate = 0, bias = [0, 0, 0], biasSet = false;
-    var still = { from: 0, sum: null, cnt: 0, min: null, max: null };
+    var turn = 0, rate = 0, rateShow = 0, bias = [0, 0, 0], biasSet = false;
+    var still = { from: 0, blocks: [], cur: null, spread: 0, shakyAt: 0, noteAt: 0 };
+    var drifts = 0, driftAt = 0;
     var motion = 'off', motionAt = 0, apiObj = { g: null, a: null };
     var fix = null, watch = null, gps = 'off', gpsAt = 0, gpsWanted = true;
     var off = null, checkedAt = 0, checks = 0, lastPull = null, hist = [], unsure = false, heading = null, from = null, pending = false;
@@ -2062,7 +2110,7 @@
       'turn_deg', 'rate_dps', 'api_hz', 'dm_hz', 'gyro_live', 'w_x', 'w_y', 'w_z', 'up_x', 'up_y', 'up_z', 'drift_dps'];
     function r(v, n) { if (v === null || v === undefined) return ''; var p = Math.pow(10, n); return Math.round(v * p) / p; }
     function row(kind, note, t) {
-      if (log.length >= LOG_MAX) return;
+      if (keep.base + log.length >= LOG_MAX) return;
       var f = kind === 'gps' ? fix : null, s = live(gy.api, t) ? gy.api : gy.dm, up = acc.up;
       log.push([r((t - t0) / 1000, 2), kind, note || '',
         f && f.speed !== null ? r(f.speed * 3.6, 1) : '', f && f.course !== null ? r(f.course, 1) : '', f ? r(f.acc, 1) : '',
@@ -2114,6 +2162,9 @@
           var x = w[0] - bias[0], y = w[1] - bias[1], z = w[2] - bias[2];
           rate = -(x * acc.up[0] + y * acc.up[1] + z * acc.up[2]);
           turn += rate * dt;
+          // Tools shows the turn averaged over about half a second, so the
+          // mount's shake does not read as turning
+          rateShow += (rate - rateShow) * (1 - Math.exp(-dt / 0.5));
           if (!hist.length || t - hist[hist.length - 1].t >= 100) {
             hist.push({ t: t, turn: turn });
             while (hist.length && t - hist[0].t > 3 * STRAIGHT_MS) hist.shift();
@@ -2137,26 +2188,48 @@
 
     // ---- the drift: the gyroscope's reading while the car stands ----
     function drift() { var u = acc.up; return u ? -(bias[0] * u[0] + bias[1] * u[1] + bias[2] * u[2]) : 0; }
+    function spreadOf(list) {
+      var most = 0;
+      for (var i = 0; i < 3; i++) {
+        var lo = Infinity, hi = -Infinity;
+        for (var j = 0; j < list.length; j++) { lo = Math.min(lo, list[j][i]); hi = Math.max(hi, list[j][i]); }
+        most = Math.max(most, hi - lo);
+      }
+      return most;
+    }
+    // While GPS says the car stands, the readings are averaged in blocks of
+    // half a second. The engine's shake cancels out in an average, a real
+    // movement does not. When the last 3 s of averages agree within
+    // STILL_SPREAD, their mean is the drift. A block that disagrees drops
+    // the older blocks, so the 3 s start again from the steady part.
     function stillSample(w, t) {
       var st = still, i;
       var stopped = !!fix && fix.speed !== null && fix.speed < STOPPED && t - fix.at < FRESH;
-      if (!stopped) { st.from = 0; return; }
-      if (!st.from) { st.from = t; st.sum = [0, 0, 0]; st.cnt = 0; st.min = w.slice(); st.max = w.slice(); }
-      for (i = 0; i < 3; i++) {
-        st.sum[i] += w[i];
-        if (w[i] < st.min[i]) st.min[i] = w[i];
-        if (w[i] > st.max[i]) st.max[i] = w[i];
-        if (st.max[i] - st.min[i] > STILL_SPREAD) { st.from = 0; return; }
+      if (!stopped) { st.from = 0; st.blocks = []; st.cur = null; return; }
+      if (!st.from) st.from = t;
+      if (st.cur && t - st.cur.at > 2 * STILL_BLOCK) st.cur = null; // a gap in the readings
+      if (!st.cur) st.cur = { at: t, sum: [0, 0, 0], n: 0 };
+      for (i = 0; i < 3; i++) st.cur.sum[i] += w[i];
+      st.cur.n += 1;
+      if (t - st.cur.at < STILL_BLOCK) return;
+      var c = st.cur;
+      st.cur = null;
+      if (c.n < 10) return;
+      st.blocks.push([c.sum[0] / c.n, c.sum[1] / c.n, c.sum[2] / c.n]);
+      st.spread = spreadOf(st.blocks);
+      if (st.spread > STILL_SPREAD) {
+        st.shakyAt = t;
+        if (t - st.noteAt > 3000) { st.noteAt = t; event('still: shaky ' + st.spread.toFixed(1)); }
+        while (st.blocks.length > 1 && spreadOf(st.blocks) > STILL_SPREAD) st.blocks.shift();
       }
-      st.cnt += 1;
-      if (t - st.from >= STILL_MS && st.cnt >= 30) {
-        var b = [st.sum[0] / st.cnt, st.sum[1] / st.cnt, st.sum[2] / st.cnt], u = acc.up;
-        st.from = 0;
-        if (u && Math.abs(b[0] * u[0] + b[1] * u[1] + b[2] * u[2]) > DRIFT_MAX) { event('not drift: turning'); return; }
-        for (i = 0; i < 3; i++) bias[i] = biasSet ? bias[i] + (b[i] - bias[i]) * 0.5 : b[i];
-        biasSet = true;
-        event('drift ' + drift().toFixed(2));
-      }
+      if (st.blocks.length * STILL_BLOCK < STILL_MS) return;
+      var b = [0, 0, 0], u = acc.up;
+      for (var j = 0; j < st.blocks.length; j++) for (i = 0; i < 3; i++) b[i] += st.blocks[j][i] / st.blocks.length;
+      st.blocks = [];
+      if (u && Math.abs(b[0] * u[0] + b[1] * u[1] + b[2] * u[2]) > DRIFT_MAX) { event('not drift: turning'); return; }
+      for (i = 0; i < 3; i++) bias[i] = biasSet ? bias[i] + (b[i] - bias[i]) * 0.5 : b[i];
+      biasSet = true; drifts += 1; driftAt = t;
+      event('drift ' + drift().toFixed(2));
     }
 
     // ---- reading the sensors ----
@@ -2259,6 +2332,7 @@
       var c = pos.coords, t = now();
       fix = { course: num(c.heading) === null ? null : Heading.norm(c.heading), speed: num(c.speed), acc: num(c.accuracy), at: t };
       gps = 'fix';
+      if (fix.speed !== null && fix.speed >= MOVING) startKeeping();
       startMotion('location allowed');
       var note = '';
       if (gpsLive(t) && gyroOk(t) && straight(t)) note = check(t);
@@ -2315,11 +2389,10 @@
         pending = false;
         var svg = document.querySelector('.app svg.compass');
         if (!svg) return;
-        var needle = svg.querySelector('.needle'), dial = svg.querySelector('.card');
         var h = heading === null ? 0 : Math.round(heading * 10) / 10;
-        if (state.dial === 'card') { needle.setAttribute('transform', 'rotate(0 48 48)'); dial.setAttribute('transform', 'rotate(' + Heading.norm(-h) + ' 48 48)'); }
-        else { needle.setAttribute('transform', 'rotate(' + h + ' 48 48)'); dial.setAttribute('transform', 'rotate(0 48 48)'); }
-        svg.classList.toggle('idle', heading === null || from === 'stale');
+        svg.querySelector('.arrow').setAttribute('transform', 'rotate(' + h + ' 48 48)');
+        svg.classList.toggle('none', heading === null);
+        svg.classList.toggle('idle', heading !== null && from === 'stale');
         svg.setAttribute('aria-label', heading === null ? 'Heading: no reading yet' : 'Heading ' + Math.round(heading) + ' degrees, coming from ' + Heading.approachSide(heading));
       });
     }
@@ -2354,7 +2427,7 @@
       var y, s = live(gy.api, t) ? gy.api : live(gy.dm, t) ? gy.dm : null;
       if (motion !== 'on') y = gps === 'off' && gpsWanted ? 'waiting for the first tap' : 'starts after the answer about location';
       else if (s) y = 'working · ' + Math.round(s.hz) + ' a second · ' + (s === gy.api ? 'Sensor API' : 'devicemotion') + ' · ' +
-        (Math.abs(rate) < 0.5 ? 'not turning' : 'turning ' + (rate > 0 ? 'right ' : 'left ') + Math.abs(rate).toFixed(1) + '°/s');
+        (Math.abs(rateShow) < 0.5 ? 'not turning' : 'turning ' + (rateShow > 0 ? 'right ' : 'left ') + Math.abs(rateShow).toFixed(1) + '°/s');
       else if (!everLive && gy.api.err && gy.api.err !== 'absent' && !gy.dm.n) y = errText(gy.api.err);
       else if (!everLive && gy.dm.empty && !gy.dm.n && (!gy.api.n)) y = 'none on this tablet';
       else if (paused) y = 'paused ' + secs(t - pausedAt) + ', restarting. A tap on the screen wakes it';
@@ -2362,7 +2435,13 @@
       lines.push(['Gyroscope', y]);
       lines.push(['Accelerometer', !acc.n ? (acc.err ? errText(acc.err) : 'no data yet')
         : t - acc.at < LIVE ? 'working · ' + acc.mag.toFixed(1) + ' m/s²' : 'paused ' + secs(t - acc.at)]);
-      lines.push(['Drift', biasSet ? 'removed · ' + Math.abs(drift()).toFixed(2) + '°/s' : 'not measured yet: it is measured while the car stands']);
+      var d, st = still;
+      if (st.from && t - st.shakyAt < 1500) d = 'standing, but the tablet shakes (' + st.spread.toFixed(1) + '°/s), waiting for it to settle';
+      else if (st.from) d = 'measuring: standing ' + secs(t - st.from) + ', steady for ' + (st.blocks.length * STILL_BLOCK / 1000).toFixed(1) + ' of 3 s';
+      else d = 'not measured yet: it is measured while the car stands';
+      if (biasSet) d = 'removed · ' + Math.abs(drift()).toFixed(2) + '°/s · measured ' + drifts + (drifts === 1 ? ' time' : ' times') +
+        ', last ' + secs(t - driftAt) + ' ago' + (st.from ? ' · ' + d : '');
+      lines.push(['Drift', d]);
       lines.push(['Pauses', !everLive ? 'no readings yet' : !tally.pauses && !paused ? 'none so far'
         : tally.pauses + ' · back by restart ' + tally.restart + ', after a tap ' + tally.tap + ', by itself ' + tally.itself +
           (paused ? ' · paused now' : '')]);
@@ -2375,27 +2454,124 @@
       lines.push(['GPS checks', !checks ? 'none yet: they come on a straight road above 11 km/h'
         : checks + ' · ' + (lastPull === null ? 'the first one set north' : 'the last one found the needle ' + Math.abs(lastPull).toFixed(1) + '° off')]);
       lines.push(['Compass', c]);
+      lines.push(['Log', logText(t)]);
       return { lines: lines };
     }
 
     // ---- the first tap starts GPS, every tap is noted ----
     function permit() { if (watch === null && gps === 'off' && gpsWanted) startGps(); }
     function tap() { lastTap = now(); }
+    // ---- the log kept on the tablet ----
+    // The index lists the kept drives, oldest first. Each drive's rows are
+    // stored in pieces of up to LOG_CHUNK rows. A page continuing a drive
+    // starts a new piece, so no stored piece is ever read back and rewritten
+    // except the open one of this page.
+    var keep = { ok: true, err: null, entry: null, chunk0: 0, base: 0, saved: 0, savedAt: 0, moved: false };
+    function readIndex() { var v = localStorage.getItem(STORE); return v ? JSON.parse(v) : []; }
+    function writeIndex(list) { localStorage.setItem(STORE, JSON.stringify(list)); }
+    function dropDrive(e) { for (var k = 0; k < e.chunks; k++) localStorage.removeItem(STORE + ':' + e.id + ':' + k); }
+    function prune(list) {
+      while (list.length > LOG_KEEP) dropDrive(list.shift());
+      return list;
+    }
+    (function openDrive() {
+      try {
+        var list = readIndex(), last = list[list.length - 1], wall = Date.now();
+        if (last && wall - last.last < LOG_JOIN) {
+          keep.entry = last; keep.chunk0 = last.chunks; keep.base = last.rows; keep.moved = true;
+          // the drive's clock goes on from its start, never back before its last row
+          t0 = now() - 1000 * Math.max((wall - last.started) / 1000, (last.lastT || 0) + 0.01);
+          event('page opened again after ' + Math.round(Math.max(0, wall - last.last) / 1000) + ' s: the drive continues');
+        }
+      } catch (e) { keep.ok = false; keep.err = e.name || 'error'; }
+      event('page opened · prototype ' + VERSION);
+    }());
+    function total() { return keep.base + log.length; }
+    // the drive is kept from the first moment the car moves
+    function startKeeping() {
+      if (keep.moved || !keep.ok) return;
+      keep.moved = true;
+      try {
+        var wall = Date.now(), list = readIndex();
+        keep.entry = { id: 'd' + wall, started: Math.round(wall - (now() - t0)), last: wall, rows: 0, chunks: 0, lastT: 0, ver: VERSION };
+        list.push(keep.entry);
+        writeIndex(prune(list));
+        event('the car moved: the drive is kept on the tablet');
+        flush();
+      } catch (e) { keep.ok = false; keep.err = e.name || 'error'; }
+    }
+    function flush() {
+      if (!keep.ok || !keep.entry || keep.saved === log.length) return;
+      for (var tries = 0; tries < LOG_KEEP + 1; tries++) {
+        try {
+          var e = keep.entry, from = Math.floor(keep.saved / LOG_CHUNK), to = Math.floor((log.length - 1) / LOG_CHUNK);
+          for (var j = from; j <= to; j++) {
+            localStorage.setItem(STORE + ':' + e.id + ':' + (keep.chunk0 + j),
+              log.slice(j * LOG_CHUNK, Math.min((j + 1) * LOG_CHUNK, log.length)).map(function (x) { return x.join(','); }).join('\n'));
+          }
+          var list = readIndex(), mine = null;
+          for (var i = 0; i < list.length; i++) if (list[i].id === e.id) mine = list[i];
+          if (!mine) { mine = e; list.push(mine); }
+          mine.last = Date.now(); mine.rows = total(); mine.chunks = keep.chunk0 + to + 1; mine.lastT = log[log.length - 1][0];
+          keep.entry = mine;
+          writeIndex(list);
+          keep.saved = log.length; keep.savedAt = now();
+          return;
+        } catch (err) {
+          // the storage is full: make room by dropping the oldest other drive
+          var all = [];
+          try { all = readIndex(); } catch (e2) { /* nothing to drop */ }
+          var other = all.filter(function (x) { return x.id !== keep.entry.id; });
+          if (!other.length || (err.name !== 'QuotaExceededError' && err.code !== 22)) {
+            keep.ok = false; keep.err = err.name === 'QuotaExceededError' || err.code === 22 ? 'the storage is full' : err.name || 'error';
+            event('log not kept: ' + keep.err);
+            return;
+          }
+          dropDrive(other[0]);
+          writeIndex(all.filter(function (x) { return x.id !== other[0].id; }));
+        }
+      }
+    }
+    setInterval(flush, LOG_EVERY);
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flush(); });
+    function drivesKept() { try { return readIndex().length; } catch (e) { return 0; } }
+    function logText(t) {
+      if (!keep.ok) return 'not kept on the tablet (' + keep.err + '): save it now, it is lost with the page';
+      if (!keep.moved) return total() + ' rows, kept on the tablet once the car moves';
+      return total() + ' rows in this drive, kept on the tablet' + (keep.savedAt ? ' ' + secs(t - keep.savedAt) + ' ago' : '') +
+        ' · ' + drivesKept() + ' of ' + LOG_KEEP + ' drives kept';
+    }
+    function two(n) { return (n < 10 ? '0' : '') + n; }
+    function iso(ms) { return new Date(ms).toISOString(); }
+    // one file with every kept drive, newest first, each with its own header
     function saveLog() {
-      var head = '# POI Tracker prototype v19.1 sensor log · started ' + new Date(Date.now() - (now() - t0)).toISOString() +
-        ' · ' + navigator.userAgent;
-      var text = head + '\n' + COLS.join(',') + '\n' + log.map(function (x) { return x.join(','); }).join('\n') + '\n';
+      flush();
+      var parts = [], drives = 0, rows = 0, list = [];
+      try { list = keep.ok ? readIndex() : []; } catch (e) { list = []; }
+      var mine = keep.ok && keep.entry;
+      function section(head, body, n) { parts.push(head + '\n' + COLS.join(',') + (body ? '\n' + body : '')); drives += 1; rows += n; }
+      if (!mine) {
+        section('# POI Tracker prototype ' + VERSION + ' sensor log · this drive, not kept on the tablet · started ' + iso(Date.now() - (now() - t0)) +
+          ' · ' + navigator.userAgent, log.map(function (x) { return x.join(','); }).join('\n'), log.length);
+      }
+      for (var i = list.length - 1; i >= 0; i--) {
+        var e = list[i], pieces = [];
+        for (var k = 0; k < e.chunks; k++) { var v = localStorage.getItem(STORE + ':' + e.id + ':' + k); if (v) pieces.push(v); }
+        section('# POI Tracker prototype ' + (e.ver || VERSION) + ' sensor log · ' + (mine && e.id === keep.entry.id ? 'this drive' : 'an earlier drive') +
+          ' · started ' + iso(e.started) + ' · last row ' + iso(e.last) + ' · ' + e.rows + ' rows · ' + navigator.userAgent, pieces.join('\n'), e.rows);
+      }
+      var text = parts.join('\n') + '\n';
       var a = document.createElement('a'), d = new Date();
-      function two(n) { return (n < 10 ? '0' : '') + n; }
       a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv' }));
-      a.download = 'prototype-v19.1-sensors-' + d.getFullYear() + two(d.getMonth() + 1) + two(d.getDate()) + '-' + two(d.getHours()) + two(d.getMinutes()) + '.csv';
+      a.download = 'prototype-' + VERSION + '-sensors-' + d.getFullYear() + two(d.getMonth() + 1) + two(d.getDate()) + '-' + two(d.getHours()) + two(d.getMinutes()) + '.csv';
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 10000);
-      return log.length;
+      return { drives: drives, rows: rows };
     }
     setInterval(function () { if (state.menu === 'tools') render(); }, 1000);
     return { permit: permit, tap: tap, draw: draw, toggleGps: toggleGps, status: status, saveLog: saveLog,
-             gpsOn: function () { return watch !== null; }, rows: function () { return log.length; } };
+             gpsOn: function () { return watch !== null; }, rows: total, drives: drivesKept };
   }());
 
   render();

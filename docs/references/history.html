@@ -82,12 +82,15 @@
           screens.md v0.41, _tokens.css v0.12): the shell's compass
           styles are copied again from main-screen v0.28. No frame draws
           the compass, since the panel covers it (item 61).
+  v0.16 2026-10-18 — the compass styles of main-screen v0.29
+          (screens.md v0.42): with no heading yet the dial shows no
+          arrow.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.15</title>
+<title>POI Tracker — History Reference v0.16</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -141,7 +144,7 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.28. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.29. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
@@ -413,7 +416,8 @@
   .compass .halo { fill: none; stroke: var(--panel-raised); stroke-linejoin: round; }
   .compass .dark { fill: var(--disc); }
   .compass .amber { fill: var(--side); }
-  /* no heading yet, or only a last known course: the arrow stays pale */
+  /* no heading yet: no arrow. Only a last known course: the arrow is pale */
+  .compass.none .arrow { visibility: hidden; }
   .compass.idle .arrow { opacity: var(--o-off); }
 
   /* ---- type pill and its menu (items 46, 60, 69) ---- */
@@ -895,16 +899,16 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.15 — 2026-10-17.</b> The compass of main-screen v0.28 reaches the shell's
+  <p class="meta"><b>v0.16 — 2026-10-18.</b> The compass of main-screen v0.29 reaches the shell's
      styles, though no frame draws it (item 61). Frame I shows a refused removal and a refused
      type change (items 13, 47). The History panel
      covers the main area beside the live POI column, in POI or Route scope, and lists
      every pass this tablet recorded and every type change not yet in the sheet, newest first, with "Delete" on each pass, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
      "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.12</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.41</b>. The shell
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.42</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.28</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.29</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Nine states,
      A to I. The twelve proposals of v0.8 are approved (v0.12, screens.md v0.38).</p>
@@ -972,7 +976,7 @@
         <li><b>61, 3</b> In portrait the panel covers the main area and the summary under it keeps its place; in landscape it covers the whole main area, action bar and compass included.</li>
         <li><b>14, 45</b> Footer: "History shows only what this tablet recorded".</li>
         <li><b>56</b> The list shows a whole row at its top edge and fades the cut row at its bottom, like the POI column; rows are --row-h tall, as the POI rows beside them.</li>
-        <li><b>67, 68</b> Size C; every value inside the frame is a token; the shell is main-screen v0.28's.</li>
+        <li><b>67, 68</b> Size C; every value inside the frame is a token; the shell is main-screen v0.29's.</li>
       </ul></aside>
     </section>
 
@@ -1377,7 +1381,7 @@
 
 <script>
 /* Checking-tool script (screens.md item 54) and sample-data generator,
-   copied from main-screen.html v0.28 with two additions marked "History".
+   copied from main-screen.html v0.29 with two additions marked "History".
    It fills the repeated markup of every frame (mini-map squares, POI rows,
    rail labels, grid tiles, the bottom summary) from one fixed table, so all
    nine frames show the same route as main-screen. No randomness: the same picture on

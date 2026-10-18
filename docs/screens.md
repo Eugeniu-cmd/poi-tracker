@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.41 — 2026-10-17
+v0.42 — 2026-10-18
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -195,6 +195,10 @@ left half --disc like the maneuver discs and its right half --side like
 the side discs. No tail, no red and no blue. The dial stays fixed with
 N up, so the test of a turning dial is closed. The arrow stays pale
 while there is no heading (item 19).
+v0.42 2026-10-18 — the user's decision on the compass: with no heading
+yet the dial shows no arrow, so a pale arrow never points north when
+nothing is known. With only a last known course the arrow stays pale
+(item 19).
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -449,8 +453,9 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     approach side is the one opposite the arrow. There is no red and no
     blue, since red is the error colour and a red needle reads as north.
     The arrow turns to the car's heading while the dial stays fixed with
-    N up. Until the sensors give a heading, and while the heading is only
-    a last known course, the arrow stays pale (--o-off). It is 128px
+    N up. Until the sensors give a heading the dial shows no arrow, and
+    while the heading is only a last known course the arrow stays pale
+    (--o-off). It is 128px
     (--compass), 144px on a landscape screen more than 700px tall
     (--compass-wide) and 96px on a short screen (--compass-compact, item
     70). The heading comes from the tablet's sensors as data-model.md
