@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  POI Tracker — working prototype v19.5
+  POI Tracker — working prototype v19.6
   One file, for the tablet. Open it in Chrome from GitHub Pages through
   tools/poi-tracker-prototype.html, the permanent address that opens the
   newest version: a downloaded copy gets no location, and the compass
@@ -10,7 +10,7 @@
   per file.
 
   The look is the approved references, copied, not redrawn:
-  - the app CSS of docs/references/main-screen.html v0.32 and the History
+  - the app CSS of docs/references/main-screen.html v0.33 and the History
     rules of docs/references/history.html v0.9, byte for byte
   - docs/references/_tokens.css v0.14, inlined so the file works alone
   - the Lucide sprite of main-screen.html
@@ -85,13 +85,16 @@
           blue was too loud. Only a visible tab saves the course, so a
           tab left open in the background cannot overwrite it with an
           old one.
+  v19.6 2026-10-18: the look of main-screen v0.33 (screens.md v0.47):
+          the type pill's numbers, its passes and its split, are amber
+          and larger. The type menu keeps its grey split.
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#EFF3FA">
-<title>POI Tracker — prototype v19.5</title>
+<title>POI Tracker — prototype v19.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -651,6 +654,12 @@
   .tl small, .ol small { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--s-1);
                          row-gap: var(--s-1); font-size: var(--t-small); font-weight: var(--w-bold);
                          color: var(--ink-2); line-height: var(--lh-tight); }
+  /* the pill's numbers, its passes and its split, read at a glance: --t-label
+     heavy in --warn, the amber of the side letters, still smaller than the
+     card's counts, on the line's baseline (item 60). The menu keeps its grey split. */
+  .tl small { align-items: baseline; }
+  .tl small .tn { font-size: var(--t-label); font-weight: var(--w-heavy); color: var(--warn);
+                  line-height: var(--lh-tight); }
   .tchg { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--t-small);
           font-weight: var(--w-heavy); color: var(--ink-2); white-space: nowrap; }
   .tchg .ic { margin-right: -0.25em; }
@@ -1533,9 +1542,11 @@
     var T = TYPES[type];
     if (type === 'nd') return 'Not counted';
     var parts = MANS.filter(function (m) { return T.split[m]; });
-    var h = withPasses ? '<span class="tp">' + T.target + ' passes ·</span> ' : T.target + ' passes · ';
+    // the pill's numbers are amber (.tn, item 60, v19.6), the menu keeps its grey split
+    var num = function (x) { return withPasses ? '<span class="tn">' + x + '</span>' : String(x); };
+    var h = withPasses ? '<span class="tp">' + num(T.target) + ' passes ·</span> ' : T.target + ' passes · ';
     return h + parts.map(function (m, i) {
-      return '<span class="iw">' + icon(MAN_ICON[m]) + T.split[m] + (i < parts.length - 1 ? ' ·' : '') + '</span>';
+      return '<span class="iw">' + icon(MAN_ICON[m]) + num(T.split[m]) + (i < parts.length - 1 ? ' ·' : '') + '</span>';
     }).join(' ');
   }
   function renderPill() {
@@ -2149,7 +2160,7 @@
     var LOG_CHUNK = 500;        // rows in one stored piece
     var LOG_KEEP = 3;           // drives kept on the tablet
     var LOG_JOIN = 10 * 60000;  // ms: a page opened again this soon continues the drive
-    var VERSION = 'v19.5';
+    var VERSION = 'v19.6';
     var RAD = 180 / Math.PI;
     var car = new Heading.Smoother(0.6);
 

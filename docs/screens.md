@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.46 — 2026-10-18
+v0.47 — 2026-10-18
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -219,6 +219,10 @@ progress: the blue was too loud, since about half of a route is in
 progress at mid-route. A POI in progress is grey with a dark bar.
 White still means not started, stripes not drivable, a check done
 (items 2, 58, 59).
+v0.47 2026-10-18 — the user's decision after a look at the tablet:
+the numbers of the type pill, its passes and its split, are larger
+and amber, --t-label heavy in --warn, still smaller than the card's
+counts (item 60).
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -392,8 +396,12 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     closes it and changes nothing.
 60. The POI type of item 46 is shown and set by the type pill, a
     full-width control under the big POI number: an icon, the type name
-    and its passes with the split ("70 passes · ← 28 · ↑ 14 · → 28"). The
-    icon shows the allowed maneuvers, not the shape of the road: their
+    and its passes with the split ("70 passes · ← 28 · ↑ 14 · → 28"). Its
+    numbers, the passes and the split, are --t-label heavy in --warn, the
+    amber of the side letters, and stay smaller than the card's counts, so
+    the plan is not read as what is still needed. The menu keeps its grey
+    split (v0.47). The icon shows the allowed maneuvers, not the shape of
+    the road: their
     icons of item 69 side by side in the order left, straight, right, in
     a tile wide enough for three, so the type name starts at the same
     place for every type. Each maneuver keeps its own place in the tile:
