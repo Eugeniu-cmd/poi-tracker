@@ -54,6 +54,7 @@ Where to look:
 | Compass prototype, live heading from the sensors | tools/compass-prototype.html |
 | Sensor test: GPS, raw gyroscope, turn and heading | tools/sensor-test.html |
 | Working prototype v19.4: working screen and live compass | tools/poi-tracker-prototype-v19.4.html |
+| Working prototype, permanent address: opens the version named in tools/prototype-latest.txt | tools/poi-tracker-prototype.html |
 
 This file carries no version tag or history on purpose: it is a config
 Claude Code reads at startup, not a registry of decisions.
