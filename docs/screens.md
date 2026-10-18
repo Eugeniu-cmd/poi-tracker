@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.44 — 2026-10-18
+v0.45 — 2026-10-18
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -210,6 +210,10 @@ and done, sheet error and not drivable carry a sign besides their
 colour (items 2, 58, 59, 69). Dialog buttons and the Settings buttons
 take the size of the action bar's buttons, and a red button that loses
 passes reads "Erase anyway" or "Delete anyway" (items 18, 24, 63).
+v0.45 2026-10-18 — the user's decision on the compass: the arrow is
+always on the dial. With no heading yet it shows the course the tablet
+saved last, pale, or north, pale, when nothing is saved. v0.42 hid it,
+and the dial looked broken at every start (item 19).
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -477,9 +481,11 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     There is no red and no
     blue, since red is the error colour and a red needle reads as north.
     The arrow turns to the car's heading while the dial stays fixed with
-    N up. Until the sensors give a heading the dial shows no arrow, and
-    while the heading is only a last known course the arrow stays pale
-    (--o-off). It is 128px
+    N up. The arrow is always on the dial. Until the sensors give a
+    heading it shows the course this tablet saved last (data-model.md
+    "Heading"), or north when nothing is saved, and it stays pale
+    (--o-off) until the first GPS check. While the heading is only a last
+    known course the arrow is pale too (decided 2026-10-18). It is 128px
     (--compass), 144px on a landscape screen more than 700px tall
     (--compass-wide) and 96px on a short screen (--compass-compact, item
     70). The heading comes from the tablet's sensors as data-model.md

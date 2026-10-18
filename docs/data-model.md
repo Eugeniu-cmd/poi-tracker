@@ -1,6 +1,6 @@
 # Data model
 
-v0.13 — 2026-10-18
+v0.14 — 2026-10-18
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -61,6 +61,11 @@ running push, and a load waits for unanswered pushes.
 v0.13 2026-10-18 — the user's rule for the approach side: the direction
 the car drives as it enters the intersection. Driving north and turning
 right is North Right.
+v0.14 2026-10-18 — "Heading" rewritten for the tablet as tested in the
+car (project docs claude/tablet-sensor-test-2026-10-17.md and
+claude/prototype-v19.md): no magnetometer, the gyroscope turns the
+heading and GPS sets north on straight roads. The tablet keeps the last
+course, so the arrow is always on the dial (screens.md item 19).
 -->
 
 ## Pass (one crossing of an intersection)
@@ -161,6 +166,8 @@ right is North Right.
   drops a waiting or rejected event.
 - device: the city in use, Theme ('system', 'light' or 'dark', 'system'
   by default) and Sound (on by default).
+- heading: the compass's last course in degrees and the time it was
+  saved (see "Heading"). Without it the next start points north, pale.
 - Empty storage = clean start; the app must work correctly in that
   state.
 
@@ -276,19 +283,38 @@ right is North Right.
   names them.
 
 ## Heading (compass)
-- Two sources, because neither alone is trustworthy in a car:
-  GPS course while moving (immune to magnetic interference, useless when
-  stopped), magnetometer when stopped (works at a standstill, distorted by
-  the vehicle body and the flexible metal mount).
-- The tablet sits in a fixed mount, so the angle between "where the tablet
-  faces" and "where the car goes" is constant but unknown. It is measured
-  once: on a straight road the app compares GPS course with the
-  magnetometer reading and stores the offset. The compass then shows the
-  car's heading, not the tablet's.
-- Readings are smoothed over ~1–2 s before they reach the screen; raw
-  values jump on rough roads and a twitching needle is worse than none.
-- Step 1 ships the magnetometer source only. GPS course arrives with the
-  rest of the GPS work in step 2.
+- The compass shows where the car drives (screens.md item 19). The
+  user's tablet has no magnetometer, so there is no magnet and no mount
+  offset. Tested in the car on 2026-10-17 (project docs
+  claude/tablet-sensor-test-2026-10-17.md and claude/prototype-v19.md).
+- The raw gyroscope turns the heading all the time: its rotation about
+  "up", "up" being a slow average of the accelerometer, so the angle of
+  the mount does not matter. The Generic Sensor API is read first,
+  "devicemotion" while it is silent. Android's ready-made orientation is
+  not read: on this tablet it gives only zeros.
+- The gyroscope drifts about 0.02 degrees a second. The drift is measured
+  and removed while the car stands (GPS below 0.3 m/s): half-second
+  averages that agree within 1 degree a second for 3 s. A turn above 0.5
+  degrees a second is the car creeping round a corner, not drift.
+- GPS sets north, only while the car drives straight (the gyroscope saw
+  less than 3 degrees in the last 2 s) at 11 km/h (3 m/s) or more. In a
+  turn the GPS course lags 2 to 3 s, below 11 km/h it is noise. Each
+  straight fix pulls the heading 30% of the way to the GPS course, a gap
+  over 30 degrees is taken at once. With the gyroscope silent the live
+  GPS course is shown.
+- The motion sensors can pause without an error while something else has
+  the focus. A sensor counts as working only with a reading in the last
+  second, on the page's own clock. While they are silent the arrow keeps
+  the last course, pale. After a pause longer than 2 s it stays pale
+  until the next GPS check. Location is asked before the motion sensors
+  start, and the sensors restart when the page is visible and focused
+  again.
+- The heading on screen is smoothed with a time constant of 0.6 s.
+- The tablet keeps the last course (see "Tablet storage"), saved every
+  2 s and when the page goes away. A new start shows it pale and the
+  gyroscope turns it until the first GPS check. With nothing saved the
+  arrow points north, pale (decided 2026-10-18).
+- The side of a pass is the quarter the arrow points to (see "Pass").
 
 ## Cities and routes
 - A city = { id, name, mailboxUrl, token, routes[], lastRoute, testedAt,

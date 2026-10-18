@@ -196,12 +196,17 @@
           tiles with the same signs (items 2, 58, 59, 69). Dialog buttons
           set their words at --t-body in --w-bold, the size of the action
           bar's buttons (item 63).
+  v0.31 2026-10-18 — the user's decision on the compass (screens.md
+          v0.45): the arrow is always on the dial. With no heading yet it
+          shows the course the tablet saved last, pale, or north, pale,
+          when nothing is saved. v0.29 hid it, and the dial looked broken
+          at every start (item 19).
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.30</title>
+<title>POI Tracker — Working Screen Reference v0.31</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -258,7 +263,7 @@
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.12 or a calc() over
+     line height below is a var() from _tokens.css v0.13 or a calc() over
      them. Literal values are limited to 0, 1px hairlines, 50% for round
      shapes, percentages and fr of a layout, em, ch, lh and cap ratios of
      a token font size, keywords, SVG geometry, the 1200px breakpoint of
@@ -529,8 +534,9 @@
   .compass .halo { fill: none; stroke: var(--panel-raised); stroke-linejoin: round; }
   .compass .dark { fill: var(--disc); }
   .compass .amber { fill: var(--side); }
-  /* no heading yet: no arrow. Only a last known course: the arrow is pale */
-  .compass.none .arrow { visibility: hidden; }
+  /* no heading yet, or only a last known course: the arrow is pale. It is
+     always on the dial: with no heading yet it shows the course this
+     tablet saved last, or north (item 19) */
   .compass.idle .arrow { opacity: var(--o-off); }
 
   /* ---- type pill and its menu (items 46, 60, 69) ---- */
@@ -910,14 +916,15 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.30 — 2026-10-18.</b> The POI states read at a glance, also under sun
+  <p class="meta"><b>v0.31 — 2026-10-18.</b> The POI states read at a glance, also under sun
      glare: a POI in progress is blue, and done, sheet error and not drivable carry a sign
      besides their colour (items 58, 59). Dialog buttons take the size of the action bar's
      buttons (item 63). The compass is one arrow on a raised round face, its left half dark
      like the maneuver discs and its right half amber like the side discs, with the dial fixed
-     and N up. With no heading yet the dial shows no arrow (item 19). Every value inside
+     and N up. The arrow is always there: with no heading yet it shows the course the tablet
+     saved last, pale, or north (item 19). Every value inside
      the frames is a token of <b>_tokens.css v0.13</b> (size C, screens.md item 67) and
-     every rule follows <b>screens.md v0.44</b>. Icons are
+     every rule follows <b>screens.md v0.45</b>. Icons are
      Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
      presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and
@@ -995,7 +1002,7 @@
         <li><b>57</b> Index rail along the column's right edge: 1, 40, 80, 120, 160, 197.</li>
         <li><b>40</b> Active row: amber tint, edge of --s-1, number in the amber foreground.</li>
         <li><b>4</b> Big POI number, "41 of 70" beside it, "29 to go" under the counter.</li>
-        <li><b>19</b> Compass at the top right of the main area, one gap under the top bar in both layouts. A raised round face with ticks and N, E, S and W, and one arrow turned to the car's heading, its left half dark like the maneuver discs and its right half amber like the side discs. The dial stays fixed with N up. With no heading yet the dial shows no arrow, and with only a last known course the arrow stays pale. 128px, 144px on a tall landscape screen, 96px on a short one (item 19).</li>
+        <li><b>19</b> Compass at the top right of the main area, one gap under the top bar in both layouts. A raised round face with ticks and N, E, S and W, and one arrow turned to the car's heading, its left half dark like the maneuver discs and its right half amber like the side discs. The dial stays fixed with N up. The arrow is always there: with no heading yet it shows the course the tablet saved last, pale, or north, and with only a last known course it stays pale. 128px, 144px on a tall landscape screen, 96px on a short one (item 19).</li>
         <li><b>60</b> Type pill under the number (item 60): a tile with three fixed slots, Left, Straight, Right; an absent maneuver leaves its slot empty. Name, split line with the same icons, "Change".</li>
         <li><b>39</b> "Still needed" card: per maneuver its Lucide icon (item 69), "N more" and a bar, no "N of T" line under it (v0.32); "Sides so far" with E at zero faded.</li>
         <li><b>5</b> Three discs in the middle of the free space, Straight higher; Lucide corner-up-left, arrow-up, corner-up-right (item 69).</li>
