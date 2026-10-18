@@ -1,6 +1,6 @@
 # Data model
 
-v0.12 — 2026-10-13
+v0.13 — 2026-10-18
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -58,10 +58,16 @@ no trace. A removal needs its ref, and a second removal of the same pass
 is rejected as 'already-removed'. Event ids are UUIDs. A push stops
 after 4 minutes and names only the events it handled. pull waits for a
 running push, and a load waits for unanswered pushes.
+v0.13 2026-10-18 — the user's rule for the approach side: the direction
+the car drives as it enters the intersection. Driving north and turning
+right is North Right.
 -->
 
 ## Pass (one crossing of an intersection)
-- Approach side: N / S / W / E.
+- Approach side: N / S / W / E, the direction the car drives as it
+  enters the intersection. Driving north and turning right is North Right
+  (the user's rule, 2026-10-18). The client's column for it is headed
+  "Coming from Direction". The side is read before the turn.
 - Maneuver: L (left) / St (straight) / R (right).
 - Belongs to a route and a POI. Each POI has its own target (see
   "Targets per POI").

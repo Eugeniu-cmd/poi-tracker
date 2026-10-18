@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  POI Tracker — working prototype v19.2
+  POI Tracker — working prototype v19.3
   One file, for the tablet. Open it in Chrome from GitHub Pages
   (tools/poi-tracker-prototype-v19.html): a downloaded copy gets no
   location, and the compass needs it.
@@ -63,13 +63,18 @@
           within 10 min continues the same drive: the log of 2026-10-17
           was lost with the page. Tools shows the drift being measured
           and where the log is.
+  v19.3 2026-10-18: the side of a pass is the direction the car drives
+          as it enters the intersection, the user's rule: driving north
+          and turning right is North Right. Tools and the compass's label
+          said "coming from", the opposite side. They now name the side
+          the arrow points to.
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#EFF3FA">
-<title>POI Tracker — prototype v19.2</title>
+<title>POI Tracker — prototype v19.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -1178,10 +1183,12 @@
     // The quarter a heading falls in: N, E, S or W, each 90 degrees wide
     // and centred on its letter.
     function cardinal(deg) { return 'NESW'[Math.round(norm(deg) / 90) % 4]; }
-    // The side the car approaches from: the quarter behind it.
-    function approachSide(deg) { return cardinal(deg + 180); }
+    // The side a pass is recorded under: the quarter the car drives towards
+    // as it enters the intersection (the user's rule of 2026-10-18: driving
+    // north and turning right is North Right).
+    function side(deg) { return cardinal(deg); }
     return { norm: norm, fromOrientation: fromOrientation, Smoother: Smoother,
-             delta: delta, cardinal: cardinal, approachSide: approachSide };
+             delta: delta, cardinal: cardinal, side: side };
   }());
 
 (function () {
@@ -1715,7 +1722,7 @@
       '<div class="tnote diag">' + c.lines.map(function (l) { return '<b>' + esc(l[0]) + '</b> ' + esc(l[1]); }).join('<br>') + '</div>' +
       items.map(function (it) {
         return '<button class="ritem" type="button" data-tool="' + it[0] + '"><b>' + it[1] + '</b><small>' + esc(it[2]) + '</small></button>';
-      }).join('') + '<div class="tnote">Prototype v19.2. Nothing is sent anywhere. The sensor log stays on this tablet, without coordinates.</div></div>';
+      }).join('') + '<div class="tnote">Prototype v19.3. Nothing is sent anywhere. The sensor log stays on this tablet, without coordinates.</div></div>';
   }
 
   // ================= feedback: toast, chime, vibration =================
@@ -2077,7 +2084,7 @@
     var LOG_CHUNK = 500;        // rows in one stored piece
     var LOG_KEEP = 3;           // drives kept on the tablet
     var LOG_JOIN = 10 * 60000;  // ms: a page opened again this soon continues the drive
-    var VERSION = 'v19.2';
+    var VERSION = 'v19.3';
     var RAD = 180 / Math.PI;
     var car = new Heading.Smoother(0.6);
 
@@ -2393,7 +2400,7 @@
         svg.querySelector('.arrow').setAttribute('transform', 'rotate(' + h + ' 48 48)');
         svg.classList.toggle('none', heading === null);
         svg.classList.toggle('idle', heading !== null && from === 'stale');
-        svg.setAttribute('aria-label', heading === null ? 'Heading: no reading yet' : 'Heading ' + Math.round(heading) + ' degrees, coming from ' + Heading.approachSide(heading));
+        svg.setAttribute('aria-label', heading === null ? 'Heading: no reading yet' : 'Heading ' + Math.round(heading) + ' degrees, side ' + Heading.side(heading));
       });
     }
 
@@ -2450,7 +2457,7 @@
       else c = (from === 'gyro' ? 'from the gyroscope, GPS check ' + secs(t - checkedAt) + ' ago'
         : from === 'gps' ? 'from GPS, ' + (gyroOk(t) ? 'waiting for a straight road to set north' : 'the gyroscope is silent')
         : 'last course, gyroscope ' + (!gyroOk(t) ? 'paused' : unsure ? 'was paused, waiting for a GPS check' : 'without a GPS check for ' + secs(t - checkedAt))) +
-        ' · ' + Math.round(heading) + '° · coming from ' + Heading.approachSide(heading);
+        ' · ' + Math.round(heading) + '° · side ' + Heading.side(heading);
       lines.push(['GPS checks', !checks ? 'none yet: they come on a straight road above 11 km/h'
         : checks + ' · ' + (lastPull === null ? 'the first one set north' : 'the last one found the needle ' + Math.abs(lastPull).toFixed(1) + '° off')]);
       lines.push(['Compass', c]);
