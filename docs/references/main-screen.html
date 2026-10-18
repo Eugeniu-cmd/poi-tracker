@@ -201,12 +201,18 @@
           shows the course the tablet saved last, pale, or north, pale,
           when nothing is saved. v0.29 hid it, and the dial looked broken
           at every start (item 19).
+  v0.32 2026-10-18 — the user's decision on the colour of a POI in
+          progress (screens.md v0.46, _tokens.css v0.14): the blue was too
+          loud at mid-route. A POI in progress is a light grey tile with an
+          --ink-2 edge and a dark bar, its mini-map square is --ink-3 and
+          its column row's bar is dark. No new colour: white means not
+          started, stripes not drivable, a check done (items 2, 58, 59).
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.31</title>
+<title>POI Tracker — Working Screen Reference v0.32</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -263,7 +269,7 @@
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.13 or a calc() over
+     line height below is a var() from _tokens.css v0.14 or a calc() over
      them. Literal values are limited to 0, 1px hairlines, 50% for round
      shapes, percentages and fr of a layout, em, ch, lh and cap ratios of
      a token font size, keywords, SVG geometry, the 1200px breakpoint of
@@ -418,7 +424,7 @@
   .dots i { display: block; width: var(--s-2); height: var(--s-2); background: var(--line); }
   .dots i.done { background: var(--ok); }
   .dots i.err { background: var(--err); }
-  .dots i.part { background: var(--prog); }
+  .dots i.part { background: var(--ink-3); }
   .dots i.nd { background: repeating-linear-gradient(135deg, var(--ink-3) 0 1px,
                            transparent 1px calc(var(--s-1) - 1px)); }
   .dots i.act { background: var(--side); box-shadow: 0 0 0 1px var(--side-ring); }
@@ -445,7 +451,7 @@
         overflow: hidden; }
   .rb i, .nb i, .cb i { display: block; height: 100%; background: var(--ink-3);
                         border-radius: inherit; }
-  /* items 2 and 59: a POI in progress has a --prog bar, in the column and in the grid */
+  /* items 2 and 59: a POI in progress has a dark --prog bar, in the column and in the grid */
   .rb i, .cell.part .cb i { background: var(--prog); }
   .rt { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
         line-height: var(--lh-tight); white-space: nowrap; }
@@ -738,7 +744,7 @@
   .sw { width: calc(var(--t-small) + var(--s-1)); height: calc(var(--t-small) + var(--s-1));
         border-radius: calc(var(--r-sm) / 2); display: inline-flex; align-items: center;
         justify-content: center; background: transparent; border: 1px solid var(--ink-3); }
-  .sw.part, .cell.part { background: var(--prog-bg); border-color: var(--prog); }
+  .sw.part, .cell.part { background: var(--prog-bg); border-color: var(--ink-2); }
   .sw.done, .cell.done { background: var(--ok-bg); border-color: var(--ok); }
   .sw.err, .cell.err { background: var(--err-bg); border-color: var(--err); }
   .sw.nd, .cell.nd { border-color: var(--line);
@@ -916,15 +922,15 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.31 — 2026-10-18.</b> The POI states read at a glance, also under sun
-     glare: a POI in progress is blue, and done, sheet error and not drivable carry a sign
+  <p class="meta"><b>v0.32 — 2026-10-18.</b> The POI states read at a glance, also under sun
+     glare: a POI in progress is grey with a dark bar, and done, sheet error and not drivable carry a sign
      besides their colour (items 58, 59). Dialog buttons take the size of the action bar's
      buttons (item 63). The compass is one arrow on a raised round face, its left half dark
      like the maneuver discs and its right half amber like the side discs, with the dial fixed
      and N up. The arrow is always there: with no heading yet it shows the course the tablet
      saved last, pale, or north (item 19). Every value inside
-     the frames is a token of <b>_tokens.css v0.13</b> (size C, screens.md item 67) and
-     every rule follows <b>screens.md v0.45</b>. Icons are
+     the frames is a token of <b>_tokens.css v0.14</b> (size C, screens.md item 67) and
+     every rule follows <b>screens.md v0.46</b>. Icons are
      Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
      presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and
@@ -1575,7 +1581,7 @@
         <li><b>66</b> Round ✕ in the top-left corner, as large as any tap target; no text "Close".</li>
         <li><b>66, 59</b> A tap on the dimmed background, or the Android back gesture, closes it and changes nothing.</li>
         <li><b>58, 22</b> Works for any POI count; the grid scrolls, a whole tile row under the legend, the cut row faded at the bottom (item 59).</li>
-        <li><b>59</b> Six tile states, as the mini-map. Current: amber tint and a thick amber edge. Done: green with a check. In progress: blue with its bar. Not started: an empty bar and a grey edge. Sheet error: red with a triangle. Not drivable: stripes with a ban sign.</li>
+        <li><b>59</b> Six tile states, as the mini-map. Current: amber tint and a thick amber edge. Done: green with a check. In progress: grey with a dark bar. Not started: an empty bar and a grey edge. Sheet error: red with a triangle. Not drivable: stripes with a ban sign.</li>
       </ul></aside>
     </section>
 

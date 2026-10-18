@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.45 — 2026-10-18
+v0.46 — 2026-10-18
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -214,6 +214,11 @@ v0.45 2026-10-18 — the user's decision on the compass: the arrow is
 always on the dial. With no heading yet it shows the course the tablet
 saved last, pale, or north, pale, when nothing is saved. v0.42 hid it,
 and the dial looked broken at every start (item 19).
+v0.46 2026-10-18 — the user's decision on the colour of a POI in
+progress: the blue was too loud, since about half of a route is in
+progress at mid-route. A POI in progress is grey with a dark bar.
+White still means not started, stripes not drivable, a check done
+(items 2, 58, 59).
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -365,7 +370,7 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     it never selects.
 58. A mini-map of the route sits at the top of the column in both
     layouts: one small square per POI, coloured by state as the tiles of
-    item 59 (current amber, done green, in progress blue, spreadsheet
+    item 59 (current amber, done green, in progress grey, spreadsheet
     error red, not drivable striped, not started pale), with the number
     of finished POIs and the word "Open". It is the column's header, not a card
     inside the column: the squares and the caption share one width and
@@ -378,7 +383,7 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     legend whose swatches are small tiles. Every state has its colour and
     a second sign that needs no colour, for sun glare and for eyes that
     mix red and green. Current: an amber tint and a thick amber edge.
-    Done: green with a check. In progress: blue with its bar. Not
+    Done: green with a check. In progress: grey with a dark bar. Not
     started: an empty bar and a grey edge. Sheet error: red with a
     warning triangle. Not drivable: grey stripes with a ban sign. Three
     grey states blended in the car (decided 2026-10-18). Tapping a
@@ -413,7 +418,7 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     after the sync control, opens Settings (item 74). It is a square tap
     target as tall as the sync control, on the same raised surface.
 2. POI list 1…N for the route's POI count: number, progress bar, "N to
-   go". Row turns green at its target, red on error, its bar is blue while
+   go". Row turns green at its target, red on error, its bar is dark while
    in progress, not-drivable POI in a state of its own (item 46), active
    POI highlighted.
 3. Bottom summary: "Done N · M to go" and the count of finished POIs. The

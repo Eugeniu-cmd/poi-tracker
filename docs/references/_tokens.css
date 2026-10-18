@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.13 — 2026-10-18
+   v0.14 — 2026-10-18
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -60,6 +60,12 @@
    three grey states blended, worst under sun glare. New --prog and
    --prog-bg, the blue of a POI in progress, and --hatch, the stripes of
    a not-drivable tile.
+   v0.14 2026-10-18 — the user's decision after a look at the prototype
+   on the tablet: the blue of a POI in progress was too loud, since about
+   half of a route is in progress at mid-route. --prog takes --ink's
+   colour, the dark bar of a POI in progress, and --prog-bg becomes a
+   light grey tint. The tile's edge is --ink-2 and its mini-map square
+   --ink-3 (screens.md v0.46, items 2, 58 and 59).
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -88,8 +94,8 @@
   --err-bg: rgba(255, 226, 223, 0.85);
   --warn: #B87400;
   --warn-bg: rgba(255, 238, 209, 0.85);
-  --prog: #2058D8;
-  --prog-bg: rgba(32, 88, 216, 0.13);
+  --prog: #1B2033;
+  --prog-bg: rgba(28, 32, 48, 0.10);
   --hatch: rgba(92, 101, 128, 0.32);
   --active: rgba(242, 168, 29, 0.18);
   --active-line: var(--side);
@@ -177,8 +183,8 @@
     --err-bg: rgba(70, 28, 25, 0.7);
     --warn: #FFB13D;
     --warn-bg: rgba(62, 44, 16, 0.7);
-    --prog: #7FA8FF;
-    --prog-bg: rgba(82, 130, 255, 0.26);
+    --prog: #EEF1F8;
+    --prog-bg: rgba(255, 255, 255, 0.10);
     --hatch: rgba(168, 176, 196, 0.26);
     --active: rgba(242, 168, 29, 0.22);
     --active-line: var(--side);
@@ -216,8 +222,8 @@
   --err-bg: rgba(70, 28, 25, 0.7);
   --warn: #FFB13D;
   --warn-bg: rgba(62, 44, 16, 0.7);
-  --prog: #7FA8FF;
-  --prog-bg: rgba(82, 130, 255, 0.26);
+  --prog: #EEF1F8;
+  --prog-bg: rgba(255, 255, 255, 0.10);
   --hatch: rgba(168, 176, 196, 0.26);
   --active: rgba(242, 168, 29, 0.22);
   --active-line: var(--side);

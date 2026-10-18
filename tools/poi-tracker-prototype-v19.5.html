@@ -1,17 +1,18 @@
 <!doctype html>
 <!--
-  POI Tracker — working prototype v19.4
-  One file, for the tablet. Open it in Chrome from GitHub Pages
-  (tools/poi-tracker-prototype-v19.4.html): a downloaded copy gets no
-  location, and the compass needs it. The file name carries the version
-  (the user's rule of 2026-10-18), so every build gets a new name and a
-  new address. Location, the saved course and the sensor logs stay,
-  since the browser keeps them per site, not per file.
+  POI Tracker — working prototype v19.5
+  One file, for the tablet. Open it in Chrome from GitHub Pages through
+  tools/poi-tracker-prototype.html, the permanent address that opens the
+  newest version: a downloaded copy gets no location, and the compass
+  needs it. The file name carries the version (the user's rule of
+  2026-10-18), so every build gets a new name. Location, the saved course
+  and the sensor logs stay, since the browser keeps them per site, not
+  per file.
 
   The look is the approved references, copied, not redrawn:
-  - the app CSS of docs/references/main-screen.html v0.31 and the History
+  - the app CSS of docs/references/main-screen.html v0.32 and the History
     rules of docs/references/history.html v0.9, byte for byte
-  - docs/references/_tokens.css v0.13, inlined so the file works alone
+  - docs/references/_tokens.css v0.14, inlined so the file works alone
   - the Lucide sprite of main-screen.html
   What this file adds is behaviour: sample routes, tapping passes, the
   compass that blooms, undo and delete with their dialogs, History, the
@@ -79,20 +80,25 @@
           saved it points north, pale. The look of main-screen v0.31:
           a POI in progress is blue, done, sheet error and not drivable
           carry a sign in the grid, and dialog buttons are smaller.
+  v19.5 2026-10-18: the look of main-screen v0.32 (screens.md v0.46,
+          tokens v0.14): a POI in progress is grey with a dark bar, the
+          blue was too loud. Only a visible tab saves the course, so a
+          tab left open in the background cannot overwrite it with an
+          old one.
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#EFF3FA">
-<title>POI Tracker — prototype v19.4</title>
+<title>POI Tracker — prototype v19.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
 <style>
-/* ===== _tokens.css v0.13, inlined ===== */
+/* ===== _tokens.css v0.14, inlined ===== */
 /* POI Tracker — design tokens.
-   v0.13 — 2026-10-18
+   v0.14 — 2026-10-18
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -153,6 +159,12 @@
    three grey states blended, worst under sun glare. New --prog and
    --prog-bg, the blue of a POI in progress, and --hatch, the stripes of
    a not-drivable tile.
+   v0.14 2026-10-18 — the user's decision after a look at the prototype
+   on the tablet: the blue of a POI in progress was too loud, since about
+   half of a route is in progress at mid-route. --prog takes --ink's
+   colour, the dark bar of a POI in progress, and --prog-bg becomes a
+   light grey tint. The tile's edge is --ink-2 and its mini-map square
+   --ink-3 (screens.md v0.46, items 2, 58 and 59).
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -181,8 +193,8 @@
   --err-bg: rgba(255, 226, 223, 0.85);
   --warn: #B87400;
   --warn-bg: rgba(255, 238, 209, 0.85);
-  --prog: #2058D8;
-  --prog-bg: rgba(32, 88, 216, 0.13);
+  --prog: #1B2033;
+  --prog-bg: rgba(28, 32, 48, 0.10);
   --hatch: rgba(92, 101, 128, 0.32);
   --active: rgba(242, 168, 29, 0.18);
   --active-line: var(--side);
@@ -270,8 +282,8 @@
     --err-bg: rgba(70, 28, 25, 0.7);
     --warn: #FFB13D;
     --warn-bg: rgba(62, 44, 16, 0.7);
-    --prog: #7FA8FF;
-    --prog-bg: rgba(82, 130, 255, 0.26);
+    --prog: #EEF1F8;
+    --prog-bg: rgba(255, 255, 255, 0.10);
     --hatch: rgba(168, 176, 196, 0.26);
     --active: rgba(242, 168, 29, 0.22);
     --active-line: var(--side);
@@ -309,8 +321,8 @@
   --err-bg: rgba(70, 28, 25, 0.7);
   --warn: #FFB13D;
   --warn-bg: rgba(62, 44, 16, 0.7);
-  --prog: #7FA8FF;
-  --prog-bg: rgba(82, 130, 255, 0.26);
+  --prog: #EEF1F8;
+  --prog-bg: rgba(255, 255, 255, 0.10);
   --hatch: rgba(168, 176, 196, 0.26);
   --active: rgba(242, 168, 29, 0.22);
   --active-line: var(--side);
@@ -333,7 +345,7 @@
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.13 or a calc() over
+     line height below is a var() from _tokens.css v0.14 or a calc() over
      them. Literal values are limited to 0, 1px hairlines, 50% for round
      shapes, percentages and fr of a layout, em, ch, lh and cap ratios of
      a token font size, keywords, SVG geometry, the 1200px breakpoint of
@@ -488,7 +500,7 @@
   .dots i { display: block; width: var(--s-2); height: var(--s-2); background: var(--line); }
   .dots i.done { background: var(--ok); }
   .dots i.err { background: var(--err); }
-  .dots i.part { background: var(--prog); }
+  .dots i.part { background: var(--ink-3); }
   .dots i.nd { background: repeating-linear-gradient(135deg, var(--ink-3) 0 1px,
                            transparent 1px calc(var(--s-1) - 1px)); }
   .dots i.act { background: var(--side); box-shadow: 0 0 0 1px var(--side-ring); }
@@ -515,7 +527,7 @@
         overflow: hidden; }
   .rb i, .nb i, .cb i { display: block; height: 100%; background: var(--ink-3);
                         border-radius: inherit; }
-  /* items 2 and 59: a POI in progress has a --prog bar, in the column and in the grid */
+  /* items 2 and 59: a POI in progress has a dark --prog bar, in the column and in the grid */
   .rb i, .cell.part .cb i { background: var(--prog); }
   .rt { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
         line-height: var(--lh-tight); white-space: nowrap; }
@@ -808,7 +820,7 @@
   .sw { width: calc(var(--t-small) + var(--s-1)); height: calc(var(--t-small) + var(--s-1));
         border-radius: calc(var(--r-sm) / 2); display: inline-flex; align-items: center;
         justify-content: center; background: transparent; border: 1px solid var(--ink-3); }
-  .sw.part, .cell.part { background: var(--prog-bg); border-color: var(--prog); }
+  .sw.part, .cell.part { background: var(--prog-bg); border-color: var(--ink-2); }
   .sw.done, .cell.done { background: var(--ok-bg); border-color: var(--ok); }
   .sw.err, .cell.err { background: var(--err-bg); border-color: var(--err); }
   .sw.nd, .cell.nd { border-color: var(--line);
@@ -2137,7 +2149,7 @@
     var LOG_CHUNK = 500;        // rows in one stored piece
     var LOG_KEEP = 3;           // drives kept on the tablet
     var LOG_JOIN = 10 * 60000;  // ms: a page opened again this soon continues the drive
-    var VERSION = 'v19.4';
+    var VERSION = 'v19.5';
     var RAD = 180 / Math.PI;
     var car = new Heading.Smoother(0.6);
 
@@ -2162,8 +2174,9 @@
     var SAVED = 'poi-proto-heading';  // the key of the last course in the browser's storage
     var SAVE_EVERY = 2000;            // ms: the course is saved at most this often
     var savedAt = 0, restored = null;
+    // only a visible tab saves: a tab in the background holds an old course (v19.5)
     function saveCourse(t, force) {
-      if (heading === null || (!force && t - savedAt < SAVE_EVERY)) return;
+      if (heading === null || (!force && (t - savedAt < SAVE_EVERY || document.visibilityState !== 'visible'))) return;
       savedAt = t;
       try { localStorage.setItem(SAVED, JSON.stringify({ deg: Math.round(heading * 10) / 10, at: Date.now() })); }
       catch (e) { /* storage full or blocked: the next start points north */ }
@@ -2172,7 +2185,7 @@
       var kept = JSON.parse(localStorage.getItem(SAVED) || 'null');
       if (kept && num(kept.deg) !== null) { restored = kept; off = Heading.norm(kept.deg); unsure = true; }
     } catch (e) { /* nothing saved: the arrow points north, pale */ }
-    window.addEventListener('pagehide', function () { saveCourse(now(), true); });
+    window.addEventListener('pagehide', function () { if (document.visibilityState === 'visible') saveCourse(now(), true); });
     document.addEventListener('visibilitychange', function () {
       if (document.visibilityState === 'hidden') saveCourse(now(), true);
     });

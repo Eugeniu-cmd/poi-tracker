@@ -93,12 +93,15 @@
           take the size of the action bar's buttons (item 63).
   v0.18 2026-10-18 — the compass styles of main-screen v0.31
           (screens.md v0.45): the arrow is always on the dial.
+  v0.19 2026-10-18 — the shell of main-screen v0.32 (screens.md v0.46,
+          _tokens.css v0.14): a POI in progress has a dark bar in the
+          column and a grey square in the mini-map.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.18</title>
+<title>POI Tracker — History Reference v0.19</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -152,11 +155,11 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.31. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.32. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.13 or a calc() over
+     line height below is a var() from _tokens.css v0.14 or a calc() over
      them. Literal values are limited to 0, 1px hairlines, 50% for round
      shapes, percentages and fr of a layout, em, ch, lh and cap ratios of
      a token font size, keywords, SVG geometry, the 1200px breakpoint of
@@ -311,7 +314,7 @@
   .dots i { display: block; width: var(--s-2); height: var(--s-2); background: var(--line); }
   .dots i.done { background: var(--ok); }
   .dots i.err { background: var(--err); }
-  .dots i.part { background: var(--prog); }
+  .dots i.part { background: var(--ink-3); }
   .dots i.nd { background: repeating-linear-gradient(135deg, var(--ink-3) 0 1px,
                            transparent 1px calc(var(--s-1) - 1px)); }
   .dots i.act { background: var(--side); box-shadow: 0 0 0 1px var(--side-ring); }
@@ -338,7 +341,7 @@
         overflow: hidden; }
   .rb i, .nb i, .cb i { display: block; height: 100%; background: var(--ink-3);
                         border-radius: inherit; }
-  /* items 2 and 59: a POI in progress has a --prog bar, in the column and in the grid */
+  /* items 2 and 59: a POI in progress has a dark --prog bar, in the column and in the grid */
   .rb i, .cell.part .cb i { background: var(--prog); }
   .rt { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
         line-height: var(--lh-tight); white-space: nowrap; }
@@ -631,7 +634,7 @@
   .sw { width: calc(var(--t-small) + var(--s-1)); height: calc(var(--t-small) + var(--s-1));
         border-radius: calc(var(--r-sm) / 2); display: inline-flex; align-items: center;
         justify-content: center; background: transparent; border: 1px solid var(--ink-3); }
-  .sw.part, .cell.part { background: var(--prog-bg); border-color: var(--prog); }
+  .sw.part, .cell.part { background: var(--prog-bg); border-color: var(--ink-2); }
   .sw.done, .cell.done { background: var(--ok-bg); border-color: var(--ok); }
   .sw.err, .cell.err { background: var(--err-bg); border-color: var(--err); }
   .sw.nd, .cell.nd { border-color: var(--line);
@@ -927,18 +930,18 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.18 — 2026-10-18.</b> The shell of main-screen v0.31 brings a blue bar for a
+  <p class="meta"><b>v0.19 — 2026-10-18.</b> The shell of main-screen v0.32 brings a dark bar for a
      POI in progress to the column and the mini-map (items 2, 58) and smaller dialog buttons
-     (item 63). The compass of main-screen v0.31 reaches the shell's
+     (item 63). The compass of main-screen v0.32 reaches the shell's
      styles, though no frame draws it (item 61). Frame I shows a refused removal and a refused
      type change (items 13, 47). The History panel
      covers the main area beside the live POI column, in POI or Route scope, and lists
      every pass this tablet recorded and every type change not yet in the sheet, newest first, with "Delete" on each pass, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
-     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.13</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.45</b>. The shell
+     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.14</b>
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.46</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.31</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.32</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Nine states,
      A to I. The twelve proposals of v0.8 are approved (v0.12, screens.md v0.38).</p>
@@ -1006,7 +1009,7 @@
         <li><b>61, 3</b> In portrait the panel covers the main area and the summary under it keeps its place; in landscape it covers the whole main area, action bar and compass included.</li>
         <li><b>14, 45</b> Footer: "History shows only what this tablet recorded".</li>
         <li><b>56</b> The list shows a whole row at its top edge and fades the cut row at its bottom, like the POI column; rows are --row-h tall, as the POI rows beside them.</li>
-        <li><b>67, 68</b> Size C; every value inside the frame is a token; the shell is main-screen v0.31's.</li>
+        <li><b>67, 68</b> Size C; every value inside the frame is a token; the shell is main-screen v0.32's.</li>
       </ul></aside>
     </section>
 
