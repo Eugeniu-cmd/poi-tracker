@@ -1,6 +1,6 @@
 # Data model
 
-v0.15 — 2026-10-19
+v0.16 — 2026-10-19
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -70,6 +70,12 @@ v0.15 2026-10-19 — "Heading" after the car test of prototype v19.6: a
 GPS check also needs the GPS course steady, and a gap over 30 degrees
 is taken at once only while the arrow is pale. Right after slow turns
 four checks had moved the arrow by 31 to 57 degrees at once.
+v0.16 2026-10-19 — the inventory before chapter 6 (project doc
+claude/chapter-6-inventory.md): the store is one key written in one
+step, with a schema number, UUIDs from crypto only, a tablet-only seq
+for order, a posted marker for later sending, cities and lastPoi in
+storage, the default baseline, a full storage, the sample city, the
+heading's own key, and the app's files for offline loading (CLAUDE.md).
 -->
 
 ## Pass (one crossing of an intersection)
@@ -85,7 +91,12 @@ four checks had moved the arrow by 31 to 57 degrees at once.
 
 ## Event — the unit of storage and transfer
 { id, ts, city, route, poi, kind, side?, man?, delta?, ref?, target? }
-- id — unique, generated on the tablet at tap time (UUID).
+- id — unique, generated on the tablet at tap time (UUID from
+  crypto.randomUUID, never from Math.random: a repeated id would make
+  the mailbox answer 'duplicate' and a pass would be lost).
+- seq — a counter on the tablet only, never sent. History's order and
+  "the most recent pass" of Undo last follow seq, never ts, since the
+  tablet's clock can be wrong or corrected.
 - city — id of the city this event belongs to. The queue may hold events
   from more than one city; each event goes to its own city's mailbox.
 - ts — tap time (Unix, milliseconds).
@@ -148,7 +159,10 @@ four checks had moved the arrow by 31 to 57 degrees at once.
   waiting (not yet delivered), delivered (the mailbox confirmed it) or
   rejected (the mailbox refused it, with the reason). Every event names
   its city and its route, so one queue can hold events from more than
-  one city.
+  one city. A waiting event inside an unanswered push also carries
+  posted, the time of that push, until an answer names it (see "Event"):
+  the field exists from the first build and is read only once sending
+  exists.
 - When the mailbox confirms an event, the tablet folds it into the
   baseline: a pass adds its delta to the two matching counts, a target
   event replaces the POI's target. From then on the event is kept for
@@ -172,6 +186,29 @@ four checks had moved the arrow by 31 to 57 degrees at once.
   by default) and Sound (on by default).
 - heading: the compass's last course in degrees and the time it was
   saved (see "Heading"). Without it the next start points north, pale.
+  It has its own key, poi-app:heading, apart from the store, since it is
+  written every 2 s.
+- cities: the cities with their routes (see "Cities and routes"). A
+  route's lastPoi is the POI the working screen opens: lastPoi, else the
+  first POI not done, else 1.
+- schema: the number of this layout, with a migration step at start.
+- The whole store is one localStorage key, poi-app:store, written in one
+  setItem per change, so a crash never leaves half a change behind. The
+  app's keys all start with poi-app: and it never touches other keys of
+  the site (the prototype's poi-proto-* logs live beside it). At start
+  the app asks for persistent storage (navigator.storage.persist) and
+  takes a Web Lock on the store: a second tab of the app shows a banner
+  and records nothing.
+- A POI with no baseline reads as seven zeros, and its target follows
+  its type (new POIs start as Intersection, 70).
+- A write that still fails after the trim above refuses the tap: the
+  dialog of screens.md item 78 says so, and nothing is counted.
+- Sample data: with empty storage the app shows "No city" (screens.md
+  item 76). A sample loads only through ?sample in the address, into a
+  city with a reserved id, the name "Sample city", no mailbox and route
+  codes that match no sheet anywhere (SAMPLE-001, SAMPLE-002). A city
+  without a mailbox never sends, so sample events can never reach a
+  tracker, and "Erase everything" removes the sample like any city.
 - Empty storage = clean start; the app must work correctly in that
   state.
 
@@ -330,11 +367,14 @@ four checks had moved the arrow by 31 to 57 degrees at once.
   route the working screen opens when the city is put in use. testedAt
   and testResult ('ok', 'auth', 'no-answer' or 'offline') record the
   last "Test connection". sentAt is the time of the last successful
-  send. keyRejected is set by an 'auth' answer (see "Mailbox").
-- A route = { id, code, poiCount, checked, loadedAt }. code and
+  send. keyRejected is set by an 'auth' answer (see "Mailbox"). The
+  sample city of "Tablet storage" carries sample: true and can never get
+  a mailbox.
+- A route = { id, code, poiCount, checked, loadedAt, lastPoi }. code and
   poiCount are typed in by hand. The route code must match the sheet
   name in that city's tracker exactly, or the mailbox finds nothing to
-  write to. id is made on the tablet and never changes, and the tablet
+  write to. id is a UUID made on the tablet, as event ids are, and never
+  changes, and the tablet
   keys every stored value of a route by it, never by its code. checked
   is set by the route's first successful load or its first delivered
   event. Until then the route reads "Not checked yet" and its code can

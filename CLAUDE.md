@@ -9,9 +9,11 @@ references and the working prototype (_recon/recon-2026-10-18.md).
 Mailbox v1.3 was installed in the Vienna tracker on 2026-10-04. v1.4
 (mailbox/) is installed nowhere yet: selfTestOnCopy on a copy comes first.
 
-Stack: one self-contained page app/index.html (vanilla JS, CSS and JS
-inside the file, no build step, no frameworks) + Google Apps Script inside
-the user's tracker. Screen references: static HTML in docs/references/.
+Stack: app/ holds the tablet app: index.html (vanilla JS, its CSS and
+JS inside), sw.js (the service worker that keeps it opening offline),
+manifest.webmanifest and the icon. No build step, no frameworks, no
+CDN, the fonts inside the app. Plus Google Apps Script inside the
+user's tracker. Screen references: static HTML in docs/references/.
 
 Hard rules:
 1. Do only what the current prompt asks. Smallest working change.

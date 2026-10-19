@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.47 — 2026-10-18
+v0.48 — 2026-10-19
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -223,6 +223,17 @@ v0.47 2026-10-18 — the user's decision after a look at the tablet:
 the numbers of the type pill, its passes and its split, are larger
 and amber, --t-label heavy in --warn, still smaller than the card's
 counts (item 60).
+v0.48 2026-10-19 — the inventory before chapter 6 (project doc
+claude/chapter-6-inventory.md): the user's decisions on the wording
+the documents lacked. Undo dimmed with "Nothing to undo" (item 9), the
+connection state over the waiting count (item 34), the empty History
+states (item 45), item 64's test and its sentences, the toasts of item
+36, the 12 s notice (item 8), the over-share caption (item 46), the
+3,000 line (item 48), the queue line's scope (item 13), the neutral chip
+(item 41), the grid over History (item 44), the second tap (item 7),
+the chime notes (item 62), the wake lock (item 11), the back gesture
+(item 66), controls of a later build (item 77), a full storage (item
+78). Offline loading and install (data-model.md v0.16).
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -247,6 +258,10 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     Chrome tab the browser bars take about 120px at the top, leaving
     1333 × 680 and 800 × 1213. Android's "Display size" setting changes
     these numbers, so the tablet is measured again if it ever changes.
+    Installed from its manifest the app runs standalone, without the
+    browser bars and with the system's status bar kept, so the clock and
+    the battery stay in view. Its insets are measured in that mode
+    (item 53).
 50. Any tablet is supported, phones are not. The smallest visible area
     the app guarantees is 1000 × 600 in landscape and 720 × 1000 in
     portrait, browser tab included. Below that the app still opens, but
@@ -457,10 +472,11 @@ appears on screen. An apostrophe on screen is the typographic one (’).
    vibration, the tapped side bounces, the "N of T" counter bounces in
    place, and the toast of item 36 appears ("Saved: ← South · N of T").
    Then the sides hide and the disc slides back. Sound and motion follow
-   item 62.
+   item 62. A second tap on a side while the first one still bounces is
+   ignored, so one pass is never recorded twice.
 8. "Cancel" is visible only while the compass is open. Tapping the same
-   maneuver again also closes it. Auto-close after 12 s — nothing
-   recorded, with a notice.
+   maneuver again also closes it. Auto-close after 12 s with the toast
+   "Closed after 12 s: nothing recorded" (item 36).
 9. "Undo last" removes the whole most recent pass (maneuver and side
    together) that this tablet recorded for the active POI, and can be
    pressed repeatedly. Each press asks first (item 63). A pass still
@@ -470,13 +486,17 @@ appears on screen. An apostrophe on screen is the typographic one (’).
    that was not accepted and a pass whose removal already waits or was
    not accepted, since History handles those (items 13, 47), so a pass
    never gets a second removal.
-   The button is dimmed only on a POI this tablet has never written to —
-   a one-time state on a route filled in by hand before the app was used.
+   The button is dimmed, with the caption "Nothing to undo" (item 27),
+   whenever no pass of the active POI counts: none recorded by this
+   tablet, or every one refused or already carrying a removal.
 10. A POI that has reached its target, or has a spreadsheet error, has
     its maneuver discs locked, with a caption saying why. Input is what
     stops: "Undo last" and "History" stay available, because a miscount
     is most likely to be noticed exactly when the POI closes.
-11. The screen stays awake while the app is open.
+11. The screen stays awake while the app is open: the app asks the
+    browser for a screen wake lock at start and again every time the page
+    comes back into view, since the browser releases it whenever the page
+    is hidden. A refusal is silent.
 19. A compass sits at the top right of the main area, in both layouts
     one gap under the top bar and flush with the main area's right edge,
     so it stands in the same place with the same air on every screen. In
@@ -546,7 +566,8 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     The split is a hard limit. A maneuver the type does not allow, and a
     maneuver whose share is full, has its disc dimmed (item 26) with a
     caption under the discs ("No left turn at this POI", "Left is done:
-    28 of 28") and takes no more passes. Undo last or Delete frees a full
+    28 of 28", and over the share "Left is over its share: 31 of 28") and
+    takes no more passes. Undo last or Delete frees a full
     share again. If a share cannot be reached in the field, the type is
     changed instead. Approach sides have no limit. A not-drivable POI has
     its discs locked at once with a caption, is never counted among POIs
@@ -562,20 +583,27 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     happened. The "N of T" counter bounces in place with it, and nothing
     pops up over the POI number. The sides bloom out of the chosen disc
     when the compass opens. All motion is skipped while the tablet's
-    "reduce motion" accessibility setting is on. Sound can be switched
-    off in Settings (item 65).
+    "reduce motion" accessibility setting is on. The rising chime is two
+    notes at 988 and 1319 Hz, the falling one 660 and 494 Hz, and the
+    vibration lasts 25 ms. Sound can be switched off in Settings (item
+    65).
 64. A type can be changed at any time, also on a POI that already has
-    passes. The change applies at once when it has no consequence: on an
-    empty POI, upward from 40 to 70, or when no recorded pass conflicts
-    with the new type. Otherwise it asks first (item 63), and the dialog
-    states the consequence in plain words:
+    passes. The change applies at once, with the toast "Type set:
+    Straight only" (item 36), when it has none of the three consequences
+    below. Otherwise it asks first (item 63), and the dialog states the
+    consequence in plain words, "in the sheet" for delivered passes and
+    "waiting on this tablet" for passes not sent yet:
     - Passes over the new target: "It already has 66 passes. Straight
       only needs 40, so the POI becomes done with 26 passes over its
       target. The sheet will flag it as over target."
-    - Passes on a POI turned Not drivable: they stay in the sheet, and the
-      app stops counting the POI.
-    - Passes of a maneuver the new type does not allow: they stay in the
-      sheet and can be deleted in History if they were a mistake.
+    - Passes on a POI turned Not drivable: "It has 12 passes in the
+      sheet. They stay there, and the app stops counting this POI." or
+      "It has 3 passes waiting on this tablet. They will still be sent,
+      and the app stops counting this POI."
+    - Passes of a maneuver the new type does not allow: "It has 5
+      Straight passes in the sheet. No straight does not allow Straight,
+      so they no longer count. Delete them in History if they were a
+      mistake." or the same with "waiting on this tablet".
     A POI over its target reads "Done · 26 over target" under its
     counter, and "done +26" in its row.
 
@@ -598,7 +626,8 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     waiting" with the warning-colour dot of a waiting pass, only until
     its removal has been delivered. Then it leaves the list. A line
     above the list counts the removals still queued, "1 removal waiting
-    to be sent", whatever holds them up. The sync control names the
+    to be sent", whatever holds them up, in the scope in view: the POI in
+    POI scope, the route in Route scope. The sync control names the
     cause (items 33, 72). A removal the mailbox refused keeps the row
     struck through and reads "Not accepted" in the error colour, with
     the reason, "Send again" and "Cancel removal". "Cancel removal" asks
@@ -613,17 +642,21 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     only.
 41. The panel's sub-header ranks its facts rather than listing them: the
     POI or route in view sits in an amber chip, the route and city stay
-    as quiet context, and a total appears in a neutral chip.
+    as quiet context, and a total appears in a neutral chip: the passes
+    this tablet recorded in the scope in view that still count.
 44. The POI list beside the History panel stays live: tapping another POI
     reloads the panel for it without closing. The panel never carries a
-    second POI picker.
+    second POI picker. The grid of all POIs (item 59) opened over History
+    returns to History when it closes.
 45. History lists only passes this tablet recorded. Numbers that reached
     the sheet by hand have no individual passes behind them — the sheet
     holds seven totals per POI — so they can be continued from, through
     "Load from sheet", but never listed. A POI with no passes from this
     tablet shows "No passes from this tablet" in the middle of the list,
     with one line naming how many passes reached the sheet by hand and
-    that they are corrected in the sheet.
+    that they are corrected in the sheet. With no passes from the sheet
+    either it reads "No passes yet", and an empty Route scope "No passes
+    on this route yet", each without the line.
 47. An event the mailbox refused stays on the tablet as "rejected", with
     the mailbox's reason, and is never trimmed (item 48). History shows
     it in its row, and the working screen's sync control counts rejected
@@ -670,7 +703,8 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     counted: a delivered one leaves the tablet at once, since the type
     itself is stored apart (data-model.md). Under the last row: "This
     tablet keeps its newest 3,000 passes and removals. Older sent ones
-    are no longer listed."
+    are no longer listed." The line shows only once a pass of the scope
+    in view has been dropped.
 
 ## Connection, sync status and tablet data
 16. Sync status is always visible on the working screen and carries a
@@ -864,12 +898,27 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     corner, as large as any tap target (item 31). There is no text
     "Close": Apple's rule is the standard close symbol without a text
     label, in the top-left corner. Where a dimmed background surrounds
-    the overlay, a tap on it closes the overlay too. The Android back
-    gesture closes the topmost open overlay instead of leaving the app.
+    the overlay, a tap on it closes the overlay too. Every layer that
+    opens over the screen (the open compass, a menu, a dialog, an
+    overlay) adds one entry to the browser's history and takes it back
+    when it closes any other way, so the Android back gesture closes
+    exactly one layer, the topmost, and leaves the app only when nothing
+    is open.
     Menus (type, route, sync) close by a choice, a tap outside, or when the
     screen turns. A tap outside only closes the menu: nothing under it
     reacts, as Apple's popovers keep other views from touches until they
     close. Confirmation dialogs keep "Cancel" (item 63).
+77. A control that opens a screen of a later build stays in place,
+    dimmed (item 26), and a tap on it shows the toast "Settings come in a
+    later version". Until Settings exists this covers the gear (item 73),
+    "Set up connection" in the Sync panel (item 72), "Add routes in
+    Settings" (item 35) and "Add your first city" (item 76). The Sync
+    panel's other controls read "Connection not set up" as their reason.
+78. The tablet's storage is full and a pass cannot be saved (data-model.md
+    "Tablet storage"): the dialog of item 63 reads "Nothing recorded" with
+    the text "This tablet's storage is full, so the pass was not saved.
+    Free space on the tablet, then tap again." and one button, "OK". The
+    counter does not move and no toast appears.
 
 ## Working-screen states not drawn as separate reference screens
 32. Empty POI: the counter reads "0 of 70" and "70 to go". The "Still
@@ -885,7 +934,10 @@ appears on screen. An apostrophe on screen is the typographic one (’).
 34. No connection: the sync control reads "No connection" with the dot in
     the muted colour. Nothing is lost meanwhile. A city whose connection
     is not set up yet reads "Connection not set up" with the same muted
-    dot.
+    dot. Both read over item 33: with changes waiting and no connection
+    the control names the connection, and the Sync panel's line under
+    the state carries the count, "12 passes are kept on this tablet until
+    it is set up." ("3 changes" when mixed, item 33).
 35. No routes yet in this city: the route picker reads "No routes yet",
     the POI list is replaced by a single button "Add routes in Settings"
     that opens Settings, and the discs are dimmed and inert, with the
@@ -899,7 +951,11 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     Q).
 36. A pass has just been recorded: a toast appears over the working area
     for about two seconds, reading "Saved: ← South · 57 of 70", then
-    fades. The screen beneath does not move.
+    fades. The screen beneath does not move. The same toast serves the
+    other confirmations: "Removed: ← South · 56 of 70" for a waiting pass
+    undone or deleted, "Removal queued: ← South · 56 of 70" for a
+    delivered one, "Type set: Straight only" (item 64) and "Closed after
+    12 s: nothing recorded" (item 8).
 37. A finished POI whose passes have not all been sent: the discs stay
     locked with their "This POI is done" caption, while "Undo last" stays
     live, because undo follows what this tablet recorded, not the POI's
