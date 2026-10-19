@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  POI Tracker — working prototype v19.6
+  POI Tracker — working prototype v19.7
   One file, for the tablet. Open it in Chrome from GitHub Pages through
   tools/poi-tracker-prototype.html, the permanent address that opens the
   newest version: a downloaded copy gets no location, and the compass
@@ -88,13 +88,17 @@
   v19.6 2026-10-18: the look of main-screen v0.33 (screens.md v0.47):
           the type pill's numbers, its passes and its split, are amber
           and larger. The type menu keeps its grey split.
+  v19.7 2026-10-19: the car test of v19.6 (data-model.md v0.15): a GPS
+          check also needs the GPS course steady, and a gap over 30
+          degrees is taken at once only while the arrow is pale. The
+          Tools menu names the real version.
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#EFF3FA">
-<title>POI Tracker — prototype v19.6</title>
+<title>POI Tracker — prototype v19.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -1792,7 +1796,7 @@
       '<div class="tnote diag">' + c.lines.map(function (l) { return '<b>' + esc(l[0]) + '</b> ' + esc(l[1]); }).join('<br>') + '</div>' +
       items.map(function (it) {
         return '<button class="ritem" type="button" data-tool="' + it[0] + '"><b>' + it[1] + '</b><small>' + esc(it[2]) + '</small></button>';
-      }).join('') + '<div class="tnote">Prototype v19.3. Nothing is sent anywhere. The sensor log stays on this tablet, without coordinates.</div></div>';
+      }).join('') + '<div class="tnote">Prototype ' + compass.version + '. Nothing is sent anywhere. The sensor log stays on this tablet, without coordinates.</div></div>';
   }
 
   // ================= feedback: toast, chime, vibration =================
@@ -2135,6 +2139,16 @@
   //    pale ("unsure"), so the gyroscope turns it with the car until the
   //    first GPS check makes it solid. With nothing saved it points north,
   //    pale.
+  // 8. Decided 2026-10-19 (v19.7) after the car test of v19.6: a GPS check
+  //    also needs the GPS course itself steady, its last 3 fixes within
+  //    5 deg of the newest. Right after a slow turn the gyroscope already
+  //    read straight while the GPS course was still catching up or was
+  //    noisy below 15 km/h, and four checks moved the arrow by 31 to 57 deg
+  //    at once. The first of them pointed about 35 deg off for 15 s. A gap
+  //    over 30 deg is now taken at once only while the arrow is pale,
+  //    otherwise it is pulled 30% like any other. Replayed on that drive:
+  //    no check moved the arrow more than 7 deg after the start, and the
+  //    accuracy on straight roads stayed the same.
   var compass = (function () {
     var MOVING = 3;             // m/s (11 km/h): the GPS course is trusted from here
     var FRESH = 3000;           // ms: a fix older than this is not live
@@ -2143,7 +2157,10 @@
     var STRAIGHT_MS = 2000;     // ms: the window that must be straight for a GPS check
     var STRAIGHT_DEG = 3;       // deg: the most the car may turn in that window
     var PULL = 0.3;             // the share of the gap to GPS closed at each straight fix
-    var SNAP = 30;              // deg: a gap larger than this is closed at once
+    var SNAP = 30;              // deg: a gap larger than this is closed at once, only while pale
+    var STEADY_FIXES = 3;       // GPS fixes that must agree before a GPS check (v19.7)
+    var STEADY_DEG = 5;         // deg: the most each of them may differ from the newest
+    var STEADY_GAP = 1600;      // ms: the longest gap between two of them
     var DT_MAX = 0.2;           // s: the longest step added up at once
     var STOPPED = 0.3;          // m/s: below this the car stands, for the drift
     var STILL_MS = 3000;        // ms: a standing car steady this long measures the drift
@@ -2160,7 +2177,7 @@
     var LOG_CHUNK = 500;        // rows in one stored piece
     var LOG_KEEP = 3;           // drives kept on the tablet
     var LOG_JOIN = 10 * 60000;  // ms: a page opened again this soon continues the drive
-    var VERSION = 'v19.6';
+    var VERSION = 'v19.7';
     var RAD = 180 / Math.PI;
     var car = new Heading.Smoother(0.6);
 
@@ -2176,6 +2193,7 @@
     var drifts = 0, driftAt = 0;
     var motion = 'off', motionAt = 0, apiObj = { g: null, a: null };
     var fix = null, watch = null, gps = 'off', gpsAt = 0, gpsWanted = true;
+    var fixes = [];             // the last GPS fixes with a course, for steady() (v19.7)
     var off = null, checkedAt = 0, checks = 0, lastPull = null, hist = [], unsure = false, heading = null, from = null, pending = false;
     var everLive = false, paused = false, pausedAt = 0, lastTap = 0, lastRestart = 0;
     var tally = { pauses: 0, restarts: 0, tap: 0, restart: 0, itself: 0 };
@@ -2439,10 +2457,12 @@
       var c = pos.coords, t = now();
       fix = { course: num(c.heading) === null ? null : Heading.norm(c.heading), speed: num(c.speed), acc: num(c.accuracy), at: t };
       gps = 'fix';
+      if (fix.course === null) fixes = [];
+      else { fixes.push({ course: fix.course, at: t }); if (fixes.length > STEADY_FIXES) fixes.shift(); }
       if (fix.speed !== null && fix.speed >= MOVING) startKeeping();
       startMotion('location allowed');
       var note = '';
-      if (gpsLive(t) && gyroOk(t) && straight(t)) note = check(t);
+      if (gpsLive(t) && gyroOk(t) && straight(t) && steady()) note = check(t);
       choose(t);
       row('gps', note, t);
     }
@@ -2453,7 +2473,7 @@
     }
     function toggleGps() {
       if (watch !== null) {
-        navigator.geolocation.clearWatch(watch); watch = null; fix = null; gps = 'off'; gpsWanted = false;
+        navigator.geolocation.clearWatch(watch); watch = null; fix = null; fixes = []; gps = 'off'; gpsWanted = false;
         startMotion('GPS turned off');
         return;
       }
@@ -2472,10 +2492,22 @@
       for (var j = hist.indexOf(old) + 1; j < hist.length; j++) if (hist[j].t - hist[j - 1].t > 300) return false;
       return Math.abs(turn - old.turn) < STRAIGHT_DEG;
     }
+    // steady: the last 3 GPS courses came at most 1.6 s apart and lie within
+    // 5 deg of the newest. Right after a turn the GPS course is still
+    // catching up while the gyroscope already reads straight (v19.7).
+    function steady() {
+      if (fixes.length < STEADY_FIXES) return false;
+      var last = fixes[fixes.length - 1];
+      for (var i = 0; i < fixes.length; i++) {
+        if (i > 0 && fixes[i].at - fixes[i - 1].at > STEADY_GAP) return false;
+        if (Math.abs(Heading.delta(fixes[i].course, last.course)) > STEADY_DEG) return false;
+      }
+      return true;
+    }
     // a GPS check: move north toward the GPS course
     function check(t) {
       var gap = off === null ? null : Heading.delta(Heading.norm(turn + off), fix.course);
-      if (off === null || Math.abs(gap) > SNAP) off = fix.course - turn;
+      if (off === null || (unsure && Math.abs(gap) > SNAP)) off = fix.course - turn;
       else off += PULL * gap;
       checkedAt = t; checks += 1; lastPull = gap; unsure = false;
       return gap === null ? 'check first' : 'check ' + gap.toFixed(1);
@@ -2679,7 +2711,7 @@
     }
     setInterval(function () { if (state.menu === 'tools') render(); }, 1000);
     return { permit: permit, tap: tap, draw: draw, toggleGps: toggleGps, status: status, saveLog: saveLog,
-             gpsOn: function () { return watch !== null; }, rows: total, drives: drivesKept };
+             gpsOn: function () { return watch !== null; }, rows: total, drives: drivesKept, version: VERSION };
   }());
 
   render();

@@ -1,6 +1,6 @@
 # Data model
 
-v0.14 — 2026-10-18
+v0.15 — 2026-10-19
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -66,6 +66,10 @@ car (project docs claude/tablet-sensor-test-2026-10-17.md and
 claude/prototype-v19.md): no magnetometer, the gyroscope turns the
 heading and GPS sets north on straight roads. The tablet keeps the last
 course, so the arrow is always on the dial (screens.md item 19).
+v0.15 2026-10-19 — "Heading" after the car test of prototype v19.6: a
+GPS check also needs the GPS course steady, and a gap over 30 degrees
+is taken at once only while the arrow is pale. Right after slow turns
+four checks had moved the arrow by 31 to 57 degrees at once.
 -->
 
 ## Pass (one crossing of an intersection)
@@ -296,12 +300,15 @@ course, so the arrow is always on the dial (screens.md item 19).
   and removed while the car stands (GPS below 0.3 m/s): half-second
   averages that agree within 1 degree a second for 3 s. A turn above 0.5
   degrees a second is the car creeping round a corner, not drift.
-- GPS sets north, only while the car drives straight (the gyroscope saw
-  less than 3 degrees in the last 2 s) at 11 km/h (3 m/s) or more. In a
-  turn the GPS course lags 2 to 3 s, below 11 km/h it is noise. Each
-  straight fix pulls the heading 30% of the way to the GPS course, a gap
-  over 30 degrees is taken at once. With the gyroscope silent the live
-  GPS course is shown.
+- GPS sets north, only while the car drives straight at 11 km/h (3 m/s)
+  or more: the gyroscope saw less than 3 degrees in the last 2 s, and the
+  last 3 GPS courses, at most 1.6 s apart, lie within 5 degrees of the
+  newest. In a turn the GPS course lags 2 to 3 s, so right after a turn
+  the gyroscope reads straight before GPS has caught up. Below 11 km/h
+  the course is noise. Each such fix pulls the heading 30% of the way to
+  the GPS course. A gap over 30 degrees is taken at once only while the
+  arrow is pale, after a start or a pause. With the gyroscope silent the
+  live GPS course is shown.
 - The motion sensors can pause without an error while something else has
   the focus. A sensor counts as working only with a reading in the last
   second, on the page's own clock. While they are silent the arrow keeps

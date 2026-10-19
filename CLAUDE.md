@@ -4,8 +4,10 @@ Project: tablet PWA. One tap = one intersection pass (POI), written into
 the user's Google Sheets tracker via an Apps Script mailbox. The client's
 (German) spreadsheet is NEVER touched by this project.
 
-Stage: the mailbox (mailbox/) is built and runs in the Vienna tracker.
-The tablet app is not built yet: references first, then app/index.html.
+Stage: chapter 6 builds the tablet app, app/index.html, from the
+references and the working prototype (_recon/recon-2026-10-18.md).
+Mailbox v1.3 was installed in the Vienna tracker on 2026-10-04. v1.4
+(mailbox/) is installed nowhere yet: selfTestOnCopy on a copy comes first.
 
 Stack: one self-contained page app/index.html (vanilla JS, CSS and JS
 inside the file, no build step, no frameworks) + Google Apps Script inside
@@ -51,10 +53,8 @@ Where to look:
 | RECON snapshots | _recon/ |
 | Mailbox (Apps Script) | mailbox/Code.gs, mailbox/README.md |
 | Measure a tablet's viewport | tools/viewport.html |
-| Compass prototype, live heading from the sensors | tools/compass-prototype.html |
 | Sensor test: GPS, raw gyroscope, turn and heading | tools/sensor-test.html |
-| Working prototype v19.6: working screen and live compass | tools/poi-tracker-prototype-v19.6.html |
-| Working prototype, permanent address: opens the version named in tools/prototype-latest.txt | tools/poi-tracker-prototype.html |
+| Working prototype (working screen, live compass): this page opens the newest version, named in tools/prototype-latest.txt | tools/poi-tracker-prototype.html |
 
 This file carries no version tag or history on purpose: it is a config
 Claude Code reads at startup, not a registry of decisions.
