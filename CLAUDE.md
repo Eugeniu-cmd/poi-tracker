@@ -44,6 +44,7 @@ Hard rules:
 Where to look:
 | What | Where |
 |---|---|
+| The tablet app: index.html, sw.js, manifest.webmanifest, icon-512.png (v0.1 sends nothing yet, and ?sample in the address loads a sample city) | app/ |
 | Data model, Log sheet, mailbox contract | docs/data-model.md |
 | Screen decision registry | docs/screens.md |
 | Design tokens | docs/references/_tokens.css |

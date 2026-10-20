@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "POI Tracker",
+  "short_name": "POI Tracker",
+  "description": "Records the passes of a route, one tap per pass, on the tablet.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#EFF3FA",
+  "theme_color": "#EFF3FA",
+  "icons": [
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

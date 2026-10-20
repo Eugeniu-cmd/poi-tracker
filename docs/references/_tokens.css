@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.14 — 2026-10-18
+   v0.15 — 2026-10-19
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -66,6 +66,12 @@
    colour, the dark bar of a POI in progress, and --prog-bg becomes a
    light grey tint. The tile's edge is --ink-2 and its mini-map square
    --ink-3 (screens.md v0.46, items 2, 58 and 59).
+   v0.15 2026-10-19 — a dedicated decision before app/index.html: the
+   motion of screens.md item 62 scales its shapes, and its scales lived
+   only in the prototype. New --scale-press, a disc held down,
+   --scale-bloom, the size a side blooms from, --scale-bounce, the peak
+   of the bounce of a tapped side, and --scale-bump, the peak of the
+   counter's bounce. The values are the prototype's, tested in the car.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -156,6 +162,10 @@
   --dur-bounce: 420ms;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-spring: cubic-bezier(0.3, 1.5, 0.5, 1);
+  --scale-press: 0.96;
+  --scale-bloom: 0.6;
+  --scale-bounce: 1.18;
+  --scale-bump: 1.12;
 }
 
 @media (prefers-color-scheme: dark) {
