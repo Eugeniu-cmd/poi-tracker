@@ -18,9 +18,9 @@ test('B1 · History of a POI', async ({ page }) => {
   expect(await text(hist.locator('.ht'))).toBe('History');
   await expect(hist.locator('button[data-scope="poi"]')).toHaveClass(/\bon\b/);
   await expect(hist.locator('button[data-scope="route"]')).not.toHaveClass(/\bon\b/);
-  expect(await text(hist.locator('.hsub .chip.amber'))).toBe('POI 136');
+  expect(await text(hist.locator('.hsub .chip.gold'))).toBe('POI 136');
   expect(await text(hist.locator('.hsub .hctx'))).toBe('SAMPLE-001 · Sample city');
-  expect(await text(hist.locator('.hsub .chip:not(.amber)'))).toBe('11 passes');
+  expect(await text(hist.locator('.hsub .chip:not(.gold)'))).toBe('11 passes');
 
   const rows = hist.locator('.hlist .hr');
   await expect(rows).toHaveCount(11);
@@ -48,9 +48,9 @@ test('B2 · Route scope', async ({ page }) => {
   await hist.locator('button[data-scope="route"]').click();
   await expect(hist.locator('button[data-scope="route"]')).toHaveClass(/\bon\b/);
   await expect(hist.locator('button[data-scope="poi"]')).not.toHaveClass(/\bon\b/);
-  expect(await text(hist.locator('.hsub .chip.amber'))).toBe('SAMPLE-001');
+  expect(await text(hist.locator('.hsub .chip.gold'))).toBe('SAMPLE-001');
   expect(await text(hist.locator('.hsub .hctx'))).toBe('Sample city');
-  expect(await text(hist.locator('.hsub .chip:not(.amber)'))).toBe('23 passes');
+  expect(await text(hist.locator('.hsub .chip:not(.gold)'))).toBe('23 passes');
   await expect(rows).toHaveCount(23);
   const nums = hist.locator('.hlist .hr .hn');
   await expect(nums).toHaveCount(23);   // each row carries a POI number
@@ -59,7 +59,7 @@ test('B2 · Route scope', async ({ page }) => {
 
   await hist.locator('button[data-scope="poi"]').click();
   await expect(hist.locator('button[data-scope="poi"]')).toHaveClass(/\bon\b/);
-  expect(await text(hist.locator('.hsub .chip.amber'))).toBe('POI 136');
+  expect(await text(hist.locator('.hsub .chip.gold'))).toBe('POI 136');
   await expect(rows).toHaveCount(11);
   await expect(hist.locator('.hlist .hr .hn')).toHaveCount(0);
   expect(await layers(page)).toBe(1);
@@ -73,7 +73,7 @@ test('B3 · The column stays live', async ({ page }) => {
   await page.locator('#col .row[data-poi="135"]').click();
   await expect(hist).toBeVisible();
   expect(await layers(page)).toBe(1);
-  expect(await text(hist.locator('.hsub .chip.amber'))).toBe('POI 135');
+  expect(await text(hist.locator('.hsub .chip.gold'))).toBe('POI 135');
   const rows = hist.locator('.hlist .hr');
   await expect(rows).toHaveCount(5);
   await expect(rows.locator('.hst')).toHaveText(['Sent', 'Sent', 'Sent', 'Sent', 'Sent']);
@@ -85,7 +85,7 @@ test('B4 · Delete a sent pass', async ({ page }) => {
   const sample = await store(page);
   const hist = await openHistory(page);
   await page.locator('#col .row[data-poi="135"]').click();
-  expect(await text(hist.locator('.hsub .chip.amber'))).toBe('POI 135');
+  expect(await text(hist.locator('.hsub .chip.gold'))).toBe('POI 135');
   const rows = hist.locator('.hlist .hr');
   await expect(rows).toHaveCount(5);
 
@@ -113,7 +113,7 @@ test('B4 · Delete a sent pass', async ({ page }) => {
   expect(await text(first.locator('.hst'))).toBe('Removal waiting');
   await expect(first.locator('.hdel')).toHaveCount(0);
   expect(await text(hist.locator('.hq'))).toBe('1 removal waiting to be sent');
-  expect(await text(hist.locator('.hsub .chip:not(.amber)'))).toBe('4 passes');
+  expect(await text(hist.locator('.hsub .chip:not(.gold)'))).toBe('4 passes');
   await expect(page.locator('#cnt')).toHaveText('69 of 70');
   await expect(page.locator('#head .rest')).toHaveText('1 to go');
 
@@ -159,8 +159,8 @@ test('B6 · Empty History', async ({ page }) => {
   expect(await text(hist.locator('.hempty b'))).toBe('No passes yet');
   await expect(hist.locator('.hempty p')).toHaveCount(0);
   expect(await text(hist.locator('.hsub .hctx'))).toBe('No city');
-  expect(await text(hist.locator('.hsub .chip:not(.amber)'))).toBe('0 passes');
-  await expect(hist.locator('.hsub .chip.amber')).toHaveCount(0);
+  expect(await text(hist.locator('.hsub .chip:not(.gold)'))).toBe('0 passes');
+  await expect(hist.locator('.hsub .chip.gold')).toHaveCount(0);
   await expect(hist.locator('.hlist .hr')).toHaveCount(0);
 
   // (b) a POI whose passes were typed into the sheet by hand
@@ -169,7 +169,7 @@ test('B6 · Empty History', async ({ page }) => {
   await expect(page.locator('#head .big')).toHaveText('57');
   hist = await openHistory(page);
   expect(await layers(page)).toBe(1);
-  expect(await text(hist.locator('.hsub .chip.amber'))).toBe('POI 57');
+  expect(await text(hist.locator('.hsub .chip.gold'))).toBe('POI 57');
   expect(await text(hist.locator('.hempty b'))).toBe('No passes from this tablet');
   expect(await text(hist.locator('.hempty p'))).toBe('The 46 passes of POI 57 reached the sheet another way, typed in by hand. Correct them in the sheet.');
   await expect(hist.locator('.hlist .hr')).toHaveCount(0);
@@ -191,8 +191,8 @@ test('B6 · Empty History', async ({ page }) => {
   await expect(hist.locator('button[data-scope="route"]')).toHaveClass(/\bon\b/);
   expect(await text(hist.locator('.hempty b'))).toBe('No passes on this route yet');
   await expect(hist.locator('.hempty p')).toHaveCount(0);
-  expect(await text(hist.locator('.hsub .chip.amber'))).toBe('SAMPLE-002');
-  expect(await text(hist.locator('.hsub .chip:not(.amber)'))).toBe('0 passes');
+  expect(await text(hist.locator('.hsub .chip.gold'))).toBe('SAMPLE-002');
+  expect(await text(hist.locator('.hsub .chip:not(.gold)'))).toBe('0 passes');
   await expect(hist.locator('.hlist .hr')).toHaveCount(0);
   expect(await layers(page)).toBe(1);
 });

@@ -8,9 +8,11 @@
    not touch.
 
    v0.1 2026-10-19 — chapter 6 step 2: offline start and install.
+   v0.2 2026-10-21 — the gold: a new cache name, so the tablet fetches
+   the gold icon instead of keeping the cached one.
 */
 'use strict';
-var CACHE = 'poi-app-v0.1';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.2';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 

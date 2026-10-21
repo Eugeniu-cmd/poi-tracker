@@ -57,7 +57,8 @@ Hard rules:
 Where to look:
 | What | Where |
 |---|---|
-| The tablet app: index.html, sw.js, manifest.webmanifest, icon-512.png (v0.1 sends nothing yet, and ?sample in the address loads a sample city) | app/ |
+| The tablet app: index.html, sw.js, manifest.webmanifest, icon-512.png (v0.2 sends nothing yet, and ?sample in the address loads a sample city) | app/ |
+| The app icon's source, rendered to app/icon-512.png | docs/references/app-icon.svg |
 | Automated tests of the app (Playwright, run from tests/) | tests/ |
 | Data model, Log sheet, mailbox contract | docs/data-model.md |
 | Screen decision registry | docs/screens.md |

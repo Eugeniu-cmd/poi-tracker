@@ -58,7 +58,7 @@ test('B7 · The grid', async ({ page }) => {
   await sheet.locator('.cell[data-poi="135"]').click();
   await expect(sheet).toHaveCount(0);
   await expect(hist).toBeVisible();
-  expect(await text(hist.locator('.hsub .chip.amber'))).toBe('POI 135');
+  expect(await text(hist.locator('.hsub .chip.gold'))).toBe('POI 135');
   await expect(page.locator('#head .big')).toHaveText('135');
   await expect.poll(() => layers(page)).toBe(1);
 });

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- POI Tracker app icon (screens.md v0.49): the compass arrow of item 19,
+       its left half the light disc colour and its right half metallic gold
+       #D4AF37 (_tokens.css v0.16), on the dark disc colour. The source of
+       app/icon-512.png, rendered at 512 x 512, opaque. -->
+  <rect width="512" height="512" fill="#1C2030"/>
+  <circle cx="256" cy="256" r="178" fill="#262C3D" stroke="#3A4258" stroke-width="4"/>
+  <g transform="translate(256 256) scale(7.6) translate(-48 -42.75)">
+    <path d="M48 27 48 52.1 37.5 58.5Z" fill="#F1F3FA"/>
+    <path d="M48 27 58.5 58.5 48 52.1Z" fill="#D4AF37"/>
+  </g>
+</svg>

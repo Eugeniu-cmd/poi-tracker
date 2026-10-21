@@ -95,7 +95,7 @@ test('C1 · A type change with consequences', async ({ page }) => {
 
   const hist = await openHistory(page);
   expect(await layers(page)).toBe(1);
-  expect(await text(hist.locator('.hsub .chip.amber'))).toBe('POI 122');
+  expect(await text(hist.locator('.hsub .chip.gold'))).toBe('POI 122');
   const first = hist.locator('.hlist .hr').first();
   await expect(first).toBeVisible();
   expect(await text(first.locator('.hmv'))).toBe('Type: Straight only');
