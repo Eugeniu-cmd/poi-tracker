@@ -69,6 +69,7 @@ Where to look:
 | Superseded planning dump (Russian, historical) | docs/inputs/ARCHIVE_handoff_v2_2026-09-02.md |
 | RECON snapshots | _recon/ |
 | Mailbox (Apps Script) | mailbox/Code.gs, mailbox/README.md |
+| Size frame: the app at the tablet's two sizes on a laptop, scaled to fit, theme switch | tools/app-frame.html |
 | Measure a tablet's viewport | tools/viewport.html |
 | Sensor test: GPS, raw gyroscope, turn and heading | tools/sensor-test.html |
 | Working prototype, frozen at v19.7 on 2026-10-21 (testing moves to the app): this page opens it, named in tools/prototype-latest.txt | tools/poi-tracker-prototype.html |

@@ -1,0 +1,173 @@
+<!doctype html>
+<!--
+  POI Tracker - size frame (a checking tool, screens.md items 49, 54, 68).
+
+  What it is for: shows the app, app/index.html as published from ../app/,
+  at the two sizes of the user's tablet when the app runs installed:
+  800 x 1333 CSS px in portrait and 1333 x 800 in landscape. On a laptop the
+  frame is scaled to fit the window ("Fit"), and "1:1" shows it at its real
+  size for judging tap sizes. A theme switch sets the app inside to light,
+  dark or the system's choice. Only the app inside the frame is canon: this
+  page's own chrome is exempt from the token rule (item 68) and never
+  appears in the app.
+
+  - The frame is the same origin as the app, so it shares the browser's
+    storage with the app opened directly: passes recorded here are the
+    same passes.
+  - The browser's Back button closes the app's layers inside the frame, one
+    per press, as the back gesture does on the tablet: the iframe's history
+    entries join this page's history.
+  - Only one app instance records at a time, because the app holds a Web
+    Lock on its store. With the app open in another tab or window, the
+    frame shows its "open in another tab" banner and records nothing.
+  - The choices (size, scale, theme) are kept in localStorage under
+    poi-frame:* keys, never under the app's poi-app:* keys or the
+    prototype's poi-proto-* keys.
+
+  No external resources, no libraries.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POI Tracker - size frame</title>
+<style>
+  html { height: 100%; }
+  body { margin: 0; min-height: 100%; display: flex; flex-direction: column; background: #888888; color: #e8ebf2;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 13px; line-height: 1.3; }
+  /* Fit: the page never scrolls. 1:1: the body grows with the frame and the page scrolls. */
+  body.fit { height: 100%; overflow: hidden; }
+  .bar { position: sticky; top: 0; z-index: 1; flex: none; display: flex; flex-wrap: wrap; align-items: center;
+    gap: 6px 8px; padding: 6px 10px; background: #1f232b; }
+  .grp { display: flex; align-items: center; gap: 4px; }
+  .sep { width: 1px; height: 20px; background: #3a404c; margin: 0 4px; }
+  .bar button { font: inherit; color: inherit; background: #343a46; border: 1px solid #4a5160; border-radius: 6px;
+    padding: 4px 10px; cursor: pointer; white-space: nowrap; }
+  .bar button:hover { background: #3e4553; }
+  .bar button.on { background: #e8ebf2; color: #1f232b; border-color: #e8ebf2; font-weight: 700; }
+  .scale { min-width: 4.5em; padding-left: 4px; color: #b5bccb; font-variant-numeric: tabular-nums; }
+  .note { margin-left: auto; color: #b5bccb; font-size: 12px; }
+  .label { flex: none; min-height: 1.3em; padding: 4px 10px; background: #2b303a; color: #c9cfdb; font-variant-numeric: tabular-nums;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stage { flex: 1; min-height: 0; display: flex; padding: 12px; box-sizing: border-box; }
+  body.fit .stage { overflow: hidden; }
+  /* the box is the scaled size of the frame, so it centres exactly; auto
+     margins keep its top-left reachable when it is larger than the window */
+  .box { flex: none; margin: auto; border: 1px solid #30343c; background: #ffffff; overflow: hidden; }
+  .wrap { transform-origin: top left; }
+  iframe { display: block; border: 0; margin: 0; padding: 0; background: #ffffff; }
+</style>
+</head>
+<body class="fit">
+<div class="bar" role="toolbar" aria-label="Size frame controls">
+  <div class="grp" role="group" aria-label="Size">
+    <button type="button" data-size="portrait">Portrait 800 × 1333</button>
+    <button type="button" data-size="landscape">Landscape 1333 × 800</button>
+  </div>
+  <span class="sep"></span>
+  <div class="grp" role="group" aria-label="Scale">
+    <button type="button" data-scale="fit">Fit</button>
+    <button type="button" data-scale="one">1:1</button>
+    <span class="scale" id="scale"></span>
+  </div>
+  <span class="sep"></span>
+  <div class="grp" role="group" aria-label="Theme of the app inside">
+    <button type="button" data-theme="system">System</button>
+    <button type="button" data-theme="light">Light</button>
+    <button type="button" data-theme="dark">Dark</button>
+  </div>
+  <span class="sep"></span>
+  <div class="grp">
+    <button type="button" data-act="reload">Reload</button>
+    <button type="button" data-act="sample">Load sample</button>
+  </div>
+  <span class="note">One window records at a time: close the app's other tabs and windows.</span>
+</div>
+<div class="label" id="label"></div>
+<div class="stage" id="stage">
+  <div class="box" id="box"><div class="wrap" id="wrap">
+    <iframe id="frame" src="../app/" title="POI Tracker app"></iframe>
+  </div></div>
+</div>
+<script>
+(function () {
+  'use strict';
+  var SIZES = { portrait: { w: 800, h: 1333 }, landscape: { w: 1333, h: 800 } };
+  var KEYS = { size: 'poi-frame:size', scale: 'poi-frame:scale', theme: 'poi-frame:theme' };
+  var state = { size: 'portrait', scale: 'fit', theme: 'system' };   // the defaults (item 55)
+
+  var frame = document.getElementById('frame'), wrap = document.getElementById('wrap'), box = document.getElementById('box');
+  var stage = document.getElementById('stage'), label = document.getElementById('label'), scaleOut = document.getElementById('scale');
+
+  function get(k) { try { return localStorage.getItem(k); } catch (err) { return null; } }
+  function put(k, v) { try { localStorage.setItem(k, v); } catch (err) { /* kept for this page only */ } }
+  function restore() {
+    var s = get(KEYS.size), c = get(KEYS.scale), t = get(KEYS.theme);
+    if (SIZES[s]) state.size = s;
+    if (c === 'fit' || c === 'one') state.scale = c;
+    if (t === 'system' || t === 'light' || t === 'dark') state.theme = t;
+  }
+  function each(sel, fn) { Array.prototype.forEach.call(document.querySelectorAll(sel), fn); }
+  function mark(attr, value) {
+    each('[' + attr + ']', function (b) {
+      var on = b.getAttribute(attr) === value;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  function fmt(k) { return '× ' + String(Math.round(k * 100) / 100); }
+
+  // The iframe keeps the exact CSS size, so the app's container queries see
+  // 800 x 1333 or 1333 x 800. In Fit the wrapper scales it by k, the largest
+  // factor up to 1 at which it fits the stage; the box takes the scaled size.
+  function layout() {
+    var sz = SIZES[state.size], w = sz.w, h = sz.h, k = 1;
+    var sizeText = (state.size === 'portrait' ? 'Portrait' : 'Landscape') + ' · ' + w + ' × ' + h + ' CSS px · ' + (state.scale === 'fit' ? 'fit ' : '1:1 ');
+    document.body.classList.toggle('fit', state.scale === 'fit');
+    frame.style.width = w + 'px'; frame.style.height = h + 'px';
+    wrap.style.width = w + 'px'; wrap.style.height = h + 'px';
+    label.textContent = sizeText;   // the label takes its line before the stage is measured
+    if (state.scale === 'fit') {
+      var cs = getComputedStyle(stage);
+      var availW = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 2;
+      var availH = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 2;
+      k = Math.min(1, availW / w, availH / h);
+      if (!(k > 0)) k = 1;
+    }
+    wrap.style.transform = 'scale(' + k + ')';
+    box.style.width = (w * k) + 'px'; box.style.height = (h * k) + 'px';
+    scaleOut.textContent = fmt(k);
+    label.textContent = sizeText + fmt(k);
+    mark('data-size', state.size); mark('data-scale', state.scale); mark('data-theme', state.theme);
+  }
+  // The app sets or removes data-theme on its root element at its own start,
+  // so the frame applies its choice after every load of the iframe.
+  function applyTheme() {
+    var d = null;
+    try { d = frame.contentDocument; } catch (err) { d = null; }
+    if (!d || !d.documentElement) return;
+    if (state.theme === 'system') d.documentElement.removeAttribute('data-theme');
+    else d.documentElement.setAttribute('data-theme', state.theme);
+  }
+
+  document.querySelector('.bar').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    if (b.hasAttribute('data-size')) { state.size = b.getAttribute('data-size'); put(KEYS.size, state.size); layout(); }
+    else if (b.hasAttribute('data-scale')) { state.scale = b.getAttribute('data-scale'); put(KEYS.scale, state.scale); layout(); }
+    else if (b.hasAttribute('data-theme')) { state.theme = b.getAttribute('data-theme'); put(KEYS.theme, state.theme); applyTheme(); layout(); }
+    else if (b.getAttribute('data-act') === 'reload') {
+      try { frame.contentWindow.location.reload(); } catch (err) { frame.setAttribute('src', frame.getAttribute('src')); }
+    }
+    else if (b.getAttribute('data-act') === 'sample') { frame.setAttribute('src', '../app/?sample'); }
+  });
+  frame.addEventListener('load', applyTheme);
+  window.addEventListener('resize', layout);
+
+  restore();
+  layout();
+  applyTheme();
+}());
+</script>
+</body>
+</html>
