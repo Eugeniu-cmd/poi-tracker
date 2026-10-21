@@ -76,5 +76,13 @@ async function recordPass(page, man, side) {
   await expect(stage).not.toHaveClass(/\bopen\b/);
   await expect.poll(() => layers(page)).toBe(0);
 }
+// opens History from the action bar and returns its element, section.hist;
+// the test asserts the number of layers itself
+async function openHistory(page) {
+  await page.locator('#bar [data-act="history"]').click();
+  const hist = page.locator('section.hist');
+  await expect(hist).toBeVisible();
+  return hist;
+}
 
-module.exports = { test, expect, KEY, UUID, UUID_V4, text, store, layers, holdsLock, expectToast, openClean, openSample, recordPass };
+module.exports = { test, expect, KEY, UUID, UUID_V4, text, store, layers, holdsLock, expectToast, openClean, openSample, recordPass, openHistory };
