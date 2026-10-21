@@ -1,0 +1,12 @@
+{
+  "name": "poi-tracker-tests",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Automated tests of the tablet app in app/ (Playwright, Chromium). Run from this folder: npx playwright test",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
+  }
+}

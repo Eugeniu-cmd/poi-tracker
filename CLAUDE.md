@@ -40,11 +40,25 @@ Hard rules:
     several icons side by side. A text character never stands in for an
     icon (no ←, →, ↑, ›). The live compass is a drawn widget, not an
     icon (screens.md item 69).
+11. Application code, tools and tests are written by you from a spec
+    prompt (decided 2026-10-20). Read the files the prompt names first,
+    follow the patterns already in the repository (references, tokens,
+    the app's own code) and keep to the one sub-problem the prompt asks.
+    If it turns out bigger, stop and report.
+12. Prove the work with checks you run yourself: the test suite in
+    tests/ (cd tests, then npx playwright test) after every change to
+    app/ or tests/, plus the prompt's own checks. The report shows the
+    command and its output, never a bare tick.
+13. Before committing code, a fresh-context subagent that did not write
+    it reviews the diff against the prompt, docs/screens.md and
+    docs/data-model.md, and reports correctness gaps only, not style.
+    Fix what it finds or report it.
 
 Where to look:
 | What | Where |
 |---|---|
 | The tablet app: index.html, sw.js, manifest.webmanifest, icon-512.png (v0.1 sends nothing yet, and ?sample in the address loads a sample city) | app/ |
+| Automated tests of the app (Playwright, run from tests/) | tests/ |
 | Data model, Log sheet, mailbox contract | docs/data-model.md |
 | Screen decision registry | docs/screens.md |
 | Design tokens | docs/references/_tokens.css |
@@ -57,7 +71,7 @@ Where to look:
 | Mailbox (Apps Script) | mailbox/Code.gs, mailbox/README.md |
 | Measure a tablet's viewport | tools/viewport.html |
 | Sensor test: GPS, raw gyroscope, turn and heading | tools/sensor-test.html |
-| Working prototype (working screen, live compass): this page opens the newest version, named in tools/prototype-latest.txt | tools/poi-tracker-prototype.html |
+| Working prototype, frozen at v19.7 on 2026-10-21 (testing moves to the app): this page opens it, named in tools/prototype-latest.txt | tools/poi-tracker-prototype.html |
 
 This file carries no version tag or history on purpose: it is a config
 Claude Code reads at startup, not a registry of decisions.
