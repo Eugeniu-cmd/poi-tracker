@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.15 — 2026-10-19
+   v0.16 — 2026-10-21
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -72,6 +72,17 @@
    --scale-bloom, the size a side blooms from, --scale-bounce, the peak
    of the bounce of a tapped side, and --scale-bump, the peak of the
    counter's bounce. The values are the prototype's, tested in the car.
+   v0.16 2026-10-21 — the user's decisions on the gold (screens.md
+   v0.49, items 5, 19 and 60). Metallic gold #D4AF37 replaces the amber
+   of --side in both themes, and --side-ring, --side-soft and --active
+   take the same gold. --warn, the gold of text and small marks, becomes
+   #8B711E on light (4.69:1 on white, the amber had 3.79:1) and #D4AF37
+   on dark. --warn-bg, unused, follows into the gold family. New
+   --man-glyph, the gold arrow on a maneuver disc and on the type tile,
+   and --man-ring, the gold ring around a maneuver disc that can be
+   tapped. New --compass-n, the gold of the compass letter N, and
+   --compass-n-edge, its dark gold outline on light (gold alone has
+   2.1:1 on the white face), none on dark.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -89,21 +100,25 @@
   --ink-3: #8E96AC;
   --disc: #1C2030;
   --disc-glyph: #FFFFFF;
-  --side: #F2A81D;
+  --side: #D4AF37;
   --side-glyph: #1B2033;
-  --side-ring: rgba(242, 168, 29, 0.45);
-  --side-soft: rgba(242, 168, 29, 0.16);
+  --side-ring: rgba(212, 175, 55, 0.45);
+  --side-soft: rgba(212, 175, 55, 0.16);
   --man-soft: rgba(28, 32, 48, 0.08);
+  --man-glyph: #D4AF37;
+  --man-ring: var(--side);
+  --compass-n: var(--side);
+  --compass-n-edge: #8B711E;
   --ok: #0E7450;
   --ok-bg: rgba(214, 244, 228, 0.85);
   --err: #B42E26;
   --err-bg: rgba(255, 226, 223, 0.85);
-  --warn: #B87400;
-  --warn-bg: rgba(255, 238, 209, 0.85);
+  --warn: #8B711E;
+  --warn-bg: rgba(246, 239, 215, 0.85);
   --prog: #1B2033;
   --prog-bg: rgba(28, 32, 48, 0.10);
   --hatch: rgba(92, 101, 128, 0.32);
-  --active: rgba(242, 168, 29, 0.18);
+  --active: rgba(212, 175, 55, 0.18);
   --active-line: var(--side);
   --focus: #1F5EFF;
   --scrim: rgba(16, 20, 32, 0.32);
@@ -182,21 +197,25 @@
     --ink-3: #737C93;
     --disc: #F1F3FA;
     --disc-glyph: #101420;
-    --side: #F2A81D;
+    --side: #D4AF37;
     --side-glyph: #10131C;
-    --side-ring: rgba(242, 168, 29, 0.5);
-    --side-soft: rgba(242, 168, 29, 0.22);
+    --side-ring: rgba(212, 175, 55, 0.5);
+    --side-soft: rgba(212, 175, 55, 0.22);
     --man-soft: rgba(255, 255, 255, 0.10);
+    --man-glyph: #8B711E;
+    --man-ring: var(--side);
+    --compass-n: var(--side);
+    --compass-n-edge: transparent;
     --ok: #3ECC82;
     --ok-bg: rgba(22, 60, 40, 0.7);
     --err: #FF9189;
     --err-bg: rgba(70, 28, 25, 0.7);
-    --warn: #FFB13D;
-    --warn-bg: rgba(62, 44, 16, 0.7);
+    --warn: #D4AF37;
+    --warn-bg: rgba(53, 44, 14, 0.7);
     --prog: #EEF1F8;
     --prog-bg: rgba(255, 255, 255, 0.10);
     --hatch: rgba(168, 176, 196, 0.26);
-    --active: rgba(242, 168, 29, 0.22);
+    --active: rgba(212, 175, 55, 0.22);
     --active-line: var(--side);
     --focus: #7FA3FF;
     --scrim: rgba(0, 0, 0, 0.55);
@@ -221,21 +240,25 @@
   --ink-3: #737C93;
   --disc: #F1F3FA;
   --disc-glyph: #101420;
-  --side: #F2A81D;
+  --side: #D4AF37;
   --side-glyph: #10131C;
-  --side-ring: rgba(242, 168, 29, 0.5);
-  --side-soft: rgba(242, 168, 29, 0.22);
+  --side-ring: rgba(212, 175, 55, 0.5);
+  --side-soft: rgba(212, 175, 55, 0.22);
   --man-soft: rgba(255, 255, 255, 0.10);
+  --man-glyph: #8B711E;
+  --man-ring: var(--side);
+  --compass-n: var(--side);
+  --compass-n-edge: transparent;
   --ok: #3ECC82;
   --ok-bg: rgba(22, 60, 40, 0.7);
   --err: #FF9189;
   --err-bg: rgba(70, 28, 25, 0.7);
-  --warn: #FFB13D;
-  --warn-bg: rgba(62, 44, 16, 0.7);
+  --warn: #D4AF37;
+  --warn-bg: rgba(53, 44, 14, 0.7);
   --prog: #EEF1F8;
   --prog-bg: rgba(255, 255, 255, 0.10);
   --hatch: rgba(168, 176, 196, 0.26);
-  --active: rgba(242, 168, 29, 0.22);
+  --active: rgba(212, 175, 55, 0.22);
   --active-line: var(--side);
   --focus: #7FA3FF;
   --scrim: rgba(0, 0, 0, 0.55);

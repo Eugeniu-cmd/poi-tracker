@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.48 — 2026-10-19
+v0.49 — 2026-10-21
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -234,6 +234,14 @@ states (item 45), item 64's test and its sentences, the toasts of item
 the chime notes (item 62), the wake lock (item 11), the back gesture
 (item 66), controls of a later build (item 77), a full storage (item
 78). Offline loading and install (data-model.md v0.16).
+v0.49 2026-10-21 — the user's decisions on the gold, from mock-ups of
+the app. Metallic gold #D4AF37 replaces the amber everywhere it marked
+the sides, the active POI, the current tile and the gold numbers, with
+a darker gold for text on light (_tokens.css v0.16). The arrows on the
+maneuver discs and on the type tile are gold, and a disc that can be
+tapped wears a gold ring (items 5, 60). The compass letter N is gold,
+outlined in dark gold on light (item 19). Items 39, 40, 41, 58 and 59
+say gold where they said amber.
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -389,7 +397,7 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     it never selects.
 58. A mini-map of the route sits at the top of the column in both
     layouts: one small square per POI, coloured by state as the tiles of
-    item 59 (current amber, done green, in progress grey, spreadsheet
+    item 59 (current gold, done green, in progress grey, spreadsheet
     error red, not drivable striped, not started pale), with the number
     of finished POIs and the word "Open". It is the column's header, not a card
     inside the column: the squares and the caption share one width and
@@ -401,7 +409,7 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     whole screen, ten to a row, coloured like the mini-map, with a
     legend whose swatches are small tiles. Every state has its colour and
     a second sign that needs no colour, for sun glare and for eyes that
-    mix red and green. Current: an amber tint and a thick amber edge.
+    mix red and green. Current: a gold tint and a thick gold edge.
     Done: green with a check. In progress: grey with a dark bar. Not
     started: an empty bar and a grey edge. Sheet error: red with a
     warning triangle. Not drivable: grey stripes with a ban sign. Three
@@ -413,13 +421,13 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     full-width control under the big POI number: an icon, the type name
     and its passes with the split ("70 passes · ← 28 · ↑ 14 · → 28"). Its
     numbers, the passes and the split, are --t-label heavy in --warn, the
-    amber of the side letters, and stay smaller than the card's counts, so
+    gold of the side letters, and stay smaller than the card's counts, so
     the plan is not read as what is still needed. The menu keeps its grey
     split (v0.47). The icon shows the allowed maneuvers, not the shape of
     the road: their
     icons of item 69 side by side in the order left, straight, right, in
-    a tile wide enough for three, so the type name starts at the same
-    place for every type. Each maneuver keeps its own place in the tile:
+    gold on a tile in the colour of the discs (item 5), wide enough for
+    three, so the type name starts at the same place for every type. Each maneuver keeps its own place in the tile:
     an absent one leaves its place empty instead of shifting the others,
     so the tiles read as a map of the maneuvers. Tapping the pill opens
     a menu with the six types, each with its icon and split, the current
@@ -459,7 +467,10 @@ appears on screen. An apostrophe on screen is the typographic one (’).
    neighbors. They sit in the middle of the free space under the "Still
    needed" card, close to the passenger's hand, and keep that height. A
    caption about them (items 10 and 46) sits under the discs and never
-   moves them.
+   moves them. Each is a dark disc (--disc) with its arrow in gold
+   (--man-glyph) and, while it can be tapped, a gold ring of 4px
+   (--man-ring). A locked disc fades and has no ring (decided
+   2026-10-21).
 6. Tap a maneuver → that disc slides to the centre of the disc area, the
    other two fade out of the way, and the four approach sides bloom
    around it as a compass: N above, S below, W left, E right. No side
@@ -504,8 +515,10 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     under it. It is a drawn widget (item 69) on a raised round face
     (--panel-raised, --shadow, a --line edge): minor ticks every 30
     degrees, longer marks at N, E, S and W, and the four letters inside,
-    N heavy in --ink and the others in --ink-2. One arrow shows where the
-    car drives. Its left half is --disc, the colour of the maneuver
+    N heavy in gold (--compass-n) with a dark gold outline on light, so
+    it reads on the white face (--compass-n-edge, decided 2026-10-21),
+    and the others in --ink-2. One arrow shows where the car drives. Its
+    left half is --disc, the colour of the maneuver
     discs, and its right half is --side, the colour of the side discs. It
     has no tail. The side of a pass is the direction the car drives as it
     enters the intersection (data-model.md "Pass"): driving north and
@@ -534,15 +547,15 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     the share, possible only from numbers typed into the sheet or from a
     type change, shows "+3 over" in the warning colour. A maneuver the
     type does not allow shows a dash. The bottom row, "Sides so far",
-    shows the four approach sides driven, on the soft amber side tint, as
+    shows the four approach sides driven, on the soft gold side tint, as
     plain counts, because sides have no split. A zero value fades toward
     the background. The card carries no separate "balance" line, since
     the split already shows in the type pill and in the card itself.
-40. The active POI row carries an amber tint, a 4px left edge, its number
-    in the amber foreground colour and its "N to go" darkened. It must be
+40. The active POI row carries a gold tint, a 4px left edge, its number
+    in the gold foreground colour and its "N to go" darkened. It must be
     findable with peripheral vision and must not imitate the green done
     row, the red error row, or a control. The tint and the edge stay
-    amber in every state. An active row that is done or in error shows
+    gold in every state. An active row that is done or in error shows
     that state in the colour of its number, text and bar.
 43. On a POI in spreadsheet error the line under the counter replaces
     "N to go" and states the mismatch in words. It stays in the ordinary
@@ -641,7 +654,7 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     once. The struck-through row of item 13 is for delivered passes
     only.
 41. The panel's sub-header ranks its facts rather than listing them: the
-    POI or route in view sits in an amber chip, the route and city stay
+    POI or route in view sits in a gold chip, the route and city stay
     as quiet context, and a total appears in a neutral chip: the passes
     this tablet recorded in the scope in view that still count.
 44. The POI list beside the History panel stays live: tapping another POI

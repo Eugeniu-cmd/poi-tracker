@@ -82,12 +82,17 @@
   v0.17 2026-10-18 — the shell of main-screen v0.33 (screens.md v0.47):
           the type pill's numbers are amber and larger, in every frame
           that shows the working screen.
+  v0.18 2026-10-21 — the shell of main-screen v0.34 (screens.md v0.49,
+          _tokens.css v0.16): metallic gold replaces the amber, the
+          arrows and the compass letter N are gold, and a maneuver disc
+          that can be tapped wears a gold ring, in every frame that shows
+          the working screen. The compass class amber is now gold.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Settings Reference v0.17</title>
+<title>POI Tracker — Settings Reference v0.18</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -141,11 +146,11 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.33. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.34. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.14 or a calc() over
+     line height below is a var() from _tokens.css v0.16 or a calc() over
      them. Literal values are limited to 0, 1px hairlines, 50% for round
      shapes, percentages and fr of a layout, em, ch, lh and cap ratios of
      a token font size, keywords, SVG geometry, the 1200px breakpoint of
@@ -339,7 +344,7 @@
   .row.err .rb i { background: var(--err); }
   .row.nd .rn, .row.nd .rt { color: var(--ink-2); }
   .row.nd .rb { opacity: var(--o-off); }
-  /* item 40: the tint and the edge stay amber in every state; a done or error
+  /* item 40: the tint and the edge stay gold in every state; a done or error
      row shows its state in the colour of its number, text and bar */
   .row.active { background: var(--active); box-shadow: inset var(--s-1) 0 0 0 var(--active-line); }
   .row.active .rn { color: var(--warn); }
@@ -403,7 +408,9 @@
   /* the compass (item 19): a drawn widget on a raised round face, all in
      tokens. One arrow shows where the car drives: its left half --disc,
      the colour of the maneuver discs, its right half --side, the colour of
-     the side discs. The dial stays fixed with N up. */
+     the side discs. The dial stays fixed with N up. The letter N is gold
+     (--compass-n) with a dark gold outline on light (--compass-n-edge),
+     its 0.7 width SVG geometry in the dial's 96-unit box. */
   .compass { position: absolute; right: anchor(--main right); top: anchor(--main top);
              width: var(--compass); height: var(--compass); border-radius: 50%;
              background: var(--panel-raised); box-shadow: var(--shadow); z-index: 2; }
@@ -412,10 +419,11 @@
   .compass .major { fill: none; stroke: var(--ink-2); stroke-linecap: round; }
   .compass text { font-size: var(--t-small); fill: var(--ink-2); font-weight: var(--w-bold);
                   text-anchor: middle; dominant-baseline: central; }
-  .compass .cn { fill: var(--ink); font-weight: var(--w-heavy); }
+  .compass .cn { fill: var(--compass-n); font-weight: var(--w-heavy); stroke: var(--compass-n-edge);
+                 stroke-width: 0.7px; paint-order: stroke; stroke-linejoin: round; }
   .compass .halo { fill: none; stroke: var(--panel-raised); stroke-linejoin: round; }
   .compass .dark { fill: var(--disc); }
-  .compass .amber { fill: var(--side); }
+  .compass .gold { fill: var(--side); }
   /* no heading yet, or only a last known course: the arrow is pale. It is
      always on the dial: with no heading yet it shows the course this
      tablet saved last, or north (item 19) */
@@ -436,7 +444,7 @@
            width: calc(3 * var(--s-5) + 2 * var(--s-1) + 2 * var(--s-2));
            height: calc(var(--tap-min) - 2 * (var(--s-2) + 1px));
            border-radius: calc(var(--r-md) - var(--s-2) - 1px); background: var(--disc);
-           color: var(--disc-glyph); }
+           color: var(--man-glyph); }
   .ticon svg { width: var(--s-5); height: var(--s-5); }
   .ticon .sl { grid-column: 1; }
   .ticon .ss, .ticon .sb { grid-column: 2; }
@@ -452,7 +460,7 @@
                          row-gap: var(--s-1); font-size: var(--t-small); font-weight: var(--w-bold);
                          color: var(--ink-2); line-height: var(--lh-tight); }
   /* the pill's numbers, its passes and its split, read at a glance: --t-label
-     heavy in --warn, the amber of the side letters, still smaller than the
+     heavy in --warn, the gold of the side letters, still smaller than the
      card's counts, on the line's baseline (item 60). The menu keeps its grey split. */
   .tl small { align-items: baseline; }
   .tl small .tn { font-size: var(--t-label); font-weight: var(--w-heavy); color: var(--warn);
@@ -513,7 +521,10 @@
      keep --s-4 from the action bar. The open compass is centred too and, where
      it does not fit, keeps --s-2 from the bar and rises over the card. The
      placement depends on the zone's height only, never on a caption, and is
-     rounded to a whole pixel. ---- */
+     rounded to a whole pixel. A disc is --disc with a gold arrow
+     (--man-glyph) and, while it can be tapped, a gold ring of --s-1
+     (--man-ring). A locked disc fades and keeps only --shadow, no ring
+     (item 5). ---- */
   .stagezone { flex: 1; min-height: 0; position: relative; }
   .stagebox { position: absolute; left: 0; right: 0; height: calc(2 * var(--disc-man));
               top: round(max(0px, min(calc((100% - 2 * var(--disc-man)) / 2),
@@ -528,7 +539,8 @@
   .disc { position: absolute; left: 50%; top: 50%; width: var(--disc-man); height: var(--disc-man);
           border-radius: 50%; transform: translate(-50%, -50%); display: flex;
           align-items: center; justify-content: center; background: var(--disc);
-          color: var(--disc-glyph); box-shadow: var(--shadow-lift); z-index: 3; }
+          color: var(--man-glyph); box-shadow: 0 0 0 var(--s-1) var(--man-ring), var(--shadow-lift);
+          z-index: 3; }
   .disc svg { width: 56%; height: 56%; }
   .disc.l { left: calc(50% - var(--side-reach) - var(--s-2));
             top: calc(50% + (var(--side-reach) - var(--s-2)) / 2); }
@@ -907,12 +919,12 @@
 
   <p class="eyebrow">Design Reference · docs/references/settings.html</p>
   <h1>POI Tracker — Settings</h1>
-  <p class="meta"><b>v0.17 — 2026-10-18.</b> Settings on the canon after the user's five
+  <p class="meta"><b>v0.18 — 2026-10-21.</b> Settings on the canon after the user's five
      decisions: the gear opens it (item 73), a city is put in use from its page (item 21), a route
      has its own page and loads from the sheet when it is added (item 22), and the dialogs name
      the passes they would lose (items 18, 24). Every value inside the frames is a token of
-     <b>_tokens.css v0.14</b> and every rule follows <b>screens.md v0.47</b>. The shell (top bar,
-     POI column, presets, drag corner, light and dark) is that of <b>main-screen.html v0.33</b>,
+     <b>_tokens.css v0.16</b> and every rule follows <b>screens.md v0.49</b>. The shell (top bar,
+     POI column, presets, drag corner, light and dark) is that of <b>main-screen.html v0.34</b>,
      copied unchanged: presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b>, <b>1333 × 800</b> and <b>1000 × 600</b>. Every frame also drags at its
      bottom-right corner. In portrait Settings is one column that drills down, in landscape the
@@ -921,7 +933,7 @@
      The consistency audit added frame J, the kept route code of frame E and the POI types in the
      two dialogs (v0.11). The compass follows main-screen v0.29 (v0.12, v0.13). A red button that
      loses passes reads "Erase anyway" or "Delete anyway", and every button takes the size of
-     the action bar's buttons (v0.14). The compass arrow is always on the dial (v0.15). A POI in progress is grey with a dark bar (v0.16). The type pill's numbers are amber (v0.17).</p>
+     the action bar's buttons (v0.14). The compass arrow is always on the dial (v0.15). A POI in progress is grey with a dark bar (v0.16). The type pill's numbers are gold (v0.17). Metallic gold replaces the amber, with gold arrows, a gold ring on a disc that can be tapped and a gold N on the compass (v0.18).</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>
@@ -951,7 +963,7 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="amber" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
     <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
@@ -1051,7 +1063,7 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="amber" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
     <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
@@ -1149,7 +1161,7 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="amber" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
     <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
@@ -1247,7 +1259,7 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="amber" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
     <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
@@ -1335,7 +1347,7 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="amber" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
     <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
@@ -1427,7 +1439,7 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="amber" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
     <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
@@ -1512,7 +1524,7 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="amber" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
     <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
@@ -1595,7 +1607,7 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="amber" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
     <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
@@ -1700,7 +1712,7 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="amber" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
     <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
@@ -1801,7 +1813,7 @@
 <div class="body">
   <div class="colwrap"><div class="col" data-active="136"></div></div>
   <div class="main">
-    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="amber" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
     <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>

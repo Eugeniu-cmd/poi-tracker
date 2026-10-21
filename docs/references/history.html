@@ -99,12 +99,16 @@
   v0.20 2026-10-18 — the shell of main-screen v0.33 (screens.md v0.47):
           the type pill's numbers are amber and larger. No frame here
           draws the pill.
+  v0.21 2026-10-21 — the shell of main-screen v0.34 (screens.md v0.49,
+          _tokens.css v0.16): metallic gold replaces the amber. The
+          sub-header's chip is the gold chip, class gold, and the dot of
+          a waiting pass and the active POI row are gold.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.20</title>
+<title>POI Tracker — History Reference v0.21</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -158,11 +162,11 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.33. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.34. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.14 or a calc() over
+     line height below is a var() from _tokens.css v0.16 or a calc() over
      them. Literal values are limited to 0, 1px hairlines, 50% for round
      shapes, percentages and fr of a layout, em, ch, lh and cap ratios of
      a token font size, keywords, SVG geometry, the 1200px breakpoint of
@@ -356,7 +360,7 @@
   .row.err .rb i { background: var(--err); }
   .row.nd .rn, .row.nd .rt { color: var(--ink-2); }
   .row.nd .rb { opacity: var(--o-off); }
-  /* item 40: the tint and the edge stay amber in every state; a done or error
+  /* item 40: the tint and the edge stay gold in every state; a done or error
      row shows its state in the colour of its number, text and bar */
   .row.active { background: var(--active); box-shadow: inset var(--s-1) 0 0 0 var(--active-line); }
   .row.active .rn { color: var(--warn); }
@@ -420,7 +424,9 @@
   /* the compass (item 19): a drawn widget on a raised round face, all in
      tokens. One arrow shows where the car drives: its left half --disc,
      the colour of the maneuver discs, its right half --side, the colour of
-     the side discs. The dial stays fixed with N up. */
+     the side discs. The dial stays fixed with N up. The letter N is gold
+     (--compass-n) with a dark gold outline on light (--compass-n-edge),
+     its 0.7 width SVG geometry in the dial's 96-unit box. */
   .compass { position: absolute; right: anchor(--main right); top: anchor(--main top);
              width: var(--compass); height: var(--compass); border-radius: 50%;
              background: var(--panel-raised); box-shadow: var(--shadow); z-index: 2; }
@@ -429,10 +435,11 @@
   .compass .major { fill: none; stroke: var(--ink-2); stroke-linecap: round; }
   .compass text { font-size: var(--t-small); fill: var(--ink-2); font-weight: var(--w-bold);
                   text-anchor: middle; dominant-baseline: central; }
-  .compass .cn { fill: var(--ink); font-weight: var(--w-heavy); }
+  .compass .cn { fill: var(--compass-n); font-weight: var(--w-heavy); stroke: var(--compass-n-edge);
+                 stroke-width: 0.7px; paint-order: stroke; stroke-linejoin: round; }
   .compass .halo { fill: none; stroke: var(--panel-raised); stroke-linejoin: round; }
   .compass .dark { fill: var(--disc); }
-  .compass .amber { fill: var(--side); }
+  .compass .gold { fill: var(--side); }
   /* no heading yet, or only a last known course: the arrow is pale. It is
      always on the dial: with no heading yet it shows the course this
      tablet saved last, or north (item 19) */
@@ -453,7 +460,7 @@
            width: calc(3 * var(--s-5) + 2 * var(--s-1) + 2 * var(--s-2));
            height: calc(var(--tap-min) - 2 * (var(--s-2) + 1px));
            border-radius: calc(var(--r-md) - var(--s-2) - 1px); background: var(--disc);
-           color: var(--disc-glyph); }
+           color: var(--man-glyph); }
   .ticon svg { width: var(--s-5); height: var(--s-5); }
   .ticon .sl { grid-column: 1; }
   .ticon .ss, .ticon .sb { grid-column: 2; }
@@ -469,7 +476,7 @@
                          row-gap: var(--s-1); font-size: var(--t-small); font-weight: var(--w-bold);
                          color: var(--ink-2); line-height: var(--lh-tight); }
   /* the pill's numbers, its passes and its split, read at a glance: --t-label
-     heavy in --warn, the amber of the side letters, still smaller than the
+     heavy in --warn, the gold of the side letters, still smaller than the
      card's counts, on the line's baseline (item 60). The menu keeps its grey split. */
   .tl small { align-items: baseline; }
   .tl small .tn { font-size: var(--t-label); font-weight: var(--w-heavy); color: var(--warn);
@@ -530,7 +537,10 @@
      keep --s-4 from the action bar. The open compass is centred too and, where
      it does not fit, keeps --s-2 from the bar and rises over the card. The
      placement depends on the zone's height only, never on a caption, and is
-     rounded to a whole pixel. ---- */
+     rounded to a whole pixel. A disc is --disc with a gold arrow
+     (--man-glyph) and, while it can be tapped, a gold ring of --s-1
+     (--man-ring). A locked disc fades and keeps only --shadow, no ring
+     (item 5). ---- */
   .stagezone { flex: 1; min-height: 0; position: relative; }
   .stagebox { position: absolute; left: 0; right: 0; height: calc(2 * var(--disc-man));
               top: round(max(0px, min(calc((100% - 2 * var(--disc-man)) / 2),
@@ -545,7 +555,8 @@
   .disc { position: absolute; left: 50%; top: 50%; width: var(--disc-man); height: var(--disc-man);
           border-radius: 50%; transform: translate(-50%, -50%); display: flex;
           align-items: center; justify-content: center; background: var(--disc);
-          color: var(--disc-glyph); box-shadow: var(--shadow-lift); z-index: 3; }
+          color: var(--man-glyph); box-shadow: 0 0 0 var(--s-1) var(--man-ring), var(--shadow-lift);
+          z-index: 3; }
   .disc svg { width: 56%; height: 56%; }
   .disc.l { left: calc(50% - var(--side-reach) - var(--s-2));
             top: calc(50% + (var(--side-reach) - var(--s-2)) / 2); }
@@ -822,13 +833,13 @@
         font-size: var(--t-body); font-weight: var(--w-heavy); color: var(--ink-2);
         border-radius: calc(var(--r-md) - var(--s-1)); white-space: nowrap; }
   .sg.on { background: var(--panel-raised); box-shadow: var(--shadow); color: var(--ink); }
-  /* sub-header (item 41): amber chip, quiet context, neutral chip */
+  /* sub-header (item 41): gold chip, quiet context, neutral chip */
   .hsub { flex: none; display: flex; align-items: center; gap: var(--s-3); }
   .chip { flex: none; display: inline-flex; align-items: center; padding: var(--s-1) var(--s-2);
           border-radius: var(--r-sm); background: var(--man-soft); color: var(--ink);
           font-size: var(--t-body); font-weight: var(--w-heavy); line-height: var(--lh-tight);
           white-space: nowrap; }
-  .chip.amber { background: var(--side-soft); color: var(--ink); }
+  .chip.gold { background: var(--side-soft); color: var(--ink); }
   .hctx { flex: 1; min-width: 0; font-size: var(--t-small); font-weight: var(--w-bold);
           color: var(--ink-2); line-height: var(--lh-tight); white-space: nowrap; }
   /* queue line (item 13), only while removals are queued */
@@ -939,7 +950,9 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.20 — 2026-10-18.</b> The shell of main-screen v0.33 brings a dark bar for a
+  <p class="meta"><b>v0.21 — 2026-10-21.</b> Metallic gold replaces the amber (main-screen v0.34): the
+     sub-header's chip, the dot of a waiting pass and the active POI row are gold (items 12, 40, 41).
+     The shell of main-screen v0.33 brought a dark bar for a
      POI in progress to the column and the mini-map (items 2, 58) and smaller dialog buttons
      (item 63). The compass of main-screen v0.33 reaches the shell's
      styles, though no frame draws it (item 61). Frame I shows a refused removal and a refused
@@ -947,10 +960,10 @@
      covers the main area beside the live POI column, in POI or Route scope, and lists
      every pass this tablet recorded and every type change not yet in the sheet, newest first, with "Delete" on each pass, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
-     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.14</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.47</b>. The shell
+     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.16</b>
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.49</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.33</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.34</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Nine states,
      A to I. The twelve proposals of v0.8 are approved (v0.12, screens.md v0.38).</p>
@@ -985,7 +998,7 @@
   <div class="main">
 <section class="hist" aria-label="History">
   <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg on" type="button" role="tab" aria-selected="true">POI</button><button class="sg" type="button" role="tab" aria-selected="false">Route</button></div></header>
-  <div class="hsub"><span class="chip amber">POI 136</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">41 passes</span></div>
+  <div class="hsub"><span class="chip gold">POI 136</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">41 passes</span></div>
   <div class="hlist" data-scope="poi">
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:38</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
@@ -1010,11 +1023,11 @@
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>12</b> The panel covers the main area: "POI" | "Route" scope control at the top right, a segmented control in the iOS style; "POI" chosen. Each entry: time, the maneuver's Lucide icon and the side alone (v0.19).</li>
         <li><b>66</b> Round ✕ close button at the top-left, as large as a tap target; no text "Close".</li>
-        <li><b>41</b> Sub-header ranks its facts: the POI in an amber chip, the route and city as quiet context, the count of passes listed in a neutral chip. The title is in --t-row and the chips in --t-body, a step under the rows, so the rows lead (v0.9).</li>
+        <li><b>41</b> Sub-header ranks its facts: the POI in a gold chip, the route and city as quiet context, the count of passes listed in a neutral chip. The title is in --t-row and the chips in --t-body, a step under the rows, so the rows lead (v0.9).</li>
         <li><b>13, 28</b> "Delete" on every pass, red text on the red tint at the right edge, apart from the routine controls; the filled red button stays in the dialog (item 63).</li>
         <li><b>33</b> Two newest passes "Waiting", the sync control reads "2 passes waiting for network" with its dot in the warning colour.</li>
-        <li><b>12, 13, 47</b> State labels: "Waiting" and "Removal waiting" with an amber dot (the amber text itself falls short of 4.5:1 at this size), "Sent" quiet, "Not accepted" in the error colour.</li>
-        <li><b>44</b> The POI column stays live beside the panel, the active row amber: tapping another POI reloads the panel for it without closing. The panel never carries a second POI picker.</li>
+        <li><b>12, 13, 47</b> State labels: "Waiting" and "Removal waiting" with a gold dot (the old amber text fell short of 4.5:1 at this size), "Sent" quiet, "Not accepted" in the error colour.</li>
+        <li><b>44</b> The POI column stays live beside the panel, the active row gold: tapping another POI reloads the panel for it without closing. The panel never carries a second POI picker.</li>
         <li><b>61, 3</b> In portrait the panel covers the main area and the summary under it keeps its place; in landscape it covers the whole main area, action bar and compass included.</li>
         <li><b>14, 45</b> Footer: "History shows only what this tablet recorded".</li>
         <li><b>56</b> The list shows a whole row at its top edge and fades the cut row at its bottom, like the POI column; rows are --row-h tall, as the POI rows beside them.</li>
@@ -1037,7 +1050,7 @@
   <div class="main">
 <section class="hist" aria-label="History">
   <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg" type="button" role="tab" aria-selected="false">POI</button><button class="sg on" type="button" role="tab" aria-selected="true">Route</button></div></header>
-  <div class="hsub"><span class="chip amber">R20890-058</span><span class="hctx">Vienna</span><span class="chip">2,184 passes</span></div>
+  <div class="hsub"><span class="chip gold">R20890-058</span><span class="hctx">Vienna</span><span class="chip">2,184 passes</span></div>
   <div class="hlist" data-scope="route">
     <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:38</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
@@ -1079,7 +1092,7 @@
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>12</b> "Route" chosen: every pass of the route this tablet recorded, newest first, POI 136's first.</li>
-        <li><b>41</b> The route in the amber chip, the city as context, "2,184 passes" in the neutral chip. The title is in --t-row and the chips in --t-body, a step under the rows, so the rows lead (v0.9).</li>
+        <li><b>41</b> The route in the gold chip, the city as context, "2,184 passes" in the neutral chip. The title is in --t-row and the chips in --t-body, a step under the rows, so the rows lead (v0.9).</li>
         <li><b>12</b> The POI number leads each row in a fixed slot as wide as the widest number, digits right-aligned; the time slot fits a date and a time, right-aligned so the clock times line up.</li>
         <li><b>16</b> A pass from today shows the time alone, an older one the date and the time ("10.10 18:52"), as the timestamp rule says.</li>
         <li><b>12</b> The time slot is right-aligned (the rule names the slot, not its alignment).</li>
@@ -1101,7 +1114,7 @@
   <div class="main">
 <section class="hist" aria-label="History">
   <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg on" type="button" role="tab" aria-selected="true">POI</button><button class="sg" type="button" role="tab" aria-selected="false">Route</button></div></header>
-  <div class="hsub"><span class="chip amber">POI 136</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">40 passes</span></div>
+  <div class="hsub"><span class="chip gold">POI 136</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">40 passes</span></div>
   <div class="hq"><span class="dot"></span>1 removal waiting to be sent</div>
   <div class="hlist" data-scope="poi">
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
@@ -1125,7 +1138,7 @@
         <p class="caption"><b>C</b> · A deleted pass</p>
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
-        <li><b>13, 38</b> The 21:31 Straight · West pass was already in the sheet: it stays in the list struck through and labelled "Removal waiting" with the amber dot of a waiting pass, without buttons, until its removal is delivered. Then it leaves the list (v0.10).</li>
+        <li><b>13, 38</b> The 21:31 Straight · West pass was already in the sheet: it stays in the list struck through and labelled "Removal waiting" with the gold dot of a waiting pass, without buttons, until its removal is delivered. Then it leaves the list (v0.10).</li>
         <li><b>26</b> The deleted row is not dimmed: opacity marks an unavailable control, and this row is a state, not a control.</li>
         <li><b>13</b> A line above the list counts the removals still queued: "1 removal waiting to be sent", whatever holds them up. The sync control names the cause, here the network (item 33).</li>
         <li><b>33</b> The sync control reads "1 removal waiting for network" with its dot in the warning colour: a queued removal counts like a waiting pass (item 33).</li>
@@ -1148,7 +1161,7 @@
   <div class="main">
 <section class="hist" aria-label="History">
   <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg on" type="button" role="tab" aria-selected="true">POI</button><button class="sg" type="button" role="tab" aria-selected="false">Route</button></div></header>
-  <div class="hsub"><span class="chip amber">POI 136</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">41 passes</span></div>
+  <div class="hsub"><span class="chip gold">POI 136</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">41 passes</span></div>
   <div class="hlist" data-scope="poi">
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:38</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
@@ -1199,7 +1212,7 @@
   <div class="main">
 <section class="hist" aria-label="History">
   <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg on" type="button" role="tab" aria-selected="true">POI</button><button class="sg" type="button" role="tab" aria-selected="false">Route</button></div></header>
-  <div class="hsub"><span class="chip amber">POI 136</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">41 passes</span></div>
+  <div class="hsub"><span class="chip gold">POI 136</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">41 passes</span></div>
   <div class="hlist" data-scope="poi">
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:38</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst wait"><span class="dot"></span>Waiting</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
@@ -1249,7 +1262,7 @@
   <div class="main">
 <section class="hist" aria-label="History">
   <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg on" type="button" role="tab" aria-selected="true">POI</button><button class="sg" type="button" role="tab" aria-selected="false">Route</button></div></header>
-  <div class="hsub"><span class="chip amber">POI 136</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">41 passes</span></div>
+  <div class="hsub"><span class="chip gold">POI 136</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">41 passes</span></div>
   <div class="hlist" data-scope="poi">
     <div class="hr rej"><div class="hl1"><div class="htx"><span class="htm">21:44</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst rej">Not accepted</span></div></div><p class="hwhy">The sheet has text in a cell this pass adds to. Fix the cell, then send again.</p><div class="hacts"><button class="btn" type="button">Send again</button><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
@@ -1303,7 +1316,7 @@
   <div class="main">
 <section class="hist" aria-label="History">
   <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg on" type="button" role="tab" aria-selected="true">POI</button><button class="sg" type="button" role="tab" aria-selected="false">Route</button></div></header>
-  <div class="hsub"><span class="chip amber">POI 139</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">0 passes</span></div>
+  <div class="hsub"><span class="chip gold">POI 139</span><span class="hctx">R20890-058 · Vienna</span><span class="chip">0 passes</span></div>
   <div class="hlist empty"><div class="hempty"><b>No passes from this tablet</b><p>The 12 passes of POI 139 reached the sheet another way, typed in by hand. Correct them in the sheet.</p></div></div>
   <p class="hfoot">History shows only what this tablet recorded</p>
 </section>
@@ -1337,7 +1350,7 @@
   <div class="main">
 <section class="hist" aria-label="History">
   <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg" type="button" role="tab" aria-selected="false">POI</button><button class="sg on" type="button" role="tab" aria-selected="true">Route</button></div></header>
-  <div class="hsub"><span class="chip amber">R20890-058</span><span class="hctx">Vienna</span><span class="chip">2,816 passes</span></div>
+  <div class="hsub"><span class="chip gold">R20890-058</span><span class="hctx">Vienna</span><span class="chip">2,816 passes</span></div>
   <div class="hlist" data-scope="route" data-end>
     <div class="hr"><div class="hl1"><div class="htx"><span class="hn">7</span><span class="htm">02.10 17:58</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="hn">7</span><span class="htm">02.10 17:53</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
@@ -1387,7 +1400,7 @@
   <div class="main">
 <section class="hist" aria-label="History">
   <header class="hh"><button class="xbtn" type="button" aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 class="ht">History</h2><div class="seg" role="tablist" aria-label="Scope"><button class="sg" type="button" role="tab" aria-selected="false">POI</button><button class="sg on" type="button" role="tab" aria-selected="true">Route</button></div></header>
-  <div class="hsub"><span class="chip amber">R20890-058</span><span class="hctx">Vienna</span><span class="chip">2,184 passes</span></div>
+  <div class="hsub"><span class="chip gold">R20890-058</span><span class="hctx">Vienna</span><span class="chip">2,184 passes</span></div>
   <div class="hlist" data-scope="route">
     <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="hn">136</span><span class="htm">21:38</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
