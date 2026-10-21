@@ -76,6 +76,13 @@ async function recordPass(page, man, side) {
   await expect(stage).not.toHaveClass(/\bopen\b/);
   await expect.poll(() => layers(page)).toBe(0);
 }
+// writes s as the whole store and reloads the page, so the app starts
+// again from it; waits until this page holds the lock and can record (C6)
+async function reloadWith(page, s) {
+  await page.evaluate(function (a) { localStorage.setItem(a.k, JSON.stringify(a.s)); }, { k: KEY, s: s });
+  await page.reload();
+  await expect.poll(() => holdsLock(page)).toBe(true);
+}
 // opens History from the action bar and returns its element, section.hist;
 // the test asserts the number of layers itself
 async function openHistory(page) {
@@ -85,4 +92,4 @@ async function openHistory(page) {
   return hist;
 }
 
-module.exports = { test, expect, KEY, UUID, UUID_V4, text, store, layers, holdsLock, expectToast, openClean, openSample, recordPass, openHistory };
+module.exports = { test, expect, KEY, UUID, UUID_V4, text, store, layers, holdsLock, expectToast, openClean, openSample, recordPass, openHistory, reloadWith };
