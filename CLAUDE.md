@@ -49,10 +49,11 @@ Hard rules:
     tests/ (cd tests, then npx playwright test) after every change to
     app/ or tests/, plus the prompt's own checks. The report shows the
     command and its output, never a bare tick.
-13. Before committing code, a fresh-context subagent that did not write
-    it reviews the diff against the prompt, docs/screens.md and
-    docs/data-model.md, and reports correctness gaps only, not style.
-    Fix what it finds or report it.
+13. Before committing code, the spec-reviewer subagent
+    (.claude/agents/spec-reviewer.md), which did not write it, reviews
+    the diff against the prompt, docs/screens.md and docs/data-model.md,
+    and reports correctness gaps only, not style. Fix what it finds or
+    report it.
 
 Where to look:
 | What | Where |
@@ -60,6 +61,7 @@ Where to look:
 | The tablet app: index.html, sw.js, manifest.webmanifest, icon-512.png (v0.2 sends nothing yet, and ?sample in the address loads a sample city) | app/ |
 | The app icon's source, rendered to app/icon-512.png | docs/references/app-icon.svg |
 | Automated tests of the app (Playwright, run from tests/) | tests/ |
+| Project subagents: spec-reviewer (rule 13) | .claude/agents/ |
 | Data model, Log sheet, mailbox contract | docs/data-model.md |
 | Screen decision registry | docs/screens.md |
 | Design tokens | docs/references/_tokens.css |
