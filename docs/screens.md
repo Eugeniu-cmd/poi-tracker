@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.51 — 2026-10-22
+v0.52 — 2026-10-22
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -264,6 +264,9 @@ pill centres its name and split between its tile and "Change type"
 (item 60).
 Item 68 lists the plain numbers that may stay literal, as CLAUDE.md rule
 9 does.
+v0.52 2026-10-22 — the one gold of item 5 is lighter, #CCA735, chosen on
+whole screens. It reads at 2.1:1 on the light card and on the light
+discs of the dark theme (the user's choice).
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -505,9 +508,11 @@ appears on screen. An apostrophe on screen is the typographic one (’).
    2026-10-21). Every maneuver arrow, on the discs, on the type tile
    and under the rings of the card, the ring of a disc, the fill of the
    card's rings and the bar of a POI in progress (items 2, 59) share one
-   gold, --gold-line #A37F22, in both themes (decided 2026-10-22). It
-   reads at 3:1 or more on every background it stands on: the dark
-   discs, the light card and the light discs of the dark theme. Gold
+   gold, --gold-line #CCA735, in both themes (decided 2026-10-22, made
+   lighter after a look at whole screens). It reads at 7:1 on the dark
+   discs and 6.6:1 on the dark card, and at 2.1:1 on the light card and
+   on the light discs of the dark theme, where its shapes are large or
+   stand beside a number or a word that says the same. Gold
    text (the side letters, a number over its share) keeps --warn, and
    gold surfaces (the side discs, the rose, the compass arrow's gold
    half) keep --side.

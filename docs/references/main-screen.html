@@ -254,12 +254,16 @@
           pill keeps its split on one line at every size. The pill's name
           and split are centred in the space between the tile and
           "Change type" (item 60).
+  v0.37 2026-10-22 — the one gold is lighter (screens.md v0.52,
+          _tokens.css v0.19): --gold-line #CCA735 for every maneuver
+          arrow, the ring of a disc, the card's ring fill and its icons
+          and the bar of a POI in progress. Nothing else changes.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.36</title>
+<title>POI Tracker — Working Screen Reference v0.37</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -316,7 +320,7 @@
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.18 or a calc() over
+     line height below is a var() from _tokens.css v0.19 or a calc() over
      them. Literal values are limited to the plain numbers of item 68: 0
      and 1, 1px hairlines, 50% for round shapes, percentages and fr of a
      layout, multipliers of a token, counts, em, ch, lh and cap ratios of
@@ -1005,7 +1009,8 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.36 — 2026-10-22.</b> The "Still needed" card, headed TO GO, shows the maneuvers as
+  <p class="meta"><b>v0.37 — 2026-10-22.</b> The one gold of the arrows, the rings and the bars is lighter,
+     #CCA735 (item 5). The "Still needed" card, headed TO GO, shows the maneuvers as
      gold rings in a pyramid and the sides as a rose of four diamonds (item 39), and the type pill's
      button reads "Change type" (item 60). Every maneuver arrow, the ring of a disc and the bar of a POI
      in progress take one gold, --gold-line (item 5). The card's head shows the last pass of the POI
@@ -1021,8 +1026,8 @@
      like the maneuver discs and its right half gold like the side discs, with the dial fixed
      and N up. The arrow is always there: with no heading yet it shows the course the tablet
      saved last, or north, as a dashed outline (item 19). Every value inside
-     the frames is a token of <b>_tokens.css v0.18</b> (size C, screens.md item 67) and
-     every rule follows <b>screens.md v0.51</b>. Icons are
+     the frames is a token of <b>_tokens.css v0.19</b> (size C, screens.md item 67) and
+     every rule follows <b>screens.md v0.52</b>. Icons are
      Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
      presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and

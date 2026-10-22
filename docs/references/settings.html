@@ -98,12 +98,15 @@
           in progress, the last pass in the card's head and a pill with
           no passes and a centred name and split, in every frame that
           shows the working screen.
+  v0.21 2026-10-22 — the shell of main-screen v0.37 (screens.md v0.52,
+          _tokens.css v0.19): the one gold is lighter, in every frame
+          that shows the working screen.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Settings Reference v0.20</title>
+<title>POI Tracker — Settings Reference v0.21</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -157,11 +160,11 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.36. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.37. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.18 or a calc() over
+     line height below is a var() from _tokens.css v0.19 or a calc() over
      them. Literal values are limited to the plain numbers of item 68: 0
      and 1, 1px hairlines, 50% for round shapes, percentages and fr of a
      layout, multipliers of a token, counts, em, ch, lh and cap ratios of
@@ -953,12 +956,12 @@
 
   <p class="eyebrow">Design Reference · docs/references/settings.html</p>
   <h1>POI Tracker — Settings</h1>
-  <p class="meta"><b>v0.20 — 2026-10-22.</b> Settings on the canon after the user's five
+  <p class="meta"><b>v0.21 — 2026-10-22.</b> Settings on the canon after the user's five
      decisions: the gear opens it (item 73), a city is put in use from its page (item 21), a route
      has its own page and loads from the sheet when it is added (item 22), and the dialogs name
      the passes they would lose (items 18, 24). Every value inside the frames is a token of
-     <b>_tokens.css v0.18</b> and every rule follows <b>screens.md v0.51</b>. The shell (top bar,
-     POI column, presets, drag corner, light and dark) is that of <b>main-screen.html v0.36</b>,
+     <b>_tokens.css v0.19</b> and every rule follows <b>screens.md v0.52</b>. The shell (top bar,
+     POI column, presets, drag corner, light and dark) is that of <b>main-screen.html v0.37</b>,
      copied unchanged: presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b>, <b>1333 × 800</b> and <b>1000 × 600</b>. Every frame also drags at its
      bottom-right corner. In portrait Settings is one column that drills down, in landscape the
@@ -967,7 +970,7 @@
      The consistency audit added frame J, the kept route code of frame E and the POI types in the
      two dialogs (v0.11). The compass follows main-screen v0.29 (v0.12, v0.13). A red button that
      loses passes reads "Erase anyway" or "Delete anyway", and every button takes the size of
-     the action bar's buttons (v0.14). The compass arrow is always on the dial (v0.15). A POI in progress is grey with a dark bar (v0.16). The type pill's numbers are gold (v0.17). Metallic gold replaces the amber, with gold arrows, a gold ring on a disc that can be tapped and a gold N on the compass (v0.18). Discs keep their centre when they scale, and a compass with no heading draws a dashed arrow (v0.19). The "Still needed" card shows rings and a rose, and the type pill's numbers are in ink with "Change type". Every arrow, ring and bar of a POI in progress takes one gold (v0.20).</p>
+     the action bar's buttons (v0.14). The compass arrow is always on the dial (v0.15). A POI in progress is grey with a dark bar (v0.16). The type pill's numbers are gold (v0.17). Metallic gold replaces the amber, with gold arrows, a gold ring on a disc that can be tapped and a gold N on the compass (v0.18). Discs keep their centre when they scale, and a compass with no heading draws a dashed arrow (v0.19). The "Still needed" card shows rings and a rose, and the type pill's numbers are in ink with "Change type". Every arrow, ring and bar of a POI in progress takes one gold (v0.20), now lighter (v0.21).</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>

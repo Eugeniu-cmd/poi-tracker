@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.18 — 2026-10-22
+   v0.19 — 2026-10-22
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -102,6 +102,12 @@
    (--prog). It reads at 3:1 or more on the dark discs, the light card
    and the light discs of the dark theme. Gold text keeps --warn, gold
    surfaces keep --side.
+   v0.19 2026-10-22 — the user's decision after the whole screens of
+   v0.18: --gold-line is lighter, #CCA735 in both themes, chosen from
+   four lighter steps. It has 7:1 on the dark discs and 6.6:1 on the
+   dark card, and 2.1:1 on the light card and on the light discs of the
+   dark theme, under the 3:1 of v0.18 (the user's choice). Gold text
+   (--warn) and gold surfaces (--side) do not change.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -128,7 +134,7 @@
   --man-ring: var(--gold-line);
   --compass-n: var(--side);
   --compass-n-edge: #8B711E;
-  --gold-line: #A37F22;
+  --gold-line: #CCA735;
   --card-fill: var(--gold-line);
   --ok: #0E7450;
   --ok-bg: rgba(214, 244, 228, 0.85);
@@ -238,7 +244,7 @@
     --man-ring: var(--gold-line);
     --compass-n: var(--side);
     --compass-n-edge: transparent;
-    --gold-line: #A37F22;
+    --gold-line: #CCA735;
     --card-fill: var(--gold-line);
     --ok: #3ECC82;
     --ok-bg: rgba(22, 60, 40, 0.7);
@@ -283,7 +289,7 @@
   --man-ring: var(--gold-line);
   --compass-n: var(--side);
   --compass-n-edge: transparent;
-  --gold-line: #A37F22;
+  --gold-line: #CCA735;
   --card-fill: var(--gold-line);
   --ok: #3ECC82;
   --ok-bg: rgba(22, 60, 40, 0.7);
