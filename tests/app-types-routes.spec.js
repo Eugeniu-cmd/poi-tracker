@@ -72,7 +72,7 @@ test('C1 · A type change with consequences', async ({ page }) => {
   expect(await text(dlg.locator('.dtitle'))).toBe('Change POI 122 to Straight only?');
   const ok = dlg.locator('[data-act="dlg-ok"]');
   expect(await text(ok)).toBe('Change');
-  await expect(ok).toHaveClass(/\bprimary\b/);
+  await expect(ok).toHaveClass(/\bdanger\b/);
   expect(await text(dlg.locator('.dbody'))).toBe('It already has 66 passes. Straight only needs 40, so the POI becomes done with 26 passes over its target. The sheet will flag it as over target. It has 26 Left and 27 Right passes in the sheet. Straight only does not allow Left or Right, so they no longer count. Delete them in History if they were a mistake.');
   await ok.click();
   await expect(dlg).toHaveCount(0);

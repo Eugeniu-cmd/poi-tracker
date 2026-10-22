@@ -30,7 +30,7 @@ test('A4 · Record a pass', async ({ page }) => {
 
   const south = page.locator('#stage [data-side="S"]');
   await south.click();
-  await south.click({ force: true });   // the second tap, while the first still bounces (the clock is paused)
+  await south.click({ force: true });   // the second tap, while the ring of the first still runs (the clock is paused)
 
   const after = await store(page);
   const added = after.events.filter(function (e) { return !knownIds.has(e.id); });
@@ -45,7 +45,7 @@ test('A4 · Record a pass', async ({ page }) => {
   await expectToast(page, 'Saved:', 'South · 42 of 70');
   await expect(page.locator('#toast use')).toHaveAttribute('href', '#i-left');
 
-  await expect(stage).toHaveClass(/\bopen\b/);   // the bounce still runs: nothing closed yet
+  await expect(stage).toHaveClass(/\bopen\b/);   // the ring still runs: nothing closed yet
   await page.clock.runFor(600);
   await expect(stage).not.toHaveClass(/\bopen\b/);
   await expect(page.locator('#stage [data-side="S"]')).toBeHidden();

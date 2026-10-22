@@ -54,14 +54,29 @@ async function goldScreen(page, scheme) {
   await expect(tile).toHaveCount(1);
   expect(await css(tile, 'color')).toBe(dark ? DARK_GOLD : GOLD);
 
-  // c. the compass: a gold N, outlined on light; the gold half; the old class is gone
+  // c. the compass: a gold N, outlined on light. On the sample it has no
+  //    heading, so it is idle (item 19): its gold half is a dashed outline
+  //    without fill and the halo is not displayed. The gold fill of the
+  //    half is checked with idle taken off for a moment, then put back.
+  //    The old class is gone.
+  await expect(page.locator('.compass')).toHaveClass(/\bidle\b/);
   const cn = page.locator('.compass .cn');
   await expect(cn).toHaveCount(1);
   expect(await css(cn, 'fill')).toBe(GOLD);
   expect(await css(cn, 'stroke')).toBe(dark ? 'rgba(0, 0, 0, 0)' : DARK_GOLD);
   const half = page.locator('.compass .gold');
   await expect(half).toHaveCount(1);
-  expect(await css(half, 'fill')).toBe(GOLD);
+  expect(await css(half, 'fill')).toBe('none');
+  expect(await css(half, 'stroke-dasharray')).toBe('3px, 2.2px');
+  expect(await css(page.locator('.compass .halo'), 'display')).toBe('none');
+  const goldFill = await page.evaluate(function () {
+    var svg = document.querySelector('.compass');
+    svg.classList.remove('idle');
+    var fill = getComputedStyle(svg.querySelector('.gold')).getPropertyValue('fill');
+    svg.classList.add('idle');
+    return fill;
+  });
+  expect(goldFill).toBe(GOLD);
   await expect(page.locator('.compass .amber')).toHaveCount(0);
 
   // g. no old colour anywhere, closed
