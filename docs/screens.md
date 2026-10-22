@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.49 — 2026-10-21
+v0.50 — 2026-10-21
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -242,6 +242,12 @@ maneuver discs and on the type tile are gold, and a disc that can be
 tapped wears a gold ring (items 5, 60). The compass letter N is gold,
 outlined in dark gold on light (item 19). Items 39, 40, 41, 58 and 59
 say gold where they said amber.
+v0.50 2026-10-21 — the user's decisions after a look at the app. A
+tapped side no longer bounces: it dips while a gold ring leaves it, and
+it keeps its place (items 7, 62). The bounce made it jump 8 px up and
+left, a centring fault fixed in the references. A compass with no
+heading draws its arrow as a dashed outline without fill (item 19). The
+"Change" of a type change dialog is red (item 63).
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -480,11 +486,11 @@ appears on screen. An apostrophe on screen is the typographic one (’).
    since the card takes no taps. When the compass closes, the disc
    slides back to its place.
 7. Tap a side → the pass is recorded as a whole: a short rising chime,
-   vibration, the tapped side bounces, the "N of T" counter bounces in
-   place, and the toast of item 36 appears ("Saved: ← South · N of T").
-   Then the sides hide and the disc slides back. Sound and motion follow
-   item 62. A second tap on a side while the first one still bounces is
-   ignored, so one pass is never recorded twice.
+   vibration, a gold ring leaves the tapped side, the "N of T" counter
+   bounces in place, and the toast of item 36 appears ("Saved: ← South ·
+   N of T"). Then the sides hide and the disc slides back. Sound and
+   motion follow item 62. A second tap on a side while the ring of the
+   first one still runs is ignored, so one pass is never recorded twice.
 8. "Cancel" is visible only while the compass is open. Tapping the same
    maneuver again also closes it. Auto-close after 12 s with the toast
    "Closed after 12 s: nothing recorded" (item 36).
@@ -529,9 +535,11 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     The arrow turns to the car's heading while the dial stays fixed with
     N up. The arrow is always on the dial. Until the sensors give a
     heading it shows the course this tablet saved last (data-model.md
-    "Heading"), or north when nothing is saved, and it stays pale
-    (--o-off) until the first GPS check. While the heading is only a last
-    known course the arrow is pale too (decided 2026-10-18). It is 128px
+    "Heading"), or north when nothing is saved, and it stays pale until
+    the first GPS check. While the heading is only a last known course
+    the arrow is pale too (decided 2026-10-18). A pale arrow is drawn as
+    a dashed outline without fill, so a stale course never passes for a
+    live one (decided 2026-10-21). It is 128px
     (--compass), 144px on a landscape screen more than 700px tall
     (--compass-wide) and 96px on a short screen (--compass-compact, item
     70). The heading comes from the tablet's sensors as data-model.md
@@ -591,9 +599,10 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     too rare to add.
 62. Sound and motion. Recording a pass plays a short rising two-note
     chime, removing one (Undo last, Delete) a short falling one. The
-    tapped side bounces: a brief elastic scale that returns to rest,
-    Apple's "bounce" (SF Symbols), the motion that says an action
-    happened. The "N of T" counter bounces in place with it, and nothing
+    tapped side dips under the finger while a gold ring leaves it,
+    growing and fading like a sonar ping, and it keeps its place, so the
+    finger never chases it (decided 2026-10-21). The "N of T" counter
+    bounces in place with it, and nothing
     pops up over the POI number. The sides bloom out of the chosen disc
     when the compass opens. All motion is skipped while the tablet's
     "reduce motion" accessibility setting is on. The rising chime is two
@@ -900,8 +909,9 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     instead, and History shows it as "Removal waiting" (data-model.md).
     Two buttons side by side: "Cancel" on the left, the action
     as a verb on the right ("Remove", "Delete", "Change"), never "OK" or
-    "Yes". A removing button is red (item 28). A type change button keeps
-    the ordinary dark style, since nothing is deleted. A tap outside the
+    "Yes". A removing button is red (item 28), and so is the button of a
+    type change, since passes stop counting (decided 2026-10-21). A tap
+    outside the
     dialog equals Cancel. There is no "don't ask again". Dialog buttons,
     like the Settings buttons (Save, Test connection, Add route), set
     their words at --t-body in --w-bold, the size of the action bar's

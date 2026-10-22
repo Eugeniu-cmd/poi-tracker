@@ -103,12 +103,16 @@
           _tokens.css v0.16): metallic gold replaces the amber. The
           sub-header's chip is the gold chip, class gold, and the dot of
           a waiting pass and the active POI row are gold.
+  v0.22 2026-10-21 — the shell of main-screen v0.35 (screens.md v0.50,
+          _tokens.css v0.17): discs centred with the translate property,
+          and a compass with no heading drawn as a dashed outline. No
+          frame here draws either.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.21</title>
+<title>POI Tracker — History Reference v0.22</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -162,11 +166,11 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.34. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.35. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.16 or a calc() over
+     line height below is a var() from _tokens.css v0.17 or a calc() over
      them. Literal values are limited to 0, 1px hairlines, 50% for round
      shapes, percentages and fr of a layout, em, ch, lh and cap ratios of
      a token font size, keywords, SVG geometry, the 1200px breakpoint of
@@ -440,10 +444,15 @@
   .compass .halo { fill: none; stroke: var(--panel-raised); stroke-linejoin: round; }
   .compass .dark { fill: var(--disc); }
   .compass .gold { fill: var(--side); }
-  /* no heading yet, or only a last known course: the arrow is pale. It is
-     always on the dial: with no heading yet it shows the course this
-     tablet saved last, or north (item 19) */
-  .compass.idle .arrow { opacity: var(--o-off); }
+  /* no heading yet, or only a last known course (the pale arrow of
+     data-model.md "Heading"): the arrow is a dashed outline without
+     fill, so a stale course never passes for a live one. It is always
+     on the dial: with no heading yet it shows the course this tablet
+     saved last, or north (item 19). Stroke and dashes are SVG geometry
+     in the dial's 96-unit box. */
+  .compass.idle .halo { display: none; }
+  .compass.idle .dark, .compass.idle .gold { fill: none; stroke: var(--ink-2); stroke-width: 1.4px;
+                                             stroke-dasharray: 3 2.2; stroke-linejoin: round; }
 
   /* ---- type pill and its menu (items 46, 60, 69) ---- */
   .typewrap { anchor-name: --pill; }
@@ -540,7 +549,9 @@
      rounded to a whole pixel. A disc is --disc with a gold arrow
      (--man-glyph) and, while it can be tapped, a gold ring of --s-1
      (--man-ring). A locked disc fades and keeps only --shadow, no ring
-     (item 5). ---- */
+     (item 5). Discs and sides are centred with the translate property,
+     never a transform, so a scale (a press, a bloom, a tap) keeps their
+     centre. ---- */
   .stagezone { flex: 1; min-height: 0; position: relative; }
   .stagebox { position: absolute; left: 0; right: 0; height: calc(2 * var(--disc-man));
               top: round(max(0px, min(calc((100% - 2 * var(--disc-man)) / 2),
@@ -553,7 +564,7 @@
   .stage { position: relative; margin: 0 auto; height: 100%;
            width: calc(2 * var(--side-reach) + 2 * var(--s-2) + var(--disc-man)); }
   .disc { position: absolute; left: 50%; top: 50%; width: var(--disc-man); height: var(--disc-man);
-          border-radius: 50%; transform: translate(-50%, -50%); display: flex;
+          border-radius: 50%; translate: -50% -50%; display: flex;
           align-items: center; justify-content: center; background: var(--disc);
           color: var(--man-glyph); box-shadow: 0 0 0 var(--s-1) var(--man-ring), var(--shadow-lift);
           z-index: 3; }
@@ -567,7 +578,7 @@
   .stage.open .disc:not(.on) { visibility: hidden; }
   .disc.locked { opacity: var(--o-locked); box-shadow: var(--shadow); }
   .side { position: absolute; left: 50%; top: 50%; width: var(--disc-side); height: var(--disc-side);
-          border-radius: 50%; transform: translate(-50%, -50%); display: flex;
+          border-radius: 50%; translate: -50% -50%; display: flex;
           align-items: center; justify-content: center; font-size: var(--t-title);
           font-weight: var(--w-heavy); line-height: var(--lh-tight); background: var(--side);
           color: var(--side-glyph); box-shadow: 0 0 0 var(--s-1) var(--side-ring), var(--shadow-lift);
@@ -950,7 +961,8 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.21 — 2026-10-21.</b> Metallic gold replaces the amber (main-screen v0.34): the
+  <p class="meta"><b>v0.22 — 2026-10-21.</b> The shell of main-screen v0.35 centres the discs with the
+     translate property and draws a compass with no heading as a dashed outline. Metallic gold replaces the amber (main-screen v0.34): the
      sub-header's chip, the dot of a waiting pass and the active POI row are gold (items 12, 40, 41).
      The shell of main-screen v0.33 brought a dark bar for a
      POI in progress to the column and the mini-map (items 2, 58) and smaller dialog buttons
@@ -960,10 +972,10 @@
      covers the main area beside the live POI column, in POI or Route scope, and lists
      every pass this tablet recorded and every type change not yet in the sheet, newest first, with "Delete" on each pass, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
-     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.16</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.49</b>. The shell
+     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.17</b>
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.50</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.34</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.35</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Nine states,
      A to I. The twelve proposals of v0.8 are approved (v0.12, screens.md v0.38).</p>

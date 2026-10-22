@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.16 — 2026-10-21
+   v0.17 — 2026-10-21
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -83,6 +83,12 @@
    tapped. New --compass-n, the gold of the compass letter N, and
    --compass-n-edge, its dark gold outline on light (gold alone has
    2.1:1 on the white face), none on dark.
+   v0.17 2026-10-21 — the user's decision on the tap of a side
+   (screens.md v0.50, items 7 and 62): the side no longer bounces. It
+   dips to --scale-dip for --dur-dip while a gold ring leaves it,
+   growing to --scale-ring and fading over --dur-ring, like a sonar
+   ping. --scale-bounce is removed, since nothing uses it any more.
+   --dur-bounce stays for the bounce of the counter.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -175,11 +181,14 @@
   --dur-fade: 160ms;
   --dur-move: 260ms;
   --dur-bounce: 420ms;
+  --dur-dip: 220ms;
+  --dur-ring: 520ms;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-spring: cubic-bezier(0.3, 1.5, 0.5, 1);
   --scale-press: 0.96;
   --scale-bloom: 0.6;
-  --scale-bounce: 1.18;
+  --scale-dip: 0.93;
+  --scale-ring: 1.9;
   --scale-bump: 1.12;
 }
 
