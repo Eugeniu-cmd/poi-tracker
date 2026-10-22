@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.50 — 2026-10-21
+v0.51 — 2026-10-22
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -248,6 +248,22 @@ it keeps its place (items 7, 62). The bounce made it jump 8 px up and
 left, a centring fault fixed in the references. A compass with no
 heading draws its arrow as a dashed outline without fill (item 19). The
 "Change" of a type change dialog is red (item 63).
+v0.51 2026-10-22 — the user's decisions on the "Still needed" card, the
+type pill, one gold and plain numbers. The card, headed "TO GO", shows
+the maneuvers as gold progress rings in a pyramid and the sides as a
+rose of four diamonds with no heading, both on one centre line (item
+39). It sizes its rings and rose by its own width, so the compact step
+no longer shrinks its values and the roomy card keeps only its padding
+and heading (items 70, 71). The type pill's numbers are in ink, like the
+screen's other numbers, and its button reads "Change type" (item 60).
+Every maneuver arrow, the ring of a disc, the fill of the card's rings
+and the bar of a POI in progress share one gold, #A37F22 (items 2, 5,
+59). The card's head shows the last pass of the active POI, "LAST"
+(item 39). The type pill and the type menu show no passes, and the
+pill centres its name and split between its tile and "Change type"
+(item 60).
+Item 68 lists the plain numbers that may stay literal, as CLAUDE.md rule
+9 does.
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -320,9 +336,9 @@ appears on screen. An apostrophe on screen is the typographic one (’).
 70. Compact step. When the app is less than 700px tall (the 1000 × 600
     minimum, and the user's tablet in landscape inside a Chrome tab at
     1333 × 680), display-only text shrinks so more fits: the big POI
-    number takes --t-num-compact, the counter --t-label, "N to go"
-    --t-small, the values in the "Still needed" tiles and the side chips
-    --t-label. The mini-map becomes a one-line button at the top of the
+    number takes --t-num-compact, the counter --t-label and "N to go"
+    --t-small. The "Still needed" card follows its own width instead
+    (item 39). The mini-map becomes a one-line button at the top of the
     column: the Lucide layout-grid icon, the count of finished POIs
     ("79 of 196") and "Open", as tall as a tap target, so the column
     shows more POI rows. Discs and every tap target keep their size,
@@ -332,22 +348,15 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     the type pill room to breathe: the screen's side margins become 16px,
     the gaps beside the POI column and between the card and the discs
     12px, and the closed Left and Right discs sit 8px nearer to Straight.
-    The card, its tiles and its chips then keep their normal paddings.
+    The card then keeps its normal padding.
 71. Roomy card. When the app is wider than tall and more than 700px tall
     (the user's tablet in landscape without browser bars, 1333 × 800)
     and the left group beside the discs is at least 520px wide, the
-    "Still needed" card steps up one size, the mirror of the compact
-    step. Beside the 118px discs the normal card looked small and flat,
-    while at 1000 × 600 the card and the discs balance. The roomy card
-    keeps the 1000 × 600 proportion of about 1.8 to 1. The tile values
-    take --t-stat, the tile labels, "more" and the two section headings
-    --t-body, and "Done" --t-title. The bars are 8px tall, the card has
-    24px of padding and each tile 16px. The side chips grow taller, but
-    their text keeps its size, since the sides are secondary. At
-    1333 × 800 the card's centre then sits level with the centre of the
-    disc cluster. Where the left group is narrower than 520px (at
-    1280 × 800, for example) the larger values would lose their 8px of
-    spare width, so the normal card stays. The head, the type pill, the
+    "Still needed" card takes 24px of padding and its heading --t-body,
+    so it does not look small and flat beside the 118px discs. Its rings and rose keep the sizes its width gives them
+    (item 39, decided 2026-10-22). Where the left group is narrower than
+    520px (at 1280 × 800, for example) the normal card stays. The head,
+    the type pill, the
     discs and every tap target do not change. The compass takes its
     landscape size (item 19).
 
@@ -363,9 +372,17 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     shadow and motion value of the app screen comes from
     docs/references/_tokens.css through var(). A value the canon lacks is
     first added to _tokens.css by a dedicated decision, then used. This
-    holds for every reference and later for app/index.html. Plain zero,
-    1px hairlines, 50% for round shapes and percentages of a layout are
-    not canon values and may stay literal. The page chrome of a reference
+    holds for every reference and later for app/index.html. Plain
+    numbers that are not design values may stay literal (decided
+    2026-10-22): 0 and 1 (off and on, no scale), 50% and 100%, 1px
+    hairlines, percentages and fr of a layout, multipliers and divisors
+    of a token inside calc(), counts (columns, flex, z-index order), em,
+    ch, lh and cap ratios of a token font size, keyframe stops, angles of
+    a drawn shape, numbers inside an SVG drawing (coordinates, path data,
+    stroke widths in its own units) and the breakpoints of media and
+    container queries, which CSS cannot read from a token. An opacity
+    between 0 and 1, a duration or the strength of a motion is a design
+    value and takes a token. The page chrome of a reference
     around the app frame (titles, notes, the checking tool) is exempt.
     Every reference prompt checks it: no other literal colour, size or
     spacing inside the app frame.
@@ -416,7 +433,7 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     legend whose swatches are small tiles. Every state has its colour and
     a second sign that needs no colour, for sun glare and for eyes that
     mix red and green. Current: a gold tint and a thick gold edge.
-    Done: green with a check. In progress: grey with a dark bar. Not
+    Done: green with a check. In progress: grey with a gold bar. Not
     started: an empty bar and a grey edge. Sheet error: red with a
     warning triangle. Not drivable: grey stripes with a ban sign. Three
     grey states blended in the car (decided 2026-10-18). Tapping a
@@ -425,15 +442,21 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     closes it and changes nothing.
 60. The POI type of item 46 is shown and set by the type pill, a
     full-width control under the big POI number: an icon, the type name
-    and its passes with the split ("70 passes · ← 28 · ↑ 14 · → 28"). Its
-    numbers, the passes and the split, are --t-label heavy in --warn, the
-    gold of the side letters, and stay smaller than the card's counts, so
-    the plan is not read as what is still needed. The menu keeps its grey
-    split (v0.47). The icon shows the allowed maneuvers, not the shape of
+    and its split ("← 28 · ↑ 14 · → 28"). Neither the pill nor the menu
+    shows the passes ("70 passes"): the counter "41 of 70" beside the
+    number already shows the target, and without them the split keeps to
+    one line at every size (decided 2026-10-22). The split's numbers are
+    --t-label heavy in --ink, like the screen's other numbers, and stay
+    smaller than the card's counts, so the plan is not read as what is
+    still needed. In gold beside the gold arrows they tired the eye
+    (decided 2026-10-22). The menu keeps its grey split (v0.47). The icon
+    shows the allowed maneuvers, not the shape of
     the road: their
     icons of item 69 side by side in the order left, straight, right, in
     gold on a tile in the colour of the discs (item 5), wide enough for
-    three, so the type name starts at the same place for every type. Each maneuver keeps its own place in the tile:
+    three, the same for every type. The type name and the split under it
+    share one centre line, in the middle of the space between the tile
+    and "Change type" (decided 2026-10-22). Each maneuver keeps its own place in the tile:
     an absent one leaves its place empty instead of shifting the others,
     so the tiles read as a map of the maneuvers. Tapping the pill opens
     a menu with the six types, each with its icon and split, the current
@@ -441,6 +464,9 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     The menu changes the active POI only. Two taps are deliberate: a
     stray touch while driving cannot change a type. A change with
     consequences for passes already recorded asks first (item 64). The
+    pill ends with "Change type" and a chevron, so it reads as the POI's
+    type and as a control (decided 2026-10-22). Where the left group is
+    narrow (the compact card of item 70) only the chevron shows. The
     counter beside the number carries no chevron.
 61. History covers the main area in both layouts, the compass and the
     action bar included, while the POI column stays live beside it, so
@@ -455,9 +481,9 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     after the sync control, opens Settings (item 74). It is a square tap
     target as tall as the sync control, on the same raised surface.
 2. POI list 1…N for the route's POI count: number, progress bar, "N to
-   go". Row turns green at its target, red on error, its bar is dark while
-   in progress, not-drivable POI in a state of its own (item 46), active
-   POI highlighted.
+   go". Row turns green at its target, red on error, its bar is gold while
+   in progress (--prog, the one gold of item 5), not-drivable POI in a
+   state of its own (item 46), active POI highlighted.
 3. Bottom summary: "Done N · M to go" and the count of finished POIs. The
    error count appears only when it is not zero. In portrait it sits
    under the main area. In landscape it sits inside the action bar, so
@@ -476,7 +502,15 @@ appears on screen. An apostrophe on screen is the typographic one (’).
    moves them. Each is a dark disc (--disc) with its arrow in gold
    (--man-glyph) and, while it can be tapped, a gold ring of 4px
    (--man-ring). A locked disc fades and has no ring (decided
-   2026-10-21).
+   2026-10-21). Every maneuver arrow, on the discs, on the type tile
+   and under the rings of the card, the ring of a disc, the fill of the
+   card's rings and the bar of a POI in progress (items 2, 59) share one
+   gold, --gold-line #A37F22, in both themes (decided 2026-10-22). It
+   reads at 3:1 or more on every background it stands on: the dark
+   discs, the light card and the light discs of the dark theme. Gold
+   text (the side letters, a number over its share) keeps --warn, and
+   gold surfaces (the side discs, the rose, the compass arrow's gold
+   half) keep --side.
 6. Tap a maneuver → that disc slides to the centre of the disc area, the
    other two fade out of the way, and the four approach sides bloom
    around it as a compass: N above, S below, W left, E right. No side
@@ -546,19 +580,44 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     "Heading" describes. Minimum gap between any two discs on the screen
     is 8px.
 39. The per-POI mini counters live in the "Still needed" card under the
-    type pill. Its top row shows, per maneuver, what is still needed
-    against the split of the POI's type (item 46): a large "12 more" and
-    a bar. There is no "16 of 28" line: it repeated the same number, and
-    the type pill above already shows the split. A maneuver whose share is
-    full shows
-    "Done" in the done colour, and its disc locks (item 46). A count past
-    the share, possible only from numbers typed into the sheet or from a
-    type change, shows "+3 over" in the warning colour. A maneuver the
-    type does not allow shows a dash. The bottom row, "Sides so far",
-    shows the four approach sides driven, on the soft gold side tint, as
-    plain counts, because sides have no split. A zero value fades toward
-    the background. The card carries no separate "balance" line, since
-    the split already shows in the type pill and in the card itself.
+    type pill (decided 2026-10-22). Its heading reads "TO GO", the words
+    of "29 to go" under the counter and in the POI column. Under it the
+    three maneuvers stand as progress rings in a pyramid, as the discs
+    stand under the card: Straight on top, Left below on the left, Right
+    below on the right. A ring fills in the gold of the arrows
+    (--card-fill, item 5) with the
+    passes driven against the maneuver's share of the POI's type (item
+    46), from the top clockwise, and shows inside what is still needed,
+    a large "12" over a small "more". There is no "16 of 28" line: the
+    type pill above already shows the split. Under each ring sit the
+    maneuver's Lucide icon in gold, 20px (--card-icon), and its name. A
+    maneuver whose share is full closes its ring in the done colour and
+    reads "Done", and its disc locks (item 46). A count past the share,
+    possible only from numbers typed into the sheet or from a type
+    change, closes its ring and reads "+3 over" with the number in the
+    warning colour. A maneuver the type does not allow fades with its
+    name and shows a dash on an empty track. Beside the pyramid the four
+    approach sides stand as a rose of diamonds on the soft gold side
+    tint, as on a compass: N above, E right, S below, W left, each with
+    its letter in gold over its count. The rose has no heading and no
+    total: the total would repeat the counter beside the POI number,
+    which also names a mismatch between sides and maneuvers. Sides have
+    no split, so they are plain counts. A side at zero fades. The pyramid
+    and the rose share one centre line, with equal space before, between
+    and after them. At the right of the head stands the last pass of the
+    active POI: "LAST", the maneuver's icon in gold, the side's letter
+    and the time ("LAST ↰ S · 21:40"), the time alone for today and the
+    date with the time when older (item 16). It is the newest pass of
+    the POI that still counts, the one "Undo last" would remove (item
+    9), so it changes with the active POI and steps back after an undo.
+    With no such pass, for example when every pass of the POI reached
+    the sheet by hand (item 45), the head shows TO GO alone. The rings
+    and the rose follow the card's own width:
+    rings of 76px and a rose of 184px (--card-ring, --card-rose), 62px
+    and 160px on a card narrower than 480px, 52px and 128px on one of
+    380px or less, where "more" and "over" are left out. The card
+    carries no separate "balance" line, since the split already shows in
+    the type pill and in the card itself.
 40. The active POI row carries a gold tint, a 4px left edge, its number
     in the gold foreground colour and its "N to go" darkened. It must be
     findable with peripheral vision and must not imitate the green done

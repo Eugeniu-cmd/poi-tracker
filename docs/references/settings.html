@@ -91,12 +91,19 @@
           _tokens.css v0.17): discs centred with the translate property,
           and a compass with no heading drawn as a dashed outline. No
           frame here draws a compass without a heading.
+  v0.20 2026-10-22 — the shell of main-screen v0.36 (screens.md v0.51,
+          _tokens.css v0.18): the "Still needed" card as rings and a
+          rose, the type pill's numbers in ink with "Change type", and one
+          gold (--gold-line) for every arrow and ring and the bar of a POI
+          in progress, the last pass in the card's head and a pill with
+          no passes and a centred name and split, in every frame that
+          shows the working screen.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Settings Reference v0.19</title>
+<title>POI Tracker — Settings Reference v0.20</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -150,17 +157,20 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.35. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.36. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.17 or a calc() over
-     them. Literal values are limited to 0, 1px hairlines, 50% for round
-     shapes, percentages and fr of a layout, em, ch, lh and cap ratios of
-     a token font size, keywords, SVG geometry, the 1200px breakpoint of
-     item 51, the 700px height of the compact step (item 70), the 400px
-     width of the compact card, the 1000px width of the compact landscape
-     card (v0.22) and the 520px width of the roomy card (item 71). Icons
+     line height below is a var() from _tokens.css v0.18 or a calc() over
+     them. Literal values are limited to the plain numbers of item 68: 0
+     and 1, 1px hairlines, 50% for round shapes, percentages and fr of a
+     layout, multipliers of a token, counts, em, ch, lh and cap ratios of
+     a token font size, keywords, angles and SVG geometry of a drawn
+     shape, and the breakpoints: 1200px of item 51, the 700px height of
+     the compact step (item 70), the 400px width of the compact card, the
+     1000px width of the compact landscape card (v0.22), the 520px width
+     of the roomy card (item 71) and the 480px and 380px widths of the
+     card's rings and rose (item 39). Icons
      are Lucide symbols (rule 10, item 69); an inline icon is 1em of its
      text. A chevron's path ends
      inside its 24-unit box (chevron-down at 18/24, chevron-right at
@@ -334,9 +344,10 @@
   .rc { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
   .rb { display: block; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
         overflow: hidden; }
-  .rb i, .nb i, .cb i { display: block; height: 100%; background: var(--ink-3);
-                        border-radius: inherit; }
-  /* items 2 and 59: a POI in progress has a dark --prog bar, in the column and in the grid */
+  .rb i, .cb i { display: block; height: 100%; background: var(--ink-3);
+                 border-radius: inherit; }
+  /* items 2 and 59: a POI in progress has a gold --prog bar (--gold-line, the gold of the
+     arrows, v0.36), in the column and in the grid */
   .rb i, .cell.part .cb i { background: var(--prog); }
   .rt { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
         line-height: var(--lh-tight); white-space: nowrap; }
@@ -462,67 +473,105 @@
   .typebtn.nd .ticon, .ticon.nd { background: transparent;
                                   box-shadow: inset 0 0 0 1px var(--ink-2); color: var(--ink-2); }
   .typebtn.off { opacity: var(--o-off); }
-  .tl { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
+  /* the name and the split share one centre line, in the middle of the
+     space between the tile and "Change type" (item 60, v0.36) */
+  .tl { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center;
+        gap: var(--s-1); }
   .tl b { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight);
           white-space: nowrap; }
   .tl small, .ol small { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--s-1);
                          row-gap: var(--s-1); font-size: var(--t-small); font-weight: var(--w-bold);
                          color: var(--ink-2); line-height: var(--lh-tight); }
-  /* the pill's numbers, its passes and its split, read at a glance: --t-label
-     heavy in --warn, the gold of the side letters, still smaller than the
-     card's counts, on the line's baseline (item 60). The menu keeps its grey split. */
+  /* the pill's split reads at a glance: its numbers --t-label heavy in --ink
+     like the screen's other numbers (v0.36: in gold beside the gold arrows
+     they tired the eye), still smaller than the card's counts, on the line's
+     baseline (item 60). The pill and the menu show no passes (v0.36). The
+     menu keeps its grey split. */
   .tl small { align-items: baseline; }
-  .tl small .tn { font-size: var(--t-label); font-weight: var(--w-heavy); color: var(--warn);
+  .tl small .tn { font-size: var(--t-label); font-weight: var(--w-heavy); color: var(--ink);
                   line-height: var(--lh-tight); }
   .tchg { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--t-small);
           font-weight: var(--w-heavy); color: var(--ink-2); white-space: nowrap; }
   .tchg .ic { margin-right: -0.25em; }
 
-  /* ---- "Still needed" card (item 39). A tile is its label, its value and
-     its bar (v0.32). The text lines are trimmed to cap height and baseline
-     and rounded up, so the inset above the label and the inset below the
-     bar are both the tile's padding. ---- */
+  /* ---- "Still needed" card (item 39, v0.36): under its heading "TO GO",
+     the maneuvers as progress rings in a pyramid, Straight on top, Left
+     below left and Right below right, as the discs stand under the card,
+     and beside them the sides as a rose of four diamonds, N above, E
+     right, S below and W left. The pyramid and the rose share one centre
+     line and equal space around them. The card is a container: its own
+     width sets the size of the rings and the rose. ---- */
   .card { background: var(--panel); border: 1px solid var(--panel-edge);
           border-radius: var(--r-md); box-shadow: var(--shadow); padding: var(--s-4);
-          display: flex; flex-direction: column; gap: var(--s-3); }
-  .sph { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-2); }
-  .sph.sides { margin-top: var(--s-3); }
+          display: flex; flex-direction: column; gap: var(--s-3);
+          container-type: inline-size; container-name: card; }
   .spt { font-size: var(--t-small); letter-spacing: calc(var(--s-1) / 2);
          font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight); }
-  .spn { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
-         line-height: var(--lh-tight); }
-  .need { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); }
-  .nc { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0;
-        padding: var(--s-3); border-radius: var(--r-sm); background: var(--panel-strong); }
-  .nh { display: block; font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
-        line-height: var(--lh-tight); white-space: nowrap; text-box: trim-both cap alphabetic;
-        height: round(up, 1cap, 1px); }
-  /* the inline icon sits centred on the cap height: its bottom 0.15em under the baseline */
-  .nh .ic { display: inline-block; vertical-align: -0.15em; margin-right: var(--s-1); }
-  .nv { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight);
-        white-space: nowrap; text-box: trim-both cap alphabetic; height: round(up, 1cap, 1px); }
-  .nv small { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
-              margin-left: var(--s-1); }
-  /* "Done" is a label, not a number: smaller, on the numbers' baseline */
-  .nv .dn { font-size: var(--t-label); }
-  .nb { display: block; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
-        overflow: hidden; }
-  .nc.ok .nv { color: var(--ok); }
-  .nc.ok .nb i { background: var(--ok); }
-  .nc.over .nv { color: var(--warn); }
-  .nc.over .nb i { background: var(--warn); }
-  .nc.off .nv, .nc.off .nb { opacity: var(--o-zero); }
-  .sides4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-2); }
-  /* Manrope sets the digits' cap-to-baseline box about 1.3px above the centre
-     of its line box, so a quarter step of padding moves from top to bottom */
-  .sv { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-2);
-        min-width: 0; border-radius: var(--r-sm);
-        padding: calc(var(--s-2) - var(--s-1) / 4) var(--s-3) calc(var(--s-2) + var(--s-1) / 4);
+  /* the head: TO GO on the left, the last pass of this POI on the right,
+     the pass Undo last would remove (item 9). With no such pass it is empty. */
+  .khead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); }
+  .lp { display: inline-flex; align-items: baseline; gap: var(--s-1); font-size: var(--t-small);
+        font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight);
+        white-space: nowrap; }
+  .lp .spt { margin-right: var(--s-1); }
+  /* the icon is 1em of the text, so a head with LAST is as tall as one without */
+  .lp .ic { align-self: center; color: var(--man-glyph); }
+  .two { --ring: var(--card-ring); --rose: var(--card-rose); --num: var(--t-title);
+         display: flex; align-items: center; justify-content: space-evenly; }
+  /* the pyramid: three columns, Left and Right 0.8 of a ring lower than
+     Straight. On a tight card it may give up width, and its columns then
+     overflow evenly into the card's padding. */
+  .pyr { flex: 0 1 auto; min-width: 0; display: grid; grid-template-columns: repeat(3, auto);
+         justify-content: center; column-gap: var(--s-1); }
+  .mz { display: flex; flex-direction: column; align-items: center; gap: var(--s-1);
+        width: calc(var(--ring) + var(--s-4)); }
+  .mz.low { margin-top: calc(0.8 * var(--ring)); }
+  .wheel { position: relative; width: var(--ring); height: var(--ring); }
+  /* the ring starts at the top and runs clockwise. Its circles are SVG
+     geometry: a track and, once a pass counts, the part driven, both 6 of
+     the drawing's 76 units wide. The part driven takes the gold of the
+     arrows (--card-fill, --gold-line). */
+  .pg { position: absolute; inset: 0; width: 100%; height: 100%; rotate: -90deg; fill: none; }
+  .pg .bg { stroke: var(--line); }
+  .pg .fg { stroke: var(--card-fill); stroke-linecap: round; }
+  .mz.ok .fg { stroke: var(--ok); }
+  .mz.off { opacity: var(--o-zero); }
+  .in { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+        justify-content: center; gap: calc(var(--s-1) / 2); line-height: var(--lh-tight);
+        white-space: nowrap; }
+  .rv { font-size: var(--num); font-weight: var(--w-heavy); }
+  /* over its share the ring is full and its number gold: "+3" over "over" */
+  .mz.over .rv { color: var(--warn); }
+  .in small { font-size: var(--t-tiny); font-weight: var(--w-bold); color: var(--ink-2); }
+  /* "Done" is a label, not a number: smaller, in the done colour */
+  .in .dn { font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ok); }
+  .mn { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--t-small);
+        font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight);
+        white-space: nowrap; }
+  .mn .ic { width: var(--card-icon); height: var(--card-icon); color: var(--man-glyph); }
+  /* the rose: a 2 x 2 grid turned 45 degrees. A square turned 45 degrees
+     fits its box inset by (1 - 1/√2) / 2 of the box on every edge */
+  .rose { flex: none; position: relative; width: var(--rose); height: var(--rose); }
+  .grid4 { position: absolute; inset: calc(0.146 * var(--rose)); display: grid;
+           grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: var(--s-2);
+           rotate: 45deg; }
+  .dm { display: grid; place-items: center; border-radius: var(--r-sm);
         background: var(--side-soft); }
-  .svl { font-size: var(--t-label); font-weight: var(--w-heavy); color: var(--warn);
-         line-height: var(--lh-tight); }
-  .svv { font-size: var(--t-title); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
-  .sv.z .svv { opacity: var(--o-zero); }
+  .dmi { rotate: -45deg; display: flex; flex-direction: column; align-items: center;
+         gap: var(--s-1); line-height: var(--lh-tight); }
+  .dl { font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--warn); }
+  .dv { font-size: var(--num); font-weight: var(--w-heavy); }
+  .dm.z .dmi { opacity: var(--o-zero); }
+  /* narrower cards: the portrait minimum and the left group beside the discs */
+  @container card (width < 480px) {
+    .two { --ring: var(--card-ring-narrow); --rose: var(--card-rose-narrow); --num: var(--t-label); }
+  }
+  @container card (width <= 380px) {
+    .two { --ring: var(--card-ring-small); --rose: var(--card-rose-small); }
+    .pyr { column-gap: var(--s-2); }
+    .mz { width: calc(var(--ring) + var(--s-2)); }
+    .in small { display: none; }
+  }
 
   /* ---- discs (items 5, 6, 10, 19, 26, 46). The closed cluster sits in the
      middle of its free space. Where the zone is too short for centred discs
@@ -716,16 +765,11 @@
                           - (2 * var(--side-reach) + var(--disc-side)))), 1px); }
   }
   /* the compact card and pill: beside the discs the left group can be
-     narrow; the card and its tiles tighten, columns size to their content so
-     every line keeps to one line, and the pill shows its chevron without the
-     word and its split without the passes prefix */
+     narrow; the card tightens its padding (its rings and rose follow its
+     own width, item 39), and the pill shows its chevron without the word */
   @container info (max-width: 400px) {
     .card { padding: var(--s-3); }
-    .need { grid-template-columns: repeat(3, auto); }
-    .nc { padding: var(--s-2); }
-    .need, .sides4 { gap: var(--s-1); }
-    .sv { padding-left: var(--s-2); padding-right: var(--s-2); gap: var(--s-1); }
-    .tchg span, .tl small .tp { display: none; }
+    .tchg span { display: none; }
   }
   /* ---- the compact step (item 70): on a short screen display text shrinks
      and the mini-map becomes a one-line grid button; discs, the compass and
@@ -734,7 +778,6 @@
     .big { font-size: var(--t-num-compact); }
     .cnt { font-size: var(--t-label); }
     .rest { font-size: var(--t-small); }
-    .nv, .svv { font-size: var(--t-label); }
     /* half a step between the counter lines keeps them level with the smaller number */
     .hcol { gap: calc(var(--s-3) / 2); }
     .mmap { flex-direction: row; align-items: center; height: var(--tap-min);
@@ -756,19 +799,12 @@
     /* the caption keeps one line and its spare width in the narrower zone */
     .lock { padding-left: var(--s-2); padding-right: var(--s-2); }
   }
-  /* with that width the card and its tiles keep their normal paddings
-     instead of the compact ones: from the landscape minimum of 1000px the
-     left group is at least 370px wide, enough for every label, value and
-     chip to keep its spare width. In a frame dragged narrower the compact
-     card stays. The pill keeps its compact look. */
+  /* with that width the card keeps its normal padding above and below
+     instead of the compact one: from the landscape minimum of 1000px the
+     left group is at least 370px wide. In a frame dragged narrower the
+     compact card stays. The pill keeps its compact look. */
   @container (max-height: 700px) and (orientation: landscape) and (min-width: 1000px) {
     .card { padding: var(--s-4) var(--s-3); }
-    /* --s-4 between the two sections over the card's --s-3 row gap */
-    .sph.sides { margin-top: calc(var(--s-4) - var(--s-3)); }
-    .need { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); }
-    .nc { padding: var(--s-3); }
-    .sides4 { gap: var(--s-2); }
-    .sv { padding-left: var(--s-3); padding-right: var(--s-3); gap: var(--s-2); }
   }
   /* ---- the compass's sizes (item 19, v0.35): 128px, 144px on a tall
      landscape screen, 96px on a short one. The compass and the head read
@@ -779,28 +815,15 @@
   @container (max-height: 700px) {
     .scr { --compass: var(--compass-compact); }
   }
-  /* ---- the roomy card (item 71, v0.33): on a tall landscape screen the
-     "Still needed" card steps up one size, the mirror of the compact
-     step, so it keeps its 1000 × 600 proportion beside the discs. Only
-     its text sizes and paddings change. Where the left group is narrower
-     than 520px the larger values would lose their spare width, so the
-     normal card stays. ---- */
+  /* ---- the roomy card (item 71, v0.36): on a tall landscape screen the
+     "Still needed" card takes more padding and a larger head, so it
+     does not look small and flat beside the discs. Its rings and rose
+     keep the sizes its width gives them (item 39). Where the left group
+     is narrower than 520px the normal card stays. ---- */
   @container (orientation: landscape) and (height > 700px) {
     @container info (width >= 520px) {
-      .card { padding: var(--s-5); gap: var(--s-4); }
-      /* --s-5 between the sections: the card's --s-4 gap plus --s-2 */
-      .sph.sides { margin-top: var(--s-2); }
-      .spt, .spn { font-size: var(--t-body); }
-      .need, .sides4 { gap: var(--s-3); }
-      .nc { padding: var(--s-4); gap: var(--s-3); }
-      .nh { font-size: var(--t-body); }
-      .nv { font-size: var(--t-stat); }
-      .nv small { font-size: var(--t-body); margin-left: var(--s-2); }
-      .nv .dn { font-size: var(--t-title); }
-      .nb { height: var(--s-2); }
-      /* taller chips, the same text: the sides are secondary */
-      .sv { padding: calc(var(--s-3) - var(--s-1) / 4) var(--s-4)
-                     calc(var(--s-3) + var(--s-1) / 4); }
+      .card { padding: var(--s-5); }
+      .spt, .lp { font-size: var(--t-body); }
     }
   }
 
@@ -930,12 +953,12 @@
 
   <p class="eyebrow">Design Reference · docs/references/settings.html</p>
   <h1>POI Tracker — Settings</h1>
-  <p class="meta"><b>v0.19 — 2026-10-21.</b> Settings on the canon after the user's five
+  <p class="meta"><b>v0.20 — 2026-10-22.</b> Settings on the canon after the user's five
      decisions: the gear opens it (item 73), a city is put in use from its page (item 21), a route
      has its own page and loads from the sheet when it is added (item 22), and the dialogs name
      the passes they would lose (items 18, 24). Every value inside the frames is a token of
-     <b>_tokens.css v0.17</b> and every rule follows <b>screens.md v0.50</b>. The shell (top bar,
-     POI column, presets, drag corner, light and dark) is that of <b>main-screen.html v0.35</b>,
+     <b>_tokens.css v0.18</b> and every rule follows <b>screens.md v0.51</b>. The shell (top bar,
+     POI column, presets, drag corner, light and dark) is that of <b>main-screen.html v0.36</b>,
      copied unchanged: presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b>, <b>1333 × 800</b> and <b>1000 × 600</b>. Every frame also drags at its
      bottom-right corner. In portrait Settings is one column that drills down, in landscape the
@@ -944,7 +967,7 @@
      The consistency audit added frame J, the kept route code of frame E and the POI types in the
      two dialogs (v0.11). The compass follows main-screen v0.29 (v0.12, v0.13). A red button that
      loses passes reads "Erase anyway" or "Delete anyway", and every button takes the size of
-     the action bar's buttons (v0.14). The compass arrow is always on the dial (v0.15). A POI in progress is grey with a dark bar (v0.16). The type pill's numbers are gold (v0.17). Metallic gold replaces the amber, with gold arrows, a gold ring on a disc that can be tapped and a gold N on the compass (v0.18). Discs keep their centre when they scale, and a compass with no heading draws a dashed arrow (v0.19).</p>
+     the action bar's buttons (v0.14). The compass arrow is always on the dial (v0.15). A POI in progress is grey with a dark bar (v0.16). The type pill's numbers are gold (v0.17). Metallic gold replaces the amber, with gold arrows, a gold ring on a disc that can be tapped and a gold N on the compass (v0.18). Discs keep their centre when they scale, and a compass with no heading draws a dashed arrow (v0.19). The "Still needed" card shows rings and a rose, and the type pill's numbers are in ink with "Change type". Every arrow, ring and bar of a POI in progress takes one gold (v0.20).</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>
@@ -977,16 +1000,17 @@
     <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change type</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
-      <div class="sph"><span class="spt">STILL NEEDED</span></div>
-      <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      <div class="khead"><span class="spt">TO GO</span><span class="lp" role="img" aria-label="Last pass: Left from South at 21:40"><span class="spt">LAST</span><svg class="ic"><use href="#i-left"/></svg>S · 21:40</span></div>
+      <div class="two">
+        <div class="pyr">
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">12</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-left"/></svg>Left</span></div>
+          <div class="mz"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">6</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-straight"/></svg>Straight</span></div>
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="61 100"/></svg><div class="in"><b class="rv">11</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-right"/></svg>Right</span></div>
+        </div>
+        <div class="rose"><div class="grid4"><div class="dm"><div class="dmi"><b class="dl">N</b><b class="dv">16</b></div></div><div class="dm z"><div class="dmi"><b class="dl">E</b><b class="dv">0</b></div></div><div class="dm"><div class="dmi"><b class="dl">W</b><b class="dv">11</b></div></div><div class="dm"><div class="dmi"><b class="dl">S</b><b class="dv">14</b></div></div></div></div>
       </div>
-      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
-      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
     </div>
     <div class="mright">
@@ -1077,16 +1101,17 @@
     <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change type</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
-      <div class="sph"><span class="spt">STILL NEEDED</span></div>
-      <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      <div class="khead"><span class="spt">TO GO</span><span class="lp" role="img" aria-label="Last pass: Left from South at 21:40"><span class="spt">LAST</span><svg class="ic"><use href="#i-left"/></svg>S · 21:40</span></div>
+      <div class="two">
+        <div class="pyr">
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">12</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-left"/></svg>Left</span></div>
+          <div class="mz"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">6</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-straight"/></svg>Straight</span></div>
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="61 100"/></svg><div class="in"><b class="rv">11</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-right"/></svg>Right</span></div>
+        </div>
+        <div class="rose"><div class="grid4"><div class="dm"><div class="dmi"><b class="dl">N</b><b class="dv">16</b></div></div><div class="dm z"><div class="dmi"><b class="dl">E</b><b class="dv">0</b></div></div><div class="dm"><div class="dmi"><b class="dl">W</b><b class="dv">11</b></div></div><div class="dm"><div class="dmi"><b class="dl">S</b><b class="dv">14</b></div></div></div></div>
       </div>
-      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
-      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
     </div>
     <div class="mright">
@@ -1175,16 +1200,17 @@
     <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change type</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
-      <div class="sph"><span class="spt">STILL NEEDED</span></div>
-      <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      <div class="khead"><span class="spt">TO GO</span><span class="lp" role="img" aria-label="Last pass: Left from South at 21:40"><span class="spt">LAST</span><svg class="ic"><use href="#i-left"/></svg>S · 21:40</span></div>
+      <div class="two">
+        <div class="pyr">
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">12</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-left"/></svg>Left</span></div>
+          <div class="mz"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">6</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-straight"/></svg>Straight</span></div>
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="61 100"/></svg><div class="in"><b class="rv">11</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-right"/></svg>Right</span></div>
+        </div>
+        <div class="rose"><div class="grid4"><div class="dm"><div class="dmi"><b class="dl">N</b><b class="dv">16</b></div></div><div class="dm z"><div class="dmi"><b class="dl">E</b><b class="dv">0</b></div></div><div class="dm"><div class="dmi"><b class="dl">W</b><b class="dv">11</b></div></div><div class="dm"><div class="dmi"><b class="dl">S</b><b class="dv">14</b></div></div></div></div>
       </div>
-      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
-      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
     </div>
     <div class="mright">
@@ -1273,16 +1299,17 @@
     <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change type</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
-      <div class="sph"><span class="spt">STILL NEEDED</span></div>
-      <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      <div class="khead"><span class="spt">TO GO</span><span class="lp" role="img" aria-label="Last pass: Left from South at 21:40"><span class="spt">LAST</span><svg class="ic"><use href="#i-left"/></svg>S · 21:40</span></div>
+      <div class="two">
+        <div class="pyr">
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">12</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-left"/></svg>Left</span></div>
+          <div class="mz"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">6</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-straight"/></svg>Straight</span></div>
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="61 100"/></svg><div class="in"><b class="rv">11</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-right"/></svg>Right</span></div>
+        </div>
+        <div class="rose"><div class="grid4"><div class="dm"><div class="dmi"><b class="dl">N</b><b class="dv">16</b></div></div><div class="dm z"><div class="dmi"><b class="dl">E</b><b class="dv">0</b></div></div><div class="dm"><div class="dmi"><b class="dl">W</b><b class="dv">11</b></div></div><div class="dm"><div class="dmi"><b class="dl">S</b><b class="dv">14</b></div></div></div></div>
       </div>
-      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
-      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
     </div>
     <div class="mright">
@@ -1361,16 +1388,17 @@
     <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change type</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
-      <div class="sph"><span class="spt">STILL NEEDED</span></div>
-      <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      <div class="khead"><span class="spt">TO GO</span><span class="lp" role="img" aria-label="Last pass: Left from South at 21:40"><span class="spt">LAST</span><svg class="ic"><use href="#i-left"/></svg>S · 21:40</span></div>
+      <div class="two">
+        <div class="pyr">
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">12</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-left"/></svg>Left</span></div>
+          <div class="mz"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">6</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-straight"/></svg>Straight</span></div>
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="61 100"/></svg><div class="in"><b class="rv">11</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-right"/></svg>Right</span></div>
+        </div>
+        <div class="rose"><div class="grid4"><div class="dm"><div class="dmi"><b class="dl">N</b><b class="dv">16</b></div></div><div class="dm z"><div class="dmi"><b class="dl">E</b><b class="dv">0</b></div></div><div class="dm"><div class="dmi"><b class="dl">W</b><b class="dv">11</b></div></div><div class="dm"><div class="dmi"><b class="dl">S</b><b class="dv">14</b></div></div></div></div>
       </div>
-      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
-      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
     </div>
     <div class="mright">
@@ -1453,16 +1481,17 @@
     <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change type</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
-      <div class="sph"><span class="spt">STILL NEEDED</span></div>
-      <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      <div class="khead"><span class="spt">TO GO</span><span class="lp" role="img" aria-label="Last pass: Left from South at 21:40"><span class="spt">LAST</span><svg class="ic"><use href="#i-left"/></svg>S · 21:40</span></div>
+      <div class="two">
+        <div class="pyr">
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">12</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-left"/></svg>Left</span></div>
+          <div class="mz"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">6</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-straight"/></svg>Straight</span></div>
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="61 100"/></svg><div class="in"><b class="rv">11</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-right"/></svg>Right</span></div>
+        </div>
+        <div class="rose"><div class="grid4"><div class="dm"><div class="dmi"><b class="dl">N</b><b class="dv">16</b></div></div><div class="dm z"><div class="dmi"><b class="dl">E</b><b class="dv">0</b></div></div><div class="dm"><div class="dmi"><b class="dl">W</b><b class="dv">11</b></div></div><div class="dm"><div class="dmi"><b class="dl">S</b><b class="dv">14</b></div></div></div></div>
       </div>
-      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
-      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
     </div>
     <div class="mright">
@@ -1538,16 +1567,17 @@
     <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change type</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
-      <div class="sph"><span class="spt">STILL NEEDED</span></div>
-      <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      <div class="khead"><span class="spt">TO GO</span><span class="lp" role="img" aria-label="Last pass: Left from South at 21:40"><span class="spt">LAST</span><svg class="ic"><use href="#i-left"/></svg>S · 21:40</span></div>
+      <div class="two">
+        <div class="pyr">
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">12</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-left"/></svg>Left</span></div>
+          <div class="mz"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">6</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-straight"/></svg>Straight</span></div>
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="61 100"/></svg><div class="in"><b class="rv">11</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-right"/></svg>Right</span></div>
+        </div>
+        <div class="rose"><div class="grid4"><div class="dm"><div class="dmi"><b class="dl">N</b><b class="dv">16</b></div></div><div class="dm z"><div class="dmi"><b class="dl">E</b><b class="dv">0</b></div></div><div class="dm"><div class="dmi"><b class="dl">W</b><b class="dv">11</b></div></div><div class="dm"><div class="dmi"><b class="dl">S</b><b class="dv">14</b></div></div></div></div>
       </div>
-      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
-      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
     </div>
     <div class="mright">
@@ -1621,16 +1651,17 @@
     <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change type</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
-      <div class="sph"><span class="spt">STILL NEEDED</span></div>
-      <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      <div class="khead"><span class="spt">TO GO</span><span class="lp" role="img" aria-label="Last pass: Left from South at 21:40"><span class="spt">LAST</span><svg class="ic"><use href="#i-left"/></svg>S · 21:40</span></div>
+      <div class="two">
+        <div class="pyr">
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">12</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-left"/></svg>Left</span></div>
+          <div class="mz"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">6</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-straight"/></svg>Straight</span></div>
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="61 100"/></svg><div class="in"><b class="rv">11</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-right"/></svg>Right</span></div>
+        </div>
+        <div class="rose"><div class="grid4"><div class="dm"><div class="dmi"><b class="dl">N</b><b class="dv">16</b></div></div><div class="dm z"><div class="dmi"><b class="dl">E</b><b class="dv">0</b></div></div><div class="dm"><div class="dmi"><b class="dl">W</b><b class="dv">11</b></div></div><div class="dm"><div class="dmi"><b class="dl">S</b><b class="dv">14</b></div></div></div></div>
       </div>
-      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
-      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
     </div>
     <div class="mright">
@@ -1726,16 +1757,17 @@
     <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change type</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
-      <div class="sph"><span class="spt">STILL NEEDED</span></div>
-      <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      <div class="khead"><span class="spt">TO GO</span><span class="lp" role="img" aria-label="Last pass: Left from South at 21:40"><span class="spt">LAST</span><svg class="ic"><use href="#i-left"/></svg>S · 21:40</span></div>
+      <div class="two">
+        <div class="pyr">
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">12</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-left"/></svg>Left</span></div>
+          <div class="mz"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">6</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-straight"/></svg>Straight</span></div>
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="61 100"/></svg><div class="in"><b class="rv">11</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-right"/></svg>Right</span></div>
+        </div>
+        <div class="rose"><div class="grid4"><div class="dm"><div class="dmi"><b class="dl">N</b><b class="dv">16</b></div></div><div class="dm z"><div class="dmi"><b class="dl">E</b><b class="dv">0</b></div></div><div class="dm"><div class="dmi"><b class="dl">W</b><b class="dv">11</b></div></div><div class="dm"><div class="dmi"><b class="dl">S</b><b class="dv">14</b></div></div></div></div>
       </div>
-      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
-      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
     </div>
     <div class="mright">
@@ -1827,16 +1859,17 @@
     <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
     <div class="mleft">
     <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
-    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="tp"><span class="tn">70</span> passes ·</span> <span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change type</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
     <div class="card">
-      <div class="sph"><span class="spt">STILL NEEDED</span></div>
-      <div class="need">
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-left"/></svg>Left</span><span class="nv">12<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-straight"/></svg>Straight</span><span class="nv">6<small>more</small></span><span class="nb"><i style="width: 57%"></i></span></div>
-        <div class="nc"><span class="nh"><svg class="ic"><use href="#i-right"/></svg>Right</span><span class="nv">11<small>more</small></span><span class="nb"><i style="width: 61%"></i></span></div>
+      <div class="khead"><span class="spt">TO GO</span><span class="lp" role="img" aria-label="Last pass: Left from South at 21:40"><span class="spt">LAST</span><svg class="ic"><use href="#i-left"/></svg>S · 21:40</span></div>
+      <div class="two">
+        <div class="pyr">
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">12</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-left"/></svg>Left</span></div>
+          <div class="mz"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">6</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-straight"/></svg>Straight</span></div>
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="61 100"/></svg><div class="in"><b class="rv">11</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-right"/></svg>Right</span></div>
+        </div>
+        <div class="rose"><div class="grid4"><div class="dm"><div class="dmi"><b class="dl">N</b><b class="dv">16</b></div></div><div class="dm z"><div class="dmi"><b class="dl">E</b><b class="dv">0</b></div></div><div class="dm"><div class="dmi"><b class="dl">W</b><b class="dv">11</b></div></div><div class="dm"><div class="dmi"><b class="dl">S</b><b class="dv">14</b></div></div></div></div>
       </div>
-      <div class="sph sides"><span class="spt">SIDES SO FAR</span><span class="spn">41 passes</span></div>
-      <div class="sides4"><div class="sv"><span class="svl">N</span><span class="svv">16</span></div><div class="sv"><span class="svl">S</span><span class="svv">14</span></div><div class="sv"><span class="svl">W</span><span class="svv">11</span></div><div class="sv z"><span class="svl">E</span><span class="svv">0</span></div></div>
     </div>
     </div>
     <div class="mright">

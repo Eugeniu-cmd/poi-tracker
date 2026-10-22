@@ -33,7 +33,15 @@ Hard rules:
    size, spacing, radius, opacity, shadow, motion) comes from
    docs/references/_tokens.css through var(), in references and in
    app/index.html alike. A value missing there is added to _tokens.css
-   first, never typed in as a literal (screens.md item 68).
+   first, never typed in as a literal (screens.md item 68). Plain
+   numbers that are not design values may stay literal: 0 and 1 (off
+   and on, no scale), 50% and 100%, 1px hairlines, percentages and fr
+   of a layout, multipliers and divisors of a token inside calc(),
+   counts (columns, flex, z-index order), em, ch, lh and cap ratios of
+   a token font size, keyframe stops, angles of a drawn shape, numbers
+   inside an SVG drawing (coordinates, path data, stroke widths in its
+   own units) and the breakpoints of media and container queries,
+   which CSS cannot read from a token (decided 2026-10-22).
 10. Every icon is an official Lucide icon (lucide.dev): its SVG path
     data copied verbatim from the Lucide source, never drawn, merged,
     cropped or edited. Allowed: size, colour, stroke-width 2.6, and
