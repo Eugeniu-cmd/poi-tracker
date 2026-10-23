@@ -134,7 +134,12 @@ test('C3 · A change with no consequence', async ({ page }) => {
   expect(targets(s)).toHaveLength(0);
   expect(s.types[rid]['140']).toBe('nor');
   expect(await text(page.locator('#pill b'))).toBe('No right');
-  expect(await text(page.locator('#pill small'))).toBe('70 passes · 56 · 14');
+  expect(await text(page.locator('#pill small'))).toBe('56 · 14');
+  // the Right ring: a dash on an empty track, faded
+  const off = page.locator('#card .mz').nth(2);
+  await expect(off).toHaveClass(/\boff\b/);
+  await expect(off.locator('.fg')).toHaveCount(0);
+  expect(await text(off.locator('.in'))).toBe('—');
   await expect(page.locator('#stage [data-man="R"]')).toHaveClass(/\blocked\b/);
   await expect(page.locator('#stage [data-man="L"]')).not.toHaveClass(/\blocked\b/);
   await expect(page.locator('#stage [data-man="St"]')).not.toHaveClass(/\blocked\b/);
@@ -231,19 +236,21 @@ test('C6 · Captions of a full share', async ({ page }) => {
   await expect(lock).toBeVisible();
   await expect(lock).toHaveText('Left is over its share: 31 of 28');
   await expect(page.locator('#stage [data-man="L"]')).toHaveClass(/\blocked\b/);
-  const tiles = page.locator('.need .nc');
-  await expect(tiles).toHaveCount(3);
-  const left = tiles.first();
-  await expect(left.locator('.nh')).toContainText('Left');
+  const rings = page.locator('#card .mz');
+  await expect(rings).toHaveCount(3);
+  const left = rings.first();
+  await expect(left.locator('.mn')).toContainText('Left');
   await expect(left).toHaveClass(/\bover\b/);
-  await expect(left.locator('.nv')).toContainText('+3');
+  expect(await text(left.locator('.in'))).toBe('+3 over');
+  await expect(left.locator('.fg')).toHaveAttribute('stroke-dasharray', '100 100');
+  expect(await left.locator('.rv').evaluate(function (el) { return getComputedStyle(el).color; })).toBe('rgb(139, 113, 30)');   // --warn on light
 
   // (b) Left done: POI 124 of the sample, Left 28 of 28
   await selectPoi(page, 124);
   await expect(lock).toBeVisible();
   await expect(lock).toHaveText('Left is done: 28 of 28');
   await expect(page.locator('#stage [data-man="L"]')).toHaveClass(/\blocked\b/);
-  await expect(left.locator('.nv')).toHaveText('Done');
+  expect(await text(left.locator('.in'))).toBe('Done');
 });
 
 test('C7 · The route menu and the POI it opens', async ({ page }) => {

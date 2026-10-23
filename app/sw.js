@@ -11,9 +11,10 @@
    v0.2 2026-10-21 — the gold: a new cache name, so the tablet fetches
    the gold icon instead of keeping the cached one.
    v0.3 2026-10-21 — the polish: a new cache name for app v0.3.
+   v0.4 2026-10-23 — the card: a new cache name for app v0.4.
 */
 'use strict';
-var CACHE = 'poi-app-v0.3';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.4';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 
