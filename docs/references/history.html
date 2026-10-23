@@ -118,12 +118,23 @@
   v0.24 2026-10-22 — the shell of main-screen v0.37 (screens.md v0.52,
           _tokens.css v0.19): the one gold is lighter, which the bar of
           a POI in progress in the column shows.
+  v0.25 2026-10-23 — the shell of main-screen v0.38 (screens.md v0.53,
+          _tokens.css v0.20, decision D1): the rules for passes to fix
+          in the rest line, on the rows, in the caption, on the grid and
+          in the summary, the over ring, the dialog's switch row and the
+          switch rules. No frame here shows those states: this page's
+          own sample route is unchanged and has no POI with passes to
+          fix. Frame C: the row "Removal waiting" carries "Cancel
+          removal", which drops the waiting removal without a dialog
+          (items 12, 13); .hr.del .hl1 joins the rule of .hr.rej .hl1,
+          so the actions line sits under the row as a refused row's
+          does.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.24</title>
+<title>POI Tracker — History Reference v0.25</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -177,11 +188,11 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.37. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.38. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.19 or a calc() over
+     line height below is a var() from _tokens.css v0.20 or a calc() over
      them. Literal values are limited to the plain numbers of item 68: 0
      and 1, 1px hairlines, 50% for round shapes, percentages and fr of a
      layout, multipliers of a token, counts, em, ch, lh and cap ratios of
@@ -326,6 +337,8 @@
              min-height: 1lh; }
   .summary span { white-space: nowrap; }
   .summary .err { color: var(--err); font-weight: var(--w-bold); }
+  /* item 3: the POIs with passes to fix, in the warning colour */
+  .summary .fix { color: var(--warn); font-weight: var(--w-bold); }
   .sumport { grid-area: sum; }
   .sumbar { display: none; flex: 1; min-width: 0; }
 
@@ -386,6 +399,11 @@
   .row.active .rt { color: var(--ink); font-weight: var(--w-heavy); }
   .row.active.done .rn, .row.active.done .rt { color: var(--ok); }
   .row.active.err .rn, .row.active.err .rt { color: var(--err); }
+  /* item 40: a row with passes to fix carries a warning triangle before its
+     tag; once nothing is to go the tag reads "to fix" in the warning colour */
+  .rt .rfix { display: inline-block; width: var(--t-small); height: var(--t-small);
+              vertical-align: -0.2em; margin-right: var(--s-1); color: var(--warn); }
+  .row.fix .rt, .row.active.fix .rt { color: var(--warn); }
   /* rail labels sit on a linear track inset by --s-2 and half a label, so the
      first and last keep clear of the hairline and the corner; the finger pad
      spans the rail's inner width */
@@ -440,6 +458,8 @@
           line-height: var(--lh-tight); text-box: trim-both cap alphabetic; }
   .rest span { white-space: nowrap; }
   .rest.ok { color: var(--ok); font-weight: var(--w-bold); }
+  /* item 4: the passes that do not fit the type, "53 to fix", in the warning colour */
+  .rest .fix { color: var(--warn); font-weight: var(--w-bold); }
   /* the compass (item 19): a drawn widget on a raised round face, all in
      tokens. One arrow shows where the car drives: its left half --disc,
      the colour of the maneuver discs, its right half --side, the colour of
@@ -560,8 +580,11 @@
         justify-content: center; gap: calc(var(--s-1) / 2); line-height: var(--lh-tight);
         white-space: nowrap; }
   .rv { font-size: var(--num); font-weight: var(--w-heavy); }
-  /* over its share the ring is full and its number gold: "+3" over "over" */
-  .mz.over .rv { color: var(--warn); }
+  /* item 39: over its share the ring is full and reads "+3 over": the number a
+     step smaller in the warning colour, the plus at half its size and raised,
+     one inline group that .in centres in the ring */
+  .mz.over .rv { color: var(--warn); font-size: calc(0.9 * var(--num)); letter-spacing: -0.03em; }
+  .rv .pl { font-size: 0.5em; vertical-align: 0.45em; margin-right: 0.2em; }
   .in small { font-size: var(--t-tiny); font-weight: var(--w-bold); color: var(--ink-2); }
   /* "Done" is a label, not a number: smaller, in the done colour */
   .in .dn { font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ok); }
@@ -651,6 +674,8 @@
   .lock.ok { color: var(--ok); background: var(--ok-bg); }
   .lock.err { color: var(--err); background: var(--err-bg); }
   .lock.info { color: var(--ink-2); background: var(--panel-strong); }
+  /* item 46: every ring closed and passes still to fix, on the gold tint */
+  .lock.fix { color: var(--warn); background: var(--active); }
 
   /* ---- action bar (items 3, 8, 9, 10, 26, 27, 42, 51): buttons concentric
      with the bar; in landscape the bar runs under the whole main area and
@@ -692,6 +717,19 @@
           justify-content: center; }
   .dbtn.danger { background: var(--danger); border-color: var(--danger); color: var(--on-danger); }
   .dbtn.primary { background: var(--disc); border-color: var(--disc); color: var(--disc-glyph); }
+  /* item 63: the switch row of a type change dialog, in the style of the Sound
+     row of Settings: the label with its line beside the switch */
+  .drow { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-3);
+          border-radius: var(--r-sm); background: var(--man-soft); }
+  .drow .ol b { font-size: var(--t-body); font-weight: var(--w-bold); }
+  .drow .ol small { display: block; font-size: var(--t-small); font-weight: var(--w-medium);
+                    color: var(--ink-2); line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  /* a switch (items 63, 65), on in the colour of the discs: the Sound row of
+     Settings and the type change dialog share it */
+  .switch { flex: none; position: relative; width: calc(var(--s-6) + var(--s-5)); height: var(--s-6);
+            border-radius: var(--s-4); background: var(--disc); }
+  .switch::after { content: ""; position: absolute; top: var(--s-1); right: var(--s-1);
+                   width: var(--s-5); height: var(--s-5); border-radius: 50%; background: var(--disc-glyph); }
   .sheet { position: absolute; inset: var(--s-4); z-index: 26; background: var(--panel-raised);
            border: 1px solid var(--panel-edge); border-radius: var(--r-lg);
            box-shadow: var(--shadow-lift); padding: var(--s-5); display: flex;
@@ -708,19 +746,23 @@
   .legend { display: flex; gap: var(--s-3); flex-wrap: wrap; font-size: var(--t-small);
             font-weight: var(--w-bold); color: var(--ink-2); }
   .lg { display: inline-flex; align-items: center; gap: var(--s-2); }
-  /* six states, as the mini-map's squares (item 59). Each has a colour and a
-     second sign that needs no colour, for sun glare and for eyes that mix red
-     and green: a check when done, a triangle on a sheet error, a ban sign on
-     stripes when not drivable, a --prog bar in progress. "Not started" keeps
+  /* seven states, as the mini-map's squares (item 59). Each has a colour and
+     a second sign that needs no colour, for sun glare and for eyes that mix
+     red and green: a check when done, a triangle on a sheet error, a triangle
+     on the gold tint with passes to fix, a ban sign on stripes when not
+     drivable, a --prog bar in progress. "Not started" keeps
      an --ink-3 edge and an empty bar, so it never reads as a hole. Each
      swatch is a small tile, and the legend's gap is --s-3, so it keeps
-     to one line from 720px wide. */
+     to one line from 800px wide; with seven states it wraps to two rows
+     at the 720px minimum (v0.38). */
   .sw { width: calc(var(--t-small) + var(--s-1)); height: calc(var(--t-small) + var(--s-1));
         border-radius: calc(var(--r-sm) / 2); display: inline-flex; align-items: center;
         justify-content: center; background: transparent; border: 1px solid var(--ink-3); }
   .sw.part, .cell.part { background: var(--prog-bg); border-color: var(--ink-2); }
   .sw.done, .cell.done { background: var(--ok-bg); border-color: var(--ok); }
   .sw.err, .cell.err { background: var(--err-bg); border-color: var(--err); }
+  /* item 59: a POI with passes to fix, the gold tint with a warning triangle */
+  .sw.fix, .cell.fix { background: var(--active); border-color: var(--warn); }
   .sw.nd, .cell.nd { border-color: var(--line);
                      background: repeating-linear-gradient(135deg, var(--hatch) 0 calc(var(--s-1) / 2),
                                  transparent calc(var(--s-1) / 2) var(--s-2)); }
@@ -748,6 +790,7 @@
   .sw .ci { width: var(--s-3); height: var(--s-3); }
   .sw.done .ci, .cell.done .ci { color: var(--ok); }
   .sw.err .ci, .cell.err .ci { color: var(--err); }
+  .sw.fix .ci, .cell.fix .ci { color: var(--warn); }
   .sw.nd .ci, .cell.nd .ci { color: var(--ink-2); }
   .cell.active { box-shadow: inset 0 0 0 var(--s-1) var(--active-line); }
   .cell.active .cn { color: var(--warn); }
@@ -937,12 +980,14 @@
           padding: 0 calc(var(--s-3) - 1px); font-size: var(--t-body); font-weight: var(--w-bold);
           color: var(--err); background: var(--err-bg); border: 1px solid var(--line);
           border-radius: var(--r-sm); white-space: nowrap; }
-  /* a deleted pass (items 13, 38): struck through, labelled, no buttons, not dimmed */
+  /* a deleted pass (items 12, 13, 38): struck through, labelled, not dimmed,
+     with "Cancel removal" under it while its removal waits */
   .hr.del .htm, .hr.del .hmv { text-decoration: line-through; }
   /* a refused pass (item 47): three lines with --s-3 above and below, the
      reason as a sentence, its two actions at the right edge, never on the
-     line with the time; the hairline closes the row under the actions */
-  .hr.rej .hl1 { height: var(--tap-min); padding: 0; border: 0; margin-top: var(--s-3); }
+     line with the time; the hairline closes the row under the actions. A
+     deleted pass has the same first line, so its action sits under it too */
+  .hr.rej .hl1, .hr.del .hl1 { height: var(--tap-min); padding: 0; border: 0; margin-top: var(--s-3); }
   .hwhy { grid-column: 1 / -1; margin: var(--s-2) 0 0; font-size: var(--t-small); font-weight: var(--w-medium);
           color: var(--ink-2); line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px);
           text-wrap: balance; }
@@ -988,7 +1033,10 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.24 — 2026-10-22.</b> The shell of main-screen v0.37 makes the one gold lighter.
+  <p class="meta"><b>v0.25 — 2026-10-23.</b> The shell of main-screen v0.38 carries the rules of decision
+     D1, passes to fix, which no frame here shows, and the row "Removal waiting" of frame C
+     carries "Cancel removal", which drops the waiting removal without a dialog (items 12, 13).
+     The shell of main-screen v0.37 makes the one gold lighter.
      The shell of main-screen v0.36 draws the "Still needed" card
      as rings and a rose and the type pill's numbers in ink with "Change type", which no frame here shows,
      and gives the bar of a POI in progress in the column the one gold of the arrows. The shell of main-screen v0.35 centres the discs with the
@@ -1002,10 +1050,10 @@
      covers the main area beside the live POI column, in POI or Route scope, and lists
      every pass this tablet recorded and every type change not yet in the sheet, newest first, with "Delete" on each pass, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
-     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.19</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.52</b>. The shell
+     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.20</b>
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.53</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.37</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.38</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Nine states,
      A to I. The twelve proposals of v0.8 are approved (v0.12, screens.md v0.38).</p>
@@ -1161,7 +1209,7 @@
   <div class="hlist" data-scope="poi">
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:40</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:38</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
-    <div class="hr del"><div class="hl1"><div class="htx"><span class="htm">21:31</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst wait"><span class="dot"></span>Removal waiting</span></div></div></div>
+    <div class="hr del"><div class="hl1"><div class="htx"><span class="htm">21:31</span><span class="hmv"><svg class="ic"><use href="#i-straight"/></svg>West</span><span class="hst wait"><span class="dot"></span>Removal waiting</span></div></div><div class="hacts"><button class="btn" type="button">Cancel removal</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:27</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>North</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:22</span><span class="hmv"><svg class="ic"><use href="#i-right"/></svg>South</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
     <div class="hr"><div class="hl1"><div class="htx"><span class="htm">21:18</span><span class="hmv"><svg class="ic"><use href="#i-left"/></svg>West</span><span class="hst">Sent</span></div><button class="hdel" type="button" aria-label="Delete this pass">Delete</button></div></div>
@@ -1180,7 +1228,8 @@
         <p class="caption"><b>C</b> · A deleted pass</p>
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
-        <li><b>13, 38</b> The 21:31 Straight · West pass was already in the sheet: it stays in the list struck through and labelled "Removal waiting" with the gold dot of a waiting pass, without buttons, until its removal is delivered. Then it leaves the list (v0.10).</li>
+        <li><b>13, 38</b> The 21:31 Straight · West pass was already in the sheet: it stays in the list struck through and labelled "Removal waiting" with the gold dot of a waiting pass, until its removal is delivered. Then it leaves the list (v0.10).</li>
+        <li><b>12, 13</b> Until then the row carries one button, "Cancel removal", under it as a refused row carries its actions. It drops the waiting removal without a dialog: the pass counts again, since nothing reached the sheet (data-model.md "Event": a waiting event may be dropped).</li>
         <li><b>26</b> The deleted row is not dimmed: opacity marks an unavailable control, and this row is a state, not a control.</li>
         <li><b>13</b> A line above the list counts the removals still queued: "1 removal waiting to be sent", whatever holds them up. The sync control names the cause, here the network (item 33).</li>
         <li><b>33</b> The sync control reads "1 removal waiting for network" with its dot in the warning colour: a queued removal counts like a waiting pass (item 33).</li>

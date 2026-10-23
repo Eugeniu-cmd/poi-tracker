@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.52 — 2026-10-22
+v0.53 — 2026-10-23
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -267,6 +267,17 @@ Item 68 lists the plain numbers that may stay literal, as CLAUDE.md rule
 v0.52 2026-10-22 — the one gold of item 5 is lighter, #CCA735, chosen on
 whole screens. It reads at 2.1:1 on the light card and on the light
 discs of the dark theme (the user's choice).
+v0.53 2026-10-23 — decision D1 (the type change audit of 2026-10-23): a
+POI is done when every ring is closed. The counter counts the passes
+that fit the type, "to go" is the sum of the rings' "more", and passes
+that do not fit are "to fix" on the head, the row, the grid and the
+summary until they are deleted on the tablet or in the sheet (items 3,
+4, 39, 40, 46, 59, 64). The type change dialog says that the sheet
+keeps such passes and the export sends them, and offers to delete this
+tablet's own (items 63, 64). The type toast carries Undo for six
+seconds (item 36). A waiting removal can be cancelled (items 12, 13).
+Undo last takes a pass whatever its maneuver (item 9). The over ring's
+plus is half size and its number a step smaller, centred (item 39).
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -437,7 +448,8 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     a second sign that needs no colour, for sun glare and for eyes that
     mix red and green. Current: a gold tint and a thick gold edge.
     Done: green with a check. In progress: grey with a gold bar. Not
-    started: an empty bar and a grey edge. Sheet error: red with a
+    started: an empty bar and a grey edge. To fix: the gold tint with a
+    warning triangle in the warning colour. Sheet error: red with a
     warning triangle. Not drivable: grey stripes with a ban sign. Three
     grey states blended in the car (decided 2026-10-18). Tapping a
     tile makes that POI active, closes the grid and
@@ -487,17 +499,26 @@ appears on screen. An apostrophe on screen is the typographic one (’).
    go". Row turns green at its target, red on error, its bar is gold while
    in progress (--prog, the one gold of item 5), not-drivable POI in a
    state of its own (item 46), active POI highlighted.
-3. Bottom summary: "Done N · M to go" and the count of finished POIs. The
-   error count appears only when it is not zero. In portrait it sits
-   under the main area. In landscape it sits inside the action bar, so
-   the POI column runs down to the bottom (item 51).
+3. Bottom summary: "Done N · M to go" and the count of finished POIs.
+   "Done" and "to go" count the passes that fit (item 4). A segment "K
+   to fix", the number of POIs with passes to fix, in the warning
+   colour, stands before the error count and appears only when it is
+   not zero. The error count appears only when it is not zero. In
+   portrait it sits under the main area. In landscape it sits inside
+   the action bar, so the POI column runs down to the bottom (item 51).
 
 ## Working screen — right
 4. Large active POI number with the "N of T" counter beside it, where T
    is the POI's target (70 or 40, a not-drivable POI reads "Not
-   drivable"), and "N to go" under the counter. Below them, one ordinary
-   gap apart, come the type pill (item 60) and then the "Still needed"
-   card (item 39).
+   drivable"), and "N to go" under the counter. The counter's N is the
+   passes that fit the POI's type: for every maneuver the type allows,
+   the smaller of its count and its share, summed (item 46). "N to go"
+   is T minus that, the sum of the rings' "more". When the POI has
+   passes that do not fit, the rest line reads "27 to go · 53 to fix",
+   the second part in the warning colour, and "53 to fix" alone when
+   nothing is to go. "Done" stands there only when nothing is to go and
+   nothing is to fix. Below them, one ordinary gap apart, come the type
+   pill (item 60) and then the "Still needed" card (item 39).
 5. Three big round maneuver buttons ← ↑ →, "straight" higher than its
    neighbors. They sit in the middle of the free space under the "Still
    needed" card, close to the passenger's hand, and keep that height. A
@@ -538,10 +559,12 @@ appears on screen. An apostrophe on screen is the typographic one (’).
    pressed repeatedly. Each press asks first (item 63). A pass still
    waiting is dropped from the queue. A pass already in the sheet has a
    removal queued for it, exactly as History does.
-   Undo last acts on the most recent pass that counts. It skips a pass
-   that was not accepted and a pass whose removal already waits or was
-   not accepted, since History handles those (items 13, 47), so a pass
-   never gets a second removal.
+   Undo last acts on the most recent pass that counts, whatever its
+   maneuver: a pass the type no longer allows is offered too, since
+   deleting it is what item 64 asks for. It skips a pass that was not
+   accepted and a pass whose removal already waits or was not accepted,
+   since History handles those (items 13, 47), so a pass never gets a
+   second removal.
    The button is dimmed, with the caption "Nothing to undo" (item 27),
    whenever no pass of the active POI counts: none recorded by this
    tablet, or every one refused or already carrying a removal.
@@ -597,11 +620,15 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     type pill above already shows the split. Under each ring sit the
     maneuver's Lucide icon in gold, 20px (--card-icon), and its name. A
     maneuver whose share is full closes its ring in the done colour and
-    reads "Done", and its disc locks (item 46). A count past the share,
-    possible only from numbers typed into the sheet or from a type
-    change, closes its ring and reads "+3 over" with the number in the
-    warning colour. A maneuver the type does not allow fades with its
-    name and shows a dash on an empty track. Beside the pyramid the four
+    reads "Done", and its disc locks (item 46).
+    A count past the share, possible only from numbers typed into the
+    sheet or from a type change, closes its ring and reads "+3 over": the
+    plus at half the number's size, the number a step smaller than the
+    other rings' and in the warning colour, the whole centred in the ring
+    with the same gap on both sides (decided 2026-10-23). A maneuver the
+    type does not allow shows "+26 over" the same way when it has passes
+    (its share is 0), and fades with its name and a dash on an empty
+    track when it has none. Beside the pyramid the four
     approach sides stand as a rose of diamonds on the soft gold side
     tint, as on a compass: N above, E right, S below, W left, each with
     its letter in gold over its count. The rose has no heading and no
@@ -628,7 +655,11 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     findable with peripheral vision and must not imitate the green done
     row, the red error row, or a control. The tint and the edge stay
     gold in every state. An active row that is done or in error shows
-    that state in the colour of its number, text and bar.
+    that state in the colour of its number, text and bar. A row with
+    passes to fix carries a small warning triangle in the warning colour
+    before its "N to go". When nothing is to go and passes are still to
+    fix, the tag reads "to fix" in the warning colour and the row is not
+    green.
 43. On a POI in spreadsheet error the line under the counter replaces
     "N to go" and states the mismatch in words. It stays in the ordinary
     muted colour; the red caption beside the locked discs is where the
@@ -654,13 +685,25 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     28 of 28", and over the share "Left is over its share: 31 of 28") and
     takes no more passes. Undo last or Delete frees a full
     share again. If a share cannot be reached in the field, the type is
-    changed instead. Approach sides have no limit. A not-drivable POI has
-    its discs locked at once with a caption, is never counted among POIs
-    "to go", is left out of the route's count of POIs ("79 of 196 done"
-    on a route of 197 with one not drivable), and must read as neither
-    done nor in error. New POIs start
-    as Intersection. "Only Left" and "only Right" are not types: they are
-    too rare to add.
+    changed instead. Approach sides have no limit.
+    A POI is done when every maneuver the type allows has reached its
+    share and no pass is to fix (decision D1, 2026-10-23). Passes that do
+    not fit the type, a maneuver it does not allow or passes past a
+    share, are "to fix": the sheet keeps them whatever the type and the
+    export sends them to the client until they are deleted, in History
+    for this tablet's passes and in the sheet for passes typed in by
+    hand. A POI with passes to fix is never done. When every ring is
+    closed and passes are still to fix, every disc locks and the caption
+    reads, in the warning colour, "53 passes to fix in the sheet", "3
+    passes to fix in History", or "53 passes to fix in the sheet and 3 in
+    History". While a ring still asks, the discs and the caption follow
+    the maneuvers as before and the head and the row carry "to fix".
+    A not-drivable POI has its discs locked at once with a caption, is
+    never counted among POIs "to go", is left out of the route's count
+    of POIs ("79 of 196 done" on a route of 197 with one not drivable),
+    and must read as neither done nor in error. A not-drivable POI with
+    passes is a POI with passes to fix. New POIs start as Intersection.
+    "Only Left" and "only Right" are not types: they are too rare to add.
 62. Sound and motion. Recording a pass plays a short rising two-note
     chime, removing one (Undo last, Delete) a short falling one. The
     tapped side dips under the finger while a gold ring leaves it,
@@ -675,23 +718,29 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     65).
 64. A type can be changed at any time, also on a POI that already has
     passes. The change applies at once, with the toast "Type set:
-    Straight only" (item 36), when it has none of the three consequences
+    Straight only" (item 36), when it has none of the two consequences
     below. Otherwise it asks first (item 63), and the dialog states the
     consequence in plain words, "in the sheet" for delivered passes and
     "waiting on this tablet" for passes not sent yet:
-    - Passes over the new target: "It already has 66 passes. Straight
-      only needs 40, so the POI becomes done with 26 passes over its
-      target. The sheet will flag it as over target."
-    - Passes on a POI turned Not drivable: "It has 12 passes in the
-      sheet. They stay there, and the app stops counting this POI." or
-      "It has 3 passes waiting on this tablet. They will still be sent,
-      and the app stops counting this POI."
-    - Passes of a maneuver the new type does not allow: "It has 5
-      Straight passes in the sheet. No straight does not allow Straight,
-      so they no longer count. Delete them in History if they were a
-      mistake." or the same with "waiting on this tablet".
-    A POI over its target reads "Done · 26 over target" under its
-    counter, and "done +26" in its row.
+    - Passes that do not fit the new type, a maneuver it does not allow
+      or passes past a share: "It has 26 Left and 27 Right passes in the
+      sheet. Straight only does not allow Left or Right. The app stops
+      counting them, but the sheet keeps them and the export sends them
+      to the client until they are deleted. 2 of them were sent from this
+      tablet, the other 51 were typed in by hand: delete those in the
+      sheet." Passes waiting on this tablet are named apart ("and 2 Right
+      passes waiting on this tablet"), and the switch of item 63 offers to
+      delete this tablet's passes. Past a share the sentence names the
+      share: "It has 31 Left passes in the sheet. No right allows 28, so 3
+      do not fit."
+    - Passes on a POI turned Not drivable: "It has 66 passes in the sheet.
+      Not drivable counts none of them. The sheet keeps them and the
+      export sends them to the client until they are deleted." with the
+      same words for passes waiting on this tablet, which are still sent
+      unless the switch deletes them.
+    After the change the POI reads "13 of 40 · 27 to go · 53 to fix" (item
+    4) and its row "27 to go" with the mark (item 40). There is no "over
+    target" state: a total past the target is passes to fix.
 
 ## "History" panel
 12. Pass list: "POI" / "Route" scope control; each entry shows time and
@@ -704,16 +753,21 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     sheet, since the type itself is stored apart (item 48). A refused one
     reads "Not accepted" (item 47). A waiting type change carries no
     button: it is undone from the type pill, and choosing the old type
-    again drops it (data-model.md). Where the slot is narrow the type's
-    name wraps under "Type:".
+    again drops it (data-model.md). A pass whose removal waits ("Removal
+    waiting") carries one button, "Cancel removal", which drops the
+    waiting removal without a dialog: the pass counts again, since
+    nothing reached the sheet (data-model.md "Event": a waiting event
+    may be dropped). Where the slot is narrow the type's name wraps
+    under "Type:".
 13. Every pass has "Delete", which asks first (item 63). A pass still
     waiting on the tablet is removed outright. A pass already in the
     sheet stays in the list, struck through and labelled "Removal
     waiting" with the warning-colour dot of a waiting pass, only until
-    its removal has been delivered. Then it leaves the list. A line
-    above the list counts the removals still queued, "1 removal waiting
-    to be sent", whatever holds them up, in the scope in view: the POI in
-    POI scope, the route in Route scope. The sync control names the
+    its removal has been delivered, and carries "Cancel removal" (item
+    12) until then. Then it leaves the list. A line above the list
+    counts the removals still queued, "1 removal waiting to be sent",
+    whatever holds them up, in the scope in view: the POI in POI scope,
+    the route in Route scope. The sync control names the
     cause (items 33, 72). A removal the mailbox refused keeps the row
     struck through and reads "Not accepted" in the error colour, with
     the reason, "Send again" and "Cancel removal". "Cancel removal" asks
@@ -729,7 +783,8 @@ appears on screen. An apostrophe on screen is the typographic one (’).
 41. The panel's sub-header ranks its facts rather than listing them: the
     POI or route in view sits in a gold chip, the route and city stay
     as quiet context, and a total appears in a neutral chip: the passes
-    this tablet recorded in the scope in view that still count.
+    this tablet recorded in the scope in view that still count, whatever
+    maneuver the type allows now.
 44. The POI list beside the History panel stays live: tapping another POI
     reloads the panel for it without closing. The panel never carries a
     second POI picker. The grid of all POIs (item 59) opened over History
@@ -964,9 +1019,18 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     removal shows the pass itself in a chip (POI, maneuver, side, time).
     The chip names the side with "from" ("Left from South"), since it
     stands alone there, while a row of History names the side alone
-    (item 12). One line says what happens: a waiting pass is simply
-    dropped from this tablet, a pass already in the sheet gets a removal
-    sent with the next sync, and a refused pass, which never reached the
+    (item 12). A type change whose new type does not fit passes of this
+    tablet shows, under its sentences, a switch "Also delete the 2
+    passes of this tablet", on by default, with the line "They do not
+    fit Straight only. A waiting pass is dropped, a sent one gets a
+    removal." under its label, in the style of the Sound switch of
+    Settings (item 65). With the switch on, "Change" applies the type
+    and deletes those passes exactly as Delete in History does, one
+    removal per sent pass. Passes typed into the sheet cannot be deleted
+    from the tablet, and the dialog says so. One line says what happens:
+    a waiting pass is simply dropped from this tablet, a pass already in
+    the sheet gets a removal sent with the next sync, and a refused
+    pass, which never reached the
     sheet, is dropped like a waiting one ("The sheet refused it, so it is
     simply dropped from this tablet."). A waiting pass that turns out to
     have reached the sheet while the dialog was open gets a removal
@@ -1042,7 +1106,12 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     other confirmations: "Removed: ← South · 56 of 70" for a waiting pass
     undone or deleted, "Removal queued: ← South · 56 of 70" for a
     delivered one, "Type set: Straight only" (item 64) and "Closed after
-    12 s: nothing recorded" (item 8).
+    12 s: nothing recorded" (item 8). The toast "Type set: Straight only"
+    stays six seconds (--dur-toast-undo) and carries a button "Undo",
+    which puts the old type back exactly as choosing it again from the
+    pill does (item 64) and shows "Type set: Intersection" without the
+    button. It does not restore passes the dialog of item 64 deleted.
+    The other toasts stay two seconds (--dur-toast).
 37. A finished POI whose passes have not all been sent: the discs stay
     locked with their "This POI is done" caption, while "Undo last" stays
     live, because undo follows what this tablet recorded, not the POI's

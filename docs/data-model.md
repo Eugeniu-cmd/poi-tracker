@@ -405,8 +405,18 @@ heading's own key, and the app's files for offline loading (CLAUDE.md).
   Approach sides have no limit. The passenger sets the type from the
   working screen, looking at the intersection, without leaving the
   screen. New POIs start as Intersection.
-- "Done", the "N of T" counter, the disc lock and the progress bar follow
-  the POI's own target, never a fixed 70. A not-drivable POI is locked at once.
+- Numbers on screen follow the type (screens.md item 46, decision D1 of
+  2026-10-23): N, the passes that fit, is the sum over the maneuvers the
+  type allows of the smaller of the maneuver's count and its share. "To
+  go" is the target minus N. "To fix" is the POI's total minus N: passes
+  of a maneuver the type does not allow, and passes past a share. A POI
+  is done when N equals the target and nothing is to fix. A not-drivable
+  POI counts every pass as to fix and is locked at once. The tracker
+  holds no type, only the target in X: the sheet keeps every pass and
+  the Generator exports every count to the client, so "to fix" names
+  passes that must be deleted, by a removal from the tablet or by hand in
+  the sheet, before the route is exported. The sheet itself flags only a
+  total over its target.
 - The type itself lives on the tablet only (see "Tablet storage"). The
   tracker holds only the target. A change of type that changes the
   target is a target event: stored on the tablet instantly, delivered

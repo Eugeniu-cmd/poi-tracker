@@ -101,12 +101,21 @@
   v0.21 2026-10-22 — the shell of main-screen v0.37 (screens.md v0.52,
           _tokens.css v0.19): the one gold is lighter, in every frame
           that shows the working screen.
+  v0.22 2026-10-23 — the shell of main-screen v0.38 (screens.md v0.53,
+          _tokens.css v0.20, decision D1): the rules for passes to fix
+          on the rows and in the summary, which no frame here shows,
+          since this page's own sample route is unchanged and has no POI
+          with passes to fix.
+          The rules .switch and .switch::after leave this file's own
+          block, since the shell now holds them for the Sound row and
+          for the type change dialog of main-screen frame I (items 63,
+          65). The Sound rows keep their markup and look the same.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Settings Reference v0.21</title>
+<title>POI Tracker — Settings Reference v0.22</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -160,11 +169,11 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.37. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.38. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.19 or a calc() over
+     line height below is a var() from _tokens.css v0.20 or a calc() over
      them. Literal values are limited to the plain numbers of item 68: 0
      and 1, 1px hairlines, 50% for round shapes, percentages and fr of a
      layout, multipliers of a token, counts, em, ch, lh and cap ratios of
@@ -309,6 +318,8 @@
              min-height: 1lh; }
   .summary span { white-space: nowrap; }
   .summary .err { color: var(--err); font-weight: var(--w-bold); }
+  /* item 3: the POIs with passes to fix, in the warning colour */
+  .summary .fix { color: var(--warn); font-weight: var(--w-bold); }
   .sumport { grid-area: sum; }
   .sumbar { display: none; flex: 1; min-width: 0; }
 
@@ -369,6 +380,11 @@
   .row.active .rt { color: var(--ink); font-weight: var(--w-heavy); }
   .row.active.done .rn, .row.active.done .rt { color: var(--ok); }
   .row.active.err .rn, .row.active.err .rt { color: var(--err); }
+  /* item 40: a row with passes to fix carries a warning triangle before its
+     tag; once nothing is to go the tag reads "to fix" in the warning colour */
+  .rt .rfix { display: inline-block; width: var(--t-small); height: var(--t-small);
+              vertical-align: -0.2em; margin-right: var(--s-1); color: var(--warn); }
+  .row.fix .rt, .row.active.fix .rt { color: var(--warn); }
   /* rail labels sit on a linear track inset by --s-2 and half a label, so the
      first and last keep clear of the hairline and the corner; the finger pad
      spans the rail's inner width */
@@ -423,6 +439,8 @@
           line-height: var(--lh-tight); text-box: trim-both cap alphabetic; }
   .rest span { white-space: nowrap; }
   .rest.ok { color: var(--ok); font-weight: var(--w-bold); }
+  /* item 4: the passes that do not fit the type, "53 to fix", in the warning colour */
+  .rest .fix { color: var(--warn); font-weight: var(--w-bold); }
   /* the compass (item 19): a drawn widget on a raised round face, all in
      tokens. One arrow shows where the car drives: its left half --disc,
      the colour of the maneuver discs, its right half --side, the colour of
@@ -543,8 +561,11 @@
         justify-content: center; gap: calc(var(--s-1) / 2); line-height: var(--lh-tight);
         white-space: nowrap; }
   .rv { font-size: var(--num); font-weight: var(--w-heavy); }
-  /* over its share the ring is full and its number gold: "+3" over "over" */
-  .mz.over .rv { color: var(--warn); }
+  /* item 39: over its share the ring is full and reads "+3 over": the number a
+     step smaller in the warning colour, the plus at half its size and raised,
+     one inline group that .in centres in the ring */
+  .mz.over .rv { color: var(--warn); font-size: calc(0.9 * var(--num)); letter-spacing: -0.03em; }
+  .rv .pl { font-size: 0.5em; vertical-align: 0.45em; margin-right: 0.2em; }
   .in small { font-size: var(--t-tiny); font-weight: var(--w-bold); color: var(--ink-2); }
   /* "Done" is a label, not a number: smaller, in the done colour */
   .in .dn { font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ok); }
@@ -634,6 +655,8 @@
   .lock.ok { color: var(--ok); background: var(--ok-bg); }
   .lock.err { color: var(--err); background: var(--err-bg); }
   .lock.info { color: var(--ink-2); background: var(--panel-strong); }
+  /* item 46: every ring closed and passes still to fix, on the gold tint */
+  .lock.fix { color: var(--warn); background: var(--active); }
 
   /* ---- action bar (items 3, 8, 9, 10, 26, 27, 42, 51): buttons concentric
      with the bar; in landscape the bar runs under the whole main area and
@@ -675,6 +698,19 @@
           justify-content: center; }
   .dbtn.danger { background: var(--danger); border-color: var(--danger); color: var(--on-danger); }
   .dbtn.primary { background: var(--disc); border-color: var(--disc); color: var(--disc-glyph); }
+  /* item 63: the switch row of a type change dialog, in the style of the Sound
+     row of Settings: the label with its line beside the switch */
+  .drow { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-3);
+          border-radius: var(--r-sm); background: var(--man-soft); }
+  .drow .ol b { font-size: var(--t-body); font-weight: var(--w-bold); }
+  .drow .ol small { display: block; font-size: var(--t-small); font-weight: var(--w-medium);
+                    color: var(--ink-2); line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  /* a switch (items 63, 65), on in the colour of the discs: the Sound row of
+     Settings and the type change dialog share it */
+  .switch { flex: none; position: relative; width: calc(var(--s-6) + var(--s-5)); height: var(--s-6);
+            border-radius: var(--s-4); background: var(--disc); }
+  .switch::after { content: ""; position: absolute; top: var(--s-1); right: var(--s-1);
+                   width: var(--s-5); height: var(--s-5); border-radius: 50%; background: var(--disc-glyph); }
   .sheet { position: absolute; inset: var(--s-4); z-index: 26; background: var(--panel-raised);
            border: 1px solid var(--panel-edge); border-radius: var(--r-lg);
            box-shadow: var(--shadow-lift); padding: var(--s-5); display: flex;
@@ -691,19 +727,23 @@
   .legend { display: flex; gap: var(--s-3); flex-wrap: wrap; font-size: var(--t-small);
             font-weight: var(--w-bold); color: var(--ink-2); }
   .lg { display: inline-flex; align-items: center; gap: var(--s-2); }
-  /* six states, as the mini-map's squares (item 59). Each has a colour and a
-     second sign that needs no colour, for sun glare and for eyes that mix red
-     and green: a check when done, a triangle on a sheet error, a ban sign on
-     stripes when not drivable, a --prog bar in progress. "Not started" keeps
+  /* seven states, as the mini-map's squares (item 59). Each has a colour and
+     a second sign that needs no colour, for sun glare and for eyes that mix
+     red and green: a check when done, a triangle on a sheet error, a triangle
+     on the gold tint with passes to fix, a ban sign on stripes when not
+     drivable, a --prog bar in progress. "Not started" keeps
      an --ink-3 edge and an empty bar, so it never reads as a hole. Each
      swatch is a small tile, and the legend's gap is --s-3, so it keeps
-     to one line from 720px wide. */
+     to one line from 800px wide; with seven states it wraps to two rows
+     at the 720px minimum (v0.38). */
   .sw { width: calc(var(--t-small) + var(--s-1)); height: calc(var(--t-small) + var(--s-1));
         border-radius: calc(var(--r-sm) / 2); display: inline-flex; align-items: center;
         justify-content: center; background: transparent; border: 1px solid var(--ink-3); }
   .sw.part, .cell.part { background: var(--prog-bg); border-color: var(--ink-2); }
   .sw.done, .cell.done { background: var(--ok-bg); border-color: var(--ok); }
   .sw.err, .cell.err { background: var(--err-bg); border-color: var(--err); }
+  /* item 59: a POI with passes to fix, the gold tint with a warning triangle */
+  .sw.fix, .cell.fix { background: var(--active); border-color: var(--warn); }
   .sw.nd, .cell.nd { border-color: var(--line);
                      background: repeating-linear-gradient(135deg, var(--hatch) 0 calc(var(--s-1) / 2),
                                  transparent calc(var(--s-1) / 2) var(--s-2)); }
@@ -731,6 +771,7 @@
   .sw .ci { width: var(--s-3); height: var(--s-3); }
   .sw.done .ci, .cell.done .ci { color: var(--ok); }
   .sw.err .ci, .cell.err .ci { color: var(--err); }
+  .sw.fix .ci, .cell.fix .ci { color: var(--warn); }
   .sw.nd .ci, .cell.nd .ci { color: var(--ink-2); }
   .cell.active { box-shadow: inset 0 0 0 var(--s-1) var(--active-line); }
   .cell.active .cn { color: var(--warn); }
@@ -884,11 +925,6 @@
         font-size: var(--t-body); font-weight: var(--w-heavy); color: var(--ink);
         border-radius: calc(var(--r-md) - var(--s-1)); white-space: nowrap; }
   .sg.on { background: var(--panel-raised); box-shadow: var(--shadow); color: var(--ink); }
-  /* Sound (item 65): a switch, on in the colour of the discs */
-  .switch { flex: none; position: relative; width: calc(var(--s-6) + var(--s-5)); height: var(--s-6);
-            border-radius: var(--s-4); background: var(--disc); }
-  .switch::after { content: ""; position: absolute; top: var(--s-1); right: var(--s-1);
-                   width: var(--s-5); height: var(--s-5); border-radius: 50%; background: var(--disc-glyph); }
   /* a deeper page: the link back names the page above (item 74) */
   .back { flex: none; align-self: flex-start; display: inline-flex; align-items: center; gap: var(--s-1);
           height: var(--tap-min); padding: 0 var(--s-2); margin-left: calc(-1 * var(--s-2));
@@ -956,12 +992,12 @@
 
   <p class="eyebrow">Design Reference · docs/references/settings.html</p>
   <h1>POI Tracker — Settings</h1>
-  <p class="meta"><b>v0.21 — 2026-10-22.</b> Settings on the canon after the user's five
+  <p class="meta"><b>v0.22 — 2026-10-23.</b> Settings on the canon after the user's five
      decisions: the gear opens it (item 73), a city is put in use from its page (item 21), a route
      has its own page and loads from the sheet when it is added (item 22), and the dialogs name
      the passes they would lose (items 18, 24). Every value inside the frames is a token of
-     <b>_tokens.css v0.19</b> and every rule follows <b>screens.md v0.52</b>. The shell (top bar,
-     POI column, presets, drag corner, light and dark) is that of <b>main-screen.html v0.37</b>,
+     <b>_tokens.css v0.20</b> and every rule follows <b>screens.md v0.53</b>. The shell (top bar,
+     POI column, presets, drag corner, light and dark) is that of <b>main-screen.html v0.38</b>,
      copied unchanged: presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b>, <b>1333 × 800</b> and <b>1000 × 600</b>. Every frame also drags at its
      bottom-right corner. In portrait Settings is one column that drills down, in landscape the
@@ -970,7 +1006,7 @@
      The consistency audit added frame J, the kept route code of frame E and the POI types in the
      two dialogs (v0.11). The compass follows main-screen v0.29 (v0.12, v0.13). A red button that
      loses passes reads "Erase anyway" or "Delete anyway", and every button takes the size of
-     the action bar's buttons (v0.14). The compass arrow is always on the dial (v0.15). A POI in progress is grey with a dark bar (v0.16). The type pill's numbers are gold (v0.17). Metallic gold replaces the amber, with gold arrows, a gold ring on a disc that can be tapped and a gold N on the compass (v0.18). Discs keep their centre when they scale, and a compass with no heading draws a dashed arrow (v0.19). The "Still needed" card shows rings and a rose, and the type pill's numbers are in ink with "Change type". Every arrow, ring and bar of a POI in progress takes one gold (v0.20), now lighter (v0.21).</p>
+     the action bar's buttons (v0.14). The compass arrow is always on the dial (v0.15). A POI in progress is grey with a dark bar (v0.16). The type pill's numbers are gold (v0.17). Metallic gold replaces the amber, with gold arrows, a gold ring on a disc that can be tapped and a gold N on the compass (v0.18). Discs keep their centre when they scale, and a compass with no heading draws a dashed arrow (v0.19). The "Still needed" card shows rings and a rose, and the type pill's numbers are in ink with "Change type". Every arrow, ring and bar of a POI in progress takes one gold (v0.20), now lighter (v0.21). The shell carries the rules of decision D1, passes to fix, which no frame here shows, and the Sound switch's rules, which the type change dialog of main-screen now shares (v0.22).</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>

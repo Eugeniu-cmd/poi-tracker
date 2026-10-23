@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.19 — 2026-10-22
+   v0.20 — 2026-10-23
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -108,6 +108,9 @@
    dark card, and 2.1:1 on the light card and on the light discs of the
    dark theme, under the 3:1 of v0.18 (the user's choice). Gold text
    (--warn) and gold surfaces (--side) do not change.
+   v0.20 2026-10-23 — two toast durations, --dur-toast for the toast of
+   item 36 and --dur-toast-undo for the type toast that carries Undo
+   (screens.md v0.53, decision D1 of 2026-10-23).
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -212,6 +215,8 @@
   --dur-bounce: 420ms;
   --dur-dip: 220ms;
   --dur-ring: 520ms;
+  --dur-toast: 2000ms;
+  --dur-toast-undo: 6000ms;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-spring: cubic-bezier(0.3, 1.5, 0.5, 1);
   --scale-press: 0.96;
