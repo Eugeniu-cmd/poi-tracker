@@ -14,7 +14,7 @@
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.52 and docs/data-model.md
+  The behaviour follows docs/screens.md v0.53 and docs/data-model.md
   v0.16, and much of it is the code of the working prototype v19.7.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
@@ -46,6 +46,13 @@
           passes, its numbers are in ink and its button reads "Change
           type". One lighter gold, #CCA735, for the arrows, the rings
           and the bar of a POI in progress.
+  v0.5 2026-10-23 — done by rings (screens.md v0.53, decision D1): the
+          counter and every total count the passes that fit the POI's
+          type, "to go" is the sum of the rings' "more", and passes that
+          do not fit are "to fix" on the head, the row, the grid and the
+          summary. A POI is done only when every ring is closed. The disc
+          caption of a done-but-to-fix POI names where the passes are.
+          The type dialog, the toast's Undo and Cancel removal are v0.6.
 -->
 <html lang="en">
 <head>
@@ -532,6 +539,8 @@
              min-height: 1lh; }
   .summary span { white-space: nowrap; }
   .summary .err { color: var(--err); font-weight: var(--w-bold); }
+  /* item 3: the POIs with passes to fix, in the warning colour */
+  .summary .fix { color: var(--warn); font-weight: var(--w-bold); }
   .sumport { grid-area: sum; }
   .sumbar { display: none; flex: 1; min-width: 0; }
 
@@ -592,6 +601,11 @@
   .row.active .rt { color: var(--ink); font-weight: var(--w-heavy); }
   .row.active.done .rn, .row.active.done .rt { color: var(--ok); }
   .row.active.err .rn, .row.active.err .rt { color: var(--err); }
+  /* item 40: a row with passes to fix carries a warning triangle before its
+     tag; once nothing is to go the tag reads "to fix" in the warning colour */
+  .rt .rfix { display: inline-block; width: var(--t-small); height: var(--t-small);
+              vertical-align: -0.2em; margin-right: var(--s-1); color: var(--warn); }
+  .row.fix .rt, .row.active.fix .rt { color: var(--warn); }
   /* rail labels sit on a linear track inset by --s-2 and half a label, so the
      first and last keep clear of the hairline and the corner; the finger pad
      spans the rail's inner width */
@@ -646,6 +660,8 @@
           line-height: var(--lh-tight); text-box: trim-both cap alphabetic; }
   .rest span { white-space: nowrap; }
   .rest.ok { color: var(--ok); font-weight: var(--w-bold); }
+  /* item 4: the passes that do not fit the type, "53 to fix", in the warning colour */
+  .rest .fix { color: var(--warn); font-weight: var(--w-bold); }
   /* the compass (item 19): a drawn widget on a raised round face, all in
      tokens. One arrow shows where the car drives: its left half --disc,
      the colour of the maneuver discs, its right half --side, the colour of
@@ -857,6 +873,8 @@
   .lock.ok { color: var(--ok); background: var(--ok-bg); }
   .lock.err { color: var(--err); background: var(--err-bg); }
   .lock.info { color: var(--ink-2); background: var(--panel-strong); }
+  /* item 46: every ring closed and passes still to fix, on the gold tint */
+  .lock.fix { color: var(--warn); background: var(--active); }
 
   /* ---- action bar (items 3, 8, 9, 10, 26, 27, 42, 51): buttons concentric
      with the bar; in landscape the bar runs under the whole main area and
@@ -914,19 +932,23 @@
   .legend { display: flex; gap: var(--s-3); flex-wrap: wrap; font-size: var(--t-small);
             font-weight: var(--w-bold); color: var(--ink-2); }
   .lg { display: inline-flex; align-items: center; gap: var(--s-2); }
-  /* six states, as the mini-map's squares (item 59). Each has a colour and a
-     second sign that needs no colour, for sun glare and for eyes that mix red
-     and green: a check when done, a triangle on a sheet error, a ban sign on
-     stripes when not drivable, a --prog bar in progress. "Not started" keeps
+  /* seven states, as the mini-map's squares (item 59). Each has a colour and
+     a second sign that needs no colour, for sun glare and for eyes that mix
+     red and green: a check when done, a triangle on a sheet error, a triangle
+     on the gold tint with passes to fix, a ban sign on stripes when not
+     drivable, a --prog bar in progress. "Not started" keeps
      an --ink-3 edge and an empty bar, so it never reads as a hole. Each
      swatch is a small tile, and the legend's gap is --s-3, so it keeps
-     to one line from 720px wide. */
+     to one line from 800px wide; with seven states it wraps to two rows
+     at the 720px minimum (v0.38). */
   .sw { width: calc(var(--t-small) + var(--s-1)); height: calc(var(--t-small) + var(--s-1));
         border-radius: calc(var(--r-sm) / 2); display: inline-flex; align-items: center;
         justify-content: center; background: transparent; border: 1px solid var(--ink-3); }
   .sw.part, .cell.part { background: var(--prog-bg); border-color: var(--ink-2); }
   .sw.done, .cell.done { background: var(--ok-bg); border-color: var(--ok); }
   .sw.err, .cell.err { background: var(--err-bg); border-color: var(--err); }
+  /* item 59: a POI with passes to fix, the gold tint with a warning triangle */
+  .sw.fix, .cell.fix { background: var(--active); border-color: var(--warn); }
   .sw.nd, .cell.nd { border-color: var(--line);
                      background: repeating-linear-gradient(135deg, var(--hatch) 0 calc(var(--s-1) / 2),
                                  transparent calc(var(--s-1) / 2) var(--s-2)); }
@@ -954,6 +976,7 @@
   .sw .ci { width: var(--s-3); height: var(--s-3); }
   .sw.done .ci, .cell.done .ci { color: var(--ok); }
   .sw.err .ci, .cell.err .ci { color: var(--err); }
+  .sw.fix .ci, .cell.fix .ci { color: var(--warn); }
   .sw.nd .ci, .cell.nd .ci { color: var(--ink-2); }
   .cell.active { box-shadow: inset 0 0 0 var(--s-1) var(--active-line); }
   .cell.active .cn { color: var(--warn); }
@@ -1302,7 +1325,7 @@
   var SIDES = ['N', 'S', 'W', 'E'];
   var SIDE_NAME = { N: 'North', S: 'South', W: 'West', E: 'East' };
   var AT = { N: 0, S: 1, W: 2, E: 3, L: 4, St: 5, R: 6 };   // the place in the 7 counts
-  var SIGN = { done: 'i-check', err: 'i-alert', nd: 'i-ban' }; // item 59
+  var SIGN = { done: 'i-check', fix: 'i-alert', err: 'i-alert', nd: 'i-ban' }; // item 59
   var LATER = 'Settings come in a later version';            // item 77
 
   // ================= helpers =================
@@ -1492,6 +1515,21 @@
     var st = c[0] + c[1] + c[2] + c[3], mt = c[4] + c[5] + c[6];
     return { c: c, s: { N: c[0], S: c[1], W: c[2], E: c[3] }, m: { L: c[4], St: c[5], R: c[6] }, total: st, mt: mt, err: st !== mt };
   }
+  // The type's view of the counts (items 4, 46, decision D1): fit, the
+  // passes that fit the type, for each maneuver the type allows the smaller
+  // of its count and its share; fix, the passes that do not fit, all of a
+  // forbidden maneuver's count and the excess of an allowed one; toGo, the
+  // sum of the rings' "more". fit never exceeds the target and equals it
+  // exactly when every ring is closed.
+  function fitFix(k, T) {
+    var fit = 0, fix = 0;
+    MANS.forEach(function (m) {
+      var share = T.split[m] || 0;
+      fit += Math.min(k.m[m], share);
+      fix += Math.max(0, k.m[m] - share);
+    });
+    return { fit: fit, fix: fix, toGo: Math.max(0, T.target - fit) };
+  }
   // The stored type, else the type the sheet's target reads as, else
   // Intersection (data-model.md "Targets per POI")
   function typeOf(rid, n) {
@@ -1500,12 +1538,16 @@
     var b = base(rid, n);
     return b ? (BY_TARGET[b.target] || 'int') : 'int';
   }
+  // 'done' only when every ring is closed and nothing is to fix, 'fix' when
+  // every ring is closed and passes are still to fix, 'part' while a ring
+  // still asks, with or without passes to fix (decision D1)
   function statusOf(rid, n, k) {
-    var T = TYPES[typeOf(rid, n)].target;
+    var T = TYPES[typeOf(rid, n)];
     k = k || counts(rid, n);
-    if (!T) return 'nd';
+    if (!T.target) return 'nd';
     if (k.err) return 'err';
-    if (k.total >= T) return 'done';
+    var f = fitFix(k, T);
+    if (f.fit === T.target) return f.fix > 0 ? 'fix' : 'done';
     return k.total > 0 ? 'part' : '';
   }
   function cityById(id) { for (var i = 0; i < S.cities.length; i++) if (S.cities[i].id === id) return S.cities[i]; return null; }
@@ -1537,17 +1579,21 @@
     for (var n = 1; n <= r.poiCount; n++) { var st = statusOf(r.id, n); if (st !== 'done' && st !== 'nd') return n; }
     return 1;
   }
+  // item 3: "Done" and "to go" count the passes that fit, a POI is done only
+  // in the state 'done', and toFix counts the POIs with passes to fix
   function routeTotals(r) {
-    var done = 0, togo = 0, poisDone = 0, errs = 0, drivable = 0;
+    var done = 0, togo = 0, poisDone = 0, errs = 0, drivable = 0, toFix = 0;
     for (var n = 1; n <= r.poiCount; n++) {
-      var T = TYPES[typeOf(r.id, n)].target, k = counts(r.id, n);
-      if (!T) continue;
+      var T = TYPES[typeOf(r.id, n)], k = counts(r.id, n);
+      if (!T.target) continue;
       drivable += 1;
-      done += Math.min(k.total, T); togo += Math.max(0, T - k.total);
-      if (k.err) errs += 1;
-      else if (k.total >= T) poisDone += 1;
+      var f = fitFix(k, T), st = statusOf(r.id, n, k);
+      done += f.fit; togo += f.toGo;
+      if (f.fix > 0) toFix += 1;
+      if (st === 'err') errs += 1;
+      else if (st === 'done') poisDone += 1;
     }
-    return { done: done, togo: togo, poisDone: poisDone, errs: errs, drivable: drivable };
+    return { done: done, togo: togo, poisDone: poisDone, errs: errs, drivable: drivable, toFix: toFix };
   }
   // the reason a maneuver cannot take a pass now, or null (items 10, 46)
   function lockOf(rid, n, man, k) {
@@ -1556,7 +1602,25 @@
     var st = statusOf(rid, n, k);
     if (st === 'nd') return { cls: 'info', text: 'This POI is not drivable', all: true };
     if (st === 'err') return { cls: 'err', text: 'Sheet error: sides and maneuvers disagree', all: true };
-    if (st === 'done') return { cls: 'ok', text: 'This POI is done: ' + k.total + ' of ' + T.target, all: true };
+    if (st === 'fix') {
+      // every ring closed and passes still to fix (item 46): where they are,
+      // split as consequences() splits them: the baseline minus the waiting
+      // removals is the sheet, and the passes to fix above that are this
+      // tablet's, deleted in History
+      var f = fitFix(k, T), b = base(rid, n), bc = b ? b.c : zeros(), wRem = zeros();
+      S.events.forEach(function (e) {
+        if (e.routeId !== rid || e.poi !== n || e.kind !== 'pass' || e.state !== 'waiting' || e.delta > 0) return;
+        wRem[AT[e.side]] += 1; wRem[AT[e.man]] += 1;
+      });
+      var inSheet = 0;
+      MANS.forEach(function (m) { inSheet += Math.max(0, bc[AT[m]] - wRem[AT[m]] - (T.split[m] || 0)); });
+      var here = f.fix - inSheet;
+      var where = inSheet > 0 && here > 0 ? plural(inSheet, 'pass', 'passes') + ' to fix in the sheet and ' + fmt(here) + ' in History'
+        : inSheet > 0 ? plural(inSheet, 'pass', 'passes') + ' to fix in the sheet'
+        : plural(here, 'pass', 'passes') + ' to fix in History';
+      return { cls: 'fix', text: where, all: true };
+    }
+    if (st === 'done') return { cls: 'ok', text: 'This POI is done: ' + fitFix(k, T).fit + ' of ' + T.target, all: true };
     if (man) {
       if (!T.split[man]) return { cls: 'info', text: T.cap };
       if (k.m[man] > T.split[man]) return { cls: 'info', text: MAN_NAME[man] + ' is over its share: ' + k.m[man] + ' of ' + T.split[man] };
@@ -1704,11 +1768,15 @@
     }
     var N = r.poiCount, act = active(), tot = routeTotals(r), dots = '', rows = '';
     for (var n = 1; n <= N; n++) {
-      var k = counts(r.id, n), st = statusOf(r.id, n, k), T = TYPES[typeOf(r.id, n)].target;
-      dots += '<i class="' + (n === act ? 'act' : st) + '"></i>';
-      var tag = st === 'nd' ? 'not drivable' : st === 'err' ? 'error' : st === 'done' ? (k.total > T ? 'done +' + (k.total - T) : 'done') : (T - k.total) + ' to go';
-      var pct = T ? Math.round(Math.min(Math.max(k.total, 0), T) / T * 100) : 0;
-      var rcls = 'row' + (st && st !== 'part' ? ' ' + st : '') + (n === act ? ' active' : '');
+      var k = counts(r.id, n), st = statusOf(r.id, n, k), T = TYPES[typeOf(r.id, n)], f = fitFix(k, T);
+      // the dots have no colour for passes to fix: the part colour (item 58)
+      dots += '<i class="' + (n === act ? 'act' : st === 'fix' ? 'part' : st) + '"></i>';
+      // item 40: a row with passes to fix carries a warning triangle before
+      // "N to go"; once nothing is to go the tag reads "to fix"
+      var tag = st === 'nd' ? 'not drivable' : st === 'err' ? 'error' : st === 'done' ? 'done' : st === 'fix' ? 'to fix'
+        : (f.fix > 0 ? icon('i-alert', 'rfix') : '') + f.toGo + ' to go';
+      var pct = T.target ? Math.round(Math.min(f.fit, T.target) / T.target * 100) : 0;
+      var rcls = 'row' + (st && st !== 'part' ? ' ' + st : '') + (st === 'part' && f.fix > 0 ? ' fix' : '') + (n === act ? ' active' : '');
       rows += '<button class="' + rcls + '" type="button" data-poi="' + n + '" aria-label="POI ' + n + '">' +
         '<span class="rn">' + n + '</span><span class="rc"><span class="rb"><i style="width: ' + pct + '%"></i></span>' +
         '<span class="rt">' + tag + '</span></span></button>';
@@ -1741,14 +1809,18 @@
   function renderHead() {
     var r = route();
     if (!r) { setHTML($('head'), '<div class="big dash">—</div><div class="hcol"><div class="plabel">POI</div></div>'); return; }
-    var n = active(), k = counts(r.id, n), T = TYPES[typeOf(r.id, n)], st = statusOf(r.id, n, k);
+    var n = active(), k = counts(r.id, n), T = TYPES[typeOf(r.id, n)], st = statusOf(r.id, n, k), f = fitFix(k, T);
     var cnt, rest, restCls = 'rest';
     if (st === 'nd') { cnt = 'Not drivable'; rest = 'Not counted'; }
     else {
-      cnt = k.total + ' of ' + T.target;
+      // item 4: the counter counts the passes that fit; passes that do not
+      // fit are "to fix" in the warning colour, alone once nothing is to go
+      cnt = f.fit + ' of ' + T.target;
       if (st === 'err') rest = '<span>Sides ' + k.total + ' ·</span> <span>maneuvers ' + k.mt + '</span>';
-      else if (st === 'done') { restCls += ' ok'; rest = k.total > T.target ? 'Done · ' + (k.total - T.target) + ' over target' : 'Done'; }
-      else rest = (T.target - k.total) + ' to go';
+      else if (st === 'done') { restCls += ' ok'; rest = 'Done'; }
+      else if (st === 'fix') { restCls += ' fix'; rest = '<span class="fix">' + f.fix + ' to fix</span>'; }
+      else if (f.fix > 0) rest = '<span>' + f.toGo + ' to go ·</span> <span class="fix">' + f.fix + ' to fix</span>';
+      else rest = f.toGo + ' to go';
     }
     setHTML($('head'), '<div class="big">' + n + '</div><div class="hcol"><div class="plabel">POI</div>' +
       '<div class="cnt" id="cnt">' + cnt + '</div><div class="' + restCls + '">' + rest + '</div></div>');
@@ -1853,10 +1925,12 @@
     var r = route();
     if (!r) return '';
     var t = routeTotals(r);
-    var seg = ['Done ' + fmt(t.done), fmt(t.togo) + ' to go', t.poisDone + ' of ' + t.drivable + ' POIs done'];
-    if (t.errs) seg.push(plural(t.errs, 'error', 'errors'));
+    // item 3: "K to fix", the POIs with passes to fix, before the error count
+    var seg = [['Done ' + fmt(t.done)], [fmt(t.togo) + ' to go'], [t.poisDone + ' of ' + t.drivable + ' POIs done']];
+    if (t.toFix) seg.push([t.toFix + ' to fix', 'fix']);
+    if (t.errs) seg.push([plural(t.errs, 'error', 'errors'), 'err']);
     return seg.map(function (s, i) {
-      return '<span' + (t.errs && i === seg.length - 1 ? ' class="err"' : '') + '>' + s + (i < seg.length - 1 ? ' ·' : '') + '</span>';
+      return '<span' + (s[1] ? ' class="' + s[1] + '"' : '') + '>' + s[0] + (i < seg.length - 1 ? ' ·' : '') + '</span>';
     }).join(' ');
   }
   function renderSummary() {
@@ -1886,8 +1960,8 @@
     if (find('grid') && r) {
       var cells = '', act = active();
       for (var i = 1; i <= r.poiCount; i++) {
-        var k = counts(r.id, i), st = statusOf(r.id, i, k), T = TYPES[typeOf(r.id, i)].target;
-        var pct = T ? Math.round(Math.min(Math.max(k.total, 0), T) / T * 100) : 0;
+        var k = counts(r.id, i), st = statusOf(r.id, i, k), T = TYPES[typeOf(r.id, i)], f = fitFix(k, T);
+        var pct = T.target ? Math.round(Math.min(f.fit, T.target) / T.target * 100) : 0;
         cells += '<button class="cell' + (st ? ' ' + st : '') + (i === act ? ' active' : '') + '" type="button" data-poi="' + i + '" aria-label="POI ' + i + '">' +
           '<span class="cn">' + i + '</span>' + (SIGN[st] ? icon(SIGN[st], 'ci') : '<span class="cb"><i style="width: ' + pct + '%"></i></span>') + '</button>';
       }
@@ -1896,6 +1970,7 @@
         '<span class="stt"><span class="stitle">All POIs</span><span class="sroute">' + esc(r.code) + '</span></span></div>' +
         '<div class="legend"><span class="lg"><span class="sw act"></span>Current</span><span class="lg"><span class="sw done">' + icon('i-check', 'ci') + '</span>Done</span>' +
         '<span class="lg"><span class="sw part"></span>In progress</span><span class="lg"><span class="sw"></span>Not started</span>' +
+        '<span class="lg"><span class="sw fix">' + icon('i-alert', 'ci') + '</span>To fix</span>' +
         '<span class="lg"><span class="sw err">' + icon('i-alert', 'ci') + '</span>Sheet error</span><span class="lg"><span class="sw nd">' + icon('i-ban', 'ci') + '</span>Not drivable</span></div>' +
         '<div class="grid" id="grid">' + cells + '</div></div>';
     }

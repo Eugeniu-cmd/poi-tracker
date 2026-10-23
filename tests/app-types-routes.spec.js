@@ -1,8 +1,12 @@
-/* POI Tracker tests — scenarios C1 to C7: a type change with and without
+/* POI Tracker tests — scenarios C1 to C9: a type change with and without
    consequences, Not drivable, passes of a maneuver the new type forbids,
-   the captions under the arrows and the route menu (prompt Tests C;
-   screens.md items 4, 10, 39, 43, 46, 60, 63, 64; data-model.md "Targets
-   per POI", "Event").
+   the captions under the arrows, the route menu, and done by rings: the
+   counter and every total count the passes that fit the type, passes
+   that do not fit are "to fix" on the head, the row, the grid and the
+   summary, and a POI is done only when every ring is closed (prompt
+   Tests C, prompt Done step 2a; screens.md items 3, 4, 10, 39, 40, 43,
+   46, 59, 60, 63, 64, decision D1; data-model.md "Targets per POI",
+   "Event").
 */
 'use strict';
 const { test, expect, UUID_V4, text, store, layers, holdsLock, openSample, recordPass, openHistory, reloadWith } = require('./fixtures');
@@ -12,6 +16,34 @@ const TYPE_NAMES = ['Intersection', 'No straight', 'No left', 'No right', 'Strai
 
 function targets(s) { return s.events.filter(function (e) { return e.kind === 'target'; }); }
 function routeId(s) { return s.cities[0].routes[0].id; }   // SAMPLE-001
+// the split of every type (screens.md item 46) and the type a sheet target
+// reads as, as app/index.html holds them
+const SPLIT = { int: { L: 28, St: 14, R: 28 }, nost: { L: 35, St: 0, R: 35 }, nol: { L: 0, St: 14, R: 56 },
+                nor: { L: 56, St: 14, R: 0 }, str: { L: 0, St: 40, R: 0 }, nd: { L: 0, St: 0, R: 0 } };
+const BY_TARGET = { 70: 'int', 40: 'str', 0: 'nd' };
+const AT = { N: 0, S: 1, W: 2, E: 3, L: 4, St: 5, R: 6 };
+// the POIs of route rid with passes to fix, counted from the store the way
+// the app counts them (item 3): the baseline plus the waiting passes,
+// against the split of the stored type or of the baseline's target; a
+// not-drivable POI is left out, as the app's totals leave it out
+function toFixOf(s, rid) {
+  const r = s.cities[0].routes.find(function (q) { return q.id === rid; });
+  const bl = s.baseline[rid] || {}, ty = s.types[rid] || {};
+  let n = 0;
+  for (let p = 1; p <= r.poiCount; p++) {
+    const b = bl[p], c = b ? b.c.slice() : [0, 0, 0, 0, 0, 0, 0];
+    s.events.forEach(function (e) {
+      if (e.routeId !== rid || e.poi !== p || e.kind !== 'pass' || e.state !== 'waiting') return;
+      c[AT[e.side]] += e.delta; c[AT[e.man]] += e.delta;
+    });
+    const t = ty[p] || (b ? (BY_TARGET[b.target] || 'int') : 'int');
+    if (t === 'nd') continue;
+    const sp = SPLIT[t];
+    const fix = Math.max(0, c[4] - sp.L) + Math.max(0, c[5] - sp.St) + Math.max(0, c[6] - sp.R);
+    if (fix > 0) n += 1;
+  }
+  return n;
+}
 // the toast on, reading exactly t (a type change shows no icon)
 async function expectToastText(page, t) {
   const toast = page.locator('#toast');
@@ -45,7 +77,7 @@ async function setStraightOnly122(page) {
   await expect(dlg).toBeVisible();
   await dlg.locator('[data-act="dlg-ok"]').click();
   await expect(dlg).toHaveCount(0);
-  await expect(page.locator('#cnt')).toHaveText('66 of 40');
+  await expect(page.locator('#cnt')).toHaveText('13 of 40');
 }
 
 test('C1 · A type change with consequences', async ({ page }) => {
@@ -79,12 +111,21 @@ test('C1 · A type change with consequences', async ({ page }) => {
 
   await expectToastText(page, 'Type set: Straight only');
   expect(await text(page.locator('#pill b'))).toBe('Straight only');
-  await expect(page.locator('#cnt')).toHaveText('66 of 40');
-  await expect(page.locator('#head .rest')).toHaveText('Done · 26 over target');
-  await expect(page.locator('#col .row[data-poi="122"] .rt')).toHaveText('done +26');
+  // decision D1: 13 Straight fit, 26 Left and 27 Right are to fix, the
+  // Straight ring still asks (items 4, 40, 46)
+  await expect(page.locator('#cnt')).toHaveText('13 of 40');
+  const rest = page.locator('#head .rest');
+  await expect(rest).toHaveText('27 to go · 53 to fix');
+  await expect(rest.locator('.fix')).toHaveText('53 to fix');
+  await expect(rest).not.toHaveClass(/\bok\b/);
+  const row = page.locator('#col .row[data-poi="122"]');
+  await expect(row).toHaveClass(/\bfix\b/);
+  await expect(row).not.toHaveClass(/\bdone\b/);
+  await expect(row.locator('.rt')).toHaveText('27 to go');
+  await expect(row.locator('.rt svg.rfix use')).toHaveAttribute('href', '#i-alert');
   const lock = page.locator('#lock');
   await expect(lock).toBeVisible();
-  await expect(lock).toHaveText('This POI is done: 66 of 40');
+  await expect(lock).toHaveText('Straight only at this POI');
 
   const s = await store(page);
   expect(s.types[rid]['122']).toBe('str');
@@ -231,7 +272,15 @@ test('C6 · Captions of a full share', async ({ page }) => {
   await reloadWith(page, s);
   await expect(page.locator('#city')).toHaveText('Sample city');
   await expect(page.locator('#head .big')).toHaveText('136');
-  await expect(page.locator('#cnt')).toHaveText('31 of 70');
+  // decision D1: 28 of the 31 Left fit, 3 are to fix, the POI is in progress
+  await expect(page.locator('#cnt')).toHaveText('28 of 70');
+  const rest = page.locator('#head .rest');
+  await expect(rest).toHaveText('42 to go · 3 to fix');
+  await expect(rest.locator('.fix')).toHaveText('3 to fix');
+  const row136 = page.locator('#col .row[data-poi="136"]');
+  await expect(row136).toHaveClass(/\bfix\b/);
+  await expect(row136.locator('.rt')).toHaveText('42 to go');
+  await expect(row136.locator('.rt svg.rfix')).toHaveCount(1);
   const lock = page.locator('#lock');
   await expect(lock).toBeVisible();
   await expect(lock).toHaveText('Left is over its share: 31 of 28');
@@ -251,6 +300,14 @@ test('C6 · Captions of a full share', async ({ page }) => {
   await expect(lock).toHaveText('Left is done: 28 of 28');
   await expect(page.locator('#stage [data-man="L"]')).toHaveClass(/\blocked\b/);
   expect(await text(left.locator('.in'))).toBe('Done');
+  // 68 of 70 in the sample, nothing to fix: no mark and no "to fix"
+  await expect(page.locator('#cnt')).toHaveText('68 of 70');
+  await expect(rest).toHaveText('2 to go');
+  await expect(rest.locator('.fix')).toHaveCount(0);
+  const row124 = page.locator('#col .row[data-poi="124"]');
+  await expect(row124).not.toHaveClass(/\bfix\b/);
+  await expect(row124.locator('.rt')).toHaveText('2 to go');
+  await expect(row124.locator('.rt svg.rfix')).toHaveCount(0);
 });
 
 test('C7 · The route menu and the POI it opens', async ({ page }) => {
@@ -286,4 +343,125 @@ test('C7 · The route menu and the POI it opens', async ({ page }) => {
   await expect(page.locator('#routeBtn')).toHaveText('SAMPLE-001');
   await expect(page.locator('#head .big')).toHaveText('136');
   await expect(page.locator('#cnt')).toHaveText('41 of 70');
+});
+
+test('C8 · Done is every ring closed', async ({ page }) => {
+  // (a) rings open: POI 122 Straight only, 13 Straight of 40, 26 Left and
+  // 27 Right to fix; Straight is live, Left and Right locked with the
+  // per-maneuver caption (items 4, 26, 46)
+  await openSample(page);
+  const s0 = await store(page);
+  const rid = routeId(s0);
+  await setStraightOnly122(page);
+  await expect(page.locator('#cnt')).toHaveText('13 of 40');
+  const rest = page.locator('#head .rest');
+  await expect(rest).toHaveText('27 to go · 53 to fix');
+  await expect(page.locator('#stage [data-man="St"]')).not.toHaveClass(/\blocked\b/);
+  await expect(page.locator('#stage [data-man="L"]')).toHaveClass(/\blocked\b/);
+  await expect(page.locator('#stage [data-man="R"]')).toHaveClass(/\blocked\b/);
+  const lock = page.locator('#lock');
+  await expect(lock).toBeVisible();
+  await expect(lock).toHaveText('Straight only at this POI');
+  await expect(lock).toHaveClass(/\binfo\b/);
+
+  // (b) rings closed: Straight reaches 40 in the sheet (the sides of
+  // main-screen.html frame T, 93 in all), the 53 stay to fix, so the POI
+  // is not done: every disc locked, the caption names the sheet, the row
+  // reads "to fix" and is not green (items 40, 46)
+  const s1 = await store(page);
+  s1.baseline[rid]['122'] = { c: [36, 17, 20, 20, 26, 40, 27], target: 40 };
+  await reloadWith(page, s1);
+  await expect(page.locator('#city')).toHaveText('Sample city');
+  await expect(page.locator('#head .big')).toHaveText('122');
+  await expect(page.locator('#cnt')).toHaveText('40 of 40');
+  await expect(rest).toHaveText('53 to fix');
+  await expect(rest).toHaveClass(/\bfix\b/);
+  await expect(rest).not.toHaveClass(/\bok\b/);
+  await expect(rest.locator('.fix')).toHaveText('53 to fix');
+  for (const man of ['L', 'St', 'R']) {
+    await expect(page.locator('#stage [data-man="' + man + '"]')).toHaveClass(/\blocked\b/);
+  }
+  await expect(lock).toBeVisible();
+  await expect(lock).toHaveText('53 passes to fix in the sheet');
+  await expect(lock).toHaveClass(/\bfix\b/);
+  const row = page.locator('#col .row[data-poi="122"]');
+  await expect(row).toHaveClass(/\bfix\b/);
+  await expect(row).toHaveClass(/\bactive\b/);
+  await expect(row).not.toHaveClass(/\bdone\b/);
+  await expect(row.locator('.rt')).toHaveText('to fix');
+  await expect(row.locator('.rt svg.rfix')).toHaveCount(0);
+  expect(await row.locator('.rt').evaluate(function (el) { return getComputedStyle(el).color; })).toBe('rgb(139, 113, 30)');   // --warn on light, not --ok
+  // the summary: not among the POIs done, counted in "to fix" (item 3)
+  const sum = page.locator('#sumport');
+  await expect(sum).toContainText('79 of 196 POIs done');
+  const toFix = toFixOf(s1, rid);
+  expect(toFix).toBeGreaterThan(0);
+  await expect(sum.locator('span.fix')).toHaveText(new RegExp('^' + toFix + ' to fix( ·)?$'));
+
+  // (c) the sample as it was, no POI with passes to fix: no "to fix"
+  // segment, POI 124 in progress
+  await reloadWith(page, s0);
+  await expect(page.locator('#city')).toHaveText('Sample city');
+  await selectPoi(page, 124);
+  await expect(page.locator('#cnt')).toHaveText('68 of 70');
+  await expect(rest).toHaveText('2 to go');
+  expect(toFixOf(s0, rid)).toBe(0);
+  await expect(sum.locator('span.fix')).toHaveCount(0);
+  await expect(sum).toContainText('79 of 196 POIs done');
+});
+
+test('C9 · The summary and the grid count to fix', async ({ page }) => {
+  await openSample(page);
+  const rid = routeId(await store(page));
+  await setStraightOnly122(page);
+  const s1 = await store(page);
+  const toFix = toFixOf(s1, rid);
+  expect(toFix).toBeGreaterThan(0);
+  // the segment "N to fix" in the warning class, before the error segment
+  const sum = page.locator('#sumport');
+  const seg = sum.locator('span.fix');
+  await expect(seg).toHaveCount(1);
+  await expect(seg).toHaveText(new RegExp('^' + toFix + ' to fix ·$'));
+  await expect(sum.locator('span.fix + span.err')).toHaveText('1 error');
+  await expect(sum.locator('span').last()).toHaveClass(/\berr\b/);
+  expect(await seg.evaluate(function (el) { return getComputedStyle(el).color; })).toBe('rgb(139, 113, 30)');   // --warn on light
+
+  // the grid: the legend has "To fix" between "Not started" and "Sheet
+  // error"; POI 122, whose Straight ring still asks, keeps its bar (item 59)
+  const mmap = page.locator('#col .mmap');
+  await mmap.click();
+  const sheet = page.locator('.sheet');
+  await expect(sheet).toBeVisible();
+  const legend = sheet.locator('.legend .lg');
+  await expect(legend).toHaveCount(7);
+  expect(await legend.allInnerTexts()).toEqual(['Current', 'Done', 'In progress', 'Not started', 'To fix', 'Sheet error', 'Not drivable']);
+  await expect(legend.nth(4).locator('.sw.fix svg.ci use')).toHaveAttribute('href', '#i-alert');
+  const cell = sheet.locator('.cell[data-poi="122"]');
+  await expect(cell).toHaveClass(/\bpart\b/);
+  await expect(cell).not.toHaveClass(/\bfix\b/);
+  await expect(cell.locator('.cb')).toHaveCount(1);
+  await expect(cell.locator('.ci')).toHaveCount(0);
+  await sheet.locator('[data-act="close-grid"]').first().click();
+  await expect(sheet).toHaveCount(0);
+  await expect.poll(() => layers(page)).toBe(0);
+
+  // every ring closed and 53 to fix: the tile takes the fix class and the
+  // alert sign, the dot keeps the part colour (items 58, 59)
+  s1.baseline[rid]['122'] = { c: [36, 17, 20, 20, 26, 40, 27], target: 40 };
+  await reloadWith(page, s1);
+  await expect(page.locator('#cnt')).toHaveText('40 of 40');
+  await expect(sum.locator('span.fix')).toHaveText(new RegExp('^' + toFixOf(s1, rid) + ' to fix ·$'));
+  await expect(page.locator('#col .dots i').nth(121)).toHaveClass(/^act$/);
+  await selectPoi(page, 124);
+  await expect(page.locator('#col .dots i').nth(121)).toHaveClass(/^part$/);
+  await mmap.click();
+  await expect(sheet).toBeVisible();
+  await expect(cell).toHaveClass(/\bfix\b/);
+  await expect(cell).not.toHaveClass(/\bpart\b/);
+  await expect(cell.locator('.cb')).toHaveCount(0);
+  await expect(cell.locator('svg.ci use')).toHaveAttribute('href', '#i-alert');
+  expect(await cell.locator('.ci').evaluate(function (el) { return getComputedStyle(el).color; })).toBe('rgb(139, 113, 30)');   // --warn on light
+  await sheet.locator('[data-act="close-grid"]').first().click();
+  await expect(sheet).toHaveCount(0);
+  await expect.poll(() => layers(page)).toBe(0);
 });
