@@ -129,12 +129,22 @@
           (items 12, 13); .hr.del .hl1 joins the rule of .hr.rej .hl1,
           so the actions line sits under the row as a refused row's
           does.
+  v0.26 2026-10-25 — the shell of main-screen v0.40 (screens.md v0.55,
+          _tokens.css v0.22), and with it the shell of v0.39 (screens.md
+          v0.54, _tokens.css v0.21), which Canon D2 did not copy here:
+          the card at scale 3, the full-size plus and the side rules of
+          decision D2, the icons on the card on --card-glyph, and the
+          colours of emerald and warm gold, which come through the
+          tokens. History covers the main area, so no frame here shows
+          the card or the discs: the POI column beside the panel, the
+          panel and its rows draw the new colours. No frame here shows a
+          Straight only POI.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.25</title>
+<title>POI Tracker — History Reference v0.26</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -188,11 +198,11 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.38. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.40. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.20 or a calc() over
+     line height below is a var() from _tokens.css v0.22 or a calc() over
      them. Literal values are limited to the plain numbers of item 68: 0
      and 1, 1px hairlines, 50% for round shapes, percentages and fr of a
      layout, multipliers of a token, counts, em, ch, lh and cap ratios of
@@ -379,8 +389,9 @@
         overflow: hidden; }
   .rb i, .cb i { display: block; height: 100%; background: var(--ink-3);
                  border-radius: inherit; }
-  /* items 2 and 59: a POI in progress has a gold --prog bar (--gold-line, the gold of the
-     arrows, v0.36), in the column and in the grid */
+  /* items 2 and 59: a POI in progress has a gold --prog bar (--gold-line, the gold of
+     the rings and of the icons on the card, which take --card-glyph; the arrows on the
+     discs and the type tile take --man-glyph, v0.40), in the column and in the grid */
   .rb i, .cell.part .cb i { background: var(--prog); }
   .rt { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
         line-height: var(--lh-tight); white-space: nowrap; }
@@ -539,10 +550,13 @@
      below left and Right below right, as the discs stand under the card,
      and beside them the sides as a rose of four diamonds, N above, E
      right, S below and W left. The pyramid and the rose share one centre
-     line and equal space around them. The card is a container: its own
-     width sets the size of the rings and the rose. ---- */
-  .card { background: var(--panel); border: 1px solid var(--panel-edge);
-          border-radius: var(--r-md); box-shadow: var(--shadow); padding: var(--s-4);
+     line and equal space around them, measured on the drawn rings and the
+     tips of the diamonds (v0.39). The card is a container: its own width
+     sets the size of the rings, their columns and the rose. Its padding
+     is one knob, --pad: the compact, the compact landscape and the roomy
+     card set it, and .two reads it. ---- */
+  .card { --pad: var(--s-4); background: var(--panel); border: 1px solid var(--panel-edge);
+          border-radius: var(--r-md); box-shadow: var(--shadow); padding: var(--pad);
           display: flex; flex-direction: column; gap: var(--s-3);
           container-type: inline-size; container-name: card; }
   .spt { font-size: var(--t-small); letter-spacing: calc(var(--s-1) / 2);
@@ -554,23 +568,36 @@
         font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight);
         white-space: nowrap; }
   .lp .spt { margin-right: var(--s-1); }
-  /* the icon is 1em of the text, so a head with LAST is as tall as one without */
-  .lp .ic { align-self: center; color: var(--man-glyph); }
-  .two { --ring: var(--card-ring); --rose: var(--card-rose); --num: var(--t-title);
-         display: flex; align-items: center; justify-content: space-evenly; }
-  /* the pyramid: three columns, Left and Right 0.8 of a ring lower than
-     Straight. On a tight card it may give up width, and its columns then
-     overflow evenly into the card's padding. */
+  /* the icon is 1em of the text, so a head with LAST is as tall as one without;
+     it takes the gold of the card's icons (--card-glyph, v0.40) */
+  .lp .ic { align-self: center; color: var(--card-glyph); }
+  /* equal space on the drawn shapes (v0.39): .two spans the card's whole
+     width, padding and hairline included, and the pyramid and the rose
+     give up their overhang in negative margins. The Left and Right
+     circles sit (col - ring) / 2 plus 2 of the drawing's 76 units inside
+     the pyramid's box, and a diamond's rounded tip sits (√2 - 1) of its
+     radius inside the rose's box. So space-evenly puts the same space
+     before the Left circle, between the Right circle and the West tip,
+     and after the East tip. */
+  .two { --ring: var(--card-ring); --col: var(--card-col); --rose: var(--card-rose);
+         --num: var(--t-title); display: flex; align-items: center;
+         justify-content: space-evenly; margin-inline: calc(-1 * var(--pad) - 1px); }
+  /* the pyramid: three columns of --col, Left and Right --card-rise rings
+     lower than Straight. On a tight card it may give up width, and its
+     columns then overflow evenly into the card's padding. */
   .pyr { flex: 0 1 auto; min-width: 0; display: grid; grid-template-columns: repeat(3, auto);
-         justify-content: center; column-gap: var(--s-1); }
+         justify-content: center; column-gap: var(--s-1);
+         margin-inline: calc(-1 * ((var(--col) - var(--ring)) / 2 + var(--ring) / 38)); }
   .mz { display: flex; flex-direction: column; align-items: center; gap: var(--s-1);
-        width: calc(var(--ring) + var(--s-4)); }
-  .mz.low { margin-top: calc(0.8 * var(--ring)); }
+        width: var(--col); }
+  .mz.low { margin-top: calc(var(--card-rise) * var(--ring)); }
   .wheel { position: relative; width: var(--ring); height: var(--ring); }
   /* the ring starts at the top and runs clockwise. Its circles are SVG
      geometry: a track and, once a pass counts, the part driven, both 6 of
-     the drawing's 76 units wide. The part driven takes the gold of the
-     arrows (--card-fill, --gold-line). */
+     the drawing's 76 units wide. The part driven takes the one gold
+     (--card-fill, --gold-line): the icons on the card take it as
+     --card-glyph, the arrows on the discs and the type tile take
+     --man-glyph (item 5, v0.40). */
   .pg { position: absolute; inset: 0; width: 100%; height: 100%; rotate: -90deg; fill: none; }
   .pg .bg { stroke: var(--line); }
   .pg .fg { stroke: var(--card-fill); stroke-linecap: round; }
@@ -581,20 +608,27 @@
         white-space: nowrap; }
   .rv { font-size: var(--num); font-weight: var(--w-heavy); }
   /* item 39: over its share the ring is full and reads "+3 over": the number a
-     step smaller in the warning colour, the plus at half its size and raised,
-     one inline group that .in centres in the ring */
-  .mz.over .rv { color: var(--warn); font-size: calc(0.9 * var(--num)); letter-spacing: -0.03em; }
-  .rv .pl { font-size: 0.5em; vertical-align: 0.45em; margin-right: 0.2em; }
+     step smaller in the warning colour, the plus as big as the digits and on
+     their middle line (v0.39), one inline group that .in centres in the ring.
+     The tight letter-spacing also follows the last digit, so the box ends
+     0.03em short on the right: a margin of that size restores the balance,
+     and the ink, not the box, sits centred. */
+  .mz.over .rv { color: var(--warn); font-size: calc(0.9 * var(--num)); letter-spacing: -0.03em;
+                 margin-right: 0.03em; }
+  .rv .pl { font-size: 1em; vertical-align: 0; margin-right: 0.02em; }
   .in small { font-size: var(--t-tiny); font-weight: var(--w-bold); color: var(--ink-2); }
   /* "Done" is a label, not a number: smaller, in the done colour */
   .in .dn { font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ok); }
   .mn { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--t-small);
         font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight);
         white-space: nowrap; }
-  .mn .ic { width: var(--card-icon); height: var(--card-icon); color: var(--man-glyph); }
+  /* the icons on the card take --card-glyph, the arrows on the discs and the
+     type tile --man-glyph (item 5, v0.40) */
+  .mn .ic { width: var(--card-icon); height: var(--card-icon); color: var(--card-glyph); }
   /* the rose: a 2 x 2 grid turned 45 degrees. A square turned 45 degrees
      fits its box inset by (1 - 1/√2) / 2 of the box on every edge */
-  .rose { flex: none; position: relative; width: var(--rose); height: var(--rose); }
+  .rose { flex: none; position: relative; width: var(--rose); height: var(--rose);
+          margin-inline: calc(-0.4142 * var(--r-sm)); }
   .grid4 { position: absolute; inset: calc(0.146 * var(--rose)); display: grid;
            grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: var(--s-2);
            rotate: 45deg; }
@@ -605,15 +639,28 @@
   .dl { font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--warn); }
   .dv { font-size: var(--num); font-weight: var(--w-heavy); }
   .dm.z .dmi { opacity: var(--o-zero); }
+  /* decision D2 (items 39, 46, v0.39): on a Straight only POI a side with
+     passes shows its count against 20, "of 20" under it. At exactly 20 the
+     count and its line take the done colour; past 20 the line reads "+3
+     over" and both take the warning colour. Nothing locks, and a side at
+     zero shows no line. Ten or more past 20 the line reads "+16" alone, and
+     the markup leaves out " over" (v0.40). */
+  .of { font-size: var(--t-tiny); font-weight: var(--w-bold); color: var(--ink-2);
+        line-height: var(--lh-tight); white-space: nowrap; }
+  .dm.ok .dv, .dm.ok .of { color: var(--ok); }
+  .dm.ov .dv, .dm.ov .of { color: var(--warn); }
   /* narrower cards: the portrait minimum and the left group beside the discs */
   @container card (width < 480px) {
-    .two { --ring: var(--card-ring-narrow); --rose: var(--card-rose-narrow); --num: var(--t-label); }
+    .two { --ring: var(--card-ring-narrow); --col: var(--card-col-narrow);
+           --rose: var(--card-rose-narrow); --num: var(--t-label); }
+    /* "+3 over" would cross the diamond's edge: past 20 the line keeps "+3" alone */
+    .dm.ov .of span { display: none; }
   }
   @container card (width <= 380px) {
-    .two { --ring: var(--card-ring-small); --rose: var(--card-rose-small); }
+    .two { --ring: var(--card-ring-small); --col: var(--card-col-small);
+           --rose: var(--card-rose-small); }
     .pyr { column-gap: var(--s-2); }
-    .mz { width: calc(var(--ring) + var(--s-2)); }
-    .in small { display: none; }
+    .in small, .of { display: none; }
   }
 
   /* ---- discs (items 5, 6, 10, 19, 26, 46). The closed cluster sits in the
@@ -831,7 +878,7 @@
      narrow; the card tightens its padding (its rings and rose follow its
      own width, item 39), and the pill shows its chevron without the word */
   @container info (max-width: 400px) {
-    .card { padding: var(--s-3); }
+    .card { --pad: var(--s-3); }
     .tchg span { display: none; }
   }
   /* ---- the compact step (item 70): on a short screen display text shrinks
@@ -867,7 +914,7 @@
      left group is at least 370px wide. In a frame dragged narrower the
      compact card stays. The pill keeps its compact look. */
   @container (max-height: 700px) and (orientation: landscape) and (min-width: 1000px) {
-    .card { padding: var(--s-4) var(--s-3); }
+    .card { --pad: var(--s-3); padding: var(--s-4) var(--pad); }
   }
   /* ---- the compass's sizes (item 19, v0.35): 128px, 144px on a tall
      landscape screen, 96px on a short one. The compass and the head read
@@ -885,7 +932,7 @@
      is narrower than 520px the normal card stays. ---- */
   @container (orientation: landscape) and (height > 700px) {
     @container info (width >= 520px) {
-      .card { padding: var(--s-5); }
+      .card { --pad: var(--s-5); }
       .spt, .lp { font-size: var(--t-body); }
     }
   }
@@ -1033,7 +1080,12 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.25 — 2026-10-23.</b> The shell of main-screen v0.38 carries the rules of decision
+  <p class="meta"><b>v0.26 — 2026-10-25.</b> The shell of main-screen v0.40, and with it the shell of v0.39,
+     which Canon D2 did not copy here, brings the card at scale 3, the full-size plus and the side rules of
+     decision D2, which no frame here shows, since History covers the main area and no frame shows a
+     Straight only POI, and the colours of emerald and warm gold through _tokens.css v0.22, which the
+     POI column beside the panel, the panel and its rows draw. The icons on the card take --card-glyph.
+     The shell of main-screen v0.38 carries the rules of decision
      D1, passes to fix, which no frame here shows, and the row "Removal waiting" of frame C
      carries "Cancel removal", which drops the waiting removal without a dialog (items 12, 13).
      The shell of main-screen v0.37 makes the one gold lighter.
@@ -1050,10 +1102,10 @@
      covers the main area beside the live POI column, in POI or Route scope, and lists
      every pass this tablet recorded and every type change not yet in the sheet, newest first, with "Delete" on each pass, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
-     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.20</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.53</b>. The shell
+     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.22</b>
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.55</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.38</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.40</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Nine states,
      A to I. The twelve proposals of v0.8 are approved (v0.12, screens.md v0.38).</p>

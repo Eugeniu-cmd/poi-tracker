@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.21 — 2026-10-25
+   v0.22 — 2026-10-25
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -118,52 +118,67 @@
    and --card-col-small, the width of a ring's column in the pyramid,
    90px, 70px and 60px. New --card-rise, 1.5: how many ring heights
    Straight sits above Left and Right.
+   v0.22 2026-10-25 — the user's decisions on the app colours, from
+   twelve whole screens (screens.md v0.55, items 5 and 68). Emerald with
+   a warm yellow gold replaces navy, lavender and the light gold in both
+   themes. Light: an ivory background, emerald text and maneuver discs,
+   --gold-line #D9A92A, --side #E0B43A, --warn #7E5F0A, --ok #287030.
+   Dark: an emerald background, ivory maneuver discs, --gold-line
+   #E6B83E, --warn #EBC75E, --ok #5FE0A0, dialogs and menus on
+   --panel-raised #123D31. On dark --man-glyph leaves --gold-line for a
+   deep gold, #A67C00, with 3.1:1 on the ivory discs, where the bright
+   gold has 1.5:1. New --card-glyph, the gold of the icons on the card,
+   which keep --gold-line. Text reaches 4.5:1 on what it sits on, except
+   the faded --ink-3, which keeps today's contrast. --err, --err-bg,
+   --hatch, --focus, --danger and --on-danger do not change, and neither
+   do the dark --scrim and shadows.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
 :root {
-  --bg: #EFF3FA;
-  --bg-grad: linear-gradient(135deg, #EAF2FF 0%, #F6F0FF 45%, #FFF2E8 100%);
-  --panel: rgba(255, 255, 255, 0.62);
-  --panel-strong: rgba(255, 255, 255, 0.88);
-  --panel-solid: #FFFFFF;
+  --bg: #F5F2E8;
+  --bg-grad: linear-gradient(135deg, #E3F1EA 0%, #F7F4EA 50%, rgba(217, 169, 42, 0.16) 100%);
+  --panel: rgba(255, 253, 246, 0.72);
+  --panel-strong: rgba(255, 253, 246, 0.92);
+  --panel-solid: #FFFDF6;
   --panel-edge: rgba(255, 255, 255, 0.85);
   --blur: 14px;
-  --line: rgba(90, 110, 170, 0.16);
-  --ink: #1B2033;
-  --ink-2: #5C6580;
-  --ink-3: #8E96AC;
-  --disc: #1C2030;
-  --disc-glyph: #FFFFFF;
-  --side: #D4AF37;
-  --side-glyph: #1B2033;
-  --side-ring: rgba(212, 175, 55, 0.45);
-  --side-soft: rgba(212, 175, 55, 0.16);
-  --man-soft: rgba(28, 32, 48, 0.08);
+  --line: rgba(5, 84, 63, 0.16);
+  --ink: #0A2A21;
+  --ink-2: rgba(10, 42, 33, 0.66);
+  --ink-3: rgba(10, 42, 33, 0.45);
+  --disc: #05543F;
+  --disc-glyph: #FFFDF6;
+  --side: #E0B43A;
+  --side-glyph: #0A2A21;
+  --side-ring: rgba(224, 180, 58, 0.45);
+  --side-soft: rgba(224, 180, 58, 0.18);
+  --man-soft: rgba(5, 84, 63, 0.08);
   --man-glyph: var(--gold-line);
   --man-ring: var(--gold-line);
   --compass-n: var(--side);
-  --compass-n-edge: #8B711E;
-  --gold-line: #CCA735;
+  --compass-n-edge: #7E5F0A;
+  --gold-line: #D9A92A;
   --card-fill: var(--gold-line);
-  --ok: #0E7450;
-  --ok-bg: rgba(214, 244, 228, 0.85);
+  --card-glyph: var(--gold-line);
+  --ok: #287030;
+  --ok-bg: rgba(40, 112, 48, 0.14);
   --err: #B42E26;
   --err-bg: rgba(255, 226, 223, 0.85);
-  --warn: #8B711E;
-  --warn-bg: rgba(246, 239, 215, 0.85);
+  --warn: #7E5F0A;
+  --warn-bg: rgba(224, 180, 58, 0.16);
   --prog: var(--gold-line);
-  --prog-bg: rgba(28, 32, 48, 0.10);
+  --prog-bg: rgba(5, 84, 63, 0.10);
   --hatch: rgba(92, 101, 128, 0.32);
-  --active: rgba(212, 175, 55, 0.18);
+  --active: rgba(224, 180, 58, 0.2);
   --active-line: var(--side);
   --focus: #1F5EFF;
-  --scrim: rgba(16, 20, 32, 0.32);
+  --scrim: rgba(4, 33, 26, 0.32);
   --panel-raised: #FFFFFF;
   --danger: var(--err);
   --on-danger: #FFFFFF;
-  --shadow: 0 6px 20px rgba(50, 65, 120, 0.14);
-  --shadow-lift: 0 10px 26px rgba(40, 50, 90, 0.26);
+  --shadow: 0 6px 20px rgba(5, 84, 63, 0.14);
+  --shadow-lift: 0 10px 26px rgba(5, 84, 63, 0.26);
   --r-sm: 12px;
   --r-md: 18px;
   --font: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -239,43 +254,44 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0F1420;
-    --bg-grad: linear-gradient(135deg, #121A2B 0%, #171526 50%, #1E1A16 100%);
-    --panel: rgba(255, 255, 255, 0.07);
-    --panel-strong: rgba(255, 255, 255, 0.13);
-    --panel-solid: #171C29;
-    --panel-edge: rgba(255, 255, 255, 0.14);
-    --line: rgba(255, 255, 255, 0.12);
-    --ink: #EEF1F8;
-    --ink-2: #A8B0C4;
-    --ink-3: #737C93;
-    --disc: #F1F3FA;
-    --disc-glyph: #101420;
-    --side: #D4AF37;
-    --side-glyph: #10131C;
-    --side-ring: rgba(212, 175, 55, 0.5);
-    --side-soft: rgba(212, 175, 55, 0.22);
-    --man-soft: rgba(255, 255, 255, 0.10);
-    --man-glyph: var(--gold-line);
+    --bg: #04211A;
+    --bg-grad: linear-gradient(135deg, #0A3027 0%, #04211A 55%, rgba(230, 184, 62, 0.10) 100%);
+    --panel: rgba(255, 255, 240, 0.06);
+    --panel-strong: rgba(255, 255, 240, 0.12);
+    --panel-solid: #0A3027;
+    --panel-edge: rgba(255, 255, 240, 0.14);
+    --line: rgba(255, 255, 240, 0.12);
+    --ink: #F2EEDC;
+    --ink-2: rgba(242, 238, 220, 0.66);
+    --ink-3: rgba(242, 238, 220, 0.52);
+    --disc: #F0E9D2;
+    --disc-glyph: #05543F;
+    --side: #E6B83E;
+    --side-glyph: #04211A;
+    --side-ring: rgba(230, 184, 62, 0.5);
+    --side-soft: rgba(230, 184, 62, 0.2);
+    --man-soft: rgba(255, 255, 240, 0.10);
+    --man-glyph: #A67C00;
     --man-ring: var(--gold-line);
     --compass-n: var(--side);
     --compass-n-edge: transparent;
-    --gold-line: #CCA735;
+    --gold-line: #E6B83E;
     --card-fill: var(--gold-line);
-    --ok: #3ECC82;
-    --ok-bg: rgba(22, 60, 40, 0.7);
+    --card-glyph: var(--gold-line);
+    --ok: #5FE0A0;
+    --ok-bg: rgba(95, 224, 160, 0.16);
     --err: #FF9189;
     --err-bg: rgba(70, 28, 25, 0.7);
-    --warn: #D4AF37;
-    --warn-bg: rgba(53, 44, 14, 0.7);
+    --warn: #EBC75E;
+    --warn-bg: rgba(230, 184, 62, 0.16);
     --prog: var(--gold-line);
-    --prog-bg: rgba(255, 255, 255, 0.10);
+    --prog-bg: rgba(255, 255, 240, 0.10);
     --hatch: rgba(168, 176, 196, 0.26);
-    --active: rgba(212, 175, 55, 0.22);
+    --active: rgba(230, 184, 62, 0.22);
     --active-line: var(--side);
     --focus: #7FA3FF;
     --scrim: rgba(0, 0, 0, 0.55);
-    --panel-raised: #303749;
+    --panel-raised: #123D31;
     --danger: #D7373F;
     --on-danger: #FFFFFF;
     --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
@@ -284,43 +300,44 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #0F1420;
-  --bg-grad: linear-gradient(135deg, #121A2B 0%, #171526 50%, #1E1A16 100%);
-  --panel: rgba(255, 255, 255, 0.07);
-  --panel-strong: rgba(255, 255, 255, 0.13);
-  --panel-solid: #171C29;
-  --panel-edge: rgba(255, 255, 255, 0.14);
-  --line: rgba(255, 255, 255, 0.12);
-  --ink: #EEF1F8;
-  --ink-2: #A8B0C4;
-  --ink-3: #737C93;
-  --disc: #F1F3FA;
-  --disc-glyph: #101420;
-  --side: #D4AF37;
-  --side-glyph: #10131C;
-  --side-ring: rgba(212, 175, 55, 0.5);
-  --side-soft: rgba(212, 175, 55, 0.22);
-  --man-soft: rgba(255, 255, 255, 0.10);
-  --man-glyph: var(--gold-line);
+  --bg: #04211A;
+  --bg-grad: linear-gradient(135deg, #0A3027 0%, #04211A 55%, rgba(230, 184, 62, 0.10) 100%);
+  --panel: rgba(255, 255, 240, 0.06);
+  --panel-strong: rgba(255, 255, 240, 0.12);
+  --panel-solid: #0A3027;
+  --panel-edge: rgba(255, 255, 240, 0.14);
+  --line: rgba(255, 255, 240, 0.12);
+  --ink: #F2EEDC;
+  --ink-2: rgba(242, 238, 220, 0.66);
+  --ink-3: rgba(242, 238, 220, 0.52);
+  --disc: #F0E9D2;
+  --disc-glyph: #05543F;
+  --side: #E6B83E;
+  --side-glyph: #04211A;
+  --side-ring: rgba(230, 184, 62, 0.5);
+  --side-soft: rgba(230, 184, 62, 0.2);
+  --man-soft: rgba(255, 255, 240, 0.10);
+  --man-glyph: #A67C00;
   --man-ring: var(--gold-line);
   --compass-n: var(--side);
   --compass-n-edge: transparent;
-  --gold-line: #CCA735;
+  --gold-line: #E6B83E;
   --card-fill: var(--gold-line);
-  --ok: #3ECC82;
-  --ok-bg: rgba(22, 60, 40, 0.7);
+  --card-glyph: var(--gold-line);
+  --ok: #5FE0A0;
+  --ok-bg: rgba(95, 224, 160, 0.16);
   --err: #FF9189;
   --err-bg: rgba(70, 28, 25, 0.7);
-  --warn: #D4AF37;
-  --warn-bg: rgba(53, 44, 14, 0.7);
+  --warn: #EBC75E;
+  --warn-bg: rgba(230, 184, 62, 0.16);
   --prog: var(--gold-line);
-  --prog-bg: rgba(255, 255, 255, 0.10);
+  --prog-bg: rgba(255, 255, 240, 0.10);
   --hatch: rgba(168, 176, 196, 0.26);
-  --active: rgba(212, 175, 55, 0.22);
+  --active: rgba(230, 184, 62, 0.22);
   --active-line: var(--side);
   --focus: #7FA3FF;
   --scrim: rgba(0, 0, 0, 0.55);
-  --panel-raised: #303749;
+  --panel-raised: #123D31;
   --danger: #D7373F;
   --on-danger: #FFFFFF;
   --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
