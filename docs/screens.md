@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.53 — 2026-10-23
+v0.54 — 2026-10-25
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -278,6 +278,21 @@ tablet's own (items 63, 64). The type toast carries Undo for six
 seconds (item 36). A waiting removal can be cancelled (items 12, 13).
 Undo last takes a pass whatever its maneuver (item 9). The over ring's
 plus is half size and its number a step smaller, centred (item 39).
+v0.54 2026-10-25 — the user's five decisions from mock-ups of the app
+(the type change audit of 2026-10-23, "Decisions taken"). The over
+ring's plus is as big as the digits and on their middle line, so "+26"
+reads as one number. The card at scale 3: the rings keep their size in
+columns of --card-col, Straight sits --card-rise rings above Left and
+Right, the diamonds grow to the rings' height, and the equal space
+before, between and after the pyramid and the rose is measured on the
+drawn shapes (item 39, _tokens.css v0.21). Decision D2: on a Straight
+only POI each side shows its passes against 20, in the done colour at
+exactly 20 and as "+3 over" past it, nothing locks, and the POI is done
+at Straight 40 whatever its sides (items 39, 46). Decision D3: a Not
+drivable POI with passes reads "66 passes to fix in the sheet" under its
+locked discs. One caption shows under the discs at a time, the most
+urgent that applies, from a sheet error down to a maneuver the type does
+not allow (item 46).
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -611,45 +626,52 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     type pill (decided 2026-10-22). Its heading reads "TO GO", the words
     of "29 to go" under the counter and in the POI column. Under it the
     three maneuvers stand as progress rings in a pyramid, as the discs
-    stand under the card: Straight on top, Left below on the left, Right
-    below on the right. A ring fills in the gold of the arrows
-    (--card-fill, item 5) with the
+    stand under the card: Straight on top, Left and Right one and a half
+    rings lower (--card-rise), on the left and on the right. A ring
+    fills in the gold of the arrows (--card-fill, item 5) with the
     passes driven against the maneuver's share of the POI's type (item
     46), from the top clockwise, and shows inside what is still needed,
     a large "12" over a small "more". There is no "16 of 28" line: the
     type pill above already shows the split. Under each ring sit the
     maneuver's Lucide icon in gold, 20px (--card-icon), and its name. A
     maneuver whose share is full closes its ring in the done colour and
-    reads "Done", and its disc locks (item 46).
-    A count past the share, possible only from numbers typed into the
-    sheet or from a type change, closes its ring and reads "+3 over": the
-    plus at half the number's size, the number a step smaller than the
-    other rings' and in the warning colour, the whole centred in the ring
-    with the same gap on both sides (decided 2026-10-23). A maneuver the
-    type does not allow shows "+26 over" the same way when it has passes
-    (its share is 0), and fades with its name and a dash on an empty
-    track when it has none. Beside the pyramid the four
-    approach sides stand as a rose of diamonds on the soft gold side
-    tint, as on a compass: N above, E right, S below, W left, each with
-    its letter in gold over its count. The rose has no heading and no
-    total: the total would repeat the counter beside the POI number,
-    which also names a mismatch between sides and maneuvers. Sides have
-    no split, so they are plain counts. A side at zero fades. The pyramid
-    and the rose share one centre line, with equal space before, between
-    and after them. At the right of the head stands the last pass of the
-    active POI: "LAST", the maneuver's icon in gold, the side's letter
-    and the time ("LAST ↰ S · 21:40"), the time alone for today and the
-    date with the time when older (item 16). It is the newest pass of
-    the POI that still counts, the one "Undo last" would remove (item
-    9), so it changes with the active POI and steps back after an undo.
-    With no such pass, for example when every pass of the POI reached
-    the sheet by hand (item 45), the head shows TO GO alone. The rings
-    and the rose follow the card's own width:
-    rings of 76px and a rose of 184px (--card-ring, --card-rose), 62px
-    and 160px on a card narrower than 480px, 52px and 128px on one of
-    380px or less, where "more" and "over" are left out. The card
-    carries no separate "balance" line, since the split already shows in
-    the type pill and in the card itself.
+    reads "Done", and its disc locks (item 46). A count past the share,
+    possible only from numbers typed into the sheet or from a type
+    change, closes its ring and reads "+3 over": the plus as big as the
+    digits and on their middle line, the number a step smaller than the
+    other rings' and in the warning colour, the whole centred in the
+    ring by its drawn shape (decided 2026-10-25). A maneuver the type
+    does not allow shows "+26 over" the same way when it has passes (its
+    share is 0), and fades with its name and a dash on an empty track
+    when it has none. Beside the pyramid the four approach sides stand
+    as a rose of diamonds on the soft gold side tint, as on a compass: N
+    above, E right, S below, W left, each with its letter in gold over
+    its count. The rose has no heading and no total: the total would
+    repeat the counter beside the POI number, which also names a
+    mismatch between sides and maneuvers. Sides have no split, so they
+    are plain counts, except on a Straight only POI (item 46). There a
+    side with passes shows "of 20" under its count, turns the done
+    colour at exactly 20, and past 20 reads "+3 over" under its count,
+    both in the warning colour. Nothing locks, and the POI is done at
+    Straight 40 whatever its sides (decision D2, 2026-10-25). A side at
+    zero fades and shows no target. The pyramid and the rose share one
+    centre line, with equal space before, between and after them,
+    measured on the drawn rings and the tips of the diamonds. At the
+    right of the head stands the last pass of the active POI: "LAST",
+    the maneuver's icon in gold, the side's letter and the time ("LAST ↰
+    S · 21:40"), the time alone for today and the date with the time
+    when older (item 16). It is the newest pass of the POI that still
+    counts, the one "Undo last" would remove (item 9), so it changes
+    with the active POI and steps back after an undo. With no such pass,
+    for example when every pass of the POI reached the sheet by hand
+    (item 45), the head shows TO GO alone. The rings and the rose follow
+    the card's own width: rings of 76px in columns of 90px and a rose of
+    214px (--card-ring, --card-col, --card-rose), 62px, 70px and 179px
+    on a card narrower than 480px, where a side past 20 reads "+3"
+    without "over", and 52px, 60px and 135px on one of 380px or less,
+    where "more", "over" and the line under a side's count are left out.
+    The card carries no separate "balance" line, since the split already
+    shows in the type pill and in the card itself.
 40. The active POI row carries a gold tint, a 4px left edge, its number
     in the gold foreground colour and its "N to go" darkened. It must be
     findable with peripheral vision and must not imitate the green done
@@ -675,17 +697,27 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     - No right: Left 56, Straight 14 (70).
     - Straight only: Straight 40 (40). A POI on a straight road, or an
       intersection where only Straight is possible. Usually 20 from each
-      direction, the side split is not tracked.
+      direction: each side shows its passes against 20 (item 39), and
+      nothing locks (decision D2, 2026-10-25).
     - Not drivable: not counted (0). A POI that cannot be driven at all
       (private property, a road closed for good). Not called "Closed",
       which reads like "done".
     The split is a hard limit. A maneuver the type does not allow, and a
     maneuver whose share is full, has its disc dimmed (item 26) with a
     caption under the discs ("No left turn at this POI", "Left is done:
-    28 of 28", and over the share "Left is over its share: 31 of 28") and
-    takes no more passes. Undo last or Delete frees a full
-    share again. If a share cannot be reached in the field, the type is
-    changed instead. Approach sides have no limit.
+    28 of 28", and over the share "Left is over its share: 31 of 28")
+    and takes no more passes. One caption shows under the discs at a
+    time, the most urgent that applies (decided 2026-10-25): a sheet
+    error, then passes to fix, then Not drivable, then an allowed
+    maneuver over its share, then a maneuver done, then a maneuver the
+    type does not allow. Between two maneuvers with the same reason,
+    Left comes before Straight and Straight before Right. A maneuver the
+    type does not allow reads as not allowed whatever its passes. So a
+    sheet error is never hidden, and a Not drivable POI with passes
+    reads "66 passes to fix in the sheet" in the warning colour
+    (decision D3). Undo last or Delete frees a full share again. If a
+    share cannot be reached in the field, the type is changed instead.
+    Approach sides have no limit.
     A POI is done when every maneuver the type allows has reached its
     share and no pass is to fix (decision D1, 2026-10-23). Passes that do
     not fit the type, a maneuver it does not allow or passes past a

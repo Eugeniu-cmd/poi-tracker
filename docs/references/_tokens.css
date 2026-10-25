@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.20 — 2026-10-23
+   v0.21 — 2026-10-25
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -111,6 +111,13 @@
    v0.20 2026-10-23 — two toast durations, --dur-toast for the toast of
    item 36 and --dur-toast-undo for the type toast that carries Undo
    (screens.md v0.53, decision D1 of 2026-10-23).
+   v0.21 2026-10-25 — the user's decisions on the card at scale 3, from
+   mock-ups of the app (screens.md v0.54, item 39). The rose grows, so a
+   diamond is as tall as a ring: --card-rose 214px, --card-rose-narrow
+   179px and --card-rose-small 135px. New --card-col, --card-col-narrow
+   and --card-col-small, the width of a ring's column in the pyramid,
+   90px, 70px and 60px. New --card-rise, 1.5: how many ring heights
+   Straight sits above Left and Right.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -176,9 +183,13 @@
   --card-ring: 76px;
   --card-ring-narrow: 62px;
   --card-ring-small: 52px;
-  --card-rose: 184px;
-  --card-rose-narrow: 160px;
-  --card-rose-small: 128px;
+  --card-rose: 214px;
+  --card-rose-narrow: 179px;
+  --card-rose-small: 135px;
+  --card-col: 90px;
+  --card-col-narrow: 70px;
+  --card-col-small: 60px;
+  --card-rise: 1.5;
   --card-icon: 20px;
 
   /* Type */

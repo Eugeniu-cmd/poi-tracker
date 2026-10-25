@@ -281,12 +281,33 @@
           the switch (items 63, 64). Frame K's legend gets "To fix"
           (item 59); with seven states it wraps to two rows at the
           720px minimum.
+  v0.39 2026-10-25 — the user's decisions on the card at scale 3, the
+          full-size plus, the sides of a Straight only POI and the
+          captions (screens.md v0.54, _tokens.css v0.21). The over
+          ring's plus is as big as the digits and on their middle line,
+          so "+26" reads as one number (.rv .pl). The rings keep their
+          size in columns of --card-col (.mz), Straight sits --card-rise
+          ring heights above Left and Right (.mz.low), and the rose takes
+          the new --card-rose sizes, so a diamond is as tall as a ring.
+          The space before the rings, between the rings and the diamonds
+          and after the diamonds is equal on the drawn shapes: .two spans
+          the card's whole width (its padding is the knob --pad), and the
+          pyramid and the rose carry negative margins of their overhang,
+          so space-evenly measures the circles and the tips. Decision
+          D2: on a Straight only POI a side with passes shows "of 20"
+          under its count (.of), at exactly 20 in the done colour
+          (.dm.ok), past 20 "+3 over" in the warning colour (.dm.ov); on
+          a card narrower than 480px the line past 20 drops "over", and
+          on one of 380px or less the line is left out. Frame S shows
+          its sides against 20. New frame U: POI 152 of the sample route
+          (Straight only, 20 from North and 14 from South, 34 passes),
+          its sides against 20 and North done. Twenty-one states, A to U.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.38</title>
+<title>POI Tracker — Working Screen Reference v0.39</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -343,7 +364,7 @@
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.20 or a calc() over
+     line height below is a var() from _tokens.css v0.21 or a calc() over
      them. Literal values are limited to the plain numbers of item 68: 0
      and 1, 1px hairlines, 50% for round shapes, percentages and fr of a
      layout, multipliers of a token, counts, em, ch, lh and cap ratios of
@@ -690,10 +711,13 @@
      below left and Right below right, as the discs stand under the card,
      and beside them the sides as a rose of four diamonds, N above, E
      right, S below and W left. The pyramid and the rose share one centre
-     line and equal space around them. The card is a container: its own
-     width sets the size of the rings and the rose. ---- */
-  .card { background: var(--panel); border: 1px solid var(--panel-edge);
-          border-radius: var(--r-md); box-shadow: var(--shadow); padding: var(--s-4);
+     line and equal space around them, measured on the drawn rings and the
+     tips of the diamonds (v0.39). The card is a container: its own width
+     sets the size of the rings, their columns and the rose. Its padding
+     is one knob, --pad: the compact, the compact landscape and the roomy
+     card set it, and .two reads it. ---- */
+  .card { --pad: var(--s-4); background: var(--panel); border: 1px solid var(--panel-edge);
+          border-radius: var(--r-md); box-shadow: var(--shadow); padding: var(--pad);
           display: flex; flex-direction: column; gap: var(--s-3);
           container-type: inline-size; container-name: card; }
   .spt { font-size: var(--t-small); letter-spacing: calc(var(--s-1) / 2);
@@ -707,16 +731,26 @@
   .lp .spt { margin-right: var(--s-1); }
   /* the icon is 1em of the text, so a head with LAST is as tall as one without */
   .lp .ic { align-self: center; color: var(--man-glyph); }
-  .two { --ring: var(--card-ring); --rose: var(--card-rose); --num: var(--t-title);
-         display: flex; align-items: center; justify-content: space-evenly; }
-  /* the pyramid: three columns, Left and Right 0.8 of a ring lower than
-     Straight. On a tight card it may give up width, and its columns then
-     overflow evenly into the card's padding. */
+  /* equal space on the drawn shapes (v0.39): .two spans the card's whole
+     width, padding and hairline included, and the pyramid and the rose
+     give up their overhang in negative margins. The Left and Right
+     circles sit (col - ring) / 2 plus 2 of the drawing's 76 units inside
+     the pyramid's box, and a diamond's rounded tip sits (√2 - 1) of its
+     radius inside the rose's box. So space-evenly puts the same space
+     before the Left circle, between the Right circle and the West tip,
+     and after the East tip. */
+  .two { --ring: var(--card-ring); --col: var(--card-col); --rose: var(--card-rose);
+         --num: var(--t-title); display: flex; align-items: center;
+         justify-content: space-evenly; margin-inline: calc(-1 * var(--pad) - 1px); }
+  /* the pyramid: three columns of --col, Left and Right --card-rise rings
+     lower than Straight. On a tight card it may give up width, and its
+     columns then overflow evenly into the card's padding. */
   .pyr { flex: 0 1 auto; min-width: 0; display: grid; grid-template-columns: repeat(3, auto);
-         justify-content: center; column-gap: var(--s-1); }
+         justify-content: center; column-gap: var(--s-1);
+         margin-inline: calc(-1 * ((var(--col) - var(--ring)) / 2 + var(--ring) / 38)); }
   .mz { display: flex; flex-direction: column; align-items: center; gap: var(--s-1);
-        width: calc(var(--ring) + var(--s-4)); }
-  .mz.low { margin-top: calc(0.8 * var(--ring)); }
+        width: var(--col); }
+  .mz.low { margin-top: calc(var(--card-rise) * var(--ring)); }
   .wheel { position: relative; width: var(--ring); height: var(--ring); }
   /* the ring starts at the top and runs clockwise. Its circles are SVG
      geometry: a track and, once a pass counts, the part driven, both 6 of
@@ -732,10 +766,14 @@
         white-space: nowrap; }
   .rv { font-size: var(--num); font-weight: var(--w-heavy); }
   /* item 39: over its share the ring is full and reads "+3 over": the number a
-     step smaller in the warning colour, the plus at half its size and raised,
-     one inline group that .in centres in the ring */
-  .mz.over .rv { color: var(--warn); font-size: calc(0.9 * var(--num)); letter-spacing: -0.03em; }
-  .rv .pl { font-size: 0.5em; vertical-align: 0.45em; margin-right: 0.2em; }
+     step smaller in the warning colour, the plus as big as the digits and on
+     their middle line (v0.39), one inline group that .in centres in the ring.
+     The tight letter-spacing also follows the last digit, so the box ends
+     0.03em short on the right: a margin of that size restores the balance,
+     and the ink, not the box, sits centred. */
+  .mz.over .rv { color: var(--warn); font-size: calc(0.9 * var(--num)); letter-spacing: -0.03em;
+                 margin-right: 0.03em; }
+  .rv .pl { font-size: 1em; vertical-align: 0; margin-right: 0.02em; }
   .in small { font-size: var(--t-tiny); font-weight: var(--w-bold); color: var(--ink-2); }
   /* "Done" is a label, not a number: smaller, in the done colour */
   .in .dn { font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ok); }
@@ -745,7 +783,8 @@
   .mn .ic { width: var(--card-icon); height: var(--card-icon); color: var(--man-glyph); }
   /* the rose: a 2 x 2 grid turned 45 degrees. A square turned 45 degrees
      fits its box inset by (1 - 1/√2) / 2 of the box on every edge */
-  .rose { flex: none; position: relative; width: var(--rose); height: var(--rose); }
+  .rose { flex: none; position: relative; width: var(--rose); height: var(--rose);
+          margin-inline: calc(-0.4142 * var(--r-sm)); }
   .grid4 { position: absolute; inset: calc(0.146 * var(--rose)); display: grid;
            grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: var(--s-2);
            rotate: 45deg; }
@@ -756,15 +795,27 @@
   .dl { font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--warn); }
   .dv { font-size: var(--num); font-weight: var(--w-heavy); }
   .dm.z .dmi { opacity: var(--o-zero); }
+  /* decision D2 (items 39, 46, v0.39): on a Straight only POI a side with
+     passes shows its count against 20, "of 20" under it. At exactly 20 the
+     count and its line take the done colour; past 20 the line reads "+3
+     over" and both take the warning colour. Nothing locks, and a side at
+     zero shows no line. */
+  .of { font-size: var(--t-tiny); font-weight: var(--w-bold); color: var(--ink-2);
+        line-height: var(--lh-tight); white-space: nowrap; }
+  .dm.ok .dv, .dm.ok .of { color: var(--ok); }
+  .dm.ov .dv, .dm.ov .of { color: var(--warn); }
   /* narrower cards: the portrait minimum and the left group beside the discs */
   @container card (width < 480px) {
-    .two { --ring: var(--card-ring-narrow); --rose: var(--card-rose-narrow); --num: var(--t-label); }
+    .two { --ring: var(--card-ring-narrow); --col: var(--card-col-narrow);
+           --rose: var(--card-rose-narrow); --num: var(--t-label); }
+    /* "+3 over" would cross the diamond's edge: past 20 the line keeps "+3" alone */
+    .dm.ov .of span { display: none; }
   }
   @container card (width <= 380px) {
-    .two { --ring: var(--card-ring-small); --rose: var(--card-rose-small); }
+    .two { --ring: var(--card-ring-small); --col: var(--card-col-small);
+           --rose: var(--card-rose-small); }
     .pyr { column-gap: var(--s-2); }
-    .mz { width: calc(var(--ring) + var(--s-2)); }
-    .in small { display: none; }
+    .in small, .of { display: none; }
   }
 
   /* ---- discs (items 5, 6, 10, 19, 26, 46). The closed cluster sits in the
@@ -982,7 +1033,7 @@
      narrow; the card tightens its padding (its rings and rose follow its
      own width, item 39), and the pill shows its chevron without the word */
   @container info (max-width: 400px) {
-    .card { padding: var(--s-3); }
+    .card { --pad: var(--s-3); }
     .tchg span { display: none; }
   }
   /* ---- the compact step (item 70): on a short screen display text shrinks
@@ -1018,7 +1069,7 @@
      left group is at least 370px wide. In a frame dragged narrower the
      compact card stays. The pill keeps its compact look. */
   @container (max-height: 700px) and (orientation: landscape) and (min-width: 1000px) {
-    .card { padding: var(--s-4) var(--s-3); }
+    .card { --pad: var(--s-3); padding: var(--s-4) var(--pad); }
   }
   /* ---- the compass's sizes (item 19, v0.35): 128px, 144px on a tall
      landscape screen, 96px on a short one. The compass and the head read
@@ -1036,7 +1087,7 @@
      is narrower than 520px the normal card stays. ---- */
   @container (orientation: landscape) and (height > 700px) {
     @container info (width >= 520px) {
-      .card { padding: var(--s-5); }
+      .card { --pad: var(--s-5); }
       .spt, .lp { font-size: var(--t-body); }
     }
   }
@@ -1064,11 +1115,18 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.38 — 2026-10-23.</b> Decision D1: a POI is done when every ring is closed. The
+  <p class="meta"><b>v0.39 — 2026-10-25.</b> The card at scale 3: the rings keep their size in columns of
+     90px, Straight sits one and a half rings above Left and Right, the diamonds grow to the rings'
+     height, and the space before, between and after the pyramid and the rose is equal on the drawn
+     shapes (item 39). The over ring's plus is as big as the digits and on their middle line, so "+26"
+     reads as one number. On a Straight only POI each side shows its passes against 20, in the done
+     colour at 20 and as "+3 over" past it, and nothing locks (decision D2, items 39, 46). New frame U:
+     POI 152 with 20 passes from North and 14 from South.
+     Decision D1: a POI is done when every ring is closed. The
      counter counts the passes that fit the type, and passes that do not fit are "to fix": in the rest
      line and the summary, on the row as a warning triangle before "N to go" or as the tag "to fix", in
      the caption under the locked discs and on the grid's tiles and legend (items 3, 4, 40, 46, 59). The
-     over ring reads "+26 over" with the plus at half size and the number a step smaller, centred (item
+     over ring reads "+26 over" with the number a step smaller, centred (item
      39). The type change dialog says that the sheet keeps the passes and the export sends them, and
      offers to delete this tablet's own with a switch (items 63, 64, frame I). New frames S and T show
      POI 131 with its rings open and POI 141 with its rings closed, both with 53 passes to fix. The one
@@ -1089,8 +1147,8 @@
      like the maneuver discs and its right half gold like the side discs, with the dial fixed
      and N up. The arrow is always there: with no heading yet it shows the course the tablet
      saved last, or north, as a dashed outline (item 19). Every value inside
-     the frames is a token of <b>_tokens.css v0.20</b> (size C, screens.md item 67) and
-     every rule follows <b>screens.md v0.53</b>. Icons are
+     the frames is a token of <b>_tokens.css v0.21</b> (size C, screens.md item 67) and
+     every rule follows <b>screens.md v0.54</b>. Icons are
      Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
      presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and
@@ -1099,7 +1157,7 @@
      shape: side by side when wider than tall, stacked when taller (item 51). Below
      700px of height the compact step applies: smaller display numbers, a one-line
      grid button instead of the mini-map and, in landscape, narrower margins and gaps
-     so the card keeps its paddings (item 70). Twenty states, A to T.</p>
+     so the card keeps its paddings (item 70). Twenty-one states, A to U.</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>
@@ -2195,7 +2253,7 @@
           <div class="mz"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="33 100"/></svg><div class="in"><b class="rv">27</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-straight"/></svg>Straight</span></div>
           <div class="mz low over"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="100 100"/></svg><div class="in"><b class="rv"><span class="pl">+</span>27</b><small>over</small></div></div><span class="mn"><svg class="ic"><use href="#i-right"/></svg>Right</span></div>
         </div>
-        <div class="rose"><div class="grid4"><div class="dm"><div class="dmi"><b class="dl">N</b><b class="dv">24</b></div></div><div class="dm"><div class="dmi"><b class="dl">E</b><b class="dv">10</b></div></div><div class="dm"><div class="dmi"><b class="dl">W</b><b class="dv">13</b></div></div><div class="dm"><div class="dmi"><b class="dl">S</b><b class="dv">19</b></div></div></div></div>
+        <div class="rose"><div class="grid4"><div class="dm ov"><div class="dmi"><b class="dl">N</b><b class="dv">24</b><small class="of">+4<span> over</span></small></div></div><div class="dm"><div class="dmi"><b class="dl">E</b><b class="dv">10</b><small class="of">of 20</small></div></div><div class="dm"><div class="dmi"><b class="dl">W</b><b class="dv">13</b><small class="of">of 20</small></div></div><div class="dm"><div class="dmi"><b class="dl">S</b><b class="dv">19</b><small class="of">of 20</small></div></div></div></div>
       </div>
     </div>
     </div>
@@ -2217,9 +2275,10 @@
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>46</b> Decision D1 (2026-10-23): a POI is done when every ring is closed. POI 131 is Straight only with 26 Left, 13 Straight and 27 Right passes in the sheet: the 53 Left and Right passes do not fit the type and are "to fix" until they are deleted in the sheet, since the sheet keeps them and the export sends them to the client.</li>
         <li><b>4</b> The counter counts the passes that fit, "13 of 40"; the rest line reads "27 to go · 53 to fix", the second part in the warning colour. "27 to go" is the sum of the rings' "more".</li>
-        <li><b>39</b> Left and Right have no share, so their rings are full and read "+26 over" and "+27 over": the plus at half the number's size, the number a step smaller in the warning colour, the whole centred in the ring with the same gap on both sides. Straight reads "27 more".</li>
+        <li><b>39</b> Left and Right have no share, so their rings are full and read "+26 over" and "+27 over": the plus as big as the digits and on their middle line, so each reads as one number, the number a step smaller in the warning colour, the whole centred in the ring by its drawn shape (decided 2026-10-25). Straight reads "27 more".</li>
+        <li><b>39, 46</b> Decision D2 (2026-10-25): on a Straight only POI each side shows its passes against 20, since the type usually takes 20 from each direction. N has 24, so it reads 24 over "+4 over", both in the warning colour; E, W and S read 10, 13 and 19 over "of 20". Nothing locks, and the POI is done at Straight 40 whatever its sides.</li>
         <li><b>40</b> The row carries a small warning triangle in the warning colour before "27 to go"; the mini-map shows the POI as in progress (item 58).</li>
-        <li><b>26, 27, 46</b> While a ring still asks, the discs follow the maneuvers as before: Left and Right are dimmed with the caption "Straight only at this POI", Straight is live.</li>
+        <li><b>26, 27, 46</b> While a ring still asks, the discs follow the maneuvers as before: Left and Right are dimmed with the caption "Straight only at this POI", Straight is live. It is the most urgent caption that applies (item 46): Left and Right are not allowed, which reads as not allowed whatever their passes, and Straight still asks.</li>
         <li><b>3</b> The summary carries "2 to fix", the POIs with passes to fix (131 and 141), in the warning colour before the error count.</li>
         <li><b>39</b> TO GO alone in the card's head: no pass of this tablet counts on this POI, every pass reached the sheet by hand (item 45).</li>
       </ul></aside>
@@ -2280,13 +2339,66 @@
       </ul></aside>
     </section>
 
+    <!-- ================= U · Straight only, 20 from each side ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="U"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync" type="button"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-down"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="152"></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(180 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
+    <div class="mleft">
+    <section class="head"><div class="big">152</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">34 of 40</div><div class="rest">6 to go</div></div></section>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="ss"><use href="#i-straight"/></svg></span><span class="tl"><b>Straight only</b><small><span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">40</span></span></small></span><span class="tchg"><span>Change type</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="khead"><span class="spt">TO GO</span></div>
+      <div class="two">
+        <div class="pyr">
+          <div class="mz low off"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/></svg><div class="in"><b class="rv">—</b></div></div><span class="mn"><svg class="ic"><use href="#i-left"/></svg>Left</span></div>
+          <div class="mz"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="85 100"/></svg><div class="in"><b class="rv">6</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-straight"/></svg>Straight</span></div>
+          <div class="mz low off"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/></svg><div class="in"><b class="rv">—</b></div></div><span class="mn"><svg class="ic"><use href="#i-right"/></svg>Right</span></div>
+        </div>
+        <div class="rose"><div class="grid4"><div class="dm ok"><div class="dmi"><b class="dl">N</b><b class="dv">20</b><small class="of">of 20</small></div></div><div class="dm z"><div class="dmi"><b class="dl">E</b><b class="dv">0</b></div></div><div class="dm z"><div class="dmi"><b class="dl">W</b><b class="dv">0</b></div></div><div class="dm"><div class="dmi"><b class="dl">S</b><b class="dv">14</b><small class="of">of 20</small></div></div></div></div>
+      </div>
+    </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l locked" type="button" aria-label="Left, not at this POI"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r locked" type="button" aria-label="Right, not at this POI"><svg><use href="#i-right"/></svg></button>
+    </div><div class="lock info">Straight only at this POI</div></div></div>
+    </div>
+    <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><div class="summary sumbar" data-summary></div></div>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+</div>
+        </div></div>
+        <p class="caption"><b>U</b> · Straight only, 20 from each side</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>46</b> Decision D2 (2026-10-25): POI 152 is Straight only with 34 passes in the sheet, 20 from North and 14 from South, all Straight. Straight only usually takes 20 from each direction, so each side shows its passes against 20, and nothing locks: the POI is done at Straight 40 whatever its sides.</li>
+        <li><b>39</b> North has reached 20, so its count and its "of 20" are in the done colour; South reads 14 over "of 20". East and West are a faded 0 with no target: a side at 0 shows no line. Straight reads "6 more"; Left and Right fade with a dash, since the type does not allow them and they have no passes.</li>
+        <li><b>4</b> The counter counts the passes that fit, "34 of 40"; the rest line reads "6 to go", the sum of the rings' "more", and so does the row.</li>
+        <li><b>26, 27, 46</b> Left and Right are dimmed with the caption "Straight only at this POI", the most urgent caption that applies: a maneuver the type does not allow reads as not allowed, and Straight still asks. Straight is live.</li>
+        <li><b>39</b> TO GO alone in the card's head: no pass of this tablet counts on this POI, every pass reached the sheet by hand (item 45).</li>
+      </ul></aside>
+    </section>
+
   </div>
 
 <script>
 /* Checking-tool script (screens.md item 54) and sample-data generator.
    It fills the repeated markup of every frame (mini-map squares, POI rows,
    rail labels, grid tiles, the bottom summary) from one fixed table, so all
-   twenty frames show the same route. No randomness: the same picture on
+   twenty-one frames show the same route. No randomness: the same picture on
    every load. It also wires the presets, the drag corner and the theme
    switch. Nothing here runs in the app. */
 (function () {
@@ -2306,6 +2418,7 @@
     if (n === 138) return { t: 'nost', c: 30 };
     if (n === 131) return { t: 'str', c: 66, fit: 13 };
     if (n === 141) return { t: 'str', c: 93, fit: 40 };
+    if (n === 152) return { t: 'str', c: 34 };
     if (n <= 48) return { t: 'int', c: 70 };
     var t = n % 19 === 0 ? 'str' : (n % 23 === 0 ? 'nost' : 'int');
     var T = TARGET[t];

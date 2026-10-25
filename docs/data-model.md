@@ -1,6 +1,6 @@
 # Data model
 
-v0.17 — 2026-10-23
+v0.18 — 2026-10-25
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -84,6 +84,11 @@ is done only when N equals the target and nothing is to fix. The sheet
 keeps every pass whatever the type and the Generator exports every
 count, so "to fix" names passes to delete before export (screens.md
 v0.53). The text landed in 51c2883 without this entry.
+v0.18 2026-10-25 — decision D2 (the type change audit, decisions taken
+on 2026-10-25): on a Straight only POI the screen shows each approach
+side against the usual 20 from each direction and locks nothing; the
+POI is done at Straight 40 whatever its sides. The target and the split
+do not change (screens.md v0.54, items 39 and 46).
 -->
 
 ## Pass (one crossing of an intersection)
@@ -405,7 +410,9 @@ v0.53). The text landed in 51c2883 without this entry.
   - No left: Straight 14, Right 56 (70).
   - No right: Left 56, Straight 14 (70).
   - Straight only: Straight 40 (40). A POI on a straight road, or an
-    intersection where only Straight is possible.
+    intersection where only Straight is possible. Usually 20 from each
+    direction. The screen shows each side against 20 and locks nothing
+    (screens.md items 39 and 46, decision D2 of 2026-10-25).
   - Not drivable: none (0). The name avoids "Closed", which reads like
     "done".
   The split is a hard limit: a maneuver whose share is full takes no
