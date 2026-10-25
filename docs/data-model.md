@@ -1,6 +1,6 @@
 # Data model
 
-v0.16 — 2026-10-19
+v0.17 — 2026-10-23
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -76,6 +76,14 @@ step, with a schema number, UUIDs from crypto only, a tablet-only seq
 for order, a posted marker for later sending, cities and lastPoi in
 storage, the default baseline, a full storage, the sample city, the
 heading's own key, and the app's files for offline loading (CLAUDE.md).
+v0.17 2026-10-23 — decision D1 (the type change audit of 2026-10-23):
+"Targets per POI" counts the passes that fit the type. N is the sum
+over the maneuvers the type allows of the smaller of the count and the
+share, "to go" is the target minus N, "to fix" is the rest, and a POI
+is done only when N equals the target and nothing is to fix. The sheet
+keeps every pass whatever the type and the Generator exports every
+count, so "to fix" names passes to delete before export (screens.md
+v0.53). The text landed in 51c2883 without this entry.
 -->
 
 ## Pass (one crossing of an intersection)

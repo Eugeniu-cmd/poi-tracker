@@ -1,12 +1,14 @@
-/* POI Tracker tests — scenarios C1 to C9: a type change with and without
+/* POI Tracker tests — scenarios C1 to C11: a type change with and without
    consequences, Not drivable, passes of a maneuver the new type forbids,
    the captions under the arrows, the route menu, and done by rings: the
    counter and every total count the passes that fit the type, passes
    that do not fit are "to fix" on the head, the row, the grid and the
-   summary, and a POI is done only when every ring is closed (prompt
-   Tests C, prompt Done step 2a; screens.md items 3, 4, 10, 39, 40, 43,
-   46, 59, 60, 63, 64, decision D1; data-model.md "Targets per POI",
-   "Event").
+   summary, a POI is done only when every ring is closed, a maneuver the
+   type does not allow reads "+26 over" when it has passes, the toast
+   counts what fits and a not-drivable POI with passes is to fix (prompt
+   Tests C, prompts Done step 2a and 2b; screens.md items 3, 4, 10, 36,
+   39, 40, 43, 46, 59, 60, 63, 64, decision D1; data-model.md "Targets
+   per POI", "Event").
 */
 'use strict';
 const { test, expect, UUID_V4, text, store, layers, holdsLock, openSample, recordPass, openHistory, reloadWith } = require('./fixtures');
@@ -25,7 +27,8 @@ const AT = { N: 0, S: 1, W: 2, E: 3, L: 4, St: 5, R: 6 };
 // the POIs of route rid with passes to fix, counted from the store the way
 // the app counts them (item 3): the baseline plus the waiting passes,
 // against the split of the stored type or of the baseline's target; a
-// not-drivable POI is left out, as the app's totals leave it out
+// not-drivable POI allows no maneuver, so every pass of it is to fix
+// (item 46)
 function toFixOf(s, rid) {
   const r = s.cities[0].routes.find(function (q) { return q.id === rid; });
   const bl = s.baseline[rid] || {}, ty = s.types[rid] || {};
@@ -37,7 +40,6 @@ function toFixOf(s, rid) {
       c[AT[e.side]] += e.delta; c[AT[e.man]] += e.delta;
     });
     const t = ty[p] || (b ? (BY_TARGET[b.target] || 'int') : 'int');
-    if (t === 'nd') continue;
     const sp = SPLIT[t];
     const fix = Math.max(0, c[4] - sp.L) + Math.max(0, c[5] - sp.St) + Math.max(0, c[6] - sp.R);
     if (fix > 0) n += 1;
@@ -49,6 +51,11 @@ async function expectToastText(page, t) {
   const toast = page.locator('#toast');
   await expect(toast).toHaveClass(/\bon\b/);
   await expect(toast).toHaveText(t);
+}
+// true when the warning triangle stands first in a row's tag, before the
+// words (item 40)
+function markFirst(rt) {
+  return rt.evaluate(function (el) { var f = el.firstElementChild; return !!f && f.classList.contains('rfix'); });
 }
 // selects a POI in the column
 async function selectPoi(page, n) {
@@ -118,11 +125,27 @@ test('C1 · A type change with consequences', async ({ page }) => {
   await expect(rest).toHaveText('27 to go · 53 to fix');
   await expect(rest.locator('.fix')).toHaveText('53 to fix');
   await expect(rest).not.toHaveClass(/\bok\b/);
+  // item 40: while the Straight ring still asks, the row carries the
+  // triangle before "27 to go" and no class fix, so only the triangle is
+  // in the warning colour (frame S)
   const row = page.locator('#col .row[data-poi="122"]');
-  await expect(row).toHaveClass(/\bfix\b/);
+  await expect(row).not.toHaveClass(/\bfix\b/);
   await expect(row).not.toHaveClass(/\bdone\b/);
   await expect(row.locator('.rt')).toHaveText('27 to go');
   await expect(row.locator('.rt svg.rfix use')).toHaveAttribute('href', '#i-alert');
+  expect(await markFirst(row.locator('.rt'))).toBe(true);
+  // item 39: Left and Right, which Straight only does not allow, read
+  // "+26 over" and "+27 over" on a full ring, the plus in its own span
+  // (frame S)
+  const rings = page.locator('#card .mz');
+  await expect(rings).toHaveCount(3);
+  for (const [i, v] of [[0, '+26 over'], [2, '+27 over']]) {
+    await expect(rings.nth(i)).toHaveClass(/\bover\b/);
+    await expect(rings.nth(i)).not.toHaveClass(/\boff\b/);
+    expect(await text(rings.nth(i).locator('.in'))).toBe(v);
+    expect(await text(rings.nth(i).locator('.rv span.pl'))).toBe('+');
+    await expect(rings.nth(i).locator('.fg')).toHaveAttribute('stroke-dasharray', '100 100');
+  }
   const lock = page.locator('#lock');
   await expect(lock).toBeVisible();
   await expect(lock).toHaveText('Straight only at this POI');
@@ -220,7 +243,9 @@ test('C4 · Not drivable', async ({ page }) => {
   await expect(dlg).toHaveCount(0);
   await expectToastText(page, 'Type set: Not drivable');
   await expect(page.locator('#cnt')).toHaveText('Not drivable');
-  await expect(page.locator('#head .rest')).toHaveText('Not counted');
+  // item 46: its 41 passes in the sheet are to fix (C11 has the row and the summary)
+  await expect(page.locator('#head .rest')).toHaveText('41 to fix');
+  await expect(page.locator('#head .rest span.fix')).toHaveText('41 to fix');
   const lock = page.locator('#lock');
   await expect(lock).toBeVisible();
   await expect(lock).toHaveText('This POI is not drivable');
@@ -277,10 +302,13 @@ test('C6 · Captions of a full share', async ({ page }) => {
   const rest = page.locator('#head .rest');
   await expect(rest).toHaveText('42 to go · 3 to fix');
   await expect(rest.locator('.fix')).toHaveText('3 to fix');
+  // item 40: the triangle before "42 to go" and no class fix while the
+  // rings still ask
   const row136 = page.locator('#col .row[data-poi="136"]');
-  await expect(row136).toHaveClass(/\bfix\b/);
+  await expect(row136).not.toHaveClass(/\bfix\b/);
   await expect(row136.locator('.rt')).toHaveText('42 to go');
   await expect(row136.locator('.rt svg.rfix')).toHaveCount(1);
+  expect(await markFirst(row136.locator('.rt'))).toBe(true);
   const lock = page.locator('#lock');
   await expect(lock).toBeVisible();
   await expect(lock).toHaveText('Left is over its share: 31 of 28');
@@ -291,6 +319,7 @@ test('C6 · Captions of a full share', async ({ page }) => {
   await expect(left.locator('.mn')).toContainText('Left');
   await expect(left).toHaveClass(/\bover\b/);
   expect(await text(left.locator('.in'))).toBe('+3 over');
+  expect(await text(left.locator('.rv span.pl'))).toBe('+');   // the half-size plus (item 39)
   await expect(left.locator('.fg')).toHaveAttribute('stroke-dasharray', '100 100');
   expect(await left.locator('.rv').evaluate(function (el) { return getComputedStyle(el).color; })).toBe('rgb(139, 113, 30)');   // --warn on light
 
@@ -391,6 +420,13 @@ test('C8 · Done is every ring closed', async ({ page }) => {
   await expect(row.locator('.rt')).toHaveText('to fix');
   await expect(row.locator('.rt svg.rfix')).toHaveCount(0);
   expect(await row.locator('.rt').evaluate(function (el) { return getComputedStyle(el).color; })).toBe('rgb(139, 113, 30)');   // --warn on light, not --ok
+  // item 39: the over rings keep their half-size plus (frame T)
+  const rings = page.locator('#card .mz');
+  for (const [i, v] of [[0, '+26 over'], [2, '+27 over']]) {
+    await expect(rings.nth(i)).toHaveClass(/\bover\b/);
+    expect(await text(rings.nth(i).locator('.in'))).toBe(v);
+    expect(await text(rings.nth(i).locator('.rv span.pl'))).toBe('+');
+  }
   // the summary: not among the POIs done, counted in "to fix" (item 3)
   const sum = page.locator('#sumport');
   await expect(sum).toContainText('79 of 196 POIs done');
@@ -464,4 +500,63 @@ test('C9 · The summary and the grid count to fix', async ({ page }) => {
   await sheet.locator('[data-act="close-grid"]').first().click();
   await expect(sheet).toHaveCount(0);
   await expect.poll(() => layers(page)).toBe(0);
+});
+
+test('C10 · The toast counts what fits', async ({ page }) => {
+  // POI 122 Straight only, 13 Straight of 40 and 53 passes to fix: a
+  // Straight pass toasts the passes that fit, as the counter reads them
+  // (items 4, 36)
+  await openSample(page);
+  await setStraightOnly122(page);
+  await recordPass(page, 'St', 'N');
+  const toast = page.locator('#toast');
+  await expect(toast).toHaveClass(/\bon\b/);
+  expect(await text(toast)).toBe('Saved: North · 14 of 40');   // the arrow icon sits between the words
+  await expect(page.locator('#cnt')).toHaveText('14 of 40');
+  await expect(page.locator('#head .rest')).toHaveText('26 to go · 53 to fix');
+});
+
+test('C11 · A not-drivable POI with passes is to fix', async ({ page }) => {
+  // POI 122, 66 passes in the sheet, set to Not drivable: the counter
+  // reads "Not drivable", the rest line "66 to fix", the row "not
+  // drivable" with the triangle, and the summary counts it among the POIs
+  // to fix (item 46)
+  await openSample(page);
+  const rid = routeId(await store(page));
+  await selectPoi(page, 122);
+  await pickType(page, 'nd');
+  const dlg = page.locator('.dlg');
+  await expect(dlg).toBeVisible();
+  await dlg.locator('[data-act="dlg-ok"]').click();
+  await expect(dlg).toHaveCount(0);
+  await expectToastText(page, 'Type set: Not drivable');
+  await expect(page.locator('#cnt')).toHaveText('Not drivable');
+  const rest = page.locator('#head .rest');
+  await expect(rest).toHaveText('66 to fix');
+  await expect(rest.locator('span.fix')).toHaveText('66 to fix');
+  const row = page.locator('#col .row[data-poi="122"]');
+  await expect(row).toHaveClass(/\bnd\b/);
+  await expect(row).toHaveClass(/\bactive\b/);
+  await expect(row).not.toHaveClass(/\bfix\b/);
+  await expect(row.locator('.rt')).toHaveText('not drivable');
+  await expect(row.locator('.rt svg.rfix use')).toHaveAttribute('href', '#i-alert');
+  expect(await markFirst(row.locator('.rt'))).toBe(true);
+  const s = await store(page);
+  expect(s.types[rid]['122']).toBe('nd');
+  const toFix = toFixOf(s, rid);
+  expect(toFix).toBeGreaterThan(0);
+  const sum = page.locator('#sumport');
+  await expect(sum.locator('span.fix')).toHaveText(new RegExp('^' + toFix + ' to fix ·$'));
+  await expect(sum).toContainText('79 of 195 POIs done');
+
+  // the sample's 168, not drivable with no passes: "Not counted" and no
+  // triangle
+  await selectPoi(page, 168);
+  await expect(page.locator('#cnt')).toHaveText('Not drivable');
+  await expect(rest).toHaveText('Not counted');
+  await expect(rest.locator('span.fix')).toHaveCount(0);
+  const row168 = page.locator('#col .row[data-poi="168"]');
+  await expect(row168).toHaveClass(/\bnd\b/);
+  await expect(row168.locator('.rt')).toHaveText('not drivable');
+  await expect(row168.locator('.rt svg.rfix')).toHaveCount(0);
 });

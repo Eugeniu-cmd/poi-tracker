@@ -13,9 +13,10 @@
    v0.3 2026-10-21 — the polish: a new cache name for app v0.3.
    v0.4 2026-10-23 — the card: a new cache name for app v0.4.
    v0.5 2026-10-23 — done by rings: a new cache name for app v0.5.
+   v0.6 2026-10-23 — the approved screens of D1: a new cache name for app v0.6.
 */
 'use strict';
-var CACHE = 'poi-app-v0.5';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.6';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 
