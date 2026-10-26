@@ -150,6 +150,16 @@
           Undo toast closes at once when the active POI or route
           changes or another toast replaces it. Both durations are read
           from the tokens, no longer literals in the script.
+  v0.14 2026-10-26 — speed step 1, the POI column redraws only what
+          changed (the performance audit of 2026-10-25: about half of a
+          tap was the column rebuilt whole and its scroll set).
+          renderColumn() still computes every row's markup and every
+          dot's class, compares them with what it drew last time and
+          replaces only the rows, dots and caption that differ, the
+          list's scroll untouched and no layout forced; it rebuilds the
+          whole column only on the first draw, for another route or
+          city, a different number of POIs or the rail's finger and
+          bubble. The store and its write stay as they are (item 78).
 -->
 <html lang="en">
 <head>
@@ -2014,7 +2024,10 @@
     setHTML(b, '<span class="dot"></span>' + esc(s.text) + icon(open ? 'i-chev-up' : 'i-chev-down'));
   }
 
-  var colBuilt = null;
+  // the column as it was drawn last time (v0.14): its route, every row's
+  // markup, every dot's class, the caption and the rail with its finger
+  // and bubble, so a render replaces only what changed
+  var colBuilt = null, colRows = [], colDots = [], colCap = '', colRail = '';
   function railMarks(N) {
     // 1, round steps, and the last POI (item 57); 1, 40, 80, 120, 160, 197 for 197
     var steps = [5, 10, 20, 25, 40, 50, 100, 200, 250, 500, 1000], step = steps[steps.length - 1];
@@ -2036,11 +2049,11 @@
         (c ? 'Add routes in Settings' : 'Add your first city') + icon('i-chev-right') + '</button>');
       return;
     }
-    var N = r.poiCount, act = active(), tot = routeTotals(r), dots = '', rows = '';
+    var N = r.poiCount, act = active(), tot = routeTotals(r), dots = [], rows = [];
     for (var n = 1; n <= N; n++) {
       var k = counts(r.id, n), st = statusOf(r.id, n, k), T = TYPES[typeOf(r.id, n)], f = fitFix(k, T);
       // the dots have no colour for passes to fix: the part colour (item 58)
-      dots += '<i class="' + (n === act ? 'act' : st === 'fix' ? 'part' : st) + '"></i>';
+      dots.push(n === act ? 'act' : st === 'fix' ? 'part' : st);
       // item 40: a row with passes to fix carries a warning triangle before
       // "N to go", and a not-drivable POI with passes before "not drivable"
       // (item 46); once nothing is to go the tag reads "to fix"
@@ -2052,19 +2065,43 @@
       // cls(): the class fix only once every ring is closed, so a row whose
       // rings still ask has only the triangle in the warning colour
       var rcls = 'row' + (st && st !== 'part' ? ' ' + st : '') + (n === act ? ' active' : '');
-      rows += '<button class="' + rcls + '" type="button" data-poi="' + n + '" aria-label="POI ' + n + '">' +
+      rows.push('<button class="' + rcls + '" type="button" data-poi="' + n + '" aria-label="POI ' + n + '">' +
         '<span class="rn">' + n + '</span><span class="rc"><span class="rb"><i style="width: ' + pct + '%"></i></span>' +
-        '<span class="rt">' + tag + '</span></span></button>';
+        '<span class="rt">' + tag + '</span></span></button>');
     }
+    var cap = tot.poisDone + ' of ' + tot.drivable;
     var rail = railMarks(N).map(function (v) { return '<span style="' + railTop(v, N) + '">' + v + '</span>'; }).join('');
     if (ui.railN) rail += '<div class="finger" style="' + railTop(ui.railN, N) + '" aria-hidden="true"></div>';
     var bubble = ui.railN ? '<div class="bubble" style="' + railTop(ui.railN, N) + '" aria-hidden="true">' + ui.railN + '</div>' : '';
+    // v0.14: the column built for this route, with as many POIs and the
+    // same rail, is patched, not rebuilt: only the rows and dots whose
+    // markup differs from what it drew last time, and the caption when it
+    // differs, are replaced. The list's scroll is not touched and no
+    // layout is forced. Every row is recomputed and compared, so no row
+    // is left stale by an action that forgot to say what it changed.
+    if (colBuilt === r.id && colRows.length === N && colRail === rail + bubble) {
+      var rowEls = col.querySelector('.list').children, dotEls = col.querySelector('.dots').children;
+      for (var i = 0; i < N; i++) {
+        if (rows[i] !== colRows[i]) rowEls[i].outerHTML = rows[i];
+        if (dots[i] !== colDots[i]) dotEls[i].className = dots[i];
+      }
+      if (cap !== colCap) {
+        col.querySelector('.mcap > span').textContent = cap + ' done';
+        col.querySelector('.mline > span').textContent = cap;
+      }
+      colRows = rows; colDots = dots; colCap = cap;
+      return;
+    }
+    // the whole column: the first draw, another route or city, a different
+    // number of POIs, or the rail's finger and bubble
     var list = col.querySelector('.list');
     var keep = list && colBuilt === r.id ? list.scrollTop : null;
-    var html = '<button class="mmap" type="button" data-act="grid" aria-label="Open the grid of all POIs"><span class="mm"><span class="dots">' + dots +
-      '</span><span class="mcap"><span>' + tot.poisDone + ' of ' + tot.drivable + ' done</span><span class="iw">Open' + icon('i-chev-right') + '</span></span></span>' +
-      '<span class="mline"><svg class="gi"><use href="#i-grid"/></svg><span>' + tot.poisDone + ' of ' + tot.drivable + '</span><span class="iw">Open' + icon('i-chev-right') + '</span></span></button>' +
-      '<div class="colbody"><div class="list">' + rows + '</div><div class="rail" aria-label="Jump through the POI list">' + rail + '</div>' + bubble + '</div>';
+    var html = '<button class="mmap" type="button" data-act="grid" aria-label="Open the grid of all POIs"><span class="mm"><span class="dots">' +
+      dots.map(function (d) { return '<i class="' + d + '"></i>'; }).join('') +
+      '</span><span class="mcap"><span>' + cap + ' done</span><span class="iw">Open' + icon('i-chev-right') + '</span></span></span>' +
+      '<span class="mline"><svg class="gi"><use href="#i-grid"/></svg><span>' + cap + '</span><span class="iw">Open' + icon('i-chev-right') + '</span></span></button>' +
+      '<div class="colbody"><div class="list">' + rows.join('') + '</div><div class="rail" aria-label="Jump through the POI list">' + rail + '</div>' + bubble + '</div>';
+    colRows = rows; colDots = dots; colCap = cap; colRail = rail + bubble;
     if (!setHTML(col, html) && colBuilt === r.id) return;
     list = col.querySelector('.list');
     if (keep !== null) list.scrollTop = keep;

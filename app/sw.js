@@ -21,9 +21,10 @@
    v0.11 2026-10-26 — gold small arrows: a new cache name for app v0.11.
    v0.12 2026-10-26 — a brighter done green for the grid: a new cache name for app v0.12.
    v0.13 2026-10-26 — Undo on the Type set toast: a new cache name for app v0.13.
+   v0.14 2026-10-26 — speed step 1, the column redraws only what changed: a new cache name for app v0.14.
 */
 'use strict';
-var CACHE = 'poi-app-v0.13';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.14';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 
