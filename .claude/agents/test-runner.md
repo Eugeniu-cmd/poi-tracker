@@ -1,6 +1,6 @@
 ---
 name: test-runner
-description: Runs the app's Playwright tests in its own context and reports the result, with the cause of every failure and its evidence. Use it after every change to app/ or tests/ (CLAUDE.md rule 12) and whenever a test fails. It changes nothing.
+description: Runs the app's failing Playwright tests in its own context and reports the cause of every failure with its evidence. Use it when a test fails (CLAUDE.md rule 12). It changes nothing.
 tools: Read, Grep, Glob, Bash
 disallowedTools: Write, Edit, NotebookEdit
 model: inherit

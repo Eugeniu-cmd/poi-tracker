@@ -1,6 +1,6 @@
 ---
 name: spec-reviewer
-description: Fresh-context review of finished work against the prompt that asked for it and the project's specs. Use it before every commit (CLAUDE.md rule 13) and whenever a change needs checking. It reports correctness gaps only and changes nothing.
+description: Fresh-context review of finished work against the prompt that asked for it and the project's specs. Use it before committing a data step (CLAUDE.md rule 13): the store, the event queue, removals or target events, sending or pulling, the mailbox, the tracker's formulas or the compass's heading logic. It reports correctness gaps only and changes nothing.
 tools: Read, Grep, Glob, Bash
 disallowedTools: Write, Edit, NotebookEdit
 model: inherit
@@ -15,7 +15,7 @@ The caller names the prompt (its text or a file) and what to review. If it names
 How to review
 1. Read CLAUDE.md, the prompt, and every file the prompt names. Read the items of docs/screens.md and the sections of docs/data-model.md that the change touches.
 2. Read the whole diff, every hunk, and every new file in full.
-3. Walk the prompt requirement by requirement: each Part, each numbered step, each acceptance check. Decide for each: met, not met, or not checkable here. Verify with your own commands, never with the author's report: hashes with Get-FileHash -Algorithm SHA256, counts with Select-String, copied blocks compared line by line with a script, and the test suite (cd tests, then npx playwright test) when the change touches app/ or tests/.
+3. Walk the prompt requirement by requirement: each Part, each numbered step, each acceptance check. Decide for each: met, not met, or not checkable here. Verify with your own commands, never with the author's report: hashes with Get-FileHash -Algorithm SHA256, counts with Select-String, copied blocks compared line by line with a script. The test suite is the one exception: take the caller's result for the final diff (its command, counts and time), and run it yourself (cd tests, then npx playwright test) only when no result is given or the diff changed after it.
 4. Check the hard rules of CLAUDE.md against the diff, above all: secrets never in files, the client's spreadsheet read-only, numbers only in route-sheet cells B..H, the two maneuver column orders never mixed, a pass atomic with its UUID applied once and no count below 0, docs/inputs/ untouched, every visual value a token (rule 9), Lucide icons only (rule 10), version histories append-only, UI copy in English.
 5. Check the scope: nothing changed outside what the prompt asks.
 6. Check the tests: none deleted, skipped or loosened, no expected value changed unless the prompt asks for it, and every new test can fail (it checks a value, not only that the code runs).

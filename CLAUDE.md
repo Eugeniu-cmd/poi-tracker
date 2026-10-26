@@ -55,16 +55,23 @@ Hard rules:
     If it turns out bigger, stop and report.
 12. Prove the work with checks you run yourself: the test suite in
     tests/ after every change to app/ or tests/, plus the prompt's own
-    checks. Run the suite through the test-runner subagent
-    (.claude/agents/test-runner.md): it runs the tests in its own
-    context and names the cause of every failure. A single test may be
-    run directly (cd tests, then npx playwright test <file>). The report
-    shows the command and its output, never a bare tick.
-13. Before committing code, the spec-reviewer subagent
-    (.claude/agents/spec-reviewer.md), which did not write it, reviews
-    the diff against the prompt, docs/screens.md and docs/data-model.md,
-    and reports correctness gaps only, not style. Fix what it finds or
-    report it.
+    checks. Run the suite directly (cd tests, then npx playwright
+    test). When a test fails, call the test-runner subagent
+    (.claude/agents/test-runner.md): it runs the failing tests in its
+    own context and names the cause of every failure. The report shows
+    the command and its output, never a bare tick (decided 2026-10-26).
+13. On a data step, before committing, the spec-reviewer subagent
+    (.claude/agents/spec-reviewer.md), which did not write the change,
+    reviews the diff against the prompt, docs/screens.md and
+    docs/data-model.md, and reports correctness gaps only, not style.
+    Fix what it finds or report it. A data step changes the tablet's
+    store, the event queue, removals or target events, sending or
+    pulling, mailbox/, the tracker's formulas or the compass's heading
+    logic. Look-only and document steps skip the review. The prompt
+    says which kind it is; when it does not, decide by this list and
+    say so in the report. Give the reviewer the suite's last result
+    for the final diff, so it does not run the suite again (decided
+    2026-10-26).
 
 Where to look:
 | What | Where |
