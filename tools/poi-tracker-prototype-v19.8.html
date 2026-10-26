@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  POI Tracker — working prototype v19.7
+  POI Tracker — working prototype v19.8
   One file, for the tablet. Open it in Chrome from GitHub Pages through
   tools/poi-tracker-prototype.html, the permanent address that opens the
   newest version: a downloaded copy gets no location, and the compass
@@ -18,10 +18,10 @@
   compass that blooms, undo and delete with their dialogs, History, the
   type menu, the route menu, the grid, the rail, a simulated sync, and the
   live compass from the tablet's sensors (data-model.md "Heading").
-  Nothing is sent anywhere. The tablet keeps two things in the browser's
-  storage: the compass's last course, and the sensor log, the last 3
-  drives, no coordinates, until "Save sensor logs" in Tools turns them
-  into one file.
+  Nothing is sent anywhere. The tablet keeps three things in the
+  browser's storage: the compass's last course, its last good drift,
+  and the sensor log, the last 3 drives, no coordinates, until "Save
+  sensor logs" in Tools turns them into one file.
 
   v17 2026-10-12 — first prototype on the canon: main-screen v0.24,
           history v0.9, tokens v0.11, screens v0.35. Replaces the
@@ -92,13 +92,20 @@
           check also needs the GPS course steady, and a gap over 30
           degrees is taken at once only while the arrow is pale. The
           Tools menu names the real version.
+  v19.8 2026-10-26: the compass test of 2026-10-23 in the new car
+          (data-model.md v0.19): the drift guard is 0.15 deg/s, since the
+          real drift is 0.02 to 0.07 deg/s in both cars and a false 0.44
+          passed the old 0.5 while the car crept round a corner with GPS
+          at 0. The last good drift is kept on the tablet for 12 hours,
+          so a reload starts with it instead of waiting for the car to
+          stand; the first drift measured replaces it.
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#EFF3FA">
-<title>POI Tracker — prototype v19.7</title>
+<title>POI Tracker — prototype v19.8</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -2149,6 +2156,16 @@
   //    otherwise it is pulled 30% like any other. Replayed on that drive:
   //    no check moved the arrow more than 7 deg after the start, and the
   //    accuracy on straight roads stayed the same.
+  // 9. Decided 2026-10-26 (v19.8) after the compass test of 2026-10-23 in
+  //    the new car: the drift guard is 0.15 deg/s, about twice the largest
+  //    real drift (0.02 to 0.07 deg/s, measured more than 100 times in two
+  //    cars). At 0.5 a turn of 0.44 deg/s, the car creeping round a corner
+  //    while GPS read 0, passed as drift and the arrow was 12 deg off 33 s
+  //    later. The last good drift is kept on the tablet for 12 hours (one
+  //    shift): the page left the screen three times in 12 minutes, and
+  //    every new start began without a drift until the car next stood for
+  //    3 s. A start reads it, checks its turn about "up" against the guard
+  //    once "up" is known, and the first drift measured replaces it.
   var compass = (function () {
     var MOVING = 3;             // m/s (11 km/h): the GPS course is trusted from here
     var FRESH = 3000;           // ms: a fix older than this is not live
@@ -2166,9 +2183,10 @@
     var STILL_MS = 3000;        // ms: a standing car steady this long measures the drift
     var STILL_BLOCK = 500;      // ms: the gyroscope is averaged over blocks this long
     var STILL_SPREAD = 1;       // deg/s: averages further apart on any axis mean it moved
-    var DRIFT_MAX = 0.5;        // deg/s: a larger turn is the car creeping round a corner
-                                // while GPS still reads 0, not drift. This tablet's
-                                // gyroscope drifted 0.01 to 0.02 deg/s in the car
+    var DRIFT_MAX = 0.15;       // deg/s: a larger turn is the car creeping round a corner
+                                // while GPS still reads 0, not drift. The real drift is
+                                // 0.02 to 0.07 deg/s in both cars, and a false 0.44
+                                // passed the old 0.5 on 2026-10-23 (v19.8)
     var RESTART_GAP = 5000;     // ms: the watchdog restarts the sensors at most this often
     var CREDIT = 1500;          // ms: a reading this soon after a tap or a restart is credited to it
     var LOG_MAX = 20000;        // rows in one drive: about three hours
@@ -2177,7 +2195,7 @@
     var LOG_CHUNK = 500;        // rows in one stored piece
     var LOG_KEEP = 3;           // drives kept on the tablet
     var LOG_JOIN = 10 * 60000;  // ms: a page opened again this soon continues the drive
-    var VERSION = 'v19.7';
+    var VERSION = 'v19.8';
     var RAD = 180 / Math.PI;
     var car = new Heading.Smoother(0.6);
 
@@ -2223,6 +2241,41 @@
       return m < 1 ? 'just now' : m < 120 ? m + ' min ago' : m < 2880 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' days ago';
     }
 
+    // ---- the last good drift, kept on the tablet (9 above) ----
+    var DRIFT = 'poi-proto-drift';    // the key of the last good drift in the browser's storage
+    var DRIFT_KEEP = 12 * 3600000;    // ms: one shift. An older kept drift is ignored
+    var keptDrift = null;             // the kept drift in use, until the first drift measured in this drive replaces it
+    var keptChecked = false;          // whether the kept drift was checked against "up"
+    function minsAgo(at) { return Math.round((Date.now() - at) / 60000) + ' min ago'; }
+    // written right after every drift that stillSample() accepts
+    function saveDrift() {
+      try { localStorage.setItem(DRIFT, JSON.stringify({ b: [r(bias[0], 4), r(bias[1], 4), r(bias[2], 4)], at: Date.now() })); }
+      catch (e) { /* storage full or blocked: the next start measures it again */ }
+    }
+    // at start: a drift saved less than 12 hours ago is used from the first
+    // second. The sensor log says whether it was kept, and why not
+    function restoreDrift() {
+      var k;
+      try { k = JSON.parse(localStorage.getItem(DRIFT) || 'null'); }
+      catch (e) { event('drift not kept: unreadable'); return; }
+      if (k === null) return;
+      if (!k.b || num(k.b[0]) === null || num(k.b[1]) === null || num(k.b[2]) === null || num(k.at) === null) { event('drift not kept: unreadable'); return; }
+      if (Date.now() - k.at >= DRIFT_KEEP) { event('drift not kept: too old'); return; }
+      bias = [k.b[0], k.b[1], k.b[2]]; biasSet = true; keptDrift = k;
+      event('drift kept from ' + minsAgo(k.at));
+    }
+    // once "up" is known, the kept drift is checked as stillSample() checks
+    // a new one: a turn about "up" above DRIFT_MAX was the car creeping
+    // round a corner, not drift, and the kept drift is dropped
+    function checkKept() {
+      keptChecked = true;
+      var u = acc.up, about = Math.abs(bias[0] * u[0] + bias[1] * u[1] + bias[2] * u[2]);
+      if (about <= DRIFT_MAX) return;
+      bias = [0, 0, 0]; biasSet = false; keptDrift = null;
+      try { localStorage.removeItem(DRIFT); } catch (e) { /* the next start reads it and drops it again */ }
+      event('kept drift dropped: ' + about.toFixed(2));
+    }
+
     function live(s, t) { return s.n > 0 && t - s.at < LIVE; }
     function alive(t) { return live(gy.api, t) || live(gy.dm, t); }
     function gyroOk(t) { return alive(t) && !!acc.up; }
@@ -2264,7 +2317,10 @@
       acc.prevT = stamp;
       var m = Math.hypot(acc.v[0], acc.v[1], acc.v[2]);
       acc.mag = m;
-      if (m > 1) acc.up = [acc.v[0] / m, acc.v[1] / m, acc.v[2] / m];
+      if (m > 1) {
+        acc.up = [acc.v[0] / m, acc.v[1] / m, acc.v[2] / m];
+        if (keptDrift && !keptChecked) checkKept();
+      }
     }
 
     // ---- the gyroscope: how fast the car turns, seen from above ----
@@ -2352,8 +2408,10 @@
       for (var j = 0; j < st.blocks.length; j++) for (i = 0; i < 3; i++) b[i] += st.blocks[j][i] / st.blocks.length;
       st.blocks = [];
       if (u && Math.abs(b[0] * u[0] + b[1] * u[1] + b[2] * u[2]) > DRIFT_MAX) { event('not drift: turning'); return; }
-      for (i = 0; i < 3; i++) bias[i] = biasSet ? bias[i] + (b[i] - bias[i]) * 0.5 : b[i];
-      biasSet = true; drifts += 1; driftAt = t;
+      // the first drift measured in this drive replaces a kept one; later ones blend (v19.8)
+      for (i = 0; i < 3; i++) bias[i] = biasSet && !keptDrift ? bias[i] + (b[i] - bias[i]) * 0.5 : b[i];
+      biasSet = true; keptDrift = null; drifts += 1; driftAt = t;
+      saveDrift();
       event('drift ' + drift().toFixed(2));
     }
 
@@ -2578,8 +2636,9 @@
       if (st.from && t - st.shakyAt < 1500) d = 'standing, but the tablet shakes (' + st.spread.toFixed(1) + '°/s), waiting for it to settle';
       else if (st.from) d = 'measuring: standing ' + secs(t - st.from) + ', steady for ' + (st.blocks.length * STILL_BLOCK / 1000).toFixed(1) + ' of 3 s';
       else d = 'not measured yet: it is measured while the car stands';
-      if (biasSet) d = 'removed · ' + Math.abs(drift()).toFixed(2) + '°/s · measured ' + drifts + (drifts === 1 ? ' time' : ' times') +
-        ', last ' + secs(t - driftAt) + ' ago' + (st.from ? ' · ' + d : '');
+      if (biasSet) d = 'removed · ' + Math.abs(drift()).toFixed(2) + '°/s · ' + (keptDrift
+        ? 'kept from ' + minsAgo(keptDrift.at) + ', not measured in this drive yet'
+        : 'measured ' + drifts + (drifts === 1 ? ' time' : ' times') + ', last ' + secs(t - driftAt) + ' ago') + (st.from ? ' · ' + d : '');
       lines.push(['Drift', d]);
       lines.push(['Pauses', !everLive ? 'no readings yet' : !tally.pauses && !paused ? 'none so far'
         : tally.pauses + ' · back by restart ' + tally.restart + ', after a tap ' + tally.tap + ', by itself ' + tally.itself +
@@ -2626,6 +2685,7 @@
       } catch (e) { keep.ok = false; keep.err = e.name || 'error'; }
       event('page opened · prototype ' + VERSION);
     }());
+    restoreDrift();
     function total() { return keep.base + log.length; }
     // the drive is kept from the first moment the car moves
     function startKeeping() {

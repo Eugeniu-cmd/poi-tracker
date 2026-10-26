@@ -1,6 +1,6 @@
 # Data model
 
-v0.18 — 2026-10-25
+v0.19 — 2026-10-26
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -89,6 +89,11 @@ on 2026-10-25): on a Straight only POI the screen shows each approach
 side against the usual 20 from each direction and locks nothing; the
 POI is done at Straight 40 whatever its sides. The target and the split
 do not change (screens.md v0.54, items 39 and 46).
+v0.19 2026-10-26 — "Heading" and "Tablet storage" after the compass test
+of 2026-10-23 in the new car: the drift guard is 0.15 degrees a second
+(a false drift of 0.44 passed 0.5 while the car crept round a corner
+with GPS at 0), and the tablet keeps its last good drift for 12 hours,
+so a reload starts with it; the first drift measured replaces it.
 -->
 
 ## Pass (one crossing of an intersection)
@@ -201,6 +206,10 @@ do not change (screens.md v0.54, items 39 and 46).
   saved (see "Heading"). Without it the next start points north, pale.
   It has its own key, poi-app:heading, apart from the store, since it is
   written every 2 s.
+- drift: the gyroscope's last good drift, three numbers in degrees a
+  second about the tablet's own axes, and the time it was measured (see
+  "Heading"). It has its own key, poi-app:drift, written only when a
+  drift is measured.
 - cities: the cities with their routes (see "Cities and routes"). A
   route's lastPoi is the POI the working screen opens: lastPoi, else the
   first POI not done, else 1.
@@ -346,10 +355,16 @@ do not change (screens.md v0.54, items 39 and 46).
   the mount does not matter. The Generic Sensor API is read first,
   "devicemotion" while it is silent. Android's ready-made orientation is
   not read: on this tablet it gives only zeros.
-- The gyroscope drifts about 0.02 degrees a second. The drift is measured
-  and removed while the car stands (GPS below 0.3 m/s): half-second
-  averages that agree within 1 degree a second for 3 s. A turn above 0.5
-  degrees a second is the car creeping round a corner, not drift.
+- The gyroscope drifts 0.02 to 0.07 degrees a second (measured in two
+  cars). The drift is measured and removed while the car stands (GPS
+  below 0.3 m/s): half-second averages that agree within 1 degree a
+  second for 3 s. A turn above 0.15 degrees a second is the car creeping
+  round a corner, not drift (decided 2026-10-26: at 0.5 a false drift of
+  0.44 turned the arrow by itself). The tablet keeps its last good drift
+  (see "Tablet storage"). A start within 12 hours removes it from the
+  first second, and the first drift measured after the start replaces
+  it. A kept drift whose turn about "up" is above 0.15 degrees a second
+  is dropped.
 - GPS sets north, only while the car drives straight at 11 km/h (3 m/s)
   or more: the gyroscope saw less than 3 degrees in the last 2 s, and the
   last 3 GPS courses, at most 1.6 s apart, lie within 5 degrees of the
