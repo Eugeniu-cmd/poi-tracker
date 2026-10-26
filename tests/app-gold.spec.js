@@ -1,22 +1,28 @@
-/* POI Tracker tests — the gold (prompts Gold step 2 and Card step 2;
-   screens.md v0.52, items 2, 5, 19, 39, 40, 41, 60; _tokens.css v0.19):
-   the one gold, --gold-line #CCA735 in both themes, on the arrows and their
-   ring, the type tile, the card's ring fill, the icons under its rings and
-   beside LAST, and the bar of a POI in progress; a gold N on the compass,
-   gold sides, a locked arrow without the ring, the gold History chip, the
-   pill's numbers in ink, none of the old colours left in any computed
-   colour, and the gold icon with its manifest entries.
+/* POI Tracker tests — the gold (prompts Gold step 2, Card step 2 and Done
+   step 2c; screens.md v0.55, items 2, 5, 19, 39, 40, 41, 60; _tokens.css
+   v0.22): the one gold, --gold-line, #D9A92A on light and #E6B83E on dark,
+   on the arrows' ring, the card's ring fill, the icons under its rings and
+   beside LAST (--card-glyph) and the bar of a POI in progress; the arrows
+   on the discs and the type tile on --man-glyph, the gold on light and a
+   deep gold, #A67C00, on the ivory discs of the dark theme; a gold N on
+   the compass and gold sides (--side, #E0B43A and #E6B83E), a locked
+   arrow without the ring, the gold History chip, the pill's numbers in
+   ink, none of the old colours left in any computed colour, and the gold
+   icon with its manifest entries (the icon keeps its colours until a step
+   of its own recolours it).
    The light and dark tests emulate the system colour scheme before the
    app opens, so its "System" theme follows it.
 */
 'use strict';
 const { test, expect, layers, openSample, openHistory } = require('./fixtures');
 
-const GOLD = 'rgb(212, 175, 55)';          // --side, --compass-n in both themes; --warn on dark
-const DARK_GOLD = 'rgb(139, 113, 30)';     // --compass-n-edge and --warn on light
-const LINE = 'rgb(204, 167, 53)';          // --gold-line #CCA735: --man-glyph, --man-ring, --card-fill and --prog in both themes
-const RING = LINE + ' 0px 0px 0px 4px';    // 0 0 0 var(--s-1) var(--man-ring)
-const OLD = ['242, 168, 29', '184, 116, 0', '255, 177, 61', '163, 127, 34'];   // the old side colour, the old light and dark --warn, and #A37F22, the gold of tokens v0.18 that never reached the app
+// the golds of _tokens.css v0.22, one value per theme
+const GOLD = { light: 'rgb(224, 180, 58)', dark: 'rgb(230, 184, 62)' };      // --side, --compass-n
+const EDGE = { light: 'rgb(126, 95, 10)', dark: 'rgba(0, 0, 0, 0)' };        // --compass-n-edge: #7E5F0A on light, transparent on dark
+const LINE = { light: 'rgb(217, 169, 42)', dark: 'rgb(230, 184, 62)' };      // --gold-line: --man-ring, --card-fill, --card-glyph and --prog in both themes
+const GLYPH = { light: 'rgb(217, 169, 42)', dark: 'rgb(166, 124, 0)' };      // --man-glyph: --gold-line on light, #A67C00 on the ivory discs of dark
+const SOFT = { light: 'rgba(224, 180, 58, 0.18)', dark: 'rgba(230, 184, 62, 0.2)' };   // --side-soft
+const OLD = ['242, 168, 29', '184, 116, 0', '255, 177, 61', '163, 127, 34', '212, 175, 55', '139, 113, 30', '204, 167, 53'];   // the old side colour, the old light and dark --warn, #A37F22, the gold of tokens v0.18 that never reached the app, and the golds of tokens v0.20: #D4AF37, #8B711E and #CCA735
 const PROPS = ['color', 'background-color', 'border-top-color', 'border-left-color', 'outline-color', 'fill', 'stroke', 'box-shadow'];
 
 // a computed style property of the element
@@ -41,22 +47,27 @@ function oldColours(page) {
 }
 
 async function goldScreen(page, scheme) {
-  const dark = scheme === 'dark';
+  const gold = GOLD[scheme], line = LINE[scheme], glyph = GLYPH[scheme];
+  const ring = line + ' 0px 0px 0px 4px';   // 0 0 0 var(--s-1) var(--man-ring)
   await page.emulateMedia({ colorScheme: scheme });
   await openSample(page);
   const stage = page.locator('#stage');
   const left = page.locator('#stage [data-man="L"]');
 
-  // a. the Left arrow of POI 136: the one gold, in both themes, and its ring
+  // a. the arrows on the three discs of POI 136 take --man-glyph: the gold on
+  //    light, a deep gold on the ivory discs of dark (item 5, v0.40); the Left
+  //    arrow, not locked, carries the ring in --man-ring, the one gold
+  const discs = page.locator('#stage .disc');
+  await expect(discs).toHaveCount(3);
+  for (let i = 0; i < 3; i++) expect(await css(discs.nth(i), 'color'), 'disc ' + i).toBe(glyph);
   await expect(left).not.toHaveClass(/\blocked\b/);
-  expect(await css(left, 'color')).toBe(LINE);
   const shadowA = await css(left, 'box-shadow');
-  expect(shadowA.startsWith(RING), 'box-shadow "' + shadowA + '" should start with the ring').toBe(true);
+  expect(shadowA.startsWith(ring), 'box-shadow "' + shadowA + '" should start with the ring').toBe(true);
 
-  // b. the type pill's tile
+  // b. the type pill's tile: --man-glyph too
   const tile = page.locator('#pill .ticon');
   await expect(tile).toHaveCount(1);
-  expect(await css(tile, 'color')).toBe(LINE);
+  expect(await css(tile, 'color')).toBe(glyph);
 
   // c. the compass: a gold N, outlined on light. On the sample it has no
   //    heading, so it is idle (item 19): its gold half is a dashed outline
@@ -66,8 +77,8 @@ async function goldScreen(page, scheme) {
   await expect(page.locator('.compass')).toHaveClass(/\bidle\b/);
   const cn = page.locator('.compass .cn');
   await expect(cn).toHaveCount(1);
-  expect(await css(cn, 'fill')).toBe(GOLD);
-  expect(await css(cn, 'stroke')).toBe(dark ? 'rgba(0, 0, 0, 0)' : DARK_GOLD);
+  expect(await css(cn, 'fill')).toBe(gold);
+  expect(await css(cn, 'stroke')).toBe(EDGE[scheme]);
   const half = page.locator('.compass .gold');
   await expect(half).toHaveCount(1);
   expect(await css(half, 'fill')).toBe('none');
@@ -80,21 +91,24 @@ async function goldScreen(page, scheme) {
     svg.classList.add('idle');
     return fill;
   });
-  expect(goldFill).toBe(GOLD);
+  expect(goldFill).toBe(gold);
   await expect(page.locator('.compass .amber')).toHaveCount(0);
 
   // h. the card and the column on POI 136, the sides closed: the fill of a
-  //    ring, the icon under it, the icon of LAST and the bar of the POI in
+  //    ring, the icons under the rings and the icon of LAST (--card-glyph,
+  //    the bright gold in both themes, v0.40) and the bar of the POI in
   //    progress take the one gold; the pill's numbers are in ink, the colour
   //    of the big number
   const fg = page.locator('#card .mz .fg').first();
   await expect(fg).toHaveCount(1);
-  expect(await css(fg, 'stroke')).toBe(LINE);
-  expect(await css(page.locator('#card .mn .ic').first(), 'color')).toBe(LINE);
+  expect(await css(fg, 'stroke')).toBe(line);
+  const mnIcons = page.locator('#card .mn .ic');
+  await expect(mnIcons).toHaveCount(3);
+  for (let i = 0; i < 3; i++) expect(await css(mnIcons.nth(i), 'color'), 'icon under ring ' + i).toBe(line);
   const lpIcon = page.locator('#card .lp .ic');
   await expect(lpIcon).toHaveCount(1);
-  expect(await css(lpIcon, 'color')).toBe(LINE);
-  expect(await css(page.locator('#col .row[data-poi="136"] .rb i'), 'background-color')).toBe(LINE);
+  expect(await css(lpIcon, 'color')).toBe(line);
+  expect(await css(page.locator('#col .row[data-poi="136"] .rb i'), 'background-color')).toBe(line);
   const ink = await css(page.locator('#head .big'), 'color');
   expect(await css(page.locator('#pill .tn').first(), 'color')).toBe(ink);
 
@@ -108,11 +122,11 @@ async function goldScreen(page, scheme) {
   await expect(sides).toHaveCount(4);
   for (let i = 0; i < 4; i++) {
     await expect(sides.nth(i)).toBeVisible();
-    expect(await css(sides.nth(i), 'background-color')).toBe(GOLD);
+    expect(await css(sides.nth(i), 'background-color')).toBe(gold);
   }
   await expect(left).toHaveClass(/\bon\b/);
   const shadowD = await css(left, 'box-shadow');
-  expect(shadowD.startsWith(RING), 'box-shadow "' + shadowD + '" should start with the ring').toBe(true);
+  expect(shadowD.startsWith(ring), 'box-shadow "' + shadowD + '" should start with the ring').toBe(true);
   // g. no old colour anywhere, with the sides open
   expect(await oldColours(page)).toEqual([]);
   await page.goBack();
@@ -124,13 +138,13 @@ async function goldScreen(page, scheme) {
   await expect(page.locator('#head .big')).toHaveText('124');
   await expect(left).toHaveClass(/\blocked\b/);
   const shadowE = await css(left, 'box-shadow');
-  expect(shadowE.includes('204, 167, 53'), 'box-shadow "' + shadowE + '" should carry no ring').toBe(false);
+  expect(shadowE.includes(line.slice(4, -1)), 'box-shadow "' + shadowE + '" should carry no ring').toBe(false);
 
   // f. History's gold chip
   const hist = await openHistory(page);
   const chip = hist.locator('.hsub .chip.gold');
   await expect(chip).toHaveCount(1);
-  expect(await css(chip, 'background-color')).toBe(dark ? 'rgba(212, 175, 55, 0.22)' : 'rgba(212, 175, 55, 0.16)');
+  expect(await css(chip, 'background-color')).toBe(SOFT[scheme]);
   // g. no old colour anywhere, with History open
   expect(await oldColours(page)).toEqual([]);
 }

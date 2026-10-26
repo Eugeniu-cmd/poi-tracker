@@ -1,12 +1,12 @@
-/* POI Tracker tests — the polish (prompt Polish step 2; screens.md v0.50,
-   items 7, 19 and 62; _tokens.css v0.17): a tapped side keeps its place
+/* POI Tracker tests — the polish (prompts Polish step 2 and Done step 2c;
+   screens.md v0.55, items 7, 19 and 62; _tokens.css v0.22): a tapped side keeps its place
    while it dips under the finger and a gold ring leaves it like a sonar
    ping, and a compass with no heading is a dashed outline.
 */
 'use strict';
 const { test, expect, openSample } = require('./fixtures');
 
-const GOLD = 'rgb(212, 175, 55)';   // --compass-n
+const GOLD = 'rgb(224, 180, 58)';   // --compass-n, that is --side #E0B43A on light, the colour scheme these tests run in
 
 // a computed style property of the element
 function css(locator, prop) {

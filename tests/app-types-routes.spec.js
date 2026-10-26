@@ -319,9 +319,9 @@ test('C6 · Captions of a full share', async ({ page }) => {
   await expect(left.locator('.mn')).toContainText('Left');
   await expect(left).toHaveClass(/\bover\b/);
   expect(await text(left.locator('.in'))).toBe('+3 over');
-  expect(await text(left.locator('.rv span.pl'))).toBe('+');   // the half-size plus (item 39)
+  expect(await text(left.locator('.rv span.pl'))).toBe('+');   // the plus, as big as the digits (item 39)
   await expect(left.locator('.fg')).toHaveAttribute('stroke-dasharray', '100 100');
-  expect(await left.locator('.rv').evaluate(function (el) { return getComputedStyle(el).color; })).toBe('rgb(139, 113, 30)');   // --warn on light
+  expect(await left.locator('.rv').evaluate(function (el) { return getComputedStyle(el).color; })).toBe('rgb(126, 95, 10)');   // --warn on light
 
   // (b) Left done: POI 124 of the sample, Left 28 of 28
   await selectPoi(page, 124);
@@ -419,8 +419,8 @@ test('C8 · Done is every ring closed', async ({ page }) => {
   await expect(row).not.toHaveClass(/\bdone\b/);
   await expect(row.locator('.rt')).toHaveText('to fix');
   await expect(row.locator('.rt svg.rfix')).toHaveCount(0);
-  expect(await row.locator('.rt').evaluate(function (el) { return getComputedStyle(el).color; })).toBe('rgb(139, 113, 30)');   // --warn on light, not --ok
-  // item 39: the over rings keep their half-size plus (frame T)
+  expect(await row.locator('.rt').evaluate(function (el) { return getComputedStyle(el).color; })).toBe('rgb(126, 95, 10)');   // --warn on light, not --ok
+  // item 39: the over rings keep their plus (frame T)
   const rings = page.locator('#card .mz');
   for (const [i, v] of [[0, '+26 over'], [2, '+27 over']]) {
     await expect(rings.nth(i)).toHaveClass(/\bover\b/);
@@ -460,7 +460,7 @@ test('C9 · The summary and the grid count to fix', async ({ page }) => {
   await expect(seg).toHaveText(new RegExp('^' + toFix + ' to fix ·$'));
   await expect(sum.locator('span.fix + span.err')).toHaveText('1 error');
   await expect(sum.locator('span').last()).toHaveClass(/\berr\b/);
-  expect(await seg.evaluate(function (el) { return getComputedStyle(el).color; })).toBe('rgb(139, 113, 30)');   // --warn on light
+  expect(await seg.evaluate(function (el) { return getComputedStyle(el).color; })).toBe('rgb(126, 95, 10)');   // --warn on light
 
   // the grid: the legend has "To fix" between "Not started" and "Sheet
   // error"; POI 122, whose Straight ring still asks, keeps its bar (item 59)
@@ -496,7 +496,7 @@ test('C9 · The summary and the grid count to fix', async ({ page }) => {
   await expect(cell).not.toHaveClass(/\bpart\b/);
   await expect(cell.locator('.cb')).toHaveCount(0);
   await expect(cell.locator('svg.ci use')).toHaveAttribute('href', '#i-alert');
-  expect(await cell.locator('.ci').evaluate(function (el) { return getComputedStyle(el).color; })).toBe('rgb(139, 113, 30)');   // --warn on light
+  expect(await cell.locator('.ci').evaluate(function (el) { return getComputedStyle(el).color; })).toBe('rgb(126, 95, 10)');   // --warn on light
   await sheet.locator('[data-act="close-grid"]').first().click();
   await expect(sheet).toHaveCount(0);
   await expect.poll(() => layers(page)).toBe(0);

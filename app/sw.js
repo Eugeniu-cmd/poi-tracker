@@ -1,4 +1,4 @@
-/* POI Tracker — the service worker of app/ (CLAUDE.md, data-model.md v0.16)
+/* POI Tracker — the service worker of app/ (CLAUDE.md, data-model.md v0.18)
    It keeps the app opening with no network: the tablet is online only
    through the phone's hotspot. The page itself is fetched from the
    network first, past the browser's own cache, so a new version arrives
@@ -14,9 +14,10 @@
    v0.4 2026-10-23 — the card: a new cache name for app v0.4.
    v0.5 2026-10-23 — done by rings: a new cache name for app v0.5.
    v0.6 2026-10-23 — the approved screens of D1: a new cache name for app v0.6.
+   v0.7 2026-10-26 — the new look: a new cache name for app v0.7.
 */
 'use strict';
-var CACHE = 'poi-app-v0.6';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.7';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 

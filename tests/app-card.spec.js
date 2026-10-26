@@ -1,9 +1,10 @@
-/* POI Tracker tests — the card (prompt Card step 2; screens.md v0.52, items
-   9, 39, 60 and 68; _tokens.css v0.19): the "Still needed" card drawn as the
-   canon draws it, three progress rings in a pyramid and a rose of the four
-   sides under TO GO, with the last pass of the POI at the head's right, the
-   type pill and its menu without passes and with "Change type", and the
-   card's rings and rose sized by its own width.
+/* POI Tracker tests — the card (prompts Card step 2 and Done step 2c;
+   screens.md v0.55, items 9, 39, 60 and 68; _tokens.css v0.22): the "Still
+   needed" card drawn as the canon draws it, three progress rings in a
+   pyramid and a rose of the four sides under TO GO, with the last pass of
+   the POI at the head's right, the type pill and its menu without passes
+   and with "Change type", and the card's rings and rose sized by its own
+   width: at scale 3 the rose is 214, 179 and 135 px (v0.39).
    Tests a and b drive the app's clock with Playwright's clock, installed
    before the page opens at 2026-10-22 12:00 local time and left running,
    so the times of the sample's passes are fixed: its newest pass on POI 136
@@ -122,10 +123,10 @@ test('Card · its size follows its width', async ({ page }) => {
   await openSample(page);
   const card = page.locator('#card');
   const sizes = [
-    { w: 800, h: 1333, card: 'wide', wheel: 76, rose: 184 },
-    { w: 1333, h: 800, card: 'wide', wheel: 76, rose: 184 },
-    { w: 720, h: 1000, card: 'narrow', wheel: 62, rose: 160 },
-    { w: 1000, h: 600, card: 'small', wheel: 52, rose: 128 }
+    { w: 800, h: 1333, card: 'wide', wheel: 76, rose: 214 },
+    { w: 1333, h: 800, card: 'wide', wheel: 76, rose: 214 },
+    { w: 720, h: 1000, card: 'narrow', wheel: 62, rose: 179 },
+    { w: 1000, h: 600, card: 'small', wheel: 52, rose: 135 }
   ];
   for (const v of sizes) {
     const at = ' at ' + v.w + ' × ' + v.h;
