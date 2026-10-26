@@ -292,8 +292,10 @@ test('C5 · Passes of a maneuver the new type forbids', async ({ page }) => {
   const dlg = page.locator('.dlg');
   await expect(dlg).toBeVisible();
   expect(await text(dlg.locator('.dtitle'))).toBe('Change POI 140 to No straight?');
-  // item 64 (app v0.9): waiting passes named apart, the switch on by default
-  expect(await text(dlg.locator('.dbody'))).toBe('It has 2 Straight passes waiting on this tablet. No straight does not allow Straight. The app stops counting them, but the sheet keeps them and the export sends them to the client until they are deleted.');
+  // item 64 (app v0.9): waiting passes named apart, the switch on by default;
+  // none of them is in the sheet, so the dialog names no sheet and says the
+  // waiting passes last (app v0.10)
+  expect(await text(dlg.locator('.dbody'))).toBe('It has 2 Straight passes waiting on this tablet. No straight does not allow Straight. The app stops counting them. Passes waiting on this tablet are still sent unless the switch below deletes them.');
   expect(await text(dlg.locator('.drow .ol b'))).toBe('Also delete the 2 passes of this tablet');
   await expect(dlg.locator('.switch')).toHaveAttribute('aria-checked', 'true');
   await dlg.locator('[data-act="dlg-cancel"]').click();

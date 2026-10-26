@@ -16,9 +16,8 @@
     is fetched from the web
   The behaviour follows docs/screens.md v0.56 and docs/data-model.md
   v0.19, and much of it is the code of the working prototype v19.7. The
-  look follows v0.55. Still to come: Cancel removal of a waiting removal
-  and the small defects of the type change audit in v0.10, Undo on the
-  type toast after its reference.
+  look follows v0.55. Still to come: Undo on the type toast after its
+  reference, and sending.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -100,6 +99,26 @@
           a sheet error asks too, the error named first. Cancel change
           on a refused change without fromType puts back the type the
           sheet's target reads as, never Intersection.
+  v0.10 2026-10-26 — Cancel removal and the small defects of the type
+          change audit of 2026-10-23 (screens.md items 12, 13, 46, 60
+          and 64, findings A1 and A3): a pass whose removal waits
+          carries "Cancel removal" in History, which drops the waiting
+          removal in one write, with no dialog and no toast, so the
+          pass counts again (data-model.md "Event": a waiting event may
+          be dropped; the sending step adds that a removal already
+          posted waits for its answer first). The type change dialog
+          says the passes waiting on this tablet last, after the
+          sentence on who put the ones in the sheet there, and names
+          the sheet only when some of them are in it. No count on
+          screen goes below 0, the sheet error read from the numbers as
+          they are. The Not drivable pill carries the class nd of frame
+          G. The baseline's target is read once, in baseTarget() and
+          typeOf() alike: a number, or a text that is a whole number,
+          is that number, anything else is 70. A sheet error comes
+          before Not drivable in statusOf() too, so the row, the grid
+          tile, the mini-map square and the summary show it as for any
+          other POI, and the head keeps "Not drivable" over the
+          error's line.
 -->
 <html lang="en">
 <head>
@@ -1650,17 +1669,29 @@
     return IX;
   }
   function base(rid, n) { var b = S.baseline[rid]; return b && b[n] || null; }
-  // a POI with no baseline reads as seven zeros, and its target is 70 as in
-  // the sheet, where an empty target cell reads as 70
-  function baseTarget(rid, n) { var b = base(rid, n); return b && typeof b.target === 'number' ? b.target : 70; }
+  // The one reading of the baseline's target (finding A1 of the type change
+  // audit): a number, or a text that is a whole number, is that number;
+  // anything else, a POI with no baseline too, is 70 as in the sheet, where
+  // an empty target cell reads as 70. Such a POI's counts are seven zeros.
+  function baseTarget(rid, n) {
+    var b = base(rid, n), t = b ? b.target : null;
+    if (typeof t === 'number') return t;
+    if (typeof t === 'string' && /^\s*\d+\s*$/.test(t)) return +t;
+    return 70;
+  }
   // Numbers on screen = baseline + the waiting pass events (data-model.md).
   // Delivered events are inside the baseline, rejected ones take no part.
   function counts(rid, n) {
     var b = base(rid, n), c = b ? b.c.slice() : zeros();
-    var w = ix().w[rid], d = w && w[n];
-    if (d) for (var i = 0; i < 7; i++) c[i] += d[i];
+    var w = ix().w[rid], d = w && w[n], i;
+    if (d) for (i = 0; i < 7; i++) c[i] += d[i];
+    // a sheet error is read from the numbers as they are; on screen none of
+    // the seven goes below 0, as under a waiting removal of a pass whose
+    // sheet count has gone to 0 (finding A3 of the type change audit)
+    var err = c[0] + c[1] + c[2] + c[3] !== c[4] + c[5] + c[6];
+    for (i = 0; i < 7; i++) if (c[i] < 0) c[i] = 0;
     var st = c[0] + c[1] + c[2] + c[3], mt = c[4] + c[5] + c[6];
-    return { c: c, s: { N: c[0], S: c[1], W: c[2], E: c[3] }, m: { L: c[4], St: c[5], R: c[6] }, total: st, mt: mt, err: st !== mt };
+    return { c: c, s: { N: c[0], S: c[1], W: c[2], E: c[3] }, m: { L: c[4], St: c[5], R: c[6] }, total: st, mt: mt, err: err };
   }
   // The type's view of the counts (items 4, 46, decision D1): fit, the
   // passes that fit the type, for each maneuver the type allows the smaller
@@ -1682,17 +1713,18 @@
   function typeOf(rid, n) {
     var t = S.types[rid] && S.types[rid][n];
     if (t && TYPES[t]) return t;
-    var b = base(rid, n);
-    return b ? (BY_TARGET[b.target] || 'int') : 'int';
+    return BY_TARGET[baseTarget(rid, n)] || 'int';
   }
-  // 'done' only when every ring is closed and nothing is to fix, 'fix' when
-  // every ring is closed and passes are still to fix, 'part' while a ring
-  // still asks, with or without passes to fix (decision D1)
+  // 'err' first, on a not-drivable POI too, since a sheet error is never
+  // hidden (item 46); 'done' only when every ring is closed and nothing is
+  // to fix, 'fix' when every ring is closed and passes are still to fix,
+  // 'part' while a ring still asks, with or without passes to fix
+  // (decision D1)
   function statusOf(rid, n, k) {
     var T = TYPES[typeOf(rid, n)];
     k = k || counts(rid, n);
-    if (!T.target) return 'nd';
     if (k.err) return 'err';
+    if (!T.target) return 'nd';
     var f = fitFix(k, T);
     if (f.fit === T.target) return f.fix > 0 ? 'fix' : 'done';
     return k.total > 0 ? 'part' : '';
@@ -1733,8 +1765,9 @@
     for (var n = 1; n <= r.poiCount; n++) {
       var T = TYPES[typeOf(r.id, n)], k = counts(r.id, n);
       // item 46: a not-drivable POI with passes is a POI with passes to fix;
-      // it stays out of drivable, done and to go
-      if (!T.target) { if (k.mt > 0) toFix += 1; continue; }
+      // it stays out of drivable, done and to go, and its sheet error counts
+      // as any other POI's
+      if (!T.target) { if (k.mt > 0) toFix += 1; if (k.err) errs += 1; continue; }
       drivable += 1;
       var f = fitFix(k, T), st = statusOf(r.id, n, k);
       done += f.fit; togo += f.toGo;
@@ -1989,25 +2022,27 @@
     var r = route();
     if (!r) { setHTML($('head'), '<div class="big dash">—</div><div class="hcol"><div class="plabel">POI</div></div>'); return; }
     var n = active(), k = counts(r.id, n), T = TYPES[typeOf(r.id, n)], st = statusOf(r.id, n, k), f = fitFix(k, T);
-    var cnt, rest, restCls = 'rest';
-    // item 46: a not-drivable POI with passes is a POI with passes to fix
-    if (st === 'nd') { cnt = 'Not drivable'; rest = k.mt > 0 ? '<span class="fix">' + k.mt + ' to fix</span>' : 'Not counted'; }
-    else {
-      // item 4: the counter counts the passes that fit; passes that do not
-      // fit are "to fix" in the warning colour, alone once nothing is to go
-      cnt = f.fit + ' of ' + T.target;
-      if (st === 'err') rest = '<span>Sides ' + k.total + ' ·</span> <span>maneuvers ' + k.mt + '</span>';
-      else if (st === 'done') { restCls += ' ok'; rest = 'Done'; }
-      else if (st === 'fix') { restCls += ' fix'; rest = '<span class="fix">' + f.fix + ' to fix</span>'; }
-      else if (f.fix > 0) rest = '<span>' + f.toGo + ' to go ·</span> <span class="fix">' + f.fix + ' to fix</span>';
-      else rest = f.toGo + ' to go';
-    }
+    // item 4: the counter counts the passes that fit, and reads "Not
+    // drivable" on a not-drivable POI; passes that do not fit are "to fix"
+    // in the warning colour, alone once nothing is to go (item 46: a
+    // not-drivable POI with passes is a POI with passes to fix). Item 43:
+    // on a sheet error the line under the counter names the mismatch, on a
+    // not-drivable POI too, since the error is never hidden
+    var cnt = T.target ? f.fit + ' of ' + T.target : 'Not drivable', rest, restCls = 'rest';
+    if (st === 'err') rest = '<span>Sides ' + k.total + ' ·</span> <span>maneuvers ' + k.mt + '</span>';
+    else if (st === 'nd') rest = k.mt > 0 ? '<span class="fix">' + k.mt + ' to fix</span>' : 'Not counted';
+    else if (st === 'done') { restCls += ' ok'; rest = 'Done'; }
+    else if (st === 'fix') { restCls += ' fix'; rest = '<span class="fix">' + f.fix + ' to fix</span>'; }
+    else if (f.fix > 0) rest = '<span>' + f.toGo + ' to go ·</span> <span class="fix">' + f.fix + ' to fix</span>';
+    else rest = f.toGo + ' to go';
     setHTML($('head'), '<div class="big">' + n + '</div><div class="hcol"><div class="plabel">POI</div>' +
       '<div class="cnt" id="cnt">' + cnt + '</div><div class="' + restCls + '">' + rest + '</div></div>');
   }
 
-  function ticon(type) {
-    if (type === 'nd') return '<span class="ticon nd"><svg class="sb"><use href="#i-ban"/></svg></span>';
+  // the type's tile (item 60): on the Not drivable pill the button carries
+  // the class nd (frame G), in the menu the tile does (frame H)
+  function ticon(type, inPill) {
+    if (type === 'nd') return '<span class="ticon' + (inPill ? '' : ' nd') + '"><svg class="sb"><use href="#i-ban"/></svg></span>';
     var sp = TYPES[type].split, h = '<span class="ticon">';
     MANS.forEach(function (m) { if (sp[m]) h += '<svg class="' + SLOT[m] + '"><use href="#' + MAN_ICON[m] + '"/></svg>'; });
     return h + '</span>';
@@ -2031,9 +2066,9 @@
       return;
     }
     var type = typeOf(r.id, active());
-    b.className = 'typebtn';
+    b.className = 'typebtn' + (type === 'nd' ? ' nd' : '');
     b.setAttribute('aria-label', 'POI type, tap to ' + (open ? 'close' : 'change'));
-    setHTML(b, ticon(type) + '<span class="tl"><b>' + TYPES[type].label + '</b><small>' + splitLine(type, true) +
+    setHTML(b, ticon(type, true) + '<span class="tl"><b>' + TYPES[type].label + '</b><small>' + splitLine(type, true) +
       '</small></span><span class="tchg"><span>Change type</span>' + icon(open ? 'i-chev-up' : 'i-chev-down') + '</span>');
   }
 
@@ -2295,7 +2330,12 @@
       var pmv = '<span class="hmv">' + icon(MAN_ICON[e.man]) + SIDE_NAME[e.side] + '</span>';
       var del = '<button class="hdel" type="button" data-del="' + e.id + '" aria-label="Delete this pass">Delete</button>';
       var rm = I.rem[e.id];
-      if (rm && rm.state === 'waiting') return '<div class="hr del"><div class="hl1"><div class="htx">' + num + tm + pmv + '<span class="hst wait"><span class="dot"></span>Removal waiting</span></div></div></div>';
+      // items 12, 13: a pass whose removal waits carries "Cancel removal"
+      // under its row (history.html frame C)
+      if (rm && rm.state === 'waiting') {
+        return '<div class="hr del"><div class="hl1"><div class="htx">' + num + tm + pmv + '<span class="hst wait"><span class="dot"></span>Removal waiting</span></div></div>' +
+          '<div class="hacts"><button class="btn" type="button" data-cancel="' + rm.id + '">Cancel removal</button></div></div>';
+      }
       if (rm && rm.state === 'rejected') {
         return '<div class="hr rej del"><div class="hl1"><div class="htx">' + num + tm + pmv + no + '</div></div>' +
           '<p class="hwhy">' + esc(reasonLine(rm, 'removal')) + '</p><div class="hacts"><button class="btn" type="button" data-again="' + rm.id + '">Send again</button>' +
@@ -2488,17 +2528,24 @@
     change(function () { e.state = 'waiting'; delete e.reason; }, 'change');
     render();
   }
-  // "Cancel removal" and "Cancel change" (items 13, 47): the refused event
-  // leaves the tablet, nothing changed in the sheet
+  // "Cancel removal" and "Cancel change" (items 12, 13, 47): the event
+  // leaves the tablet, nothing changed in the sheet. A removal that waits
+  // is dropped like a refused one, with no dialog and no toast, and its
+  // pass counts again (data-model.md "Event": a waiting event may be
+  // dropped). The app sends nothing yet, so no removal is inside a push;
+  // the sending step adds that a removal already posted waits for its
+  // answer first (finding A2 of the type change audit). A waiting type
+  // change carries no button: choosing the old type again drops it.
   function cancelEvent(id) {
     var e = ix().byId[id];
-    if (!e || e.state !== 'rejected') return;
+    if (!e) return;
     if (e.kind === 'pass' && e.delta < 0) {
+      if (e.state !== 'waiting' && e.state !== 'rejected') return;
       change(function () { S.events = S.events.filter(function (x) { return x.id !== id; }); }, 'change');
       render();
       return;
     }
-    if (e.kind !== 'target') return;
+    if (e.kind !== 'target' || e.state !== 'rejected') return;
     // the type the change replaced, else the type the sheet's target reads
     // as, which queues nothing (finding A3 of the type change audit)
     var rid = e.routeId, n = e.poi, t = TYPES[e.fromType] ? e.fromType : (BY_TARGET[baseTarget(rid, n)] || 'int');
@@ -2537,6 +2584,11 @@
       return (words.length > 1 ? words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1] : words[0]) + (sum === 1 ? ' pass ' : ' passes ') + where;
     };
     var has = function (ms) { return 'It has ' + [group(ms, sheet, 'in the sheet'), group(ms, wait, 'waiting on this tablet')].filter(Boolean).join(' and ') + '.'; };
+    // The sentences, in one order for every type (item 64, v0.10): the
+    // passes that do not fit and where they are; that the app stops
+    // counting them and, when some of them are in the sheet, that the sheet
+    // keeps them; who put the ones in the sheet there; last, that the ones
+    // waiting on this tablet are still sent unless the switch deletes them.
     var lines = [], del = [], fix = 0;
     if (t === 'nd') {
       var inSheet = Math.max(sheet[0] + sheet[1] + sheet[2] + sheet[3], sheet[4] + sheet[5] + sheet[6]);
@@ -2545,11 +2597,7 @@
       if (fix <= 0) return null;
       if (counts(rid, n).err) lines.push('The sheet shows an error at this POI: its sides and maneuvers disagree.');
       lines.push('It has ' + [inSheet > 0 ? plural(inSheet, 'pass', 'passes') + ' in the sheet' : null,
-        waiting > 0 ? plural(waiting, 'pass', 'passes') + ' waiting on this tablet' : null].filter(Boolean).join(' and ') + '. ' +
-        (fix === 1 ? 'Not drivable does not count it. The sheet keeps it and the export sends it to the client until it is deleted.'
-          : 'Not drivable counts none of them. The sheet keeps them and the export sends them to the client until they are deleted.'));
-      if (waiting > 0) lines.push(waiting === 1 ? 'The pass waiting on this tablet is still sent unless the switch below deletes it.'
-        : 'Passes waiting on this tablet are still sent unless the switch below deletes them.');
+        waiting > 0 ? plural(waiting, 'pass', 'passes') + ' waiting on this tablet' : null].filter(Boolean).join(' and ') + '.');
       MANS.forEach(function (m) { del = del.concat(mine[m]); });
     } else {
       var off = MANS.filter(function (m) { return !T.split[m] && sheet[AT[m]] + wait[AT[m]] > 0; });
@@ -2564,16 +2612,24 @@
         fix += extra; del = del.concat(mine[m].slice(0, extra));
       });
       if (fix <= 0) return null;
-      lines.push(fix === 1 ? 'The app stops counting it, but the sheet keeps it and the export sends it to the client until it is deleted.'
-        : 'The app stops counting them, but the sheet keeps them and the export sends them to the client until they are deleted.');
     }
-    // the passes that do not fit and are in the sheet: the switch's sent
-    // ones and those typed in by hand
+    // where the passes that do not fit are: waiting on this tablet, or in
+    // the sheet, the switch's sent ones and those typed in by hand
+    var waitingHere = del.filter(function (e) { return e.state === 'waiting'; }).length;
     var sent = del.filter(function (e) { return e.state === 'delivered'; }).length, hand = Math.max(0, fix - del.length);
+    var keeps = sent + hand > 0;   // some of them are in the sheet
+    if (t === 'nd') lines.push((fix === 1 ? 'Not drivable does not count it.' : 'Not drivable counts none of them.') +
+      (!keeps ? '' : fix === 1 ? ' The sheet keeps it and the export sends it to the client until it is deleted.'
+        : ' The sheet keeps them and the export sends them to the client until they are deleted.'));
+    else lines.push((fix === 1 ? 'The app stops counting it' : 'The app stops counting them') +
+      (!keeps ? '.' : fix === 1 ? ', but the sheet keeps it and the export sends it to the client until it is deleted.'
+        : ', but the sheet keeps them and the export sends them to the client until they are deleted.'));
     if (sent > 0 && hand > 0) lines.push((sent === 1 ? '1 of them was' : fmt(sent) + ' of them were') + ' sent from this tablet, the other' +
       (hand === 1 ? ' was typed in by hand: delete it in the sheet.' : ' ' + fmt(hand) + ' were typed in by hand: delete those in the sheet.'));
     else if (hand > 0) lines.push(hand === 1 ? 'It was typed in by hand: delete it in the sheet.' : 'They were typed in by hand: delete them in the sheet.');
     else if (sent > 0) lines.push(sent === 1 ? 'It was sent from this tablet.' : 'They were sent from this tablet.');
+    if (waitingHere > 0) lines.push(waitingHere === 1 ? 'The pass waiting on this tablet is still sent unless the switch below deletes it.'
+      : 'Passes waiting on this tablet are still sent unless the switch below deletes them.');
     var k = del.length, sw = null;
     if (k) sw = { on: true, label: k === 1 ? 'Also delete the pass of this tablet' : 'Also delete the ' + fmt(k) + ' passes of this tablet',
                   line: (t === 'nd' ? (k === 1 ? 'Not drivable does not count it.' : 'Not drivable counts none of them.')

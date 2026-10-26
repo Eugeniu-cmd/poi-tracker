@@ -12,6 +12,12 @@
    the error named first. A change where every pass fits applies at once.
    Cancel change of a refused type change without fromType puts back the
    type the sheet's target reads as.
+   Since app v0.10 (prompt Done step 2f) the sentences keep one order for
+   every type: the passes that do not fit and where they are, that the app
+   stops counting them and, only when some of them are in the sheet, that
+   the sheet keeps them, who put the ones in the sheet there, and last the
+   ones waiting on this tablet, still sent unless the switch deletes them
+   (D3, D4, D5 and D9).
    The stores are injected as in app-types-routes.spec.js: the sample with
    a POI's type, counts and this tablet's events rewritten.
 */
@@ -24,6 +30,8 @@ const SAMPLE_EVENTS = 22;   // the sample's delivered passes
 const KEEP = 'The app stops counting them, but the sheet keeps them and the export sends them to the client until they are deleted.';
 const NEVER = 'Not drivable counts none of them. The sheet keeps them and the export sends them to the client until they are deleted.';
 const HAND = 'They were typed in by hand: delete them in the sheet.';
+// v0.10: the passes waiting on this tablet are said last
+const WAIT_LAST = 'Passes waiting on this tablet are still sent unless the switch below deletes them.';
 // item 64's first example, frame I
 const FRAME_I = 'It has 26 Left and 27 Right passes in the sheet. Straight only does not allow Left or Right. ' + KEEP +
   ' 2 of them were sent from this tablet, the other 51 were typed in by hand: delete those in the sheet.';
@@ -215,7 +223,7 @@ test('D3 · Waiting passes are named apart and dropped', async ({ page }) => {
   await expect(page.locator('#cnt')).toHaveText('67 of 70');
   const dlg = await openDialogFor(page, 122, 'str', 'Straight only',
     'It has 26 Left and 27 Right passes in the sheet and 2 Right passes waiting on this tablet. Straight only does not allow Left or Right. ' + KEEP +
-    ' 2 of them were sent from this tablet, the other 51 were typed in by hand: delete those in the sheet.');
+    ' 2 of them were sent from this tablet, the other 51 were typed in by hand: delete those in the sheet. ' + WAIT_LAST);
   await expectSwitch(dlg, 'Also delete the 4 passes of this tablet', LINE_STR);
   const a = await change(page, dlg, 'Straight only');
   expect(a.types[rid]['122']).toBe('str');
@@ -226,7 +234,8 @@ test('D3 · Waiting passes are named apart and dropped', async ({ page }) => {
   await expect(page.locator('#head .rest')).toHaveText('27 to go · 51 to fix');
 
   // (b) passes of this tablet alone, recorded by taps: POI 140 to No
-  // straight; both are dropped, and the change between two types at 70
+  // straight; none of them is in the sheet, so the dialog names no sheet
+  // (v0.10); both are dropped, and the change between two types at 70
   // sends nothing
   await page.locator('#col .row[data-poi="140"]').click();
   await expect(page.locator('#head .big')).toHaveText('140');
@@ -234,7 +243,7 @@ test('D3 · Waiting passes are named apart and dropped', async ({ page }) => {
   await recordPass(page, 'St', 'N');
   await expect(page.locator('#cnt')).toHaveText('2 of 70');
   const before = (await store(page)).events.length;
-  const d2 = await openDialogFor(page, 140, 'nost', 'No straight', 'It has 2 Straight passes waiting on this tablet. No straight does not allow Straight. ' + KEEP);
+  const d2 = await openDialogFor(page, 140, 'nost', 'No straight', 'It has 2 Straight passes waiting on this tablet. No straight does not allow Straight. The app stops counting them. ' + WAIT_LAST);
   await expectSwitch(d2, 'Also delete the 2 passes of this tablet', 'They do not fit No straight. A waiting pass is dropped, a sent one gets a removal.');
   const b = await change(page, d2, 'No straight');
   expect(b.types[rid]['140']).toBe('nost');
@@ -258,7 +267,7 @@ test('D4 · Extra passes: the newest of this tablet, as many as do not fit', asy
   await expect(page.locator('#cnt')).toHaveText('40 of 40');
   let dlg = await openDialogFor(page, 122, 'int', 'Intersection',
     'It has 38 Straight passes in the sheet and 2 Straight passes waiting on this tablet. Intersection allows 14, so 26 do not fit. ' + KEEP +
-    ' 3 of them were sent from this tablet, the other 21 were typed in by hand: delete those in the sheet.');
+    ' 3 of them were sent from this tablet, the other 21 were typed in by hand: delete those in the sheet. ' + WAIT_LAST);
   await expectSwitch(dlg, 'Also delete the 5 passes of this tablet', LINE_INT);
   let a = await change(page, dlg, 'Intersection');
   expect(a.types[rid]['122']).toBe('int');
@@ -313,7 +322,7 @@ test('D5 · Not drivable: every pass, and a sheet error named first', async ({ p
   await inject(page, copy(s0), 122, null, null, sent.concat(waiting));
   let dlg = await openDialogFor(page, 122, 'nd', 'Not drivable',
     'It has 66 passes in the sheet and 2 passes waiting on this tablet. ' + NEVER +
-    ' Passes waiting on this tablet are still sent unless the switch below deletes them. 2 of them were sent from this tablet, the other 64 were typed in by hand: delete those in the sheet.');
+    ' 2 of them were sent from this tablet, the other 64 were typed in by hand: delete those in the sheet. ' + WAIT_LAST);
   await expectSwitch(dlg, 'Also delete the 4 passes of this tablet', 'Not drivable counts none of them. A waiting pass is dropped, a sent one gets a removal.');
   let a = await change(page, dlg, 'Not drivable');
   expect(a.types[rid]['122']).toBe('nd');
@@ -435,5 +444,50 @@ test('D8 · More cases of item 64: a forbidden maneuver, past a share, one pass'
     expect(targets(a), k.name).toHaveLength(k.targets);
     expectRemovals(a, mine, rid, 122);
     expect(a.events, k.name).toHaveLength(SAMPLE_EVENTS + k.targets + mine.length * 2);
+  }
+});
+
+test('D9 · The waiting passes are said last, the sheet only when it holds some', async ({ page }) => {
+  // the order of v0.10 (prompt Done step 2f, item 64) for every type: the
+  // passes that do not fit and where they are; that the app stops counting
+  // them and, when some of them are in the sheet, that the sheet keeps
+  // them; who put the ones in the sheet there; and last the ones waiting
+  // on this tablet, still sent unless the switch deletes them. Frame I's
+  // text does not change: its POI has no waiting pass.
+  await openSample(page);
+  const s0 = await store(page);
+  const rid = routeId(s0);
+  const sent = [pass(rid, 122, 'L', 'N', 23, 'delivered'), pass(rid, 122, 'R', 'S', 24, 'delivered')];
+  const waiting = [pass(rid, 122, 'R', 'N', 25, 'waiting'), pass(rid, 122, 'R', 'E', 26, 'waiting')];
+  const two = [pass(rid, 140, 'St', 'S', 23, 'waiting'), pass(rid, 140, 'St', 'N', 24, 'waiting')];   // POI 140 has nothing in the sheet
+  const LINE_ND = 'Not drivable counts none of them. A waiting pass is dropped, a sent one gets a removal.';
+  const CASES = [
+    { name: 'frame I, unchanged', n: 122, events: sent, to: 'str', label: 'Straight only', body: FRAME_I,
+      sw: ['Also delete the 2 passes of this tablet', LINE_STR] },
+    { name: 'frame I with 2 Right passes waiting', n: 122, events: sent.concat(waiting), to: 'str', label: 'Straight only',
+      body: 'It has 26 Left and 27 Right passes in the sheet and 2 Right passes waiting on this tablet. Straight only does not allow Left or Right. ' + KEEP +
+        ' 2 of them were sent from this tablet, the other 51 were typed in by hand: delete those in the sheet. ' + WAIT_LAST,
+      sw: ['Also delete the 4 passes of this tablet', LINE_STR] },
+    { name: '2 Straight passes waiting to No straight, none in the sheet', n: 140, events: two, to: 'nost', label: 'No straight',
+      body: 'It has 2 Straight passes waiting on this tablet. No straight does not allow Straight. The app stops counting them. ' + WAIT_LAST,
+      sw: ['Also delete the 2 passes of this tablet', 'They do not fit No straight. A waiting pass is dropped, a sent one gets a removal.'] },
+    { name: 'Not drivable with 64 typed in by hand, 2 sent and 2 waiting', n: 122, events: sent.concat(waiting), to: 'nd', label: 'Not drivable',
+      body: 'It has 66 passes in the sheet and 2 passes waiting on this tablet. ' + NEVER +
+        ' 2 of them were sent from this tablet, the other 64 were typed in by hand: delete those in the sheet. ' + WAIT_LAST,
+      sw: ['Also delete the 4 passes of this tablet', LINE_ND] },
+    { name: '2 passes waiting to Not drivable, none in the sheet', n: 140, events: two, to: 'nd', label: 'Not drivable',
+      body: 'It has 2 passes waiting on this tablet. Not drivable counts none of them. ' + WAIT_LAST,
+      sw: ['Also delete the 2 passes of this tablet', LINE_ND] },
+    { name: 'one pass waiting to Not drivable', n: 140, events: two.slice(0, 1), to: 'nd', label: 'Not drivable',
+      body: 'It has 1 pass waiting on this tablet. Not drivable does not count it. The pass waiting on this tablet is still sent unless the switch below deletes it.',
+      sw: ['Also delete the pass of this tablet', 'Not drivable does not count it. A waiting pass is dropped, a sent one gets a removal.'] }
+  ];
+  for (const k of CASES) {
+    await inject(page, copy(s0), k.n, null, null, k.events);
+    const dlg = await openDialogFor(page, k.n, k.to, k.label, k.body);
+    await expectSwitch(dlg, k.sw[0], k.sw[1]);
+    await dlg.locator('[data-act="dlg-cancel"]').click();
+    await expect(dlg, k.name).toHaveCount(0);
+    await expect.poll(() => layers(page)).toBe(0);
   }
 });
