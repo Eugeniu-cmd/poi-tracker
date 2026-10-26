@@ -16,9 +16,8 @@
     is fetched from the web
   The behaviour follows docs/screens.md v0.55 and docs/data-model.md
   v0.18, and much of it is the code of the working prototype v19.7. The
-  look follows v0.55; the Straight only side text, the caption priority
-  and decision D3 come in v0.8, and the type dialog, the toast's Undo
-  and Cancel removal in v0.9.
+  look follows v0.55; the type dialog, the toast's Undo and Cancel
+  removal come in v0.9.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -75,6 +74,16 @@
           of the browser's bar follows the new background, and the 18 px
           gap under the working area is closed: the overlays container
           takes no place in the screen's flex column.
+  v0.8 2026-10-26 — captions and sides (screens.md v0.55, decisions D2
+          and D3 of 2026-10-25): on a Straight only POI each side with
+          passes shows its count against 20, "of 20" under it, in the
+          done colour at exactly 20, "+3 over" in the warning colour
+          past it and "+16" alone ten or more past; nothing locks. One
+          caption under the discs, the most urgent that applies: a
+          sheet error, then passes to fix or the POI done, then Not
+          drivable, then a maneuver over its share, then one done, then
+          one the type does not allow, Left before Straight before
+          Right. A not drivable POI with passes reads its passes to fix.
 -->
 <html lang="en">
 <head>
@@ -1423,12 +1432,15 @@
   var SAMPLE_ID = 'sample';          // the reserved id of the sample city
   var OPEN_TIMEOUT = 12000;          // item 8: the open compass closes after 12 s
   var TOAST_MS = 2000;               // item 36
+  // item 46: the types, their targets and splits; side, the usual passes
+  // from each direction on a Straight only POI, shown under the sides
+  // (decision D2)
   var TYPES = {
     int:  { label: 'Intersection',  target: 70, split: { L: 28, St: 14, R: 28 } },
     nost: { label: 'No straight',   target: 70, split: { L: 35, St: 0, R: 35 }, cap: 'No straight at this POI' },
     nol:  { label: 'No left',       target: 70, split: { L: 0, St: 14, R: 56 }, cap: 'No left turn at this POI' },
     nor:  { label: 'No right',      target: 70, split: { L: 56, St: 14, R: 0 }, cap: 'No right turn at this POI' },
-    str:  { label: 'Straight only', target: 40, split: { L: 0, St: 40, R: 0 }, cap: 'Straight only at this POI' },
+    str:  { label: 'Straight only', target: 40, split: { L: 0, St: 40, R: 0 }, cap: 'Straight only at this POI', side: 20 },
     nd:   { label: 'Not drivable',  target: 0,  split: { L: 0, St: 0, R: 0 } }
   };
   var TYPE_ORDER = ['int', 'nost', 'nol', 'nor', 'str', 'nd'];
@@ -1712,38 +1724,63 @@
     }
     return { done: done, togo: togo, poisDone: poisDone, errs: errs, drivable: drivable, toFix: toFix };
   }
-  // the reason a maneuver cannot take a pass now, or null (items 10, 46)
+  // where the passes to fix of a POI are (item 46), split as consequences()
+  // splits them: the baseline minus the waiting removals is the sheet, and
+  // the passes to fix above that are this tablet's, deleted in History
+  function toFixText(rid, n, k, T) {
+    var f = fitFix(k, T), b = base(rid, n), bc = b ? b.c : zeros(), wRem = zeros();
+    S.events.forEach(function (e) {
+      if (e.routeId !== rid || e.poi !== n || e.kind !== 'pass' || e.state !== 'waiting' || e.delta > 0) return;
+      wRem[AT[e.side]] += 1; wRem[AT[e.man]] += 1;
+    });
+    var inSheet = 0;
+    MANS.forEach(function (m) { inSheet += Math.max(0, bc[AT[m]] - wRem[AT[m]] - (T.split[m] || 0)); });
+    var here = f.fix - inSheet;
+    return inSheet > 0 && here > 0 ? plural(inSheet, 'pass', 'passes') + ' to fix in the sheet and ' + fmt(here) + ' in History'
+      : inSheet > 0 ? plural(inSheet, 'pass', 'passes') + ' to fix in the sheet'
+      : plural(here, 'pass', 'passes') + ' to fix in History';
+  }
+  // the reason a maneuver cannot take a pass now, or null (items 10, 46):
+  // which disc locks. The caption under the discs is captionOf's, and a
+  // maneuver's own reason carries its rank there
   function lockOf(rid, n, man, k) {
     var type = typeOf(rid, n), T = TYPES[type];
     k = k || counts(rid, n);
     var st = statusOf(rid, n, k);
     if (st === 'nd') return { cls: 'info', text: 'This POI is not drivable', all: true };
     if (st === 'err') return { cls: 'err', text: 'Sheet error: sides and maneuvers disagree', all: true };
-    if (st === 'fix') {
-      // every ring closed and passes still to fix (item 46): where they are,
-      // split as consequences() splits them: the baseline minus the waiting
-      // removals is the sheet, and the passes to fix above that are this
-      // tablet's, deleted in History
-      var f = fitFix(k, T), b = base(rid, n), bc = b ? b.c : zeros(), wRem = zeros();
-      S.events.forEach(function (e) {
-        if (e.routeId !== rid || e.poi !== n || e.kind !== 'pass' || e.state !== 'waiting' || e.delta > 0) return;
-        wRem[AT[e.side]] += 1; wRem[AT[e.man]] += 1;
-      });
-      var inSheet = 0;
-      MANS.forEach(function (m) { inSheet += Math.max(0, bc[AT[m]] - wRem[AT[m]] - (T.split[m] || 0)); });
-      var here = f.fix - inSheet;
-      var where = inSheet > 0 && here > 0 ? plural(inSheet, 'pass', 'passes') + ' to fix in the sheet and ' + fmt(here) + ' in History'
-        : inSheet > 0 ? plural(inSheet, 'pass', 'passes') + ' to fix in the sheet'
-        : plural(here, 'pass', 'passes') + ' to fix in History';
-      return { cls: 'fix', text: where, all: true };
-    }
+    // every ring closed and passes still to fix (item 46): where they are
+    if (st === 'fix') return { cls: 'fix', text: toFixText(rid, n, k, T), all: true };
     if (st === 'done') return { cls: 'ok', text: 'This POI is done: ' + fitFix(k, T).fit + ' of ' + T.target, all: true };
     if (man) {
-      if (!T.split[man]) return { cls: 'info', text: T.cap };
-      if (k.m[man] > T.split[man]) return { cls: 'info', text: MAN_NAME[man] + ' is over its share: ' + k.m[man] + ' of ' + T.split[man] };
-      if (k.m[man] === T.split[man]) return { cls: 'info', text: MAN_NAME[man] + ' is done: ' + k.m[man] + ' of ' + T.split[man] };
+      if (!T.split[man]) return { cls: 'info', text: T.cap, rank: 3 };
+      if (k.m[man] > T.split[man]) return { cls: 'info', text: MAN_NAME[man] + ' is over its share: ' + k.m[man] + ' of ' + T.split[man], rank: 1 };
+      if (k.m[man] === T.split[man]) return { cls: 'info', text: MAN_NAME[man] + ' is done: ' + k.m[man] + ' of ' + T.split[man], rank: 2 };
     }
     return null;
+  }
+  // One caption under the discs, the most urgent that applies (item 46,
+  // decided 2026-10-25): a sheet error, then passes to fix, which a not
+  // drivable POI with passes has too (decision D3), or the POI done, then
+  // Not drivable, then an allowed maneuver over its share, then a maneuver
+  // done, then a maneuver the type does not allow, whatever its passes.
+  // Between two maneuvers with the same reason, Left comes before Straight
+  // and Straight before Right. The class follows the reason (err, fix, ok,
+  // info). The locks are lockOf's and do not change with the caption.
+  function captionOf(rid, n, k) {
+    var T = TYPES[typeOf(rid, n)];
+    k = k || counts(rid, n);
+    if (k.err) return { cls: 'err', text: 'Sheet error: sides and maneuvers disagree' };
+    var f = fitFix(k, T);
+    if (f.fit === T.target) {
+      // every ring closed; on a not drivable POI every pass is to fix
+      if (f.fix > 0) return { cls: 'fix', text: toFixText(rid, n, k, T) };
+      if (T.target) return { cls: 'ok', text: 'This POI is done: ' + f.fit + ' of ' + T.target };
+      return { cls: 'info', text: 'This POI is not drivable' };
+    }
+    var best = null;
+    MANS.forEach(function (m) { var lk = lockOf(rid, n, m, k); if (lk && (!best || lk.rank < best.rank)) best = lk; });
+    return best;
   }
   // a pass that counts: recorded here, waiting or delivered, with no removal
   // that waits or was delivered (a refused removal leaves it in the sheet)
@@ -2011,8 +2048,22 @@
       return '<div class="' + cls + '"><div class="wheel">' + svg + '<div class="in">' + val + '</div></div>' +
         '<span class="mn">' + icon(MAN_ICON[m]) + MAN_NAME[m] + '</span></div>';
     }).join('');
+    // decision D2 (items 39, 46): on a Straight only POI a side with passes
+    // shows its count against the usual 20 from each direction, "of 20"
+    // under it, in the done colour at exactly 20; past 20 the line reads
+    // "+3 over" and both take the warning colour, and ten or more past it
+    // reads "+16" alone (frames S, T and U). A side at zero fades with no
+    // line, and every other type keeps plain counts
     var rose = ['N', 'E', 'W', 'S'].map(function (s) {
-      return '<div class="dm' + (k.s[s] ? '' : ' z') + '"><div class="dmi"><b class="dl">' + s + '</b><b class="dv">' + k.s[s] + '</b></div></div>';
+      var have = k.s[s], per = T ? T.side : 0, cls = 'dm', of = '';
+      if (!have) cls += ' z';
+      else if (per) {
+        if (have < per) of = 'of ' + per;
+        else if (have === per) { cls += ' ok'; of = 'of ' + per; }
+        else { cls += ' ov'; of = '+' + (have - per) + (have - per < 10 ? '<span> over</span>' : ''); }
+      }
+      return '<div class="' + cls + '"><div class="dmi"><b class="dl">' + s + '</b><b class="dv">' + have + '</b>' +
+        (of ? '<small class="of">' + of + '</small>' : '') + '</div></div>';
     }).join('');
     setHTML($('card'), '<div class="khead">' + head + '</div><div class="two"><div class="pyr">' + rings + '</div>' +
       '<div class="rose"><div class="grid4">' + rose + '</div></div></div>');
@@ -2030,8 +2081,9 @@
       d.classList.toggle('locked', !!lk);
       d.classList.toggle('on', !!o && o.man === m);
       d.setAttribute('aria-label', MAN_NAME[m] + (lk ? ', ' + (r ? 'locked' : 'unavailable') : ''));
-      if (r && lk && (!caption || lk.all)) caption = lk;
     });
+    // item 46: one caption, the most urgent that applies, whatever disc it locks
+    if (r) caption = captionOf(r.id, n, k);
     SIDES.forEach(function (s) { stage.querySelector('[data-side="' + s + '"]').classList.toggle('ring', ui.ring === s); });
     var lock = $('lock');
     if (caption && !o) { lock.hidden = false; lock.className = 'lock ' + caption.cls; lock.textContent = caption.text; }

@@ -246,9 +246,12 @@ test('C4 · Not drivable', async ({ page }) => {
   // item 46: its 41 passes in the sheet are to fix (C11 has the row and the summary)
   await expect(page.locator('#head .rest')).toHaveText('41 to fix');
   await expect(page.locator('#head .rest span.fix')).toHaveText('41 to fix');
+  // decision D3 (item 46, v0.8): a not-drivable POI with passes reads its
+  // passes to fix in the warning colour, not "This POI is not drivable"
   const lock = page.locator('#lock');
   await expect(lock).toBeVisible();
-  await expect(lock).toHaveText('This POI is not drivable');
+  await expect(lock).toHaveText('41 passes to fix in the sheet');
+  await expect(lock).toHaveClass('lock fix');
   for (const man of ['L', 'St', 'R']) {
     await expect(page.locator('#stage [data-man="' + man + '"]')).toHaveClass(/\blocked\b/);
   }
