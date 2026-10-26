@@ -112,7 +112,12 @@ test('C1 · A type change with consequences', async ({ page }) => {
   const ok = dlg.locator('[data-act="dlg-ok"]');
   expect(await text(ok)).toBe('Change');
   await expect(ok).toHaveClass(/\bdanger\b/);
-  expect(await text(dlg.locator('.dbody'))).toBe('It already has 66 passes. Straight only needs 40, so the POI becomes done with 26 passes over its target. The sheet will flag it as over target. It has 26 Left and 27 Right passes in the sheet. Straight only does not allow Left or Right, so they no longer count. Delete them in History if they were a mistake.');
+  // item 64 (app v0.9): the sentences of its first example; the sample's
+  // POI 122 has no pass of this tablet, so every pass that does not fit
+  // was typed in by hand and no switch shows (app-type-dialog.spec.js has
+  // frame I's two sent passes)
+  expect(await text(dlg.locator('.dbody'))).toBe('It has 26 Left and 27 Right passes in the sheet. Straight only does not allow Left or Right. The app stops counting them, but the sheet keeps them and the export sends them to the client until they are deleted. They were typed in by hand: delete them in the sheet.');
+  await expect(dlg.locator('.drow')).toHaveCount(0);
   await ok.click();
   await expect(dlg).toHaveCount(0);
 
@@ -222,7 +227,11 @@ test('C4 · Not drivable', async ({ page }) => {
   const dlg = page.locator('.dlg');
   await expect(dlg).toBeVisible();
   expect(await text(dlg.locator('.dtitle'))).toBe('Change POI 136 to Not drivable?');
-  expect(await text(dlg.locator('.dbody'))).toBe('It has 41 passes in the sheet. They stay there, and the app stops counting this POI.');
+  // item 64 (app v0.9): the Not drivable sentences; the switch offers the
+  // sample's 10 passes of POI 136 (app-type-dialog.spec.js takes it up)
+  expect(await text(dlg.locator('.dbody'))).toBe('It has 41 passes in the sheet. Not drivable counts none of them. The sheet keeps them and the export sends them to the client until they are deleted. 10 of them were sent from this tablet, the other 31 were typed in by hand: delete those in the sheet.');
+  expect(await text(dlg.locator('.drow .ol b'))).toBe('Also delete the 10 passes of this tablet');
+  await expect(dlg.locator('.switch')).toHaveAttribute('aria-checked', 'true');
   const cancel = dlg.locator('[data-act="dlg-cancel"]');
   expect(await text(cancel)).toBe('Cancel');
   await cancel.click();
@@ -239,6 +248,9 @@ test('C4 · Not drivable', async ({ page }) => {
   expect(await text(dlg.locator('.dtitle'))).toBe('Change POI 136 to Not drivable?');
   const ok = dlg.locator('[data-act="dlg-ok"]');
   expect(await text(ok)).toBe('Change');
+  // the switch off: the 41 passes stay, and this test reads the POI with them
+  await dlg.locator('.drow').click();
+  await expect(dlg.locator('.switch')).toHaveAttribute('aria-checked', 'false');
   await ok.click();
   await expect(dlg).toHaveCount(0);
   await expectToastText(page, 'Type set: Not drivable');
@@ -259,6 +271,7 @@ test('C4 · Not drivable', async ({ page }) => {
   await expect(page.locator('#sumport')).toContainText('79 of 195 POIs done');
   s = await store(page);
   expect(s.types[rid]['136']).toBe('nd');
+  expect(s.events).toHaveLength(23);   // the target event alone: the switch was off
   const tev = targets(s);
   expect(tev).toHaveLength(1);
   expect(tev[0]).toMatchObject({ poi: 136, target: 0, fromType: 'int', state: 'waiting' });
@@ -279,7 +292,10 @@ test('C5 · Passes of a maneuver the new type forbids', async ({ page }) => {
   const dlg = page.locator('.dlg');
   await expect(dlg).toBeVisible();
   expect(await text(dlg.locator('.dtitle'))).toBe('Change POI 140 to No straight?');
-  expect(await text(dlg.locator('.dbody'))).toBe('It has 2 Straight passes waiting on this tablet. No straight does not allow Straight, so they no longer count. Delete them in History if they were a mistake.');
+  // item 64 (app v0.9): waiting passes named apart, the switch on by default
+  expect(await text(dlg.locator('.dbody'))).toBe('It has 2 Straight passes waiting on this tablet. No straight does not allow Straight. The app stops counting them, but the sheet keeps them and the export sends them to the client until they are deleted.');
+  expect(await text(dlg.locator('.drow .ol b'))).toBe('Also delete the 2 passes of this tablet');
+  await expect(dlg.locator('.switch')).toHaveAttribute('aria-checked', 'true');
   await dlg.locator('[data-act="dlg-cancel"]').click();
   await expect(dlg).toHaveCount(0);
   await expect.poll(() => layers(page)).toBe(0);

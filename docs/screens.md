@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.55 — 2026-10-25
+v0.56 — 2026-10-26
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -299,6 +299,12 @@ arrows on the ivory discs of the dark theme in a deep gold while the
 icons on the card keep the bright gold through the new --card-glyph
 (item 5, _tokens.css v0.22), and a side ten or more past 20 reading
 "+16" alone (item 39).
+v0.56 2026-10-26 — the type change dialog built (app v0.9): the switch
+of item 63 deletes, for a maneuver the new type allows with a smaller
+share, this tablet's newest passes of it, as many as do not fit, newest
+first like Undo last, and takes only passes that count, waiting or sent;
+a POI whose sides and maneuvers disagree in the sheet always asks before
+it turns Not drivable, and its dialog names the error first (item 64).
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -776,21 +782,23 @@ appears on screen. An apostrophe on screen is the typographic one (’).
       or passes past a share: "It has 26 Left and 27 Right passes in the
       sheet. Straight only does not allow Left or Right. The app stops
       counting them, but the sheet keeps them and the export sends them
-      to the client until they are deleted. 2 of them were sent from this
-      tablet, the other 51 were typed in by hand: delete those in the
-      sheet." Passes waiting on this tablet are named apart ("and 2 Right
-      passes waiting on this tablet"), and the switch of item 63 offers to
-      delete this tablet's passes. Past a share the sentence names the
-      share: "It has 31 Left passes in the sheet. No right allows 28, so 3
-      do not fit."
-    - Passes on a POI turned Not drivable: "It has 66 passes in the sheet.
-      Not drivable counts none of them. The sheet keeps them and the
-      export sends them to the client until they are deleted." with the
-      same words for passes waiting on this tablet, which are still sent
-      unless the switch deletes them.
-    After the change the POI reads "13 of 40 · 27 to go · 53 to fix" (item
-    4) and its row "27 to go" with the mark (item 40). There is no "over
-    target" state: a total past the target is passes to fix.
+      to the client until they are deleted. 2 of them were sent from
+      this tablet, the other 51 were typed in by hand: delete those in
+      the sheet." Passes waiting on this tablet are named apart ("and 2
+      Right passes waiting on this tablet"), and the switch of item 63
+      offers to delete this tablet's passes. Past a share the sentence
+      names the share: "It has 31 Left passes in the sheet. No right
+      allows 28, so 3 do not fit."
+    - Passes on a POI turned Not drivable: "It has 66 passes in the
+      sheet. Not drivable counts none of them. The sheet keeps them and
+      the export sends them to the client until they are deleted." with
+      the same words for passes waiting on this tablet, which are still
+      sent unless the switch deletes them.
+    A POI whose sides and maneuvers disagree in the sheet always asks
+    before it turns Not drivable, and its dialog names the error first.
+    After the change the POI reads "13 of 40 · 27 to go · 53 to fix"
+    (item 4) and its row "27 to go" with the mark (item 40). There is no
+    "over target" state: a total past the target is passes to fix.
 
 ## "History" panel
 12. Pass list: "POI" / "Route" scope control; each entry shows time and
@@ -1076,24 +1084,27 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     removal." under its label, in the style of the Sound switch of
     Settings (item 65). With the switch on, "Change" applies the type
     and deletes those passes exactly as Delete in History does, one
-    removal per sent pass. Passes typed into the sheet cannot be deleted
-    from the tablet, and the dialog says so. One line says what happens:
-    a waiting pass is simply dropped from this tablet, a pass already in
-    the sheet gets a removal sent with the next sync, and a refused
-    pass, which never reached the
-    sheet, is dropped like a waiting one ("The sheet refused it, so it is
-    simply dropped from this tablet."). A waiting pass that turns out to
-    have reached the sheet while the dialog was open gets a removal
+    removal per sent pass. For a maneuver the new type allows with a
+    smaller share, the switch deletes this tablet's newest passes of it,
+    as many as do not fit, newest first like Undo last (decided
+    2026-10-26). It deletes passes that count, waiting or sent: a
+    refused pass keeps its own Delete in History (item 13). Passes typed
+    into the sheet cannot be deleted from the tablet, and the dialog
+    says so. One line says what happens: a waiting pass is simply
+    dropped from this tablet, a pass already in the sheet gets a removal
+    sent with the next sync, and a refused pass, which never reached the
+    sheet, is dropped like a waiting one ("The sheet refused it, so it
+    is simply dropped from this tablet."). A waiting pass that turns out
+    to have reached the sheet while the dialog was open gets a removal
     instead, and History shows it as "Removal waiting" (data-model.md).
-    Two buttons side by side: "Cancel" on the left, the action
-    as a verb on the right ("Remove", "Delete", "Change"), never "OK" or
-    "Yes". A removing button is red (item 28), and so is the button of a
-    type change, since passes stop counting (decided 2026-10-21). A tap
-    outside the
-    dialog equals Cancel. There is no "don't ask again". Dialog buttons,
-    like the Settings buttons (Save, Test connection, Add route), set
-    their words at --t-body in --w-bold, the size of the action bar's
-    buttons (decided 2026-10-18).
+    Two buttons side by side: "Cancel" on the left, the action as a verb
+    on the right ("Remove", "Delete", "Change"), never "OK" or "Yes". A
+    removing button is red (item 28), and so is the button of a type
+    change, since passes stop counting (decided 2026-10-21). A tap
+    outside the dialog equals Cancel. There is no "don't ask again".
+    Dialog buttons, like the Settings buttons (Save, Test connection,
+    Add route), set their words at --t-body in --w-bold, the size of the
+    action bar's buttons (decided 2026-10-18).
 66. An overlay that covers the screen or the main area (the grid of all
     POIs, History, Settings) closes with a round ✕ button in its top-left
     corner, as large as any tap target (item 31). There is no text

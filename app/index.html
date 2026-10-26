@@ -14,10 +14,11 @@
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.55 and docs/data-model.md
-  v0.18, and much of it is the code of the working prototype v19.7. The
-  look follows v0.55; the type dialog, the toast's Undo and Cancel
-  removal come in v0.9.
+  The behaviour follows docs/screens.md v0.56 and docs/data-model.md
+  v0.19, and much of it is the code of the working prototype v19.7. The
+  look follows v0.55. Still to come: Cancel removal of a waiting removal
+  and the small defects of the type change audit in v0.10, Undo on the
+  type toast after its reference.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -84,6 +85,21 @@
           drivable, then a maneuver over its share, then one done, then
           one the type does not allow, Left before Straight before
           Right. A not drivable POI with passes reads its passes to fix.
+  v0.9 2026-10-26 — the type change dialog (screens.md v0.56, items 63
+          and 64, decision D1): the sentences on the passes that do not
+          fit the new type and where they are, in the sheet, sent from
+          this tablet, typed in by hand or waiting on this tablet, and
+          under them the switch "Also delete the 2 passes of this
+          tablet", on by default, which deletes this tablet's passes
+          that do not fit exactly as Delete in History does, a waiting
+          pass dropped and a sent one given a removal, in the one write
+          of the change. Of a maneuver the new type allows with a
+          smaller share it takes the newest passes by seq, as many as do
+          not fit, like Undo last. Not drivable counts every pass, the
+          larger of the sides' and the maneuvers' totals, so a POI with
+          a sheet error asks too, the error named first. Cancel change
+          on a refused change without fromType puts back the type the
+          sheet's target reads as, never Intersection.
 -->
 <html lang="en">
 <head>
@@ -1363,6 +1379,10 @@
   .gear.off, .colbtn.off { opacity: var(--o-off); }
   /* a dialog with one button (item 78) */
   .dbtns.one { grid-template-columns: 1fr; }
+  /* item 63: the switch of the type change dialog when it is off, the knob
+     at the left on a faded track (the references draw the switch on only) */
+  .switch[aria-checked="false"] { background: var(--ink-3); }
+  .switch[aria-checked="false"]::after { right: auto; left: var(--s-1); }
   @media (prefers-reduced-motion: reduce) {
     .app *, .app *::before, .app *::after { animation: none !important; transition: none !important; }
   }
@@ -2159,6 +2179,8 @@
       h += '<button class="scrim top" type="button" data-act="dlg-cancel" aria-label="Cancel"></button>' +
         '<div class="dlg" role="alertdialog" aria-modal="true" aria-label="' + esc(d.title) + '"><div class="dtitle">' + esc(d.title) + '</div>' +
         (d.chip ? '<div class="dchip">' + d.chip + '</div>' : '') + '<div class="dbody">' + esc(d.body) + '</div>' +
+        (d.sw ? '<div class="drow"><span class="ol"><b>' + esc(d.sw.label) + '</b><small>' + esc(d.sw.line) + '</small></span>' +
+          '<span class="switch" role="switch" aria-checked="' + (d.sw.on ? 'true' : 'false') + '" aria-label="' + esc(d.sw.label) + '"></span></div>' : '') +
         (d.one ? '<div class="dbtns one"><button class="dbtn ' + d.okCls + '" type="button" data-act="dlg-ok">' + esc(d.ok) + '</button></div>'
           : '<div class="dbtns"><button class="dbtn" type="button" data-act="dlg-cancel">Cancel</button>' +
             '<button class="dbtn ' + d.okCls + '" type="button" data-act="dlg-ok">' + esc(d.ok) + '</button></div>') + '</div>';
@@ -2401,6 +2423,30 @@
   function passChip(e) {
     return 'POI ' + e.poi + ' · <span class="iw">' + icon(MAN_ICON[e.man]) + MAN_NAME[e.man] + ' from ' + SIDE_NAME[e.side] + '</span> · ' + stamp(e.ts);
   }
+  // The removal of a delivered pass (data-model.md "Event"): a new UUID
+  // and seq, delta -1, ref the pass, waiting. Delete in History and the
+  // switch of the type change dialog build the same one. Runs inside
+  // change().
+  function removalOf(e) {
+    var r = routeById(e.routeId);
+    S.seq += 1;
+    return { id: uuid(), seq: S.seq, ts: Date.now(), city: e.city, route: r ? r.code : e.route, routeId: e.routeId, poi: e.poi,
+             kind: 'pass', side: e.side, man: e.man, delta: -1, ref: e.id, state: 'waiting' };
+  }
+  // The switch of the type change dialog (item 63): this tablet's passes
+  // deleted exactly as Delete in History does, each read again now: a
+  // waiting pass is dropped, a sent one gets a removal, a pass gone or
+  // with a removal already is left alone. Runs inside change().
+  function deletePasses(ids) {
+    IX = null;
+    var I = ix();
+    ids.forEach(function (id) {
+      var e = I.byId[id];
+      if (!e || e.kind !== 'pass' || e.delta < 0 || I.rem[id]) return;
+      if (e.state === 'delivered') S.events.push(removalOf(e));
+      else if (e.state === 'waiting') S.events = S.events.filter(function (x) { return x.id !== id; });
+    });
+  }
   // items 9, 13, 63: removing a pass asks first
   function askRemove(e, viaUndo) {
     openDialog({
@@ -2424,14 +2470,8 @@
     if (!e || e.kind !== 'pass' || e.delta < 0 || I.rem[id]) return;
     var queued = e.state === 'delivered';
     var ok = change(function () {
-      if (queued) {
-        var r = routeById(e.routeId);
-        S.seq += 1;
-        S.events.push({ id: uuid(), seq: S.seq, ts: Date.now(), city: e.city, route: r ? r.code : e.route, routeId: e.routeId, poi: e.poi,
-                        kind: 'pass', side: e.side, man: e.man, delta: -1, ref: e.id, state: 'waiting' });
-      } else {
-        S.events = S.events.filter(function (x) { return x.id !== id; });
-      }
+      if (queued) S.events.push(removalOf(e));
+      else S.events = S.events.filter(function (x) { return x.id !== id; });
     }, 'change');
     if (!ok) return;
     chime(false);
@@ -2459,63 +2499,106 @@
       return;
     }
     if (e.kind !== 'target') return;
-    var rid = e.routeId, n = e.poi, t = TYPES[e.fromType] ? e.fromType : 'int';
-    var go = function () {
-      if (change(function () {
-        S.events = S.events.filter(function (x) { return x.id !== id; });
-        IX = null;
-        setType(rid, n, t);
-      }, 'change')) toast('Type set: ' + esc(TYPES[t].label));
-    };
-    var lines = consequences(rid, n, t);
-    if (!lines.length) { go(); render(); return; }
-    openDialog({ title: 'Change POI ' + n + ' to ' + TYPES[t].label + '?', body: lines.join(' '), ok: 'Change', okCls: 'danger', run: go });
-    render();
+    // the type the change replaced, else the type the sheet's target reads
+    // as, which queues nothing (finding A3 of the type change audit)
+    var rid = e.routeId, n = e.poi, t = TYPES[e.fromType] ? e.fromType : (BY_TARGET[baseTarget(rid, n)] || 'int');
+    changeType(rid, n, t, function () { S.events = S.events.filter(function (x) { return x.id !== id; }); });
   }
 
-  // ---- the type (items 46, 60, 64; data-model.md "Targets per POI") ----
-  // what a change to type t does to the passes already recorded at POI n:
-  // the sentences of item 64, none when it has no consequence
+  // ---- the type (items 46, 60, 63, 64; data-model.md "Targets per POI") ----
+  // What a change to type t does to the passes already recorded at POI n
+  // (items 63, 64): null when every pass fits t, else the dialog's
+  // sentences, the passes its switch deletes and the switch's words. Per
+  // maneuver, in the sheet is the baseline minus this tablet's waiting
+  // removals, waiting this tablet's waiting passes, and what is past t's
+  // share, all of it for a maneuver t does not allow, does not fit. The
+  // switch takes this tablet's passes that count, waiting or sent with no
+  // removal (a refused pass keeps its own Delete in History): every one
+  // of a maneuver t does not allow, and of an allowed one the newest by
+  // seq, as many as do not fit, like Undo last (decided 2026-10-26). The
+  // rest that do not fit were typed into the sheet by hand. Not drivable
+  // counts every pass, the larger of the sides' and the maneuvers'
+  // totals, so a POI with a sheet error asks too and names it first.
   function consequences(rid, n, t) {
-    var T = TYPES[t], k = counts(rid, n), b = base(rid, n), bc = b ? b.c : zeros();
-    var wAdd = zeros(), wRem = zeros();
+    var T = TYPES[t], b = base(rid, n), I = ix();
+    var sheet = b ? b.c.slice() : zeros(), wait = zeros(), mine = { L: [], St: [], R: [] };
     S.events.forEach(function (e) {
-      if (e.routeId !== rid || e.poi !== n || e.kind !== 'pass' || e.state !== 'waiting') return;
-      var a = e.delta > 0 ? wAdd : wRem;
-      a[AT[e.side]] += 1; a[AT[e.man]] += 1;
+      if (e.routeId !== rid || e.poi !== n || e.kind !== 'pass') return;
+      if (e.delta < 0) { if (e.state === 'waiting') { sheet[AT[e.side]] -= 1; sheet[AT[e.man]] -= 1; } return; }
+      if (e.state === 'waiting') { wait[AT[e.side]] += 1; wait[AT[e.man]] += 1; }
+      if ((e.state === 'waiting' || e.state === 'delivered') && !I.rem[e.id]) mine[e.man].push(e);
     });
-    var sheet = bc.map(function (v, i) { return v - wRem[i]; });   // what stays in the sheet
-    var lines = [];
+    MANS.forEach(function (m) { mine[m].sort(function (x, y) { return y.seq - x.seq; }); });   // newest first
+    // "26 Left and 27 Right passes in the sheet": the maneuvers with passes
+    var group = function (ms, arr, where) {
+      var sum = 0, words = [];
+      ms.forEach(function (m) { if (arr[AT[m]] > 0) { sum += arr[AT[m]]; words.push(fmt(arr[AT[m]]) + ' ' + MAN_NAME[m]); } });
+      if (!words.length) return null;
+      return (words.length > 1 ? words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1] : words[0]) + (sum === 1 ? ' pass ' : ' passes ') + where;
+    };
+    var has = function (ms) { return 'It has ' + [group(ms, sheet, 'in the sheet'), group(ms, wait, 'waiting on this tablet')].filter(Boolean).join(' and ') + '.'; };
+    var lines = [], del = [], fix = 0;
     if (t === 'nd') {
-      if (k.total <= 0) return lines;
-      var inSheet = sheet[0] + sheet[1] + sheet[2] + sheet[3], waiting = wAdd[0] + wAdd[1] + wAdd[2] + wAdd[3];
-      if (inSheet > 0 && waiting > 0) {
-        lines.push('It has ' + plural(inSheet, 'pass', 'passes') + ' in the sheet. ' + (inSheet === 1 ? 'It stays' : 'They stay') + ' there.');
-        lines.push('It has ' + plural(waiting, 'pass', 'passes') + ' waiting on this tablet. ' + (waiting === 1 ? 'It' : 'They') + ' will still be sent, and the app stops counting this POI.');
-      } else if (inSheet > 0) lines.push('It has ' + plural(inSheet, 'pass', 'passes') + ' in the sheet. ' + (inSheet === 1 ? 'It stays' : 'They stay') + ' there, and the app stops counting this POI.');
-      else if (waiting > 0) lines.push('It has ' + plural(waiting, 'pass', 'passes') + ' waiting on this tablet. ' + (waiting === 1 ? 'It' : 'They') + ' will still be sent, and the app stops counting this POI.');
-      return lines;
+      var inSheet = Math.max(sheet[0] + sheet[1] + sheet[2] + sheet[3], sheet[4] + sheet[5] + sheet[6]);
+      var waiting = Math.max(wait[0] + wait[1] + wait[2] + wait[3], wait[4] + wait[5] + wait[6]);
+      fix = inSheet + waiting;
+      if (fix <= 0) return null;
+      if (counts(rid, n).err) lines.push('The sheet shows an error at this POI: its sides and maneuvers disagree.');
+      lines.push('It has ' + [inSheet > 0 ? plural(inSheet, 'pass', 'passes') + ' in the sheet' : null,
+        waiting > 0 ? plural(waiting, 'pass', 'passes') + ' waiting on this tablet' : null].filter(Boolean).join(' and ') + '. ' +
+        (fix === 1 ? 'Not drivable does not count it. The sheet keeps it and the export sends it to the client until it is deleted.'
+          : 'Not drivable counts none of them. The sheet keeps them and the export sends them to the client until they are deleted.'));
+      if (waiting > 0) lines.push(waiting === 1 ? 'The pass waiting on this tablet is still sent unless the switch below deletes it.'
+        : 'Passes waiting on this tablet are still sent unless the switch below deletes them.');
+      MANS.forEach(function (m) { del = del.concat(mine[m]); });
+    } else {
+      var off = MANS.filter(function (m) { return !T.split[m] && sheet[AT[m]] + wait[AT[m]] > 0; });
+      if (off.length) {
+        lines.push(has(off) + ' ' + T.label + ' does not allow ' + off.map(function (m) { return MAN_NAME[m]; }).join(' or ') + '.');
+        off.forEach(function (m) { fix += sheet[AT[m]] + wait[AT[m]]; del = del.concat(mine[m]); });
+      }
+      MANS.forEach(function (m) {
+        var extra = T.split[m] ? sheet[AT[m]] + wait[AT[m]] - T.split[m] : 0;
+        if (extra <= 0) return;
+        lines.push(has([m]) + ' ' + T.label + ' allows ' + fmt(T.split[m]) + ', so ' + fmt(extra) + (extra === 1 ? ' does not fit.' : ' do not fit.'));
+        fix += extra; del = del.concat(mine[m].slice(0, extra));
+      });
+      if (fix <= 0) return null;
+      lines.push(fix === 1 ? 'The app stops counting it, but the sheet keeps it and the export sends it to the client until it is deleted.'
+        : 'The app stops counting them, but the sheet keeps them and the export sends them to the client until they are deleted.');
     }
-    if (k.total > T.target) {
-      lines.push('It already has ' + plural(k.total, 'pass', 'passes') + '. ' + T.label + ' needs ' + T.target + ', so the POI becomes done with ' +
-        plural(k.total - T.target, 'pass', 'passes') + ' over its target. The sheet will flag it as over target.');
-    }
-    var off = MANS.filter(function (m) { return !T.split[m] && (sheet[AT[m]] > 0 || wAdd[AT[m]] > 0); });
-    if (off.length) {
-      var group = function (arr, where) {
-        var parts = off.filter(function (m) { return arr[AT[m]] > 0; });
-        if (!parts.length) return null;
-        var sum = 0, words = parts.map(function (m) { sum += arr[AT[m]]; return fmt(arr[AT[m]]) + ' ' + MAN_NAME[m]; });
-        var list = words.length > 1 ? words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1] : words[0];
-        return { text: list + (sum === 1 ? ' pass ' : ' passes ') + where, n: sum };
-      };
-      var gs = [group(sheet, 'in the sheet'), group(wAdd, 'waiting on this tablet')].filter(Boolean);
-      var all = gs.reduce(function (a, g) { return a + g.n; }, 0), one = all === 1;
-      lines.push('It has ' + gs.map(function (g) { return g.text; }).join(' and ') + '. ' + T.label + ' does not allow ' +
-        off.map(function (m) { return MAN_NAME[m]; }).join(' or ') + ', so ' + (one ? 'it no longer counts' : 'they no longer count') +
-        '. Delete ' + (one ? 'it' : 'them') + ' in History if ' + (one ? 'it was a mistake' : 'they were a mistake') + '.');
-    }
-    return lines;
+    // the passes that do not fit and are in the sheet: the switch's sent
+    // ones and those typed in by hand
+    var sent = del.filter(function (e) { return e.state === 'delivered'; }).length, hand = Math.max(0, fix - del.length);
+    if (sent > 0 && hand > 0) lines.push((sent === 1 ? '1 of them was' : fmt(sent) + ' of them were') + ' sent from this tablet, the other' +
+      (hand === 1 ? ' was typed in by hand: delete it in the sheet.' : ' ' + fmt(hand) + ' were typed in by hand: delete those in the sheet.'));
+    else if (hand > 0) lines.push(hand === 1 ? 'It was typed in by hand: delete it in the sheet.' : 'They were typed in by hand: delete them in the sheet.');
+    else if (sent > 0) lines.push(sent === 1 ? 'It was sent from this tablet.' : 'They were sent from this tablet.');
+    var k = del.length, sw = null;
+    if (k) sw = { on: true, label: k === 1 ? 'Also delete the pass of this tablet' : 'Also delete the ' + fmt(k) + ' passes of this tablet',
+                  line: (t === 'nd' ? (k === 1 ? 'Not drivable does not count it.' : 'Not drivable counts none of them.')
+                    : (k === 1 ? 'It does not fit ' : 'They do not fit ') + T.label + '.') + ' A waiting pass is dropped, a sent one gets a removal.' };
+    return { body: lines.join(' '), del: del.map(function (e) { return e.id; }), sw: sw };
+  }
+  // A change of the active POI's type, or the type Cancel change puts
+  // back: at once with the toast when every pass fits, else after the
+  // dialog of items 63 and 64. "Change" applies the type and, with the
+  // switch on, deletes the switch's passes inside the same change(), so
+  // the store is written once. pre runs first inside it (Cancel change
+  // drops its refused event there).
+  function changeType(rid, n, t, pre) {
+    var q = consequences(rid, n, t);
+    var go = function () {
+      if (change(function () {
+        if (pre) pre();
+        IX = null;
+        setType(rid, n, t);
+        if (q && q.sw && q.sw.on) deletePasses(q.del);
+      }, 'change')) toast('Type set: ' + esc(TYPES[t].label));
+    };
+    if (!q) { go(); render(); return; }
+    openDialog({ title: 'Change POI ' + n + ' to ' + TYPES[t].label + '?', body: q.body, sw: q.sw, ok: 'Change', okCls: 'danger', run: go });
+    render();
   }
   // Stores the type and keeps at most one target event per POI that waits
   // or was rejected: a new change drops it and queues a new one only when
@@ -2540,13 +2623,7 @@
     if (!r || !TYPES[t]) { render(); return; }
     var rid = r.id, n = active();
     if (t === typeOf(rid, n)) { render(); return; }
-    var go = function () {
-      if (change(function () { setType(rid, n, t); }, 'change')) toast('Type set: ' + esc(TYPES[t].label));
-    };
-    var lines = consequences(rid, n, t);
-    if (!lines.length) { go(); render(); return; }
-    openDialog({ title: 'Change POI ' + n + ' to ' + TYPES[t].label + '?', body: lines.join(' '), ok: 'Change', okCls: 'danger', run: go });
-    render();
+    changeType(rid, n, t, null);
   }
 
   function selectPoi(n, fromGrid) {
@@ -2569,6 +2646,9 @@
   // ================= events =================
   var swallowAt = 0;
   app.addEventListener('click', function (e) {
+    // item 63: a tap on the switch row of a type change dialog toggles it
+    var row = e.target.closest('.drow'), dl = row && find('dialog');
+    if (row && !blocked) { if (dl && dl.d.sw) { dl.d.sw.on = !dl.d.sw.on; render(); } return; }
     var t = e.target.closest('button');
     if (!t || !app.contains(t) || blocked) return;
     var a = t.getAttribute('data-act');
