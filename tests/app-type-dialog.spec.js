@@ -104,7 +104,13 @@ function writes(page) { return page.evaluate(function () { return window.__write
 async function expectToastText(page, t) {
   const toast = page.locator('#toast');
   await expect(toast).toHaveClass(/\bon\b/);
-  await expect(toast).toHaveText(t);
+  // its own words, without the button "Undo" that follows them after a
+  // change from the pill or its dialog (app v0.13, item 36)
+  await expect.poll(function () {
+    return toast.evaluate(function (el) {
+      return Array.from(el.childNodes).filter(function (n) { return n.nodeType === 3; }).map(function (n) { return n.textContent; }).join('').replace(/\s+/g, ' ').trim();
+    });
+  }).toBe(t);
 }
 // "Change": the dialog closes, the toast names the type, the store was
 // written once; returns the store

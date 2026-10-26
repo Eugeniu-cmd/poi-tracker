@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.58 — 2026-10-26
+v0.59 — 2026-10-26
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -318,6 +318,11 @@ tiles of the grid, the legend's Done swatch and a done square of the
 mini-map take --ok-tile on --ok-tile-bg, on light a brighter green than
 the POI column's --ok, since their large numbers need 3:1 where the
 column's small "done" needs 4.5:1 (items 58, 59). Dark does not change.
+v0.59 2026-10-26 — Undo on the "Type set" toast built (app v0.13): the
+button is gold, --side-glyph on --side, as tall as any control (item
+31), so the toast grows while it shows; it acts on the POI whose type
+changed, and the toast closes when the active POI or route changes or
+another toast replaces it (item 36).
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -1199,8 +1204,12 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     only" stays six seconds (--dur-toast-undo) and carries a button
     "Undo", which puts the old type back exactly as choosing it again
     from the pill does (item 64) and shows "Type set: Intersection"
-    without the button. It does not restore passes the dialog of item 64
-    deleted. The other toasts stay two seconds (--dur-toast).
+    without the button. The button is gold, the word in --side-glyph on
+    --side, as tall as any control (item 31), so the toast grows while
+    it shows (decided 2026-10-26). It acts on the POI whose type
+    changed, and the toast closes when the active POI or route changes
+    or another toast replaces it. It does not restore passes the dialog
+    of item 64 deleted. The other toasts stay two seconds (--dur-toast).
 37. A finished POI whose passes have not all been sent: the discs stay
     locked with their "This POI is done" caption, while "Undo last" stays
     live, because undo follows what this tablet recorded, not the POI's

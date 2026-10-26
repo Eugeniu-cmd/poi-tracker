@@ -61,7 +61,13 @@ async function pickType(page, t) {
 async function expectToastText(page, t) {
   const toast = page.locator('#toast');
   await expect(toast).toHaveClass(/\bon\b/);
-  await expect(toast).toHaveText(t);
+  // its own words, without the button "Undo" that follows them after a
+  // change from the pill or its dialog (app v0.13, item 36)
+  await expect.poll(function () {
+    return toast.evaluate(function (el) {
+      return Array.from(el.childNodes).filter(function (n) { return n.nodeType === 3; }).map(function (n) { return n.textContent; }).join('').replace(/\s+/g, ' ').trim();
+    });
+  }).toBe(t);
 }
 // every number below 0 in the element's text, as "-N"; a minus after a
 // letter or digit, as in the route code SAMPLE-001, is not one

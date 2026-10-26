@@ -14,10 +14,9 @@
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.58 and docs/data-model.md
+  The behaviour follows docs/screens.md v0.59 and docs/data-model.md
   v0.19, and much of it is the code of the working prototype v19.7. The
-  look follows v0.58. Still to come: Undo on the type toast after its
-  reference, and sending.
+  look follows v0.59. Still to come: sending.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -137,6 +136,20 @@
           need 3:1; the POI column and every small text keep --ok, and
           dark follows --ok. The APP ONLY piece stays. No behaviour
           changes.
+  v0.13 2026-10-26 — Undo on the "Type set" toast (screens.md v0.59,
+          items 31, 36 and 64): a type change made from the pill or its
+          dialog shows "Type set: Straight only" with a gold button
+          "Undo", --side-glyph on --side, as tall as any control, for
+          --dur-toast-undo; the toast grows to hold it and alone takes
+          taps. Undo puts the old type back on the POI whose type
+          changed through the path of pickType, so a way back with
+          consequences asks first and setType drops or queues the
+          target event; passes the dialog's switch deleted stay
+          deleted, and its own toast, like the one of "Cancel change"
+          in History, carries no button and stays --dur-toast. The
+          Undo toast closes at once when the active POI or route
+          changes or another toast replaces it. Both durations are read
+          from the tokens, no longer literals in the script.
 -->
 <html lang="en">
 <head>
@@ -1431,6 +1444,16 @@
   /* item 36: its maneuver arrow is gold, --man-glyph, as on the discs whose
      colours the toast wears (v0.11) */
   .toast .ic { color: var(--man-glyph); }
+  /* item 36: the toast that carries "Undo" (v0.13): the button is gold,
+     --side-glyph on --side, as tall as any control (item 31), inside the
+     toast's own padding, so the toast grows while it shows. Only this
+     toast takes taps, and only while it is on; its button is disabled
+     once the toast has gone, out of the keyboard's reach. */
+  .toast.undo { padding: var(--s-2) var(--s-2) var(--s-2) var(--s-5); gap: var(--s-4); }
+  .toast.undo.on { pointer-events: auto; }
+  .tundo { display: inline-flex; align-items: center; justify-content: center;
+           min-height: var(--tap-min); padding: 0 var(--s-5); border-radius: calc(var(--r-md) - var(--s-2));
+           background: var(--side); color: var(--side-glyph); font-weight: var(--w-heavy); }
   /* controls of a later build stay in place, dimmed (items 26, 77) */
   .gear.off, .colbtn.off { opacity: var(--o-off); }
   /* a dialog with one button (item 78) */
@@ -1507,7 +1530,6 @@
   var LIMIT = 3000;                  // item 48: pass events (passes and removals) kept
   var SAMPLE_ID = 'sample';          // the reserved id of the sample city
   var OPEN_TIMEOUT = 12000;          // item 8: the open compass closes after 12 s
-  var TOAST_MS = 2000;               // item 36
   // item 46: the types, their targets and splits; side, the usual passes
   // from each direction on a Straight only POI, shown under the sides
   // (decision D2)
@@ -1535,6 +1557,10 @@
   var app = document.getElementById('app');
   // item 7: a second side tap is ignored while the ring runs: --dur-ring
   var RING = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dur-ring')) || 520;
+  // item 36: the toast stays --dur-toast, the one that carries Undo
+  // --dur-toast-undo, both read from the tokens (v0.13)
+  var TOAST_MS = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dur-toast'));
+  var TOAST_UNDO_MS = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dur-toast-undo'));
   function $(id) { return document.getElementById(id); }
   function icon(id, cls) { return '<svg class="' + (cls || 'ic') + '"><use href="#' + id + '"/></svg>'; }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -2416,13 +2442,28 @@
   }
 
   // ================= feedback: toast, chime, vibration (items 36, 62) =================
-  var toastTimer;
-  function toast(html) {
+  // The toast of item 36. With undo, the POI whose type changed and the
+  // type "Undo" puts back: the toast carries the button, stays
+  // --dur-toast-undo and takes taps, until its time, until another toast
+  // replaces it, or until the active POI or route changes (v0.13).
+  var toastTimer, undoAt = null;
+  function toast(html, undo) {
     var t = $('toast');
-    t.innerHTML = html;
+    undoAt = undo || null;
+    t.innerHTML = html + (undo ? '<button class="tundo" type="button" data-act="undo-type">Undo</button>' : '');
+    t.classList.toggle('undo', !!undo);
     t.classList.add('on');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.classList.remove('on'); }, TOAST_MS);
+    toastTimer = setTimeout(hideToast, undo ? TOAST_UNDO_MS : TOAST_MS);
+  }
+  // the toast fades out keeping its size; its button is disabled, so the
+  // hidden toast is out of the keyboard's reach, and it takes no taps
+  function hideToast() {
+    var t = $('toast'), b = t.querySelector('.tundo');
+    clearTimeout(toastTimer);
+    undoAt = null;
+    t.classList.remove('on');
+    if (b) b.disabled = true;
   }
   var audio;
   function chime(up) {
@@ -2673,21 +2714,24 @@
                     : (k === 1 ? 'It does not fit ' : 'They do not fit ') + T.label + '.') + ' A waiting pass is dropped, a sent one gets a removal.' };
     return { body: lines.join(' '), del: del.map(function (e) { return e.id; }), sw: sw };
   }
-  // A change of the active POI's type, or the type Cancel change puts
-  // back: at once with the toast when every pass fits, else after the
-  // dialog of items 63 and 64. "Change" applies the type and, with the
-  // switch on, deletes the switch's passes inside the same change(), so
-  // the store is written once. pre runs first inside it (Cancel change
-  // drops its refused event there).
-  function changeType(rid, n, t, pre) {
+  // A change of the active POI's type, or the type Undo or Cancel change
+  // puts back: at once with the toast when every pass fits, else after
+  // the dialog of items 63 and 64. "Change" applies the type and, with
+  // the switch on, deletes the switch's passes inside the same change(),
+  // so the store is written once. pre runs first inside it (Cancel change
+  // drops its refused event there). With undo, a change the passenger
+  // made from the pill or its dialog, the toast carries "Undo" with the
+  // type the change replaced (item 36, v0.13).
+  function changeType(rid, n, t, pre, undo) {
     var q = consequences(rid, n, t);
     var go = function () {
+      var from = typeOf(rid, n);
       if (change(function () {
         if (pre) pre();
         IX = null;
         setType(rid, n, t);
         if (q && q.sw && q.sw.on) deletePasses(q.del);
-      }, 'change')) toast('Type set: ' + esc(TYPES[t].label));
+      }, 'change')) toast('Type set: ' + esc(TYPES[t].label), undo ? { rid: rid, n: n, t: from } : null);
     };
     if (!q) { go(); render(); return; }
     openDialog({ title: 'Change POI ' + n + ' to ' + TYPES[t].label + '?', body: q.body, sw: q.sw, ok: 'Change', okCls: 'danger', run: go });
@@ -2716,12 +2760,25 @@
     if (!r || !TYPES[t]) { render(); return; }
     var rid = r.id, n = active();
     if (t === typeOf(rid, n)) { render(); return; }
-    changeType(rid, n, t, null);
+    changeType(rid, n, t, null, true);
+  }
+  // "Undo" on the toast (item 36): the old type goes back on the POI whose
+  // type changed, through the path of pickType, so a way back with
+  // consequences asks first (item 64) and setType drops or queues the
+  // target event. Passes the dialog's switch deleted stay deleted, and
+  // the toast this gives carries no Undo. The toast closes first: its
+  // tap has been taken.
+  function undoType() {
+    var u = undoAt;
+    hideToast();
+    if (!u || !routeById(u.rid) || !TYPES[u.t] || u.t === typeOf(u.rid, u.n)) { render(); return; }
+    changeType(u.rid, u.n, u.t, null);
   }
 
   function selectPoi(n, fromGrid) {
     var r = route();
     if (!r || !(n >= 1 && n <= r.poiCount)) return;
+    if (undoAt && n !== active()) hideToast();   // item 36: the Undo toast closes when the active POI changes
     r.lastPoi = n;
     quietSave();
     removeLayer('open');
@@ -2732,7 +2789,10 @@
   function selectRoute(id) {
     var c = city();
     removeLayer('menu'); removeLayer('open');
-    if (c && c.routes.some(function (q) { return q.id === id; })) { c.lastRoute = id; quietSave(); colBuilt = null; }
+    if (c && c.routes.some(function (q) { return q.id === id; })) {
+      if (undoAt && id !== c.lastRoute) hideToast();   // item 36: the Undo toast closes when the route changes
+      c.lastRoute = id; quietSave(); colBuilt = null;
+    }
     render();
   }
 
@@ -2766,6 +2826,7 @@
       case 'close-grid': removeLayer('grid'); render(); break;
       case 'close-history': removeLayer('history'); render(); break;
       case 'undo': undo(); break;
+      case 'undo-type': undoType(); break;
       case 'cancel': removeLayer('open'); render(); break;
       case 'dlg-cancel': removeLayer('dialog'); render(); break;
       case 'dlg-ok': var d = find('dialog'); removeLayer('dialog'); if (d && d.d.run) d.d.run(); render(); break;
