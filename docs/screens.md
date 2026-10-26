@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.56 — 2026-10-26
+v0.57 — 2026-10-26
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -305,6 +305,13 @@ share, this tablet's newest passes of it, as many as do not fit, newest
 first like Undo last, and takes only passes that count, waiting or sent;
 a POI whose sides and maneuvers disagree in the sheet always asks before
 it turns Not drivable, and its dialog names the error first (item 64).
+v0.57 2026-10-26 — gold small arrows (main-screen v0.41, history v0.27,
+settings v0.24, app v0.11): the arrows of the type pill's split and of a
+removal dialog's chip are gold, --card-glyph, as the icons on the card
+(items 60, 63); the toast's arrow is gold, --man-glyph, as on the discs
+whose colours it wears (item 36); History's rows keep the arrow in the
+text colour, a long list like the type menu (item 12). Item 64 records
+the order of the dialog's sentences, which app v0.10 already keeps.
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -499,25 +506,26 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     --t-label heavy in --ink, like the screen's other numbers, and stay
     smaller than the card's counts, so the plan is not read as what is
     still needed. In gold beside the gold arrows they tired the eye
-    (decided 2026-10-22). The menu keeps its grey split (v0.47). The icon
-    shows the allowed maneuvers, not the shape of
-    the road: their
-    icons of item 69 side by side in the order left, straight, right, in
-    gold on a tile in the colour of the discs (item 5), wide enough for
-    three, the same for every type. The type name and the split under it
-    share one centre line, in the middle of the space between the tile
-    and "Change type" (decided 2026-10-22). Each maneuver keeps its own place in the tile:
-    an absent one leaves its place empty instead of shifting the others,
-    so the tiles read as a map of the maneuvers. Tapping the pill opens
-    a menu with the six types, each with its icon and split, the current
-    one marked with a check, as the route menu marks the active route.
-    The menu changes the active POI only. Two taps are deliberate: a
-    stray touch while driving cannot change a type. A change with
-    consequences for passes already recorded asks first (item 64). The
-    pill ends with "Change type" and a chevron, so it reads as the POI's
-    type and as a control (decided 2026-10-22). Where the left group is
-    narrow (the compact card of item 70) only the chevron shows. The
-    counter beside the number carries no chevron.
+    (decided 2026-10-22). The split's arrows are gold (--card-glyph), as
+    the icons on the card (decided 2026-10-26). The menu keeps its grey
+    split (v0.47). The icon shows the allowed maneuvers, not the shape
+    of the road: their icons of item 69 side by side in the order left,
+    straight, right, in gold on a tile in the colour of the discs (item
+    5), wide enough for three, the same for every type. The type name
+    and the split under it share one centre line, in the middle of the
+    space between the tile and "Change type" (decided 2026-10-22). Each
+    maneuver keeps its own place in the tile: an absent one leaves its
+    place empty instead of shifting the others, so the tiles read as a
+    map of the maneuvers. Tapping the pill opens a menu with the six
+    types, each with its icon and split, the current one marked with a
+    check, as the route menu marks the active route. The menu changes
+    the active POI only. Two taps are deliberate: a stray touch while
+    driving cannot change a type. A change with consequences for passes
+    already recorded asks first (item 64). The pill ends with "Change
+    type" and a chevron, so it reads as the POI's type and as a control
+    (decided 2026-10-22). Where the left group is narrow (the compact
+    card of item 70) only the chevron shows. The counter beside the
+    number carries no chevron.
 61. History covers the main area in both layouts, the compass and the
     action bar included, while the POI column stays live beside it, so
     item 44 holds unchanged. In portrait the summary under the main area
@@ -796,27 +804,34 @@ appears on screen. An apostrophe on screen is the typographic one (’).
       sent unless the switch deletes them.
     A POI whose sides and maneuvers disagree in the sheet always asks
     before it turns Not drivable, and its dialog names the error first.
+    The dialog's sentences keep one order for every type: the passes
+    that do not fit, then that the app stops counting them, with the
+    sheet keeping them when some are in the sheet, then who put the ones
+    in the sheet there, and last that passes waiting on this tablet are
+    still sent unless the switch deletes them (app v0.10, 2026-10-26).
     After the change the POI reads "13 of 40 · 27 to go · 53 to fix"
     (item 4) and its row "27 to go" with the mark (item 40). There is no
     "over target" state: a total past the target is passes to fix.
 
 ## "History" panel
 12. Pass list: "POI" / "Route" scope control; each entry shows time and
-    "maneuver + side". The time sits right-aligned in its slot. Each row
-    ends with its state: "Waiting" and "Removal waiting" with the dot in
-    the warning colour, "Sent" quiet, "Not accepted" in the error colour.
-    A type change that sent a target event (item 64) has a row of its
-    own, "Type: Straight only", with the POI number in Route scope. It
-    reads "Waiting" while it waits and leaves the list once it is in the
-    sheet, since the type itself is stored apart (item 48). A refused one
-    reads "Not accepted" (item 47). A waiting type change carries no
-    button: it is undone from the type pill, and choosing the old type
-    again drops it (data-model.md). A pass whose removal waits ("Removal
-    waiting") carries one button, "Cancel removal", which drops the
-    waiting removal without a dialog: the pass counts again, since
-    nothing reached the sheet (data-model.md "Event": a waiting event
-    may be dropped). Where the slot is narrow the type's name wraps
-    under "Type:".
+    "maneuver + side". The arrow keeps the text colour: History is a
+    long list, like the type menu (decided 2026-10-26). The time sits
+    right-aligned in its slot. Each row ends with its state: "Waiting"
+    and "Removal waiting" with the dot in the warning colour, "Sent"
+    quiet, "Not accepted" in the error colour. A type change that sent a
+    target event (item 64) has a row of its own, "Type: Straight only",
+    with the POI number in Route scope. It reads "Waiting" while it
+    waits and leaves the list once it is in the sheet, since the type
+    itself is stored apart (item 48). A refused one reads "Not accepted"
+    (item 47). A waiting type change carries no button: it is undone
+    from the type pill, and choosing the old type again drops it
+    (data-model.md). A pass whose removal waits ("Removal waiting")
+    carries one button, "Cancel removal", which drops the waiting
+    removal without a dialog: the pass counts again, since nothing
+    reached the sheet (data-model.md "Event": a waiting event may be
+    dropped). Where the slot is narrow the type's name wraps under
+    "Type:".
 13. Every pass has "Delete", which asks first (item 63). A pass still
     waiting on the tablet is removed outright. A pass already in the
     sheet stays in the list, struck through and labelled "Removal
@@ -1074,37 +1089,38 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     and Google share. A dialog sits in the middle of the screen over a
     dimmed background. Its title names the action: "Remove the last
     pass?", "Delete this pass?", "Change POI 122 to Straight only?". A
-    removal shows the pass itself in a chip (POI, maneuver, side, time).
-    The chip names the side with "from" ("Left from South"), since it
-    stands alone there, while a row of History names the side alone
-    (item 12). A type change whose new type does not fit passes of this
-    tablet shows, under its sentences, a switch "Also delete the 2
-    passes of this tablet", on by default, with the line "They do not
-    fit Straight only. A waiting pass is dropped, a sent one gets a
-    removal." under its label, in the style of the Sound switch of
-    Settings (item 65). With the switch on, "Change" applies the type
-    and deletes those passes exactly as Delete in History does, one
-    removal per sent pass. For a maneuver the new type allows with a
-    smaller share, the switch deletes this tablet's newest passes of it,
-    as many as do not fit, newest first like Undo last (decided
-    2026-10-26). It deletes passes that count, waiting or sent: a
-    refused pass keeps its own Delete in History (item 13). Passes typed
-    into the sheet cannot be deleted from the tablet, and the dialog
-    says so. One line says what happens: a waiting pass is simply
-    dropped from this tablet, a pass already in the sheet gets a removal
-    sent with the next sync, and a refused pass, which never reached the
-    sheet, is dropped like a waiting one ("The sheet refused it, so it
-    is simply dropped from this tablet."). A waiting pass that turns out
-    to have reached the sheet while the dialog was open gets a removal
-    instead, and History shows it as "Removal waiting" (data-model.md).
-    Two buttons side by side: "Cancel" on the left, the action as a verb
-    on the right ("Remove", "Delete", "Change"), never "OK" or "Yes". A
-    removing button is red (item 28), and so is the button of a type
-    change, since passes stop counting (decided 2026-10-21). A tap
-    outside the dialog equals Cancel. There is no "don't ask again".
-    Dialog buttons, like the Settings buttons (Save, Test connection,
-    Add route), set their words at --t-body in --w-bold, the size of the
-    action bar's buttons (decided 2026-10-18).
+    removal shows the pass itself in a chip (POI, maneuver, side, time),
+    its maneuver arrow in gold (--card-glyph, decided 2026-10-26). The
+    chip names the side with "from" ("Left from South"), since it stands
+    alone there, while a row of History names the side alone (item 12).
+    A type change whose new type does not fit passes of this tablet
+    shows, under its sentences, a switch "Also delete the 2 passes of
+    this tablet", on by default, with the line "They do not fit Straight
+    only. A waiting pass is dropped, a sent one gets a removal." under
+    its label, in the style of the Sound switch of Settings (item 65).
+    With the switch on, "Change" applies the type and deletes those
+    passes exactly as Delete in History does, one removal per sent pass.
+    For a maneuver the new type allows with a smaller share, the switch
+    deletes this tablet's newest passes of it, as many as do not fit,
+    newest first like Undo last (decided 2026-10-26). It deletes passes
+    that count, waiting or sent: a refused pass keeps its own Delete in
+    History (item 13). Passes typed into the sheet cannot be deleted
+    from the tablet, and the dialog says so. One line says what happens:
+    a waiting pass is simply dropped from this tablet, a pass already in
+    the sheet gets a removal sent with the next sync, and a refused
+    pass, which never reached the sheet, is dropped like a waiting one
+    ("The sheet refused it, so it is simply dropped from this tablet.").
+    A waiting pass that turns out to have reached the sheet while the
+    dialog was open gets a removal instead, and History shows it as
+    "Removal waiting" (data-model.md). Two buttons side by side:
+    "Cancel" on the left, the action as a verb on the right ("Remove",
+    "Delete", "Change"), never "OK" or "Yes". A removing button is red
+    (item 28), and so is the button of a type change, since passes stop
+    counting (decided 2026-10-21). A tap outside the dialog equals
+    Cancel. There is no "don't ask again". Dialog buttons, like the
+    Settings buttons (Save, Test connection, Add route), set their words
+    at --t-body in --w-bold, the size of the action bar's buttons
+    (decided 2026-10-18).
 66. An overlay that covers the screen or the main area (the grid of all
     POIs, History, Settings) closes with a round ✕ button in its top-left
     corner, as large as any tap target (item 31). There is no text
@@ -1163,16 +1179,18 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     Q).
 36. A pass has just been recorded: a toast appears over the working area
     for about two seconds, reading "Saved: ← South · 57 of 70", then
-    fades. The screen beneath does not move. The same toast serves the
-    other confirmations: "Removed: ← South · 56 of 70" for a waiting pass
+    fades. Its maneuver arrow is gold, --man-glyph, as on the discs
+    whose colours the toast wears (decided 2026-10-26). The screen
+    beneath does not move. The same toast serves the other
+    confirmations: "Removed: ← South · 56 of 70" for a waiting pass
     undone or deleted, "Removal queued: ← South · 56 of 70" for a
     delivered one, "Type set: Straight only" (item 64) and "Closed after
-    12 s: nothing recorded" (item 8). The toast "Type set: Straight only"
-    stays six seconds (--dur-toast-undo) and carries a button "Undo",
-    which puts the old type back exactly as choosing it again from the
-    pill does (item 64) and shows "Type set: Intersection" without the
-    button. It does not restore passes the dialog of item 64 deleted.
-    The other toasts stay two seconds (--dur-toast).
+    12 s: nothing recorded" (item 8). The toast "Type set: Straight
+    only" stays six seconds (--dur-toast-undo) and carries a button
+    "Undo", which puts the old type back exactly as choosing it again
+    from the pill does (item 64) and shows "Type set: Intersection"
+    without the button. It does not restore passes the dialog of item 64
+    deleted. The other toasts stay two seconds (--dur-toast).
 37. A finished POI whose passes have not all been sent: the discs stay
     locked with their "This POI is done" caption, while "Undo last" stays
     live, because undo follows what this tablet recorded, not the POI's

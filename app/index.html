@@ -7,16 +7,16 @@
   network: the service worker keeps these files on the tablet.
 
   The look is the approved references, copied, not redrawn:
-  - the app CSS of docs/references/main-screen.html v0.40 and the History
-    rules of docs/references/history.html v0.26, byte for byte
+  - the app CSS of docs/references/main-screen.html v0.41 and the History
+    rules of docs/references/history.html v0.27, byte for byte
   - docs/references/_tokens.css v0.22, inlined
   - the Lucide sprite of main-screen.html
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.56 and docs/data-model.md
+  The behaviour follows docs/screens.md v0.57 and docs/data-model.md
   v0.19, and much of it is the code of the working prototype v19.7. The
-  look follows v0.55. Still to come: Undo on the type toast after its
+  look follows v0.57. Still to come: Undo on the type toast after its
   reference, and sending.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
@@ -119,6 +119,15 @@
           tile, the mini-map square and the summary show it as for any
           other POI, and the head keeps "Not drivable" over the
           error's line.
+  v0.11 2026-10-26 — gold small arrows (screens.md v0.57, items 12, 36,
+          60 and 63): the canon copied whole from main-screen.html v0.41
+          and history.html v0.27, the tokens still _tokens.css v0.22.
+          The arrows of the type pill's split and of a removal dialog's
+          chip take --card-glyph, the gold of the card's icons; the
+          toast's arrow takes --man-glyph, the gold of the discs whose
+          colours it wears (.toast .ic in the APP ONLY piece); the type
+          menu's split and History's rows keep the text colour. No
+          behaviour changes.
 -->
 <html lang="en">
 <head>
@@ -828,10 +837,12 @@
      like the screen's other numbers (v0.36: in gold beside the gold arrows
      they tired the eye), still smaller than the card's counts, on the line's
      baseline (item 60). The pill and the menu show no passes (v0.36). The
-     menu keeps its grey split. */
+     menu keeps its grey split. The split's arrows are gold, --card-glyph, as
+     the icons on the card (v0.41). */
   .tl small { align-items: baseline; }
   .tl small .tn { font-size: var(--t-label); font-weight: var(--w-heavy); color: var(--ink);
                   line-height: var(--lh-tight); }
+  .tl small .ic { color: var(--card-glyph); }
   .tchg { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--t-small);
           font-weight: var(--w-heavy); color: var(--ink-2); white-space: nowrap; }
   .tchg .ic { margin-right: -0.25em; }
@@ -1044,6 +1055,7 @@
   .dchip { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--s-1);
            padding: var(--s-2) var(--s-3); border-radius: var(--r-sm); background: var(--man-soft);
            font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .dchip .ic { color: var(--card-glyph); }
   .dbody { font-size: var(--t-body); font-weight: var(--w-medium);
            line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px);
            text-wrap: balance; color: var(--ink-2); }
@@ -1394,6 +1406,9 @@
            line-height: var(--lh-tight); white-space: nowrap; pointer-events: none;
            opacity: 0; transition: opacity var(--dur-fade) var(--ease-out); }
   .toast.on { opacity: 1; }
+  /* item 36: its maneuver arrow is gold, --man-glyph, as on the discs whose
+     colours the toast wears (v0.11) */
+  .toast .ic { color: var(--man-glyph); }
   /* controls of a later build stay in place, dimmed (items 26, 77) */
   .gear.off, .colbtn.off { opacity: var(--o-off); }
   /* a dialog with one button (item 78) */

@@ -18,9 +18,10 @@
    v0.8 2026-10-26 — captions and sides: a new cache name for app v0.8.
    v0.9 2026-10-26 — the type change dialog: a new cache name for app v0.9.
    v0.10 2026-10-26 — Cancel removal and the small defects: a new cache name for app v0.10.
+   v0.11 2026-10-26 — gold small arrows: a new cache name for app v0.11.
 */
 'use strict';
-var CACHE = 'poi-app-v0.10';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.11';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 

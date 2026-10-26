@@ -1,7 +1,8 @@
-/* POI Tracker tests — the gold (prompts Gold step 2, Card step 2 and Done
-   step 2c; screens.md v0.55, items 2, 5, 19, 39, 40, 41, 60; _tokens.css
-   v0.22): the one gold, --gold-line, #D9A92A on light and #E6B83E on dark,
-   on the arrows' ring, the card's ring fill, the icons under its rings and
+/* POI Tracker tests — the gold (prompts Gold step 2, Card step 2, Done
+   step 2c and Gold small arrows; screens.md v0.57, items 2, 5, 12, 19, 36,
+   39, 40, 41, 60, 63; _tokens.css v0.22; main-screen v0.41, app v0.11):
+   the one gold, --gold-line, #D9A92A on light and #E6B83E on dark, on the
+   arrows' ring, the card's ring fill, the icons under its rings and
    beside LAST (--card-glyph) and the bar of a POI in progress; the arrows
    on the discs and the type tile on --man-glyph, the gold on light and a
    deep gold, #A67C00, on the ivory discs of the dark theme; a gold N on
@@ -9,12 +10,16 @@
    arrow without the ring, the gold History chip, the pill's numbers in
    ink, none of the old colours left in any computed colour, and the gold
    icon with its manifest entries (the icon keeps its colours until a step
-   of its own recolours it).
+   of its own recolours it). The small arrows beside words (decided
+   2026-10-26): the type pill's split arrows and the chip of a removal
+   dialog on --card-glyph, the toast's arrow on --man-glyph, while the
+   type menu's split keeps --ink-2 (its marked row --ink) and a History
+   row keeps --ink.
    The light and dark tests emulate the system colour scheme before the
    app opens, so its "System" theme follows it.
 */
 'use strict';
-const { test, expect, layers, openSample, openHistory } = require('./fixtures');
+const { test, expect, layers, openSample, openHistory, recordPass, expectToast } = require('./fixtures');
 
 // the golds of _tokens.css v0.22, one value per theme
 const GOLD = { light: 'rgb(224, 180, 58)', dark: 'rgb(230, 184, 62)' };      // --side, --compass-n
@@ -28,6 +33,18 @@ const PROPS = ['color', 'background-color', 'border-top-color', 'border-left-col
 // a computed style property of the element
 function css(locator, prop) {
   return locator.evaluate(function (el, p) { return getComputedStyle(el).getPropertyValue(p); }, prop);
+}
+// the computed colour of a token in the theme on screen: a probe element
+// coloured with var(name), read and removed
+function tokenColour(page, name) {
+  return page.evaluate(function (n) {
+    var el = document.createElement('span');
+    el.style.color = 'var(' + n + ')';
+    document.body.appendChild(el);
+    var c = getComputedStyle(el).color;
+    el.remove();
+    return c;
+  }, name);
 }
 // every element in the document whose computed colours still carry one of
 // the old values, as "tag.classes property: value"
@@ -115,6 +132,51 @@ async function goldScreen(page, scheme) {
   // g. no old colour anywhere, closed
   expect(await oldColours(page)).toEqual([]);
 
+  // i. the small arrows beside words (v0.41, app v0.11). The type pill's
+  //    split arrows take --card-glyph, the one gold, its numbers in ink as
+  //    checked above (item 60)
+  const splitIcons = page.locator('#pill .tl small .ic');
+  await expect(splitIcons).toHaveCount(3);
+  for (let i = 0; i < 3; i++) expect(await css(splitIcons.nth(i), 'color'), 'split arrow ' + i).toBe(line);
+  //    the open type menu keeps its grey split, --ink-2, unchanged; its
+  //    marked row keeps the split in --ink (.opt.on .ol small, item 60)
+  const ink2 = await tokenColour(page, '--ink-2');
+  const ink1 = await tokenColour(page, '--ink');
+  expect(ink1).toBe(ink);
+  await page.locator('#pill').click();
+  const pop = page.locator('.pop');
+  await expect(pop).toBeVisible();
+  const menuIcons = pop.locator('.opt:not(.on) .ol small .ic');
+  await expect(menuIcons).toHaveCount(7);   // 2 + 2 + 2 + 1 arrows of the four unmarked types with a split; Not drivable has none
+  for (let i = 0; i < 7; i++) expect(await css(menuIcons.nth(i), 'color'), 'menu arrow ' + i).toBe(ink2);
+  const markedIcons = pop.locator('.opt.on .ol small .ic');
+  await expect(markedIcons).toHaveCount(3);
+  for (let i = 0; i < 3; i++) expect(await css(markedIcons.nth(i), 'color'), 'marked menu arrow ' + i).toBe(ink);
+  await page.goBack();
+  await expect(pop).toHaveCount(0);
+  await expect.poll(() => layers(page)).toBe(0);
+  //    the chip of a removal dialog takes --card-glyph (item 63): Undo last
+  //    on POI 136, whose newest pass, Left from South, counts
+  await page.locator('[data-act="undo"]').click();
+  const dlg = page.locator('.dlg');
+  await expect(dlg).toBeVisible();
+  const chipIcon = dlg.locator('.dchip .ic');
+  await expect(chipIcon).toHaveCount(1);
+  expect(await css(chipIcon, 'color')).toBe(line);
+  await dlg.locator('[data-act="dlg-cancel"]').click();
+  await expect(dlg).toHaveCount(0);
+  await expect.poll(() => layers(page)).toBe(0);
+  await expect(page.locator('#cnt')).toHaveText('41 of 70');
+  //    the toast's arrow takes --man-glyph, the gold of the discs whose
+  //    colours the toast wears (item 36): a pass recorded, Left from South
+  await recordPass(page, 'L', 'S');
+  await expectToast(page, 'Saved:', 'South · 42 of 70');
+  const toastIcon = page.locator('#toast .ic');
+  await expect(toastIcon).toHaveCount(1);
+  expect(await css(toastIcon, 'color')).toBe(glyph);
+  // g. no old colour anywhere, with the toast on
+  expect(await oldColours(page)).toEqual([]);
+
   // d. the open compass: four gold sides, the ring stays on the arrow
   await left.click();
   await expect(stage).toHaveClass(/\bopen\b/);
@@ -145,6 +207,15 @@ async function goldScreen(page, scheme) {
   const chip = hist.locator('.hsub .chip.gold');
   await expect(chip).toHaveCount(1);
   expect(await css(chip, 'background-color')).toBe(SOFT[scheme]);
+  //    a History row keeps its arrow in the text colour, --ink: a long list,
+  //    like the type menu (item 12, v0.41). POI 124 has no pass of this
+  //    tablet, so Route scope: its newest row is the pass recorded above
+  await hist.locator('button[data-scope="route"]').click();
+  await expect(hist.locator('button[data-scope="route"]')).toHaveClass(/\bon\b/);
+  const rowIcons = hist.locator('.hlist .hr .hmv .ic');
+  expect(await rowIcons.count()).toBeGreaterThan(0);
+  const rowCount = await rowIcons.count();
+  for (let i = 0; i < rowCount; i++) expect(await css(rowIcons.nth(i), 'color'), 'History row arrow ' + i).toBe(ink1);
   // g. no old colour anywhere, with History open
   expect(await oldColours(page)).toEqual([]);
 }

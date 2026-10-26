@@ -139,12 +139,20 @@
           the card or the discs: the POI column beside the panel, the
           panel and its rows draw the new colours. No frame here shows a
           Straight only POI.
+  v0.27 2026-10-26 — the shell of main-screen v0.41 (screens.md v0.57,
+          items 60 and 63): the arrows of the type pill's split and of
+          the chip of a removal dialog take --card-glyph, the gold of
+          the icons on the card. The Delete dialogs of frames D and E
+          show the chip's gold arrow; no frame here shows the pill.
+          History's own rows keep the arrow in the text colour: a long
+          list, like the type menu (item 12, decided 2026-10-26). No
+          token changes.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.26</title>
+<title>POI Tracker — History Reference v0.27</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -198,7 +206,7 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.40. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.41. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
@@ -537,10 +545,12 @@
      like the screen's other numbers (v0.36: in gold beside the gold arrows
      they tired the eye), still smaller than the card's counts, on the line's
      baseline (item 60). The pill and the menu show no passes (v0.36). The
-     menu keeps its grey split. */
+     menu keeps its grey split. The split's arrows are gold, --card-glyph, as
+     the icons on the card (v0.41). */
   .tl small { align-items: baseline; }
   .tl small .tn { font-size: var(--t-label); font-weight: var(--w-heavy); color: var(--ink);
                   line-height: var(--lh-tight); }
+  .tl small .ic { color: var(--card-glyph); }
   .tchg { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--t-small);
           font-weight: var(--w-heavy); color: var(--ink-2); white-space: nowrap; }
   .tchg .ic { margin-right: -0.25em; }
@@ -753,6 +763,7 @@
   .dchip { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--s-1);
            padding: var(--s-2) var(--s-3); border-radius: var(--r-sm); background: var(--man-soft);
            font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .dchip .ic { color: var(--card-glyph); }
   .dbody { font-size: var(--t-body); font-weight: var(--w-medium);
            line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px);
            text-wrap: balance; color: var(--ink-2); }
@@ -1080,7 +1091,11 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.26 — 2026-10-25.</b> The shell of main-screen v0.40, and with it the shell of v0.39,
+  <p class="meta"><b>v0.27 — 2026-10-26.</b> The shell of main-screen v0.41: the arrows of the type pill's split and of
+     a removal dialog's chip are gold, --card-glyph, as the icons on the card. The Delete dialogs of frames D
+     and E show the chip's gold arrow, while History's own rows keep the arrow in the text colour, a long
+     list like the type menu (items 12, 60, 63, decided 2026-10-26).
+     The shell of main-screen v0.40, and with it the shell of v0.39,
      which Canon D2 did not copy here, brings the card at scale 3, the full-size plus and the side rules of
      decision D2, which no frame here shows, since History covers the main area and no frame shows a
      Straight only POI, and the colours of emerald and warm gold through _tokens.css v0.22, which the
@@ -1103,9 +1118,9 @@
      every pass this tablet recorded and every type change not yet in the sheet, newest first, with "Delete" on each pass, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
      "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.22</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.55</b>. The shell
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.57</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.40</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.41</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Nine states,
      A to I. The twelve proposals of v0.8 are approved (v0.12, screens.md v0.38).</p>

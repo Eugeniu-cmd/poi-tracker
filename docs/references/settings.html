@@ -121,12 +121,20 @@
           card at scale 3, the arrows on the ivory discs of the dark
           theme in the deep gold and the card's icons in the bright
           gold. No frame here shows a Straight only POI.
+  v0.24 2026-10-26 — the shell of main-screen v0.41 (screens.md v0.57,
+          items 60 and 63): the arrows of the type pill's split and of
+          the chip of a removal dialog take --card-glyph, the gold of
+          the icons on the card. Every frame shows the working screen
+          behind Settings with the pill, so all of them draw the gold
+          split arrows; no frame here shows a removal dialog. History's
+          own rows keep the arrow in the text colour (item 12, decided
+          2026-10-26). No token changes.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Settings Reference v0.23</title>
+<title>POI Tracker — Settings Reference v0.24</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -180,7 +188,7 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.40. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.41. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
@@ -519,10 +527,12 @@
      like the screen's other numbers (v0.36: in gold beside the gold arrows
      they tired the eye), still smaller than the card's counts, on the line's
      baseline (item 60). The pill and the menu show no passes (v0.36). The
-     menu keeps its grey split. */
+     menu keeps its grey split. The split's arrows are gold, --card-glyph, as
+     the icons on the card (v0.41). */
   .tl small { align-items: baseline; }
   .tl small .tn { font-size: var(--t-label); font-weight: var(--w-heavy); color: var(--ink);
                   line-height: var(--lh-tight); }
+  .tl small .ic { color: var(--card-glyph); }
   .tchg { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--t-small);
           font-weight: var(--w-heavy); color: var(--ink-2); white-space: nowrap; }
   .tchg .ic { margin-right: -0.25em; }
@@ -735,6 +745,7 @@
   .dchip { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--s-1);
            padding: var(--s-2) var(--s-3); border-radius: var(--r-sm); background: var(--man-soft);
            font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .dchip .ic { color: var(--card-glyph); }
   .dbody { font-size: var(--t-body); font-weight: var(--w-medium);
            line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px);
            text-wrap: balance; color: var(--ink-2); }
@@ -1040,12 +1051,12 @@
 
   <p class="eyebrow">Design Reference · docs/references/settings.html</p>
   <h1>POI Tracker — Settings</h1>
-  <p class="meta"><b>v0.23 — 2026-10-25.</b> Settings on the canon after the user's five
+  <p class="meta"><b>v0.24 — 2026-10-26.</b> Settings on the canon after the user's five
      decisions: the gear opens it (item 73), a city is put in use from its page (item 21), a route
      has its own page and loads from the sheet when it is added (item 22), and the dialogs name
      the passes they would lose (items 18, 24). Every value inside the frames is a token of
-     <b>_tokens.css v0.22</b> and every rule follows <b>screens.md v0.55</b>. The shell (top bar,
-     POI column, presets, drag corner, light and dark) is that of <b>main-screen.html v0.40</b>,
+     <b>_tokens.css v0.22</b> and every rule follows <b>screens.md v0.57</b>. The shell (top bar,
+     POI column, presets, drag corner, light and dark) is that of <b>main-screen.html v0.41</b>,
      copied unchanged: presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b>, <b>1333 × 800</b> and <b>1000 × 600</b>. Every frame also drags at its
      bottom-right corner. In portrait Settings is one column that drills down, in landscape the
@@ -1054,7 +1065,7 @@
      The consistency audit added frame J, the kept route code of frame E and the POI types in the
      two dialogs (v0.11). The compass follows main-screen v0.29 (v0.12, v0.13). A red button that
      loses passes reads "Erase anyway" or "Delete anyway", and every button takes the size of
-     the action bar's buttons (v0.14). The compass arrow is always on the dial (v0.15). A POI in progress is grey with a dark bar (v0.16). The type pill's numbers are gold (v0.17). Metallic gold replaces the amber, with gold arrows, a gold ring on a disc that can be tapped and a gold N on the compass (v0.18). Discs keep their centre when they scale, and a compass with no heading draws a dashed arrow (v0.19). The "Still needed" card shows rings and a rose, and the type pill's numbers are in ink with "Change type". Every arrow, ring and bar of a POI in progress takes one gold (v0.20), now lighter (v0.21). The shell carries the rules of decision D1, passes to fix, which no frame here shows, and the Sound switch's rules, which the type change dialog of main-screen now shares (v0.22). The shell of main-screen v0.40, and with it the shell of v0.39, which Canon D2 did not copy here, brings the card at scale 3, the full-size plus and the side rules of decision D2, and the colours of emerald and warm gold through the tokens: every frame shows the working screen behind Settings with the card and the discs, the arrows on the ivory discs of the dark theme in a deep gold and the card's icons in the bright gold (--card-glyph). No frame here shows a Straight only POI (v0.23).</p>
+     the action bar's buttons (v0.14). The compass arrow is always on the dial (v0.15). A POI in progress is grey with a dark bar (v0.16). The type pill's numbers are gold (v0.17). Metallic gold replaces the amber, with gold arrows, a gold ring on a disc that can be tapped and a gold N on the compass (v0.18). Discs keep their centre when they scale, and a compass with no heading draws a dashed arrow (v0.19). The "Still needed" card shows rings and a rose, and the type pill's numbers are in ink with "Change type". Every arrow, ring and bar of a POI in progress takes one gold (v0.20), now lighter (v0.21). The shell carries the rules of decision D1, passes to fix, which no frame here shows, and the Sound switch's rules, which the type change dialog of main-screen now shares (v0.22). The shell of main-screen v0.40, and with it the shell of v0.39, which Canon D2 did not copy here, brings the card at scale 3, the full-size plus and the side rules of decision D2, and the colours of emerald and warm gold through the tokens: every frame shows the working screen behind Settings with the card and the discs, the arrows on the ivory discs of the dark theme in a deep gold and the card's icons in the bright gold (--card-glyph). No frame here shows a Straight only POI (v0.23). The shell of main-screen v0.41 draws the arrows of the type pill's split and of a removal dialog's chip in the gold of the card's icons, --card-glyph: every frame shows the pill behind Settings, none a removal dialog. History's own rows keep the arrow in the text colour (v0.24).</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>

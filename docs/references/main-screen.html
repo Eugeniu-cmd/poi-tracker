@@ -316,12 +316,19 @@
           past 20 the line reads "+16" without "over", which the markup
           leaves out. Frame A's notes name --man-glyph, --card-glyph and
           the card sizes of v0.39.
+  v0.41 2026-10-26 — gold small arrows (screens.md v0.57, items 60 and
+          63): the arrows of the type pill's split (.tl small .ic) and of
+          the chip of a removal dialog (.dchip .ic) take --card-glyph,
+          the gold of the icons on the card, in both themes. The split's
+          numbers stay in ink, and the open type menu keeps its grey
+          split (.ol small). No token changes. Frame A's note on item 60
+          and frame J's notes name the gold.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.40</title>
+<title>POI Tracker — Working Screen Reference v0.41</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -713,10 +720,12 @@
      like the screen's other numbers (v0.36: in gold beside the gold arrows
      they tired the eye), still smaller than the card's counts, on the line's
      baseline (item 60). The pill and the menu show no passes (v0.36). The
-     menu keeps its grey split. */
+     menu keeps its grey split. The split's arrows are gold, --card-glyph, as
+     the icons on the card (v0.41). */
   .tl small { align-items: baseline; }
   .tl small .tn { font-size: var(--t-label); font-weight: var(--w-heavy); color: var(--ink);
                   line-height: var(--lh-tight); }
+  .tl small .ic { color: var(--card-glyph); }
   .tchg { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--t-small);
           font-weight: var(--w-heavy); color: var(--ink-2); white-space: nowrap; }
   .tchg .ic { margin-right: -0.25em; }
@@ -929,6 +938,7 @@
   .dchip { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--s-1);
            padding: var(--s-2) var(--s-3); border-radius: var(--r-sm); background: var(--man-soft);
            font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
+  .dchip .ic { color: var(--card-glyph); }
   .dbody { font-size: var(--t-body); font-weight: var(--w-medium);
            line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px);
            text-wrap: balance; color: var(--ink-2); }
@@ -1136,7 +1146,10 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.40 — 2026-10-25.</b> The app's colours are emerald and warm gold (_tokens.css v0.22, item 68):
+  <p class="meta"><b>v0.41 — 2026-10-26.</b> Gold small arrows: the type pill's split and the chip of a removal dialog
+     draw their arrows in the gold of the card's icons, --card-glyph, the split's numbers still in ink
+     (items 60, 63, frames A and J). The type menu keeps its grey split (frame H).
+     The app's colours are emerald and warm gold (_tokens.css v0.22, item 68):
      ivory and emerald on light, emerald and ivory on dark. The arrows on the ivory discs of the dark
      theme are a deep gold, and the icons on the card keep the bright gold (--card-glyph, item 5).
      Frame T reads its sides against 20, North 36 as "+16" (item 39).
@@ -1173,7 +1186,7 @@
      and N up. The arrow is always there: with no heading yet it shows the course the tablet
      saved last, or north, as a dashed outline (item 19). Every value inside
      the frames is a token of <b>_tokens.css v0.22</b> (size C, screens.md item 67) and
-     every rule follows <b>screens.md v0.55</b>. Icons are
+     every rule follows <b>screens.md v0.57</b>. Icons are
      Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
      presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and
@@ -1253,7 +1266,7 @@
         <li><b>40</b> Active row: gold tint, edge of --s-1, number in the gold foreground.</li>
         <li><b>4</b> Big POI number, "41 of 70" beside it, "29 to go" under the counter.</li>
         <li><b>19</b> Compass at the top right of the main area, one gap under the top bar in both layouts. A raised round face with ticks and N, E, S and W, N in gold with a dark gold outline on light, and one arrow turned to the car's heading, its left half dark like the maneuver discs and its right half gold like the side discs. The dial stays fixed with N up. The arrow is always there: with no heading yet it shows the course the tablet saved last, or north, as a dashed outline without fill, and so does a last known course (frame Q). 128px, 144px on a tall landscape screen, 96px on a short one (item 19).</li>
-        <li><b>60</b> Type pill under the number (item 60): a tile with three fixed slots, Left, Straight, Right; an absent maneuver leaves its slot empty. Name, split line with the same icons and its numbers in ink, no passes, "Change type". The name and the split are centred in the space between the tile and "Change type" (v0.36). The tile's arrows are gold, as on the discs (item 5).</li>
+        <li><b>60</b> Type pill under the number (item 60): a tile with three fixed slots, Left, Straight, Right; an absent maneuver leaves its slot empty. Name, split line with the same icons in gold (--card-glyph, v0.41) and its numbers in ink, no passes, "Change type". The name and the split are centred in the space between the tile and "Change type" (v0.36). The tile's arrows are gold, as on the discs (item 5).</li>
         <li><b>39</b> "Still needed" card headed "TO GO" (v0.36). The maneuvers as progress rings in a pyramid, Straight on top, Left and Right below, as the discs stand: each ring fills in the gold of the arrows (--card-fill) and shows "N more" inside, and its gold Lucide icon (--card-glyph, --card-icon) and name sit under it (item 69). Beside them the sides as a rose of four diamonds, N above, E right, S below, W left, E at zero faded. The pyramid and the rose share one centre line. At the head's right "LAST ↰ S · 21:40": the newest pass of this POI that counts, the one Undo last removes (frame J).</li>
         <li><b>5</b> Three discs in the middle of the free space, Straight higher; Lucide corner-up-left, arrow-up, corner-up-right (item 69). Gold arrows on the discs (--man-glyph), a deep gold on the ivory discs of the dark theme, and a gold ring around each disc that can be tapped (--man-ring, --gold-line) (v0.40).</li>
         <li><b>9</b> "Undo last" live; "History" beside it.</li>
@@ -1768,6 +1781,7 @@
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>9</b> "Undo last" removes the whole most recent pass this tablet recorded for the POI; each press asks first.</li>
         <li><b>63</b> The dialog shows the pass itself (POI, maneuver, side, time) and one line on what happens.</li>
+        <li><b>63</b> The chip's arrow is gold, --card-glyph, as the icons on the card (v0.41).</li>
         <li><b>9, 63</b> A pass already in the sheet gets a removal sent with the next sync; a waiting one is simply dropped.</li>
         <li><b>63, 28</b> "Cancel" left, "Remove" right; the removing button is red.</li>
         <li><b>63</b> Dialog in the middle of the screen over a dimmed background; a tap outside equals Cancel.</li>
