@@ -129,12 +129,20 @@
           split arrows; no frame here shows a removal dialog. History's
           own rows keep the arrow in the text colour (item 12, decided
           2026-10-26). No token changes.
+  v0.25 2026-10-26 — the shell of main-screen v0.42 (screens.md v0.58,
+          _tokens.css v0.23, items 58 and 59): the done tiles of the
+          grid, the legend's Done swatch and a done square of the
+          mini-map take --ok-tile on --ok-tile-bg, on light a brighter
+          green than the column's --ok. Every frame shows the working
+          screen behind Settings with the mini-map, so all of them draw
+          the done squares in it; no frame here shows the grid. On dark
+          both follow --ok and --ok-bg.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Settings Reference v0.24</title>
+<title>POI Tracker — Settings Reference v0.25</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -188,11 +196,11 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.41. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.42. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.22 or a calc() over
+     line height below is a var() from _tokens.css v0.23 or a calc() over
      them. Literal values are limited to the plain numbers of item 68: 0
      and 1, 1px hairlines, 50% for round shapes, percentages and fr of a
      layout, multipliers of a token, counts, em, ch, lh and cap ratios of
@@ -350,7 +358,7 @@
   .mm { display: flex; flex-direction: column; gap: var(--s-2); }
   .dots { display: grid; grid-template-columns: repeat(20, var(--s-2)); gap: 1px; }
   .dots i { display: block; width: var(--s-2); height: var(--s-2); background: var(--line); }
-  .dots i.done { background: var(--ok); }
+  .dots i.done { background: var(--ok-tile); }
   .dots i.err { background: var(--err); }
   .dots i.part { background: var(--ink-3); }
   .dots i.nd { background: repeating-linear-gradient(135deg, var(--ink-3) 0 1px,
@@ -799,7 +807,7 @@
         border-radius: calc(var(--r-sm) / 2); display: inline-flex; align-items: center;
         justify-content: center; background: transparent; border: 1px solid var(--ink-3); }
   .sw.part, .cell.part { background: var(--prog-bg); border-color: var(--ink-2); }
-  .sw.done, .cell.done { background: var(--ok-bg); border-color: var(--ok); }
+  .sw.done, .cell.done { background: var(--ok-tile-bg); border-color: var(--ok-tile); }
   .sw.err, .cell.err { background: var(--err-bg); border-color: var(--err); }
   /* item 59: a POI with passes to fix, the gold tint with a warning triangle */
   .sw.fix, .cell.fix { background: var(--active); border-color: var(--warn); }
@@ -818,8 +826,8 @@
   .cn { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
   .cb { width: 60%; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
         overflow: hidden; display: block; }
-  .cell.done .cn { color: var(--ok); }
-  .cell.done .cb i { background: var(--ok); }
+  .cell.done .cn { color: var(--ok-tile); }
+  .cell.done .cb i { background: var(--ok-tile); }
   .cell.err .cn { color: var(--err); }
   .cell.err .cb i { background: var(--err); }
   .cell.nd .cn { color: var(--ink-2); }
@@ -828,7 +836,7 @@
   .cell .ci { width: var(--t-label); height: var(--t-label); flex: none;
               margin-block: calc((var(--s-1) - var(--t-label)) / 2); }
   .sw .ci { width: var(--s-3); height: var(--s-3); }
-  .sw.done .ci, .cell.done .ci { color: var(--ok); }
+  .sw.done .ci, .cell.done .ci { color: var(--ok-tile); }
   .sw.err .ci, .cell.err .ci { color: var(--err); }
   .sw.fix .ci, .cell.fix .ci { color: var(--warn); }
   .sw.nd .ci, .cell.nd .ci { color: var(--ink-2); }
@@ -1051,12 +1059,12 @@
 
   <p class="eyebrow">Design Reference · docs/references/settings.html</p>
   <h1>POI Tracker — Settings</h1>
-  <p class="meta"><b>v0.24 — 2026-10-26.</b> Settings on the canon after the user's five
+  <p class="meta"><b>v0.25 — 2026-10-26.</b> Settings on the canon after the user's five
      decisions: the gear opens it (item 73), a city is put in use from its page (item 21), a route
      has its own page and loads from the sheet when it is added (item 22), and the dialogs name
      the passes they would lose (items 18, 24). Every value inside the frames is a token of
-     <b>_tokens.css v0.22</b> and every rule follows <b>screens.md v0.57</b>. The shell (top bar,
-     POI column, presets, drag corner, light and dark) is that of <b>main-screen.html v0.41</b>,
+     <b>_tokens.css v0.23</b> and every rule follows <b>screens.md v0.58</b>. The shell (top bar,
+     POI column, presets, drag corner, light and dark) is that of <b>main-screen.html v0.42</b>,
      copied unchanged: presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b>, <b>1333 × 800</b> and <b>1000 × 600</b>. Every frame also drags at its
      bottom-right corner. In portrait Settings is one column that drills down, in landscape the
@@ -1065,7 +1073,7 @@
      The consistency audit added frame J, the kept route code of frame E and the POI types in the
      two dialogs (v0.11). The compass follows main-screen v0.29 (v0.12, v0.13). A red button that
      loses passes reads "Erase anyway" or "Delete anyway", and every button takes the size of
-     the action bar's buttons (v0.14). The compass arrow is always on the dial (v0.15). A POI in progress is grey with a dark bar (v0.16). The type pill's numbers are gold (v0.17). Metallic gold replaces the amber, with gold arrows, a gold ring on a disc that can be tapped and a gold N on the compass (v0.18). Discs keep their centre when they scale, and a compass with no heading draws a dashed arrow (v0.19). The "Still needed" card shows rings and a rose, and the type pill's numbers are in ink with "Change type". Every arrow, ring and bar of a POI in progress takes one gold (v0.20), now lighter (v0.21). The shell carries the rules of decision D1, passes to fix, which no frame here shows, and the Sound switch's rules, which the type change dialog of main-screen now shares (v0.22). The shell of main-screen v0.40, and with it the shell of v0.39, which Canon D2 did not copy here, brings the card at scale 3, the full-size plus and the side rules of decision D2, and the colours of emerald and warm gold through the tokens: every frame shows the working screen behind Settings with the card and the discs, the arrows on the ivory discs of the dark theme in a deep gold and the card's icons in the bright gold (--card-glyph). No frame here shows a Straight only POI (v0.23). The shell of main-screen v0.41 draws the arrows of the type pill's split and of a removal dialog's chip in the gold of the card's icons, --card-glyph: every frame shows the pill behind Settings, none a removal dialog. History's own rows keep the arrow in the text colour (v0.24).</p>
+     the action bar's buttons (v0.14). The compass arrow is always on the dial (v0.15). A POI in progress is grey with a dark bar (v0.16). The type pill's numbers are gold (v0.17). Metallic gold replaces the amber, with gold arrows, a gold ring on a disc that can be tapped and a gold N on the compass (v0.18). Discs keep their centre when they scale, and a compass with no heading draws a dashed arrow (v0.19). The "Still needed" card shows rings and a rose, and the type pill's numbers are in ink with "Change type". Every arrow, ring and bar of a POI in progress takes one gold (v0.20), now lighter (v0.21). The shell carries the rules of decision D1, passes to fix, which no frame here shows, and the Sound switch's rules, which the type change dialog of main-screen now shares (v0.22). The shell of main-screen v0.40, and with it the shell of v0.39, which Canon D2 did not copy here, brings the card at scale 3, the full-size plus and the side rules of decision D2, and the colours of emerald and warm gold through the tokens: every frame shows the working screen behind Settings with the card and the discs, the arrows on the ivory discs of the dark theme in a deep gold and the card's icons in the bright gold (--card-glyph). No frame here shows a Straight only POI (v0.23). The shell of main-screen v0.41 draws the arrows of the type pill's split and of a removal dialog's chip in the gold of the card's icons, --card-glyph: every frame shows the pill behind Settings, none a removal dialog. History's own rows keep the arrow in the text colour (v0.24). The shell of main-screen v0.42 gives a done square of the mini-map, the done tiles of the grid and the legend's Done swatch --ok-tile on --ok-tile-bg, on light a brighter green than the column's --ok: the mini-map above the column shows it behind Settings, the grid no frame here shows (v0.25).</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>

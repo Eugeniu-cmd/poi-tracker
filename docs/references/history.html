@@ -147,12 +147,19 @@
           History's own rows keep the arrow in the text colour: a long
           list, like the type menu (item 12, decided 2026-10-26). No
           token changes.
+  v0.28 2026-10-26 — the shell of main-screen v0.42 (screens.md v0.58,
+          _tokens.css v0.23, items 58 and 59): the done tiles of the
+          grid, the legend's Done swatch and a done square of the
+          mini-map take --ok-tile on --ok-tile-bg, on light a brighter
+          green than the column's --ok. The mini-map above the POI
+          column shows its done squares in every frame here; no frame
+          here shows the grid. On dark both follow --ok and --ok-bg.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.27</title>
+<title>POI Tracker — History Reference v0.28</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -206,11 +213,11 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.41. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.42. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.22 or a calc() over
+     line height below is a var() from _tokens.css v0.23 or a calc() over
      them. Literal values are limited to the plain numbers of item 68: 0
      and 1, 1px hairlines, 50% for round shapes, percentages and fr of a
      layout, multipliers of a token, counts, em, ch, lh and cap ratios of
@@ -368,7 +375,7 @@
   .mm { display: flex; flex-direction: column; gap: var(--s-2); }
   .dots { display: grid; grid-template-columns: repeat(20, var(--s-2)); gap: 1px; }
   .dots i { display: block; width: var(--s-2); height: var(--s-2); background: var(--line); }
-  .dots i.done { background: var(--ok); }
+  .dots i.done { background: var(--ok-tile); }
   .dots i.err { background: var(--err); }
   .dots i.part { background: var(--ink-3); }
   .dots i.nd { background: repeating-linear-gradient(135deg, var(--ink-3) 0 1px,
@@ -817,7 +824,7 @@
         border-radius: calc(var(--r-sm) / 2); display: inline-flex; align-items: center;
         justify-content: center; background: transparent; border: 1px solid var(--ink-3); }
   .sw.part, .cell.part { background: var(--prog-bg); border-color: var(--ink-2); }
-  .sw.done, .cell.done { background: var(--ok-bg); border-color: var(--ok); }
+  .sw.done, .cell.done { background: var(--ok-tile-bg); border-color: var(--ok-tile); }
   .sw.err, .cell.err { background: var(--err-bg); border-color: var(--err); }
   /* item 59: a POI with passes to fix, the gold tint with a warning triangle */
   .sw.fix, .cell.fix { background: var(--active); border-color: var(--warn); }
@@ -836,8 +843,8 @@
   .cn { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
   .cb { width: 60%; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
         overflow: hidden; display: block; }
-  .cell.done .cn { color: var(--ok); }
-  .cell.done .cb i { background: var(--ok); }
+  .cell.done .cn { color: var(--ok-tile); }
+  .cell.done .cb i { background: var(--ok-tile); }
   .cell.err .cn { color: var(--err); }
   .cell.err .cb i { background: var(--err); }
   .cell.nd .cn { color: var(--ink-2); }
@@ -846,7 +853,7 @@
   .cell .ci { width: var(--t-label); height: var(--t-label); flex: none;
               margin-block: calc((var(--s-1) - var(--t-label)) / 2); }
   .sw .ci { width: var(--s-3); height: var(--s-3); }
-  .sw.done .ci, .cell.done .ci { color: var(--ok); }
+  .sw.done .ci, .cell.done .ci { color: var(--ok-tile); }
   .sw.err .ci, .cell.err .ci { color: var(--err); }
   .sw.fix .ci, .cell.fix .ci { color: var(--warn); }
   .sw.nd .ci, .cell.nd .ci { color: var(--ink-2); }
@@ -1091,7 +1098,10 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.27 — 2026-10-26.</b> The shell of main-screen v0.41: the arrows of the type pill's split and of
+  <p class="meta"><b>v0.28 — 2026-10-26.</b> The shell of main-screen v0.42: a done square of the mini-map above the
+     POI column takes --ok-tile, on light a brighter green than the column's --ok, as the done tiles of
+     the grid and the legend's Done swatch, which no frame here shows (items 58, 59, _tokens.css v0.23).
+     The shell of main-screen v0.41: the arrows of the type pill's split and of
      a removal dialog's chip are gold, --card-glyph, as the icons on the card. The Delete dialogs of frames D
      and E show the chip's gold arrow, while History's own rows keep the arrow in the text colour, a long
      list like the type menu (items 12, 60, 63, decided 2026-10-26).
@@ -1117,10 +1127,10 @@
      covers the main area beside the live POI column, in POI or Route scope, and lists
      every pass this tablet recorded and every type change not yet in the sheet, newest first, with "Delete" on each pass, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
-     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.22</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.57</b>. The shell
+     "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.23</b>
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.58</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.41</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.42</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Nine states,
      A to I. The twelve proposals of v0.8 are approved (v0.12, screens.md v0.38).</p>

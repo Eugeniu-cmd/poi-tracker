@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.57 — 2026-10-26
+v0.58 — 2026-10-26
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -312,6 +312,12 @@ removal dialog's chip are gold, --card-glyph, as the icons on the card
 whose colours it wears (item 36); History's rows keep the arrow in the
 text colour, a long list like the type menu (item 12). Item 64 records
 the order of the dialog's sentences, which app v0.10 already keeps.
+v0.58 2026-10-26 — a brighter done green for the grid (tokens v0.23,
+main-screen v0.42, history v0.28, settings v0.25, app v0.12): the done
+tiles of the grid, the legend's Done swatch and a done square of the
+mini-map take --ok-tile on --ok-tile-bg, on light a brighter green than
+the POI column's --ok, since their large numbers need 3:1 where the
+column's small "done" needs 4.5:1 (items 58, 59). Dark does not change.
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -478,25 +484,29 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     layouts: one small square per POI, coloured by state as the tiles of
     item 59 (current gold, done green, in progress grey, spreadsheet
     error red, not drivable striped, not started pale), with the number
-    of finished POIs and the word "Open". It is the column's header, not a card
-    inside the column: the squares and the caption share one width and
-    keep at least 12px from the column's edges, and a hairline divides
-    the header from the rows. It works for any POI count (item 22). How
-    it scales for a small or a large count is settled when the reference
-    is drawn. On a short screen it becomes a one-line button (item 70).
+    of finished POIs and the word "Open". A done square is on light a
+    brighter green than the POI column's (--ok-tile, decided
+    2026-10-26). It is the column's header, not a card inside the
+    column: the squares and the caption share one width and keep at
+    least 12px from the column's edges, and a hairline divides the
+    header from the rows. It works for any POI count (item 22). How it
+    scales for a small or a large count is settled when the reference is
+    drawn. On a short screen it becomes a one-line button (item 70).
 59. Tapping the mini-map opens a grid of all POIs of the route over the
     whole screen, ten to a row, coloured like the mini-map, with a
-    legend whose swatches are small tiles. Every state has its colour and
-    a second sign that needs no colour, for sun glare and for eyes that
-    mix red and green. Current: a gold tint and a thick gold edge.
-    Done: green with a check. In progress: grey with a gold bar. Not
-    started: an empty bar and a grey edge. To fix: the gold tint with a
-    warning triangle in the warning colour. Sheet error: red with a
-    warning triangle. Not drivable: grey stripes with a ban sign. Three
-    grey states blended in the car (decided 2026-10-18). Tapping a
-    tile makes that POI active, closes the grid and
-    scrolls the column to it. The ✕ of item 66 or a tap outside the grid
-    closes it and changes nothing.
+    legend whose swatches are small tiles. Every state has its colour
+    and a second sign that needs no colour, for sun glare and for eyes
+    that mix red and green. Current: a gold tint and a thick gold edge.
+    Done: green with a check, on light a brighter green than the POI
+    column's (--ok-tile, decided 2026-10-26), since its large numbers
+    need 3:1 where the column's small "done" needs 4.5:1. In progress:
+    grey with a gold bar. Not started: an empty bar and a grey edge. To
+    fix: the gold tint with a warning triangle in the warning colour.
+    Sheet error: red with a warning triangle. Not drivable: grey stripes
+    with a ban sign. Three grey states blended in the car (decided
+    2026-10-18). Tapping a tile makes that POI active, closes the grid
+    and scrolls the column to it. The ✕ of item 66 or a tap outside the
+    grid closes it and changes nothing.
 60. The POI type of item 46 is shown and set by the type pill, a
     full-width control under the big POI number: an icon, the type name
     and its split ("← 28 · ↑ 14 · → 28"). Neither the pill nor the menu

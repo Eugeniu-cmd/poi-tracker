@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.22 — 2026-10-25
+   v0.23 — 2026-10-26
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -132,6 +132,13 @@
    the faded --ink-3, which keeps today's contrast. --err, --err-bg,
    --hatch, --focus, --danger and --on-danger do not change, and neither
    do the dark --scrim and shadows.
+   v0.23 2026-10-26 — the user's decision on the done tiles of the grid
+   (screens.md v0.58, items 58 and 59). New --ok-tile and --ok-tile-bg:
+   on light a brighter green, #2F9447 on its own tint, for the done
+   tiles of the All POIs grid, the legend's Done swatch and a done
+   square of the mini-map, whose large numbers need 3:1 (3.2:1 on the
+   tint). --ok stays #287030 for the POI column and every small text. On
+   dark both follow --ok and --ok-bg.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
@@ -163,6 +170,8 @@
   --card-glyph: var(--gold-line);
   --ok: #287030;
   --ok-bg: rgba(40, 112, 48, 0.14);
+  --ok-tile: #2F9447;
+  --ok-tile-bg: rgba(47, 148, 71, 0.14);
   --err: #B42E26;
   --err-bg: rgba(255, 226, 223, 0.85);
   --warn: #7E5F0A;
@@ -280,6 +289,8 @@
     --card-glyph: var(--gold-line);
     --ok: #5FE0A0;
     --ok-bg: rgba(95, 224, 160, 0.16);
+    --ok-tile: var(--ok);
+    --ok-tile-bg: var(--ok-bg);
     --err: #FF9189;
     --err-bg: rgba(70, 28, 25, 0.7);
     --warn: #EBC75E;
@@ -326,6 +337,8 @@
   --card-glyph: var(--gold-line);
   --ok: #5FE0A0;
   --ok-bg: rgba(95, 224, 160, 0.16);
+  --ok-tile: var(--ok);
+  --ok-tile-bg: var(--ok-bg);
   --err: #FF9189;
   --err-bg: rgba(70, 28, 25, 0.7);
   --warn: #EBC75E;

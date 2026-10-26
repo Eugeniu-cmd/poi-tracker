@@ -323,12 +323,22 @@
           numbers stay in ink, and the open type menu keeps its grey
           split (.ol small). No token changes. Frame A's note on item 60
           and frame J's notes name the gold.
+  v0.42 2026-10-26 — a brighter done green for the grid (screens.md
+          v0.58, items 58 and 59, _tokens.css v0.23): the done tiles of
+          the All POIs grid (.cell.done, its number, bar and check), the
+          legend's Done swatch (.sw.done) and a done square of the
+          mini-map (.dots i.done) take --ok-tile on --ok-tile-bg, on
+          light #2F9447 on its own tint, since their large numbers need
+          3:1. The POI column, the card's rings, the captions and every
+          other use of --ok keep #287030. On dark both tokens follow
+          --ok and --ok-bg, so nothing changes there. Frame K's notes
+          name the tokens.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.41</title>
+<title>POI Tracker — Working Screen Reference v0.42</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -385,7 +395,7 @@
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.22 or a calc() over
+     line height below is a var() from _tokens.css v0.23 or a calc() over
      them. Literal values are limited to the plain numbers of item 68: 0
      and 1, 1px hairlines, 50% for round shapes, percentages and fr of a
      layout, multipliers of a token, counts, em, ch, lh and cap ratios of
@@ -543,7 +553,7 @@
   .mm { display: flex; flex-direction: column; gap: var(--s-2); }
   .dots { display: grid; grid-template-columns: repeat(20, var(--s-2)); gap: 1px; }
   .dots i { display: block; width: var(--s-2); height: var(--s-2); background: var(--line); }
-  .dots i.done { background: var(--ok); }
+  .dots i.done { background: var(--ok-tile); }
   .dots i.err { background: var(--err); }
   .dots i.part { background: var(--ink-3); }
   .dots i.nd { background: repeating-linear-gradient(135deg, var(--ink-3) 0 1px,
@@ -992,7 +1002,7 @@
         border-radius: calc(var(--r-sm) / 2); display: inline-flex; align-items: center;
         justify-content: center; background: transparent; border: 1px solid var(--ink-3); }
   .sw.part, .cell.part { background: var(--prog-bg); border-color: var(--ink-2); }
-  .sw.done, .cell.done { background: var(--ok-bg); border-color: var(--ok); }
+  .sw.done, .cell.done { background: var(--ok-tile-bg); border-color: var(--ok-tile); }
   .sw.err, .cell.err { background: var(--err-bg); border-color: var(--err); }
   /* item 59: a POI with passes to fix, the gold tint with a warning triangle */
   .sw.fix, .cell.fix { background: var(--active); border-color: var(--warn); }
@@ -1011,8 +1021,8 @@
   .cn { font-size: var(--t-label); font-weight: var(--w-heavy); line-height: var(--lh-tight); }
   .cb { width: 60%; height: var(--s-1); border-radius: var(--r-sm); background: var(--line);
         overflow: hidden; display: block; }
-  .cell.done .cn { color: var(--ok); }
-  .cell.done .cb i { background: var(--ok); }
+  .cell.done .cn { color: var(--ok-tile); }
+  .cell.done .cb i { background: var(--ok-tile); }
   .cell.err .cn { color: var(--err); }
   .cell.err .cb i { background: var(--err); }
   .cell.nd .cn { color: var(--ink-2); }
@@ -1021,7 +1031,7 @@
   .cell .ci { width: var(--t-label); height: var(--t-label); flex: none;
               margin-block: calc((var(--s-1) - var(--t-label)) / 2); }
   .sw .ci { width: var(--s-3); height: var(--s-3); }
-  .sw.done .ci, .cell.done .ci { color: var(--ok); }
+  .sw.done .ci, .cell.done .ci { color: var(--ok-tile); }
   .sw.err .ci, .cell.err .ci { color: var(--err); }
   .sw.fix .ci, .cell.fix .ci { color: var(--warn); }
   .sw.nd .ci, .cell.nd .ci { color: var(--ink-2); }
@@ -1146,7 +1156,11 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.41 — 2026-10-26.</b> Gold small arrows: the type pill's split and the chip of a removal dialog
+  <p class="meta"><b>v0.42 — 2026-10-26.</b> A brighter done green for the grid (_tokens.css v0.23, items 58 and 59): the done
+     tiles of frame K, the legend's Done swatch and a done square of the mini-map take --ok-tile on
+     --ok-tile-bg, on light #2F9447 on its own tint, since their large numbers need 3:1 (3.2:1 on the
+     tint), while the POI column and every small text keep --ok; on dark both follow --ok and --ok-bg.
+     Gold small arrows: the type pill's split and the chip of a removal dialog
      draw their arrows in the gold of the card's icons, --card-glyph, the split's numbers still in ink
      (items 60, 63, frames A and J). The type menu keeps its grey split (frame H).
      The app's colours are emerald and warm gold (_tokens.css v0.22, item 68):
@@ -1185,8 +1199,8 @@
      like the maneuver discs and its right half gold like the side discs, with the dial fixed
      and N up. The arrow is always there: with no heading yet it shows the course the tablet
      saved last, or north, as a dashed outline (item 19). Every value inside
-     the frames is a token of <b>_tokens.css v0.22</b> (size C, screens.md item 67) and
-     every rule follows <b>screens.md v0.57</b>. Icons are
+     the frames is a token of <b>_tokens.css v0.23</b> (size C, screens.md item 67) and
+     every rule follows <b>screens.md v0.58</b>. Icons are
      Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
      presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and
@@ -1853,6 +1867,7 @@
         <li><b>66, 59</b> A tap on the dimmed background, or the Android back gesture, closes it and changes nothing.</li>
         <li><b>58, 22</b> Works for any POI count; the grid scrolls, a whole tile row under the legend, the cut row faded at the bottom (item 59).</li>
         <li><b>59</b> Seven tile states. Current: gold tint and a thick gold edge. Done: green with a check. In progress: grey with a gold bar. Not started: an empty bar and a grey edge. To fix: the gold tint with a triangle in the warning colour (POI 141, decision D1: every ring closed and 53 passes to fix; POI 131, whose Straight ring still asks, is in progress here and carries the mark on its row, item 40). Sheet error: red with a triangle. Not drivable: stripes with a ban sign. The mini-map has no colour for passes to fix and shows such a POI as in progress.</li>
+        <li><b>59, 58</b> Done tiles and the legend's Done swatch use --ok-tile on --ok-tile-bg, a brighter green on light than the column's --ok, since their large numbers need 3:1 where the column's small "done" needs 4.5:1; a done square of the mini-map takes it too (v0.42).</li>
       </ul></aside>
     </section>
 
