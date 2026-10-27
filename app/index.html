@@ -160,6 +160,18 @@
           whole column only on the first draw, for another route or
           city, a different number of POIs or the rail's finger and
           bubble. The store and its write stay as they are (item 78).
+  v0.15 2026-10-27 — a temporary test switch for the band seen on the
+          tablet on 2026-10-27, a band across the middle of the screen
+          gone black or full of noise while a locked disc showed beside
+          an active Left. Opened as app/?lab=0 to app/?lab=4, it puts the
+          class lab-N on the root element for that page load and "Test N"
+          in --warn after the city name. Each variant changes one thing
+          about a locked disc: lab-0 draws it as before, lab-1 without
+          its shadow, lab-2 opaque in its colours mixed with --bg, lab-3
+          with every disc on its own layer (will-change: opacity), lab-4
+          without the disc's opacity fade. Any other value changes
+          nothing, and the switch touches no storage. To be removed once
+          the tablet shows which drawing works.
 -->
 <html lang="en">
 <head>
@@ -1472,6 +1484,17 @@
      at the left on a faded track (the references draw the switch on only) */
   .switch[aria-checked="false"] { background: var(--ink-3); }
   .switch[aria-checked="false"]::after { right: auto; left: var(--s-1); }
+  /* v0.15, temporary: the test switch ?lab=0 to ?lab=4 for the band the
+     tablet drew around a locked disc on 2026-10-27. Its label in the top
+     bar, then one change to a locked disc per variant; lab-0 changes
+     nothing. Removed once the tablet shows which drawing works. */
+  .lab { font-size: var(--t-small); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+         color: var(--warn); }
+  .lab-1 .disc.locked { box-shadow: none; }
+  .lab-2 .disc.locked { opacity: 1; background: color-mix(in srgb, var(--disc) calc(var(--o-locked) * 100%), var(--bg));
+                        color: color-mix(in srgb, var(--man-glyph) calc(var(--o-locked) * 100%), var(--bg)); }
+  .lab-3 .disc { will-change: opacity; }
+  .lab-4 .disc { transition: left var(--dur-move) var(--ease-out), top var(--dur-move) var(--ease-out); }
   @media (prefers-reduced-motion: reduce) {
     .app *, .app *::before, .app *::after { animation: none !important; transition: none !important; }
   }
@@ -3051,6 +3074,14 @@
   }
 
   load();
+  // v0.15, temporary: ?lab=0 to ?lab=4 draws a locked disc another way for
+  // this page load and names the variant after the city; any other value
+  // changes nothing. Read before ?sample strips the address.
+  var lab = /(^|&)lab=([0-4])(&|$)/.exec(location.search.slice(1));
+  if (lab) {
+    document.documentElement.classList.add('lab-' + lab[2]);
+    $('city').insertAdjacentHTML('afterend', '<span class="lab" id="lab">Test ' + lab[2] + '</span>');
+  }
   var wantSample = /(^|[?&])sample(=|&|$)/.test(location.search.slice(1));
   if (wantSample) { try { history.replaceState(history.state, '', location.pathname + location.hash); } catch (err) { /* fine */ } }
   applyTheme();
