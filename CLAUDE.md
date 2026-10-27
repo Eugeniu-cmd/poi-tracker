@@ -93,7 +93,7 @@ Where to look:
 | Size frame: the app at the tablet's two sizes on a laptop, scaled to fit, theme switch | tools/app-frame.html |
 | Measure a tablet's viewport | tools/viewport.html |
 | Sensor test: GPS, raw gyroscope, turn and heading | tools/sensor-test.html |
-| Working prototype v19.8 of 2026-10-26, frozen except for compass fixes until the compass reaches the app in step 3 (testing moves to the app): this page opens it, named in tools/prototype-latest.txt | tools/poi-tracker-prototype.html |
+| Working prototype v19.8 of 2026-10-26, its compass approved after the car test of 2026-10-27 (docs/data-model.md "Heading"), frozen except for compass fixes until the compass reaches the app in step 3 (testing moves to the app): this page opens it, named in tools/prototype-latest.txt | tools/poi-tracker-prototype.html |
 
 This file carries no version tag or history on purpose: it is a config
 Claude Code reads at startup, not a registry of decisions.

@@ -1,6 +1,6 @@
 # Data model
 
-v0.19 — 2026-10-26
+v0.20 — 2026-10-27
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — first version (Russian): pass, event, storage, Журнал
 sheet, mailbox contract, sync rules. Carried over from the planning chat.
@@ -94,6 +94,10 @@ of 2026-10-23 in the new car: the drift guard is 0.15 degrees a second
 (a false drift of 0.44 passed 0.5 while the car crept round a corner
 with GPS at 0), and the tablet keeps its last good drift for 12 hours,
 so a reload starts with it; the first drift measured replaces it.
+v0.20 2026-10-27 — "Heading" after the car test of prototype v19.8 on
+2026-10-27: the rules are approved and go into the app unchanged in step
+3, and the known limits after sharp slow turns and when reversing are
+written down.
 -->
 
 ## Pass (one crossing of an intersection)
@@ -387,6 +391,22 @@ so a reload starts with it; the first drift measured replaces it.
   gyroscope turns it until the first GPS check. With nothing saved the
   arrow points north, pale (decided 2026-10-18).
 - The side of a pass is the quarter the arrow points to (see "Pass").
+- Approved after the car test of 2026-10-27 (prototype v19.8, two drives,
+  116 minutes of log, project doc claude/compass-new-car-2026-10-23.md,
+  decided 2026-10-27): no false drift in 318 measurements, and against
+  the GPS course on straight roads the arrow was off by a median of 1 to
+  2 degrees at 30 km/h or more and 2 to 4 degrees in town. The user's own
+  check against other compass apps agreed. These rules go into the app
+  unchanged in step 3, and the app's own car test checks the arrow just
+  before an intersection.
+- Known limits, from the same test: right after a sharp turn at low
+  speed, or a manoeuvre at a standstill, the arrow can be 30 degrees or
+  more off until the next GPS checks correct it (in the morning drive
+  half of these within 24 s). Reversing keeps the arrow on the way the
+  car faces, since no check runs below 11 km/h. Reversing in a straight
+  line at 11 km/h or more with a steady course for about 3 s would pull
+  the arrow toward the back of the car. The rules do not guard against
+  it, as it is rare on a route.
 
 ## Cities and routes
 - A city = { id, name, mailboxUrl, token, routes[], lastRoute, testedAt,
