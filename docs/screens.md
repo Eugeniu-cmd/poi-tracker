@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.59 — 2026-10-26
+v0.60 — 2026-10-28
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -323,6 +323,12 @@ button is gold, --side-glyph on --side, as tall as any control (item
 31), so the toast grows while it shows; it acts on the POI whose type
 changed, and the toast closes when the active POI or route changes or
 another toast replaces it (item 36).
+v0.60 2026-10-28 — a locked disc has no shadow (main-screen v0.43,
+history v0.29, settings v0.26, app v0.16): the user's tablet drew a band
+of garbage across the middle of the screen under a half-transparent disc
+with a blurred shadow, so a locked disc keeps its fade and loses its
+shadow, which at 28% was invisible anyway (item 5). The test switch of
+app v0.15, which found it, is gone.
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -584,12 +590,14 @@ appears on screen. An apostrophe on screen is the typographic one (’).
    moves them. Each is a disc in --disc, emerald on light and ivory on
    dark, with its arrow in gold (--man-glyph) and, while it can be
    tapped, a gold ring of 4px (--man-ring). A locked disc fades and has
-   no ring (decided 2026-10-21). The ring of a disc, the fill of the
-   card's rings, the icons on the card (--card-glyph) and the bar of a
-   POI in progress (items 2, 59) share one gold, --gold-line, #D9A92A on
-   light and #E6B83E on dark (the palette of item 68, decided
-   2026-10-25). The arrows on the discs and on the type tile
-   (--man-glyph) take the same gold on light, 4.1:1 on the emerald
+   no ring (decided 2026-10-21) and no shadow (decided 2026-10-28: the
+   tablet's GPU drew a band of garbage across the screen under a
+   half-transparent disc with a blurred shadow). The ring of a disc, the
+   fill of the card's rings, the icons on the card (--card-glyph) and
+   the bar of a POI in progress (items 2, 59) share one gold,
+   --gold-line, #D9A92A on light and #E6B83E on dark (the palette of
+   item 68, decided 2026-10-25). The arrows on the discs and on the type
+   tile (--man-glyph) take the same gold on light, 4.1:1 on the emerald
    discs, and a deep gold, #A67C00, on the ivory discs of the dark
    theme, 3.1:1, where the bright gold would read at 1.5:1 (decided
    2026-10-25). On the light card the gold reads at 2.1:1 and on the

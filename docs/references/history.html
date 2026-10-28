@@ -154,12 +154,18 @@
           green than the column's --ok. The mini-map above the POI
           column shows its done squares in every frame here; no frame
           here shows the grid. On dark both follow --ok and --ok-bg.
+  v0.29 2026-10-28 — the shell of main-screen v0.43 (screens.md v0.60,
+          item 5): a locked disc has no shadow, since the user's tablet
+          drew a band of garbage across the screen under a
+          half-transparent disc with a blurred shadow. The History panel
+          covers the main area, so no frame here shows a disc. No token
+          changes.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.28</title>
+<title>POI Tracker — History Reference v0.29</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -213,7 +219,7 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.42. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.43. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
@@ -688,10 +694,11 @@
      placement depends on the zone's height only, never on a caption, and is
      rounded to a whole pixel. A disc is --disc with a gold arrow
      (--man-glyph) and, while it can be tapped, a gold ring of --s-1
-     (--man-ring). A locked disc fades and keeps only --shadow, no ring
-     (item 5). Discs and sides are centred with the translate property,
-     never a transform, so a scale (a press, a bloom, a tap) keeps their
-     centre. ---- */
+     (--man-ring). A locked disc fades and keeps no shadow and no ring
+     (item 5): the tablet's GPU cannot draw a half-transparent disc with
+     a blurred shadow (decided 2026-10-28). Discs and sides are centred
+     with the translate property, never a transform, so a scale (a press,
+     a bloom, a tap) keeps their centre. ---- */
   .stagezone { flex: 1; min-height: 0; position: relative; }
   .stagebox { position: absolute; left: 0; right: 0; height: calc(2 * var(--disc-man));
               top: round(max(0px, min(calc((100% - 2 * var(--disc-man)) / 2),
@@ -716,7 +723,7 @@
             top: calc(50% + (var(--side-reach) - var(--s-2)) / 2); }
   .stage.open .disc.on { left: 50%; top: 50%; }
   .stage.open .disc:not(.on) { visibility: hidden; }
-  .disc.locked { opacity: var(--o-locked); box-shadow: var(--shadow); }
+  .disc.locked { opacity: var(--o-locked); box-shadow: none; }
   .side { position: absolute; left: 50%; top: 50%; width: var(--disc-side); height: var(--disc-side);
           border-radius: 50%; translate: -50% -50%; display: flex;
           align-items: center; justify-content: center; font-size: var(--t-title);
@@ -1098,7 +1105,10 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.28 — 2026-10-26.</b> The shell of main-screen v0.42: a done square of the mini-map above the
+  <p class="meta"><b>v0.29 — 2026-10-28.</b> The shell of main-screen v0.43: a locked disc has no shadow, since the
+     user's tablet drew a band of garbage across the screen under a half-transparent disc with a blurred
+     shadow; the panel covers the main area, so no frame here shows a disc (item 5, decided 2026-10-28).
+     The shell of main-screen v0.42: a done square of the mini-map above the
      POI column takes --ok-tile, on light a brighter green than the column's --ok, as the done tiles of
      the grid and the legend's Done swatch, which no frame here shows (items 58, 59, _tokens.css v0.23).
      The shell of main-screen v0.41: the arrows of the type pill's split and of
@@ -1128,9 +1138,9 @@
      every pass this tablet recorded and every type change not yet in the sheet, newest first, with "Delete" on each pass, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
      "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.23</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.58</b>. The shell
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.60</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.42</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.43</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Nine states,
      A to I. The twelve proposals of v0.8 are approved (v0.12, screens.md v0.38).</p>

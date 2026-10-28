@@ -333,12 +333,22 @@
           other use of --ok keep #287030. On dark both tokens follow
           --ok and --ok-bg, so nothing changes there. Frame K's notes
           name the tokens.
+  v0.43 2026-10-28 — a locked disc has no shadow (screens.md v0.60, item
+          5): the user's tablet (Lenovo Tab M10 Plus 3rd Gen, Mali-G52,
+          Chrome 155) drew a band of garbage across the middle of the
+          screen, black or full of coloured noise, whenever a maneuver
+          disc was locked, and the test switch of app v0.15 showed that
+          the disc without its shadow is the drawing that works. The GPU
+          cannot draw an element that is both half-transparent and
+          carries a blurred shadow, so .disc.locked keeps --o-locked and
+          loses --shadow, which at 28% was invisible anyway. Frame G's
+          notes say so. No token changes.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.42</title>
+<title>POI Tracker — Working Screen Reference v0.43</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -866,10 +876,11 @@
      placement depends on the zone's height only, never on a caption, and is
      rounded to a whole pixel. A disc is --disc with a gold arrow
      (--man-glyph) and, while it can be tapped, a gold ring of --s-1
-     (--man-ring). A locked disc fades and keeps only --shadow, no ring
-     (item 5). Discs and sides are centred with the translate property,
-     never a transform, so a scale (a press, a bloom, a tap) keeps their
-     centre. ---- */
+     (--man-ring). A locked disc fades and keeps no shadow and no ring
+     (item 5): the tablet's GPU cannot draw a half-transparent disc with
+     a blurred shadow (decided 2026-10-28). Discs and sides are centred
+     with the translate property, never a transform, so a scale (a press,
+     a bloom, a tap) keeps their centre. ---- */
   .stagezone { flex: 1; min-height: 0; position: relative; }
   .stagebox { position: absolute; left: 0; right: 0; height: calc(2 * var(--disc-man));
               top: round(max(0px, min(calc((100% - 2 * var(--disc-man)) / 2),
@@ -894,7 +905,7 @@
             top: calc(50% + (var(--side-reach) - var(--s-2)) / 2); }
   .stage.open .disc.on { left: 50%; top: 50%; }
   .stage.open .disc:not(.on) { visibility: hidden; }
-  .disc.locked { opacity: var(--o-locked); box-shadow: var(--shadow); }
+  .disc.locked { opacity: var(--o-locked); box-shadow: none; }
   .side { position: absolute; left: 50%; top: 50%; width: var(--disc-side); height: var(--disc-side);
           border-radius: 50%; translate: -50% -50%; display: flex;
           align-items: center; justify-content: center; font-size: var(--t-title);
@@ -1156,7 +1167,10 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.42 — 2026-10-26.</b> A brighter done green for the grid (_tokens.css v0.23, items 58 and 59): the done
+  <p class="meta"><b>v0.43 — 2026-10-28.</b> A locked disc has no shadow (item 5, frame G): the tablet's GPU drew a band of
+     garbage across the middle of the screen under a half-transparent disc with a blurred shadow, so a
+     locked disc keeps its fade and loses --shadow, which at 28% was invisible anyway (decided 2026-10-28).
+     A brighter done green for the grid (_tokens.css v0.23, items 58 and 59): the done
      tiles of frame K, the legend's Done swatch and a done square of the mini-map take --ok-tile on
      --ok-tile-bg, on light #2F9447 on its own tint, since their large numbers need 3:1 (3.2:1 on the
      tint), while the POI column and every small text keep --ok; on dark both follow --ok and --ok-bg.
@@ -1200,7 +1214,7 @@
      and N up. The arrow is always there: with no heading yet it shows the course the tablet
      saved last, or north, as a dashed outline (item 19). Every value inside
      the frames is a token of <b>_tokens.css v0.23</b> (size C, screens.md item 67) and
-     every rule follows <b>screens.md v0.58</b>. Icons are
+     every rule follows <b>screens.md v0.60</b>. Icons are
      Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
      presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and
@@ -1608,6 +1622,7 @@
       </div>
       <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
         <li><b>46</b> A not-drivable POI has its discs locked at once, with a caption, and is never counted among POIs "to go".</li>
+        <li><b>5</b> A locked disc has no shadow since v0.43: the tablet's GPU drew garbage under a faded disc with a blurred shadow.</li>
         <li><b>46</b> It must read as neither done nor in error: quiet style, no green, no red.</li>
         <li><b>4</b> The counter reads "Not drivable", the line under it "Not counted".</li>
         <li><b>60</b> The pill takes its own quiet style, outlined in --ink-2; the tile holds Lucide ban in the middle slot (items 60, 69).</li>

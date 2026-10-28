@@ -7,16 +7,16 @@
   network: the service worker keeps these files on the tablet.
 
   The look is the approved references, copied, not redrawn:
-  - the app CSS of docs/references/main-screen.html v0.42 and the History
-    rules of docs/references/history.html v0.28, byte for byte
+  - the app CSS of docs/references/main-screen.html v0.43 and the History
+    rules of docs/references/history.html v0.29, byte for byte
   - docs/references/_tokens.css v0.23, inlined
   - the Lucide sprite of main-screen.html
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.59 and docs/data-model.md
+  The behaviour follows docs/screens.md v0.60 and docs/data-model.md
   v0.19, and much of it is the code of the working prototype v19.7. The
-  look follows v0.59. Still to come: sending.
+  look follows v0.60. Still to come: sending.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -172,6 +172,17 @@
           without the disc's opacity fade. Any other value changes
           nothing, and the switch touches no storage. To be removed once
           the tablet shows which drawing works.
+  v0.16 2026-10-28 — the permanent fix for the band: a locked disc has no
+          shadow (screens.md v0.60, item 5), the canon copied whole from
+          main-screen.html v0.43 and history.html v0.29, the tokens still
+          _tokens.css v0.23. The tablet's GPU cannot draw a disc that is
+          both half-transparent and carries a blurred shadow, so
+          .disc.locked keeps --o-locked and loses --shadow, which at 28%
+          was invisible anyway. The test switch of v0.15 is removed: Test
+          1, the locked disc without its shadow, was the one that worked;
+          Tests 0 and 4 kept the band, Tests 2 and 3 made the see-through
+          panels blink in dark. The APP ONLY piece stays. No behaviour
+          changes.
 -->
 <html lang="en">
 <head>
@@ -1030,10 +1041,11 @@
      placement depends on the zone's height only, never on a caption, and is
      rounded to a whole pixel. A disc is --disc with a gold arrow
      (--man-glyph) and, while it can be tapped, a gold ring of --s-1
-     (--man-ring). A locked disc fades and keeps only --shadow, no ring
-     (item 5). Discs and sides are centred with the translate property,
-     never a transform, so a scale (a press, a bloom, a tap) keeps their
-     centre. ---- */
+     (--man-ring). A locked disc fades and keeps no shadow and no ring
+     (item 5): the tablet's GPU cannot draw a half-transparent disc with
+     a blurred shadow (decided 2026-10-28). Discs and sides are centred
+     with the translate property, never a transform, so a scale (a press,
+     a bloom, a tap) keeps their centre. ---- */
   .stagezone { flex: 1; min-height: 0; position: relative; }
   .stagebox { position: absolute; left: 0; right: 0; height: calc(2 * var(--disc-man));
               top: round(max(0px, min(calc((100% - 2 * var(--disc-man)) / 2),
@@ -1058,7 +1070,7 @@
             top: calc(50% + (var(--side-reach) - var(--s-2)) / 2); }
   .stage.open .disc.on { left: 50%; top: 50%; }
   .stage.open .disc:not(.on) { visibility: hidden; }
-  .disc.locked { opacity: var(--o-locked); box-shadow: var(--shadow); }
+  .disc.locked { opacity: var(--o-locked); box-shadow: none; }
   .side { position: absolute; left: 50%; top: 50%; width: var(--disc-side); height: var(--disc-side);
           border-radius: 50%; translate: -50% -50%; display: flex;
           align-items: center; justify-content: center; font-size: var(--t-title);
@@ -1484,17 +1496,6 @@
      at the left on a faded track (the references draw the switch on only) */
   .switch[aria-checked="false"] { background: var(--ink-3); }
   .switch[aria-checked="false"]::after { right: auto; left: var(--s-1); }
-  /* v0.15, temporary: the test switch ?lab=0 to ?lab=4 for the band the
-     tablet drew around a locked disc on 2026-10-27. Its label in the top
-     bar, then one change to a locked disc per variant; lab-0 changes
-     nothing. Removed once the tablet shows which drawing works. */
-  .lab { font-size: var(--t-small); font-weight: var(--w-heavy); line-height: var(--lh-tight);
-         color: var(--warn); }
-  .lab-1 .disc.locked { box-shadow: none; }
-  .lab-2 .disc.locked { opacity: 1; background: color-mix(in srgb, var(--disc) calc(var(--o-locked) * 100%), var(--bg));
-                        color: color-mix(in srgb, var(--man-glyph) calc(var(--o-locked) * 100%), var(--bg)); }
-  .lab-3 .disc { will-change: opacity; }
-  .lab-4 .disc { transition: left var(--dur-move) var(--ease-out), top var(--dur-move) var(--ease-out); }
   @media (prefers-reduced-motion: reduce) {
     .app *, .app *::before, .app *::after { animation: none !important; transition: none !important; }
   }
@@ -3074,14 +3075,6 @@
   }
 
   load();
-  // v0.15, temporary: ?lab=0 to ?lab=4 draws a locked disc another way for
-  // this page load and names the variant after the city; any other value
-  // changes nothing. Read before ?sample strips the address.
-  var lab = /(^|&)lab=([0-4])(&|$)/.exec(location.search.slice(1));
-  if (lab) {
-    document.documentElement.classList.add('lab-' + lab[2]);
-    $('city').insertAdjacentHTML('afterend', '<span class="lab" id="lab">Test ' + lab[2] + '</span>');
-  }
   var wantSample = /(^|[?&])sample(=|&|$)/.test(location.search.slice(1));
   if (wantSample) { try { history.replaceState(history.state, '', location.pathname + location.hash); } catch (err) { /* fine */ } }
   applyTheme();
