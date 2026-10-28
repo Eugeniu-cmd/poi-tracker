@@ -24,9 +24,10 @@
    v0.14 2026-10-26 — speed step 1, the column redraws only what changed: a new cache name for app v0.14.
    v0.15 2026-10-27 — a temporary test switch for the band on the tablet: a new cache name for app v0.15.
    v0.16 2026-10-28 — a locked disc has no shadow, the test switch removed: a new cache name for app v0.16.
+   v0.17 2026-10-28 — no zoom, and leaving the app cancels a half-made pass: a new cache name for app v0.17.
 */
 'use strict';
-var CACHE = 'poi-app-v0.16';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.17';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 

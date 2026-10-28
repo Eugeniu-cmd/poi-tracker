@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.60 — 2026-10-28
+v0.61 — 2026-10-28
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -329,6 +329,14 @@ of garbage across the middle of the screen under a half-transparent disc
 with a blurred shadow, so a locked disc keeps its fade and loses its
 shadow, which at 28% was invisible anyway (item 5). The test switch of
 app v0.15, which found it, is gone.
+v0.61 2026-10-28 — no zoom, and leaving the app cancels a half-made pass
+(app v0.17): the user's two decisions after filming app v0.14 on the
+tablet on 2026-10-27. The app no longer zooms with two fingers or a
+double tap, so the screen stays steady; larger text comes from Android's
+own font and display size settings (item 52). When the app leaves the
+screen, the open compass closes as Cancel does, with no toast, since
+nothing was recorded; a pass whose side was already tapped is saved and
+finishes as usual (item 8).
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -381,12 +389,14 @@ appears on screen. An apostrophe on screen is the typographic one (’).
 52. Discs, the compass, text sizes and tap targets keep their size in px
     on every screen. A larger screen shows more, not bigger: extra space
     goes into the length of lists (more POI rows at once) and into the
-    gaps between blocks. Nothing is scaled as a whole. There are two
-    exceptions, and both change only display text and paddings: the
-    compact step of item 70 on a short screen and the roomy card of item
-    71 on a tall landscape screen. Discs and tap targets never change
-    size. The compass follows the same steps with its own sizes (item
-    19).
+    gaps between blocks. Nothing is scaled as a whole. The user cannot
+    zoom the app either, with two fingers or a double tap, so the screen
+    stays steady (decided 2026-10-27). Larger text comes from Android's
+    own font and display size settings. There are two exceptions, and
+    both change only display text and paddings: the compact step of item
+    70 on a short screen and the roomy card of item 71 on a tall
+    landscape screen. Discs and tap targets never change size. The
+    compass follows the same steps with its own sizes (item 19).
 53. The bottom edge of the screen is shared with the system: on Android a
     sideways swipe along the bottom handle switches apps. Nothing
     tappable or swipeable sits inside that area. Its height is taken from
@@ -621,7 +631,11 @@ appears on screen. An apostrophe on screen is the typographic one (’).
    first one still runs is ignored, so one pass is never recorded twice.
 8. "Cancel" is visible only while the compass is open. Tapping the same
    maneuver again also closes it. Auto-close after 12 s with the toast
-   "Closed after 12 s: nothing recorded" (item 36).
+   "Closed after 12 s: nothing recorded" (item 36). When the app leaves
+   the screen (the home screen, another app, the screen turned off) the
+   open compass closes as Cancel does, with no toast, since nothing was
+   recorded (decided 2026-10-27). A pass whose side was already tapped
+   is saved and finishes as usual.
 9. "Undo last" removes the whole most recent pass (maneuver and side
    together) that this tablet recorded for the active POI, and can be
    pressed repeatedly. Each press asks first (item 63). A pass still

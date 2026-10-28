@@ -14,7 +14,7 @@
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.60 and docs/data-model.md
+  The behaviour follows docs/screens.md v0.61 and docs/data-model.md
   v0.19, and much of it is the code of the working prototype v19.7. The
   look follows v0.60. Still to come: sending.
 
@@ -183,11 +183,28 @@
           Tests 0 and 4 kept the band, Tests 2 and 3 made the see-through
           panels blink in dark. The APP ONLY piece stays. No behaviour
           changes.
+  v0.17 2026-10-28 — no zoom, and leaving the app cancels a half-made
+          pass (screens.md v0.61, items 8 and 52, decided 2026-10-27
+          after the film of v0.14 on the tablet). The viewport tag takes
+          maximum-scale=1 and user-scalable=no, and .app takes
+          touch-action: pan-x pan-y instead of manipulation, so a pinch
+          or a double tap inside the app does nothing while lists still
+          scroll; larger text comes from Android's own font and display
+          size settings. When the page becomes hidden (the home screen,
+          another app, the screen turned off) while the sides are open
+          and no pass is being recorded, the open sides close through
+          the path of Cancel: the layer removed, the auto-close timer
+          cleared, the screen redrawn and the history kept in step, with
+          no toast. A pass whose side was already tapped is stored and
+          finishes as usual; a menu, a dialog, History and the grid
+          stay, and the notification shade, which takes only the focus,
+          leaves the sides open. The store and its write stay as they
+          are.
 -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#F5F2E8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#04211A" media="(prefers-color-scheme: dark)">
 <title>POI Tracker</title>
@@ -1435,7 +1452,7 @@
      references draw as separate frames or not at all. Tokens only
      (screens.md item 68).
      ============================================================ */
-  .app { touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  .app { touch-action: pan-x pan-y; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   /* the overlays container takes no place in .scr's flex column: an empty
      in-flow item still adds one gap under .body, 18 px the reference has
      not. Its overlays stay absolute against .scr, as before, and the toast
@@ -2960,6 +2977,20 @@
   }
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') keepAwake(); });
   document.addEventListener('pointerdown', keepAwake, true);
+
+  // ---- item 8: leaving the app cancels a half-made pass (decided
+  // 2026-10-27). When the page becomes hidden (the home screen, another
+  // app, the screen turned off; the notification shade takes only the
+  // focus) while the sides are open and no pass is being recorded, they
+  // close through the path of Cancel: the layer removed, the auto-close
+  // timer cleared, the screen redrawn, the history kept in step. No
+  // toast, since nothing was recorded. A pass whose side was tapped
+  // (ui.busy) is stored already and finishes as usual; a menu, a dialog,
+  // History and the grid stay. ----
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState !== 'hidden') return;
+    if (find('open') && !ui.busy) { removeLayer('open'); render(); }
+  });
 
   // ================= the compass (item 19): step 2 is a stub =================
   // The sensors of data-model.md "Heading" (prototype v19.7) come in step 3
