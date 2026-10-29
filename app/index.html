@@ -200,6 +200,22 @@
           stay, and the notification shade, which takes only the focus,
           leaves the sides open. The store and its write stay as they
           are.
+  v0.18 2026-10-28 — a second temporary test switch, for the dark-mode
+          blink of the see-through panels seen on the tablet on
+          2026-10-28: at every side tap the type pill, the "To go" card,
+          the route and connection buttons and the rail were drawn about
+          30% darker for a third of a second, at every maneuver tap for
+          one frame, and the rail flipped between two shades for
+          seconds with no tap. Opened as app/?lab=0 to app/?lab=3, it
+          puts the class lab-N on the root element for that page load
+          and "Test N" in --warn after the city name. lab-0 draws as
+          before; lab-1 makes --panel, --panel-strong and --panel-edge
+          opaque, the colours the translucent ones give over --bg, in
+          both themes; lab-2 stops every animation and transition in
+          the app as the reduced-motion rule does, so a tap switches the
+          screen at once; lab-3 does both. Any other value changes
+          nothing, and the switch touches no storage. To be removed once
+          the tablet shows which drawing works.
 -->
 <html lang="en">
 <head>
@@ -1513,6 +1529,25 @@
      at the left on a faded track (the references draw the switch on only) */
   .switch[aria-checked="false"] { background: var(--ink-3); }
   .switch[aria-checked="false"]::after { right: auto; left: var(--s-1); }
+  /* v0.18, temporary: the test switch ?lab=0 to ?lab=3 for the blink the
+     tablet drew on the see-through panels in dark on 2026-10-28. Its
+     label in the top bar, then per variant: lab-0 changes nothing, lab-1
+     makes the three panel tokens opaque, the colours the translucent ones
+     give over --bg, lab-2 stops all motion as reduced motion does, lab-3
+     does both. The panel rules follow the token blocks and are at least
+     as specific as each of them, so they win in both themes. Removed
+     once the tablet shows which drawing works. */
+  .lab { font-size: var(--t-small); font-weight: var(--w-heavy); line-height: var(--lh-tight);
+         color: var(--warn); }
+  :root.lab-1, :root.lab-3 { --panel: #FCFAF2; --panel-strong: #FEFCF5; --panel-edge: #FEFDFC; }
+  @media (prefers-color-scheme: dark) {
+    :root.lab-1:not([data-theme="light"]), :root.lab-3:not([data-theme="light"]) {
+      --panel: #132E27; --panel-strong: #223C34; --panel-edge: #274038; }
+  }
+  :root.lab-1[data-theme="dark"], :root.lab-3[data-theme="dark"] {
+    --panel: #132E27; --panel-strong: #223C34; --panel-edge: #274038; }
+  .lab-2 .app *, .lab-2 .app *::before, .lab-2 .app *::after,
+  .lab-3 .app *, .lab-3 .app *::before, .lab-3 .app *::after { animation: none !important; transition: none !important; }
   @media (prefers-reduced-motion: reduce) {
     .app *, .app *::before, .app *::after { animation: none !important; transition: none !important; }
   }
@@ -3106,6 +3141,15 @@
   }
 
   load();
+  // v0.18, temporary: ?lab=0 to ?lab=3 draws the see-through panels and
+  // the motion another way for this page load and names the variant after
+  // the city; any other value changes nothing. Read before ?sample strips
+  // the address.
+  var lab = /(^|&)lab=([0-3])(&|$)/.exec(location.search.slice(1));
+  if (lab) {
+    document.documentElement.classList.add('lab-' + lab[2]);
+    $('city').insertAdjacentHTML('afterend', '<span class="lab" id="lab">Test ' + lab[2] + '</span>');
+  }
   var wantSample = /(^|[?&])sample(=|&|$)/.test(location.search.slice(1));
   if (wantSample) { try { history.replaceState(history.state, '', location.pathname + location.hash); } catch (err) { /* fine */ } }
   applyTheme();
