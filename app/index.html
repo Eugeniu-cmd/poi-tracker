@@ -8,15 +8,15 @@
 
   The look is the approved references, copied, not redrawn:
   - the app CSS of docs/references/main-screen.html v0.46 and the History
-    rules of docs/references/history.html v0.32, byte for byte
+    rules of docs/references/history.html v0.33, byte for byte
   - docs/references/_tokens.css v0.24, inlined
   - the Lucide sprite of main-screen.html
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.66 and docs/data-model.md
+  The behaviour follows docs/screens.md v0.67 and docs/data-model.md
   v0.19, and much of it is the code of the working prototype v19.7. The
-  look follows v0.64. Still to come: sending.
+  look follows v0.67. Still to come: sending.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -278,6 +278,24 @@
           cache name, so a later step cannot bump one and forget the
           other. Settings will show it too when it is built. The APP
           ONLY piece stays. No behaviour changes.
+  v0.23 2026-10-30 — speed step 3 (screens.md v0.67, item 48, decided
+          2026-10-30): History of the whole route draws the newest 50
+          rows first. Under the last drawn row, while older rows remain,
+          a count, "50 of 2,974 shown", and a wide button, "Show 50
+          more", which draws the next 50 under the ones drawn and keeps
+          the list where it is; "Show 24 more" when fewer remain; once
+          every row is drawn both are gone, and the line of item 48
+          shows only then. The count counts the list's rows, passes and
+          type changes alike. The rows drawn stay while History is open,
+          also when a row changes, and go back to 50 when History opens
+          again or the scope changes (HIST_PAGE and histShown, reset
+          with histKey). Only the rows drawn are built, so opening
+          History of the whole route no longer builds thousands of rows:
+          the user's tablet counted 2 freezes at every opening. POI
+          scope draws all its rows, as before. The canon copied whole
+          from main-screen.html v0.46 and history.html v0.33, the tokens
+          still _tokens.css v0.24. The store and its write do not
+          change. The APP ONLY piece stays.
 -->
 <html lang="en">
 <head>
@@ -1544,6 +1562,21 @@
   .hacts { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: var(--s-2);
            margin-top: var(--s-2); padding-bottom: var(--s-3); border-bottom: 1px solid var(--line); }
   .hacts .btn { min-width: calc(3 * var(--tap-min) - var(--s-6)); justify-content: center; }
+  /* the newest 50 of the whole route (item 48, v0.33): in Route scope the
+     list first draws the newest 50 rows. Under the last drawn row, while
+     older rows remain, a centred count of the rows drawn and a wide
+     button that draws the next 50; both span the list's grid, so no
+     column widens. The button is the full width of the list and at least
+     --tap-min tall, on --panel-inset with a hairline, its word centred;
+     not the .btn of the bar, whose weight and radius differ. Once every
+     row is drawn both are gone and .hend below follows the last row */
+  .hshown { grid-column: 1 / -1; margin: 0; padding: var(--s-4) var(--s-3) var(--s-3); text-align: center;
+            font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
+            line-height: var(--lh-tight); white-space: nowrap; }
+  .hmore { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center;
+           min-height: var(--tap-min); padding: 0 var(--s-4); background: var(--panel-inset);
+           border: 1px solid var(--line); border-radius: var(--r-sm); color: var(--ink);
+           font-size: var(--t-body); font-weight: var(--w-heavy); white-space: nowrap; }
   /* the end of the list (item 48) and the empty state (items 14, 45) */
   .hend { grid-column: 1 / -1; margin: 0; padding: var(--s-4) var(--s-3); text-align: center;
           font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
@@ -1689,7 +1722,7 @@
   'use strict';
 
   // ================= constants (screens.md items 39, 46, 60; data-model.md) =================
-  var APP_VERSION = 'v0.22';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
+  var APP_VERSION = 'v0.23';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
   var KEY = 'poi-app:store';         // the whole store, one key, one setItem per change
   var HEADING_KEY = 'poi-app:heading';
   var SCHEMA = 1;                    // the layout of the store; migrate() brings older ones up
@@ -2675,7 +2708,8 @@
       default: return 'The sheet could not write this change. Send it again.';
     }
   }
-  var histKey = null;
+  var HIST_PAGE = 50;               // item 48: Route scope draws this many rows first, and this many more per tap on "Show more"
+  var histKey = null, histShown = HIST_PAGE;
   function renderHistory() {
     var main = $('main'), open = !!find('history');
     main.classList.toggle('histopen', open);
@@ -2684,6 +2718,7 @@
     var c = city(), r = route(), n = r ? active() : 0, scope = ui.scope, I = ix();
     var key = scope + '|' + (r ? r.id : '') + '|' + (scope === 'poi' ? n : '');
     var keep = old && histKey === key ? old.querySelector('.hlist').scrollTop : 0;
+    if (histKey !== key) histShown = HIST_PAGE;   // a fresh list: History opened again, or its scope or route changed
     var list = [], counted = 0, removals = 0;
     if (r) S.events.forEach(function (e) {
       if (e.routeId !== r.id || (scope === 'poi' && e.poi !== n)) return;
@@ -2694,7 +2729,11 @@
       list.push(e);
     });
     list.sort(function (a, b) { return b.seq - a.seq; });
-    var rows = list.map(function (e) {
+    // item 48: Route scope builds and draws only the newest histShown rows,
+    // so opening History of the whole route never builds thousands; POI
+    // scope draws all its rows. The rows drawn stay while History is open.
+    var shown = scope === 'route' ? Math.min(histShown, list.length) : list.length, left = list.length - shown;
+    var rows = list.slice(0, shown).map(function (e) {
       var num = scope === 'route' ? '<span class="hn">' + e.poi + '</span>' : '';
       var tm = '<span class="htm">' + stamp(e.ts) + '</span>';
       var wait = '<span class="hst wait"><span class="dot"></span>Waiting</span>', no = '<span class="hst rej">Not accepted</span>';
@@ -2736,8 +2775,11 @@
       } else msg = '<b>No passes yet</b>';
       body = '<div class="hlist empty"><div class="hempty">' + msg + '</div></div>';
     } else {
+      // under the last drawn row: the count and "Show 50 more" while rows
+      // remain, else the line of item 48 once a pass has been dropped
       body = '<div class="hlist" data-scope="' + scope + '">' + rows +
-        (dropped ? '<p class="hend"><span>This tablet keeps its newest 3,000 passes and removals.</span><span>Older sent ones are no longer listed.</span></p>' : '') + '</div>';
+        (left ? '<p class="hshown">' + fmt(shown) + ' of ' + fmt(list.length) + ' shown</p><button class="hmore" type="button" data-act="hist-more">Show ' + fmt(Math.min(left, HIST_PAGE)) + ' more</button>'
+          : dropped ? '<p class="hend"><span>This tablet keeps its newest 3,000 passes and removals.</span><span>Older sent ones are no longer listed.</span></p>' : '') + '</div>';
     }
     var sub = !r ? '<span class="hctx">' + esc(c ? c.name : 'No city') + '</span>'
       : scope === 'poi' ? '<span class="chip gold">POI ' + n + '</span><span class="hctx">' + esc(r.code) + ' · ' + esc(c.name) + '</span>'
@@ -3159,6 +3201,7 @@
       case 'history': openHistory(); render(); break;
       case 'close-grid': removeLayer('grid'); render(); break;
       case 'close-history': removeLayer('history'); render(); break;
+      case 'hist-more': histShown += HIST_PAGE; render(); break;   // item 48: the next 50 rows under the ones drawn
       case 'undo': undo(); break;
       case 'undo-type': undoType(); break;
       case 'cancel': removeLayer('open'); render(); break;

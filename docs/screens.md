@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.66 — 2026-10-30
+v0.67 — 2026-10-30
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -367,6 +367,13 @@ O and V, history v0.32, settings v0.29, app v0.22): the "This tablet"
 section's title line carries the app's version on its right, "App
 v0.22", so the user sees which version the tablet runs after an update
 (item 72). Settings will show it too when it is built. No other change.
+v0.67 2026-10-30 — speed step 3, History of the whole route shows the
+newest 50 rows (history v0.33 frame J, app v0.23): item 48 says that in
+Route scope History first draws the newest 50 rows, with a count, "50 of
+2,974 shown", and a wide button "Show 50 more" under them until every
+row is drawn, and that POI scope draws all its rows. The user's tablet
+counted 2 freezes at every opening of History of the whole route, about
+3,000 rows drawn at once (decided 2026-10-30). No other change.
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -990,7 +997,13 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     itself is stored apart (data-model.md). Under the last row: "This
     tablet keeps its newest 3,000 passes and removals. Older sent ones
     are no longer listed." The line shows only once a pass of the scope
-    in view has been dropped.
+    in view has been dropped. In Route scope History first draws the
+    newest 50 rows. Under them a count, "50 of 2,974 shown", and a wide
+    button "Show 50 more" draw the next 50, "Show 24 more" when fewer
+    remain, until every row is drawn; the line above shows only then.
+    The count stays while History is open and goes back to 50 when it
+    opens again or the scope changes. POI scope draws all its rows
+    (decided 2026-10-30, speed step 3).
 
 ## Connection, sync status and tablet data
 16. Sync status is always visible on the working screen and carries a
