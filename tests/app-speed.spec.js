@@ -15,14 +15,15 @@
    The figure of a tap is final within a second of the tap (the app waits
    that long for the browser's entries), so the section is read 1.2 s
    after the pass. The passes go to POI 53 of the sample, which has none.
-   The first chime of a session creates the app's AudioContext inside the
-   tap, which takes about 300 ms in headless Chromium on this machine and
-   would make the first pass read "Some taps slow"; where a test expects
-   the first pass to be "Fast" it creates an AudioContext beforehand, so
-   the app's own creation is cheap and the tap's figure is the tap's.
+   The app creates its AudioContext once, right after the first screen is
+   drawn, so the first pass is as quick as the rest (app v0.21, screens.md
+   v0.65, item 62); created inside the first side tap, as before, it took
+   about 300 ms in headless Chromium and made the first pass read "Some
+   taps slow". The last three tests count the contexts through a wrapper
+   around window.AudioContext set before the page loads.
 */
 'use strict';
-const { test, expect, text, store, layers, holdsLock, openSample, recordPass } = require('./fixtures');
+const { test, expect, text, store, layers, holdsLock, openSample, recordPass, reloadWith } = require('./fixtures');
 
 // the computed colour of a token, as getComputedStyle gives colours
 function tokenColor(page, name) {
@@ -46,9 +47,6 @@ async function armBusy(page) {
   });
 }
 function setBusy(page, ms) { return page.evaluate(function (v) { window.__busy = v; }, ms); }
-// an AudioContext before the first chime, so its creation is not in the
-// first tap's figure (see the header)
-function warmAudio(page) { return page.evaluate(function () { window.__audio = new AudioContext(); }); }
 // the Sync panel, opened from its control; closed by the same control
 async function openPanel(page) {
   await page.locator('#syncBtn').click();
@@ -115,7 +113,6 @@ for (const scheme of ['light', 'dark']) {
     await openSample(page);
     await selectPoi(page, 53);
     await armBusy(page);
-    await warmAudio(page);
 
     // one pass: both times the same whole number above 0, "Fast" in --ok
     await timedPass(page, 'L', 'N');
@@ -163,7 +160,6 @@ test('Speed · a tap that records nothing changes no figure', async ({ page }) =
   await openSample(page);
   await selectPoi(page, 53);
   await armBusy(page);
-  await warmAudio(page);
   const stage = page.locator('#stage');
   const before = await store(page);
 
@@ -193,7 +189,6 @@ test('Speed · after 51 fast passes the slow one has left the slowest of 50', as
   await openSample(page);
   await selectPoi(page, 53);
   await armBusy(page);
-  await warmAudio(page);
   const before = await store(page);
 
   await setBusy(page, 300);
@@ -221,7 +216,6 @@ test('Speed · after 51 fast passes the slow one has left the slowest of 50', as
 test('Speed · a reload resets the section, and the storage holds no new key', async ({ page }) => {
   await openSample(page);
   await selectPoi(page, 53);
-  await warmAudio(page);
   const keys = await localKeys(page);
   expect(keys).toContain('poi-app:store');
 
@@ -244,4 +238,99 @@ test('Speed · a reload resets the section, and the storage holds no new key', a
   expect(since.map(function (t) { return 'No pass yet · since ' + t; })).toContain(s.line);
   expect(s.cls).toBe('sline off');
   expect(await localKeys(page)).toEqual(keys);
+});
+
+// ---- the ding ready before the first pass (app v0.21, screens.md v0.65,
+// item 62): the app creates its AudioContext once, right after the first
+// screen is drawn, while sound is on, so the first side tap creates none
+// and its figure is the tap's. A wrapper around window.AudioContext, set
+// before the page loads, counts the contexts and notes the time of each;
+// with failFirst the first construction throws, as it would where the
+// browser has no audio device, so the app's own path inside the tap runs.
+function countAudio(page, failFirst) {
+  return page.addInitScript(function (failFirst) {
+    var Real = window.AudioContext;
+    window.__audio = [];
+    function Counted() {
+      if (failFirst && !window.__audio.length) { window.__audio.push({ at: performance.now(), failed: true }); throw new Error('no audio device'); }
+      var c = new Real();
+      window.__audio.push({ at: performance.now(), state: c.state });
+      return c;
+    }
+    Counted.prototype = Real.prototype;
+    window.AudioContext = Counted;
+    window.webkitAudioContext = Counted;
+  }, !!failFirst);
+}
+function audioMade(page) { return page.evaluate(function () { return window.__audio; }); }
+function now(page) { return page.evaluate(function () { return performance.now(); }); }
+// the start has settled once the freezes are counted: that observer is
+// set in the task after the one that makes the context
+async function startSettled(page) {
+  const pop = await openPanel(page);
+  await expect(pop.locator('.sfig .ol b').nth(2)).toHaveText(/^\d+$/);
+  await closePanel(page);
+}
+const STORE_KEYS = ['baseline', 'cities', 'device', 'dropped', 'events', 'schema', 'seq', 'types'];
+
+test('Speed · the ding is ready: sound on makes one AudioContext before any tap, the first tap makes none and is Fast', async ({ page }) => {
+  await countAudio(page);
+  await openSample(page);
+  await expect.poll(() => audioMade(page).then(function (a) { return a.length; })).toBe(1);
+  const made = await audioMade(page), t0 = await now(page);
+  expect(made[0].failed).toBeUndefined();
+  expect(made[0].at).toBeLessThan(t0);   // before any tap
+  // the store is as before: its keys, the device's keys, no new key in the storage
+  const keys = await localKeys(page), s0 = await store(page);
+  expect(keys).toContain('poi-app:store');
+  expect(Object.keys(s0).sort()).toEqual(STORE_KEYS);
+  expect(Object.keys(s0.device).sort()).toEqual(['cityId', 'sound', 'theme']);
+  expect(s0.device.sound).toBe(true);
+
+  await selectPoi(page, 53);
+  await timedPass(page, 'L', 'N');
+  expect(await audioMade(page)).toHaveLength(1);   // the tap created none
+  const s = await readSection(await openPanel(page));
+  expect(ms(s.last)).toBeGreaterThan(0);
+  expect(s.line).toMatch(/^Fast · since \d\d:\d\d$/);
+  expect(s.cls).toBe('sline');
+  await closePanel(page);
+  expect(await localKeys(page)).toEqual(keys);
+  expect(Object.keys(await store(page)).sort()).toEqual(STORE_KEYS);
+});
+
+test('Speed · the ding is ready: sound off before start makes no AudioContext, nor does a pass', async ({ page }) => {
+  await countAudio(page);
+  await openSample(page);
+  const s0 = await store(page);
+  s0.device.sound = false;
+  await reloadWith(page, s0);
+  await expect(page.locator('#city')).toHaveText('Sample city');
+  await startSettled(page);
+  expect(await audioMade(page)).toEqual([]);
+  await selectPoi(page, 53);
+  await recordPass(page, 'L', 'N');
+  expect(await audioMade(page)).toEqual([]);
+  const s = await store(page);
+  expect(s.device.sound).toBe(false);
+  expect(s.events).toHaveLength(s0.events.length + 1);
+});
+
+test('Speed · the ding is ready: when the early creation fails, the first pass makes the context itself, as before, with no error', async ({ page }) => {
+  await countAudio(page, true);
+  await openSample(page);
+  await startSettled(page);
+  let made = await audioMade(page);
+  expect(made).toHaveLength(1);
+  expect(made[0].failed).toBe(true);
+  const t0 = await now(page), before = await store(page);
+  await selectPoi(page, 53);
+  await recordPass(page, 'L', 'N');
+  made = await audioMade(page);
+  expect(made).toHaveLength(2);
+  expect(made[1].failed).toBeUndefined();
+  expect(made[1].at).toBeGreaterThan(t0);   // inside the tap
+  await recordPass(page, 'R', 'S');   // the second chime reuses it
+  expect(await audioMade(page)).toHaveLength(2);
+  expect((await store(page)).events).toHaveLength(before.events.length + 2);
 });

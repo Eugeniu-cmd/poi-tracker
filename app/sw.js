@@ -28,9 +28,10 @@
    v0.18 2026-10-28 — a second temporary test switch, for the dark-mode blink of the see-through panels: a new cache name for app v0.18.
    v0.19 2026-10-30 — solid panels, the test switch removed: a new cache name for app v0.19.
    v0.20 2026-10-30 — speed step 2b, the Sync panel's This tablet section measures the side taps and the freezes: a new cache name for app v0.20.
+   v0.21 2026-10-30 — the ding is ready before the first pass, the audio context created right after the first screen is drawn: a new cache name for app v0.21.
 */
 'use strict';
-var CACHE = 'poi-app-v0.20';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.21';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 

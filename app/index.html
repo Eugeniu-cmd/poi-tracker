@@ -14,7 +14,7 @@
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.64 and docs/data-model.md
+  The behaviour follows docs/screens.md v0.65 and docs/data-model.md
   v0.19, and much of it is the code of the working prototype v19.7. The
   look follows v0.64. Still to come: sending.
 
@@ -254,6 +254,19 @@
           it resets when the app restarts. An observer type the browser
           lacks leaves the app's own times and "–" for the freezes. The
           APP ONLY piece stays.
+  v0.21 2026-10-30 — the ding is ready before the first pass (screens.md
+          v0.65, item 62, decided 2026-10-30): the audio context is
+          created once, right after the first screen is drawn, outside
+          any tap, while sound is on, so the first pass is as quick as
+          the rest. Speed step 2b found that chime() created it inside
+          the first side tap, 230 to 380 ms in headless Chromium, so the
+          first pass of every start read "Some taps slow". Its task runs
+          before the freeze counting starts, so the app's own start
+          still counts no freeze. Created before any tap, the context
+          may start suspended; chime() resumes it inside the side tap as
+          before, and still creates one itself when the early creation
+          failed or sound was off at start. The chime's notes and
+          timing, the store and its write do not change.
 -->
 <html lang="en">
 <head>
@@ -2768,6 +2781,25 @@
     } catch (err) { /* no sound is fine */ }
   }
   function buzz() { try { if (navigator.vibrate) navigator.vibrate(25); } catch (err) { /* none */ } }
+  // The audio context is created once, right after the first screen is
+  // drawn (the first frame after start, then a task, as the freeze
+  // counting marks it), outside any tap and while sound is on, so no tap
+  // pays for it: created inside the first side tap it cost 230 to 380 ms
+  // (speed step 2b; decided 2026-10-30). Before any tap the browser may
+  // start it suspended, with a warning in the console; chime() resumes it
+  // inside the side tap. chime() keeps its own path, so sound still works
+  // when this failed or sound was off at start and is turned on later.
+  function readySound() {
+    requestAnimationFrame(function () {
+      setTimeout(function () {
+        if (!S.device.sound || audio) return;
+        try {
+          var AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) audio = new AC();
+        } catch (err) { /* chime() creates it in the tap */ }
+      }, 0);
+    });
+  }
   // "57 of 70" after a change, as the counter reads it (item 36): the
   // passes that fit the POI's type (item 4)
   function tally(rid, n) {
@@ -3315,6 +3347,7 @@
   if (wantSample) { try { history.replaceState(history.state, '', location.pathname + location.hash); } catch (err) { /* fine */ } }
   applyTheme();
   render();
+  readySound();   // before watchSpeed(): its task runs before the freeze counting starts
   watchSpeed();
   Compass.start(drawCompass);
   keepAwake();

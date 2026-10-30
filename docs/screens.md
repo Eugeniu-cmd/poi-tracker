@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.64 — 2026-10-30
+v0.65 — 2026-10-30
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -357,6 +357,11 @@ v0.64 2026-10-30 — speed step 2b, the app measures (app v0.20): item 72
 now says that before the first pass the two times show dashes and the
 status line reads "No pass yet" while the freezes show as counted, since
 the tablet can freeze before the first pass. No other change.
+v0.65 2026-10-30 — the ding is ready before the first pass (app v0.21):
+item 62 says the sound is made ready once, right after the app opens, so
+the first pass is as quick as the rest; the app created the browser's
+audio context inside the first side tap, which made the first pass of
+every start slow (speed step 2b, decided 2026-10-30). No other change.
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -834,13 +839,14 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     tapped side dips under the finger while a gold ring leaves it,
     growing and fading like a sonar ping, and it keeps its place, so the
     finger never chases it (decided 2026-10-21). The "N of T" counter
-    bounces in place with it, and nothing
-    pops up over the POI number. The sides bloom out of the chosen disc
-    when the compass opens. All motion is skipped while the tablet's
-    "reduce motion" accessibility setting is on. The rising chime is two
-    notes at 988 and 1319 Hz, the falling one 660 and 494 Hz, and the
-    vibration lasts 25 ms. Sound can be switched off in Settings (item
-    65).
+    bounces in place with it, and nothing pops up over the POI number.
+    The sides bloom out of the chosen disc when the compass opens. All
+    motion is skipped while the tablet's "reduce motion" accessibility
+    setting is on. The rising chime is two notes at 988 and 1319 Hz, the
+    falling one 660 and 494 Hz, and the vibration lasts 25 ms. Sound can
+    be switched off in Settings (item 65). The sound is made ready once,
+    right after the app opens, so the first pass is as quick as the rest
+    (decided 2026-10-30).
 64. A type can be changed at any time, also on a POI that already has
     passes. The change applies at once, with the toast "Type set:
     Straight only" (item 36), when it has none of the two consequences
