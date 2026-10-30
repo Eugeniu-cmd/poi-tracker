@@ -1,5 +1,5 @@
 /* POI Tracker — design tokens.
-   v0.23 — 2026-10-26
+   v0.24 — 2026-10-30
    Version history (append-only, never rewrite old entries):
    v0.1 2026-09-03 — tokens extracted from the 2026-09-02 prototype.
    v0.2 2026-09-03 — header translated to English; token values unchanged.
@@ -139,16 +139,26 @@
    square of the mini-map, whose large numbers need 3:1 (3.2:1 on the
    tint). --ok stays #287030 for the POI column and every small text. On
    dark both follow --ok and --ok-bg.
+   v0.24 2026-10-30 — the user's decision on solid panels (screens.md
+   v0.62, item 68). --panel, --panel-strong and --panel-edge become
+   opaque, the colours the translucent ones gave over --bg, since the
+   tablet's GPU drew see-through panels about twice too light, made them
+   blink at a pass, veiled them while a menu was open and flipped the
+   rail. New --panel-inset, the strong surface inside a panel (the
+   mini-map, the rail, the column's button, the action bar's and
+   History's buttons). The background gradient no longer shows through a
+   panel.
    Rules: every reference imports this file; tokens are never edited in
    passing — only by a dedicated decision. */
 
 :root {
   --bg: #F5F2E8;
   --bg-grad: linear-gradient(135deg, #E3F1EA 0%, #F7F4EA 50%, rgba(217, 169, 42, 0.16) 100%);
-  --panel: rgba(255, 253, 246, 0.72);
-  --panel-strong: rgba(255, 253, 246, 0.92);
+  --panel: #FCFAF2;
+  --panel-strong: #FEFCF5;
+  --panel-inset: #FFFDF6;
   --panel-solid: #FFFDF6;
-  --panel-edge: rgba(255, 255, 255, 0.85);
+  --panel-edge: #FFFEFD;
   --blur: 14px;
   --line: rgba(5, 84, 63, 0.16);
   --ink: #0A2A21;
@@ -265,10 +275,11 @@
   :root:not([data-theme="light"]) {
     --bg: #04211A;
     --bg-grad: linear-gradient(135deg, #0A3027 0%, #04211A 55%, rgba(230, 184, 62, 0.10) 100%);
-    --panel: rgba(255, 255, 240, 0.06);
-    --panel-strong: rgba(255, 255, 240, 0.12);
+    --panel: #132E27;
+    --panel-strong: #223C34;
+    --panel-inset: #2F473F;
     --panel-solid: #0A3027;
-    --panel-edge: rgba(255, 255, 240, 0.14);
+    --panel-edge: #344C43;
     --line: rgba(255, 255, 240, 0.12);
     --ink: #F2EEDC;
     --ink-2: rgba(242, 238, 220, 0.66);
@@ -313,10 +324,11 @@
 :root[data-theme="dark"] {
   --bg: #04211A;
   --bg-grad: linear-gradient(135deg, #0A3027 0%, #04211A 55%, rgba(230, 184, 62, 0.10) 100%);
-  --panel: rgba(255, 255, 240, 0.06);
-  --panel-strong: rgba(255, 255, 240, 0.12);
+  --panel: #132E27;
+  --panel-strong: #223C34;
+  --panel-inset: #2F473F;
   --panel-solid: #0A3027;
-  --panel-edge: rgba(255, 255, 240, 0.14);
+  --panel-edge: #344C43;
   --line: rgba(255, 255, 240, 0.12);
   --ink: #F2EEDC;
   --ink-2: rgba(242, 238, 220, 0.66);

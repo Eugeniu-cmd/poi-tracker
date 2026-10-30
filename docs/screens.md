@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.61 — 2026-10-28
+v0.62 — 2026-10-30
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -337,6 +337,15 @@ own font and display size settings (item 52). When the app leaves the
 screen, the open compass closes as Cancel does, with no toast, since
 nothing was recorded; a pass whose side was already tapped is saved and
 finishes as usual (item 8).
+v0.62 2026-10-30 — solid panels (tokens v0.24, main-screen v0.44,
+history v0.30, settings v0.27, app v0.19): the user's tablet drew the
+see-through panels about twice too light in dark, let them go to their
+designed colour for a moment at every pass, veiled them while the type
+menu was open and flipped the rail between two shades, so --panel,
+--panel-strong and --panel-edge are opaque, the colours the translucent
+ones gave over --bg, and a strong surface inside a panel takes the new
+--panel-inset (item 68). The test switch of app v0.18, which found it,
+is gone.
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -468,7 +477,11 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     side discs and the letters N, E, S and W, and done is a brighter
     green of its own, apart from the emerald. The error red, the focus
     blue and the hatch of a not drivable tile are not part of the
-    palette and stay as they were.
+    palette and stay as they were. Panels are solid, never see-through:
+    --panel, --panel-strong, --panel-inset (a strong surface inside a
+    panel) and --panel-edge are opaque colours (decided 2026-10-30),
+    since the tablet's GPU drew see-through panels too light and made
+    them blink, flip and veil.
 69. Icons are Lucide icons only (CLAUDE.md rule 10), their path data
     copied verbatim, at stroke-width 2.6. One symbol stands for each
     maneuver everywhere in the app: Lucide corner-up-left for Left,

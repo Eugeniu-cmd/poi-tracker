@@ -343,12 +343,29 @@
           carries a blurred shadow, so .disc.locked keeps --o-locked and
           loses --shadow, which at 28% was invisible anyway. Frame G's
           notes say so. No token changes.
+  v0.44 2026-10-30 — solid panels (screens.md v0.62, item 68,
+          _tokens.css v0.24): the user's tablet (Lenovo Tab M10 Plus 3rd
+          Gen, Mali-G52, Chrome 155) drew the see-through panels about
+          twice too light in dark, let them go to their designed colour
+          for a moment at every pass, veiled them while the type menu
+          was open and flipped the rail between two shades, and the
+          test switch of app v0.18 showed that opaque panels are the
+          drawing that works. --panel, --panel-strong and --panel-edge
+          become the colours the translucent ones gave over --bg, in
+          both themes, and a strong surface inside a panel takes the
+          new --panel-inset, so it keeps the look it had: .mmap, .rail
+          and .colbtn inside the column, .btn inside the action bar and,
+          in History, inside the panel. The surfaces on the page
+          background (.route, .sync, .gear, .typebtn, .lock.info) keep
+          --panel-strong, and the borders keep --panel-edge. The
+          background gradient no longer shows through a panel. No
+          frame's markup changes.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.43</title>
+<title>POI Tracker — Working Screen Reference v0.44</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -405,7 +422,7 @@
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
-     line height below is a var() from _tokens.css v0.23 or a calc() over
+     line height below is a var() from _tokens.css v0.24 or a calc() over
      them. Literal values are limited to the plain numbers of item 68: 0
      and 1, 1px hairlines, 50% for round shapes, percentages and fr of a
      layout, multipliers of a token, counts, em, ch, lh and cap ratios of
@@ -557,7 +574,7 @@
 
   /* ---- mini-map, the column's header (item 58); on a short screen a
      one-line grid button in its place (item 70) ---- */
-  .mmap { flex: none; width: 100%; padding: var(--s-3); background: var(--panel-strong);
+  .mmap { flex: none; width: 100%; padding: var(--s-3); background: var(--panel-inset);
           border-bottom: 1px solid var(--line); display: flex; flex-direction: column;
           align-items: center; }
   .mm { display: flex; flex-direction: column; gap: var(--s-2); }
@@ -622,7 +639,7 @@
      first and last keep clear of the hairline and the corner; the finger pad
      spans the rail's inner width */
   .rail { position: relative; width: var(--s-6); flex: none; border-left: 1px solid var(--line);
-          background: var(--panel-strong); }
+          background: var(--panel-inset); }
   .rail span { position: absolute; left: 0; right: 0; text-align: center;
                transform: translateY(-50%); font-size: var(--t-small);
                font-weight: var(--w-heavy); color: var(--ink-2); line-height: var(--lh-tight); }
@@ -642,7 +659,7 @@
             padding: var(--s-3) var(--s-4); font-size: var(--t-body); font-weight: var(--w-bold);
             line-height: round(up, calc(var(--lh-body) * var(--t-body)), 1px);
             text-wrap: balance; color: var(--ink);
-            background: var(--panel-strong); border: 1px solid var(--line);
+            background: var(--panel-inset); border: 1px solid var(--line);
             border-radius: calc(var(--r-md) - var(--s-3) - 1px); }
   .colbtn .ic { margin-right: -0.375em; }
 
@@ -938,7 +955,7 @@
          border-radius: var(--r-md); box-shadow: var(--shadow); }
   .btn { display: inline-flex; align-items: center; height: var(--tap-min);
          padding: 0 var(--s-4); font-size: var(--t-body); font-weight: var(--w-bold);
-         background: var(--panel-strong); border: 1px solid var(--line);
+         background: var(--panel-inset); border: 1px solid var(--line);
          border-radius: calc(var(--r-md) - var(--s-2) - 1px); white-space: nowrap; }
   .btn.off { opacity: var(--o-off); }
   .btn.cancel { margin-left: auto; }
@@ -1167,7 +1184,12 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.43 — 2026-10-28.</b> A locked disc has no shadow (item 5, frame G): the tablet's GPU drew a band of
+  <p class="meta"><b>v0.44 — 2026-10-30.</b> Solid panels (item 68, _tokens.css v0.24): the tablet's GPU drew the
+     see-through panels about twice too light in dark, made them blink at a pass, veiled them under an open
+     menu and flipped the rail, so --panel, --panel-strong and --panel-edge are opaque, the colours the
+     translucent ones gave over --bg, and a strong surface inside a panel (the mini-map, the rail, the
+     column's button, the bar's buttons) takes the new --panel-inset (decided 2026-10-30).
+     A locked disc has no shadow (item 5, frame G): the tablet's GPU drew a band of
      garbage across the middle of the screen under a half-transparent disc with a blurred shadow, so a
      locked disc keeps its fade and loses --shadow, which at 28% was invisible anyway (decided 2026-10-28).
      A brighter done green for the grid (_tokens.css v0.23, items 58 and 59): the done
@@ -1213,8 +1235,8 @@
      like the maneuver discs and its right half gold like the side discs, with the dial fixed
      and N up. The arrow is always there: with no heading yet it shows the course the tablet
      saved last, or north, as a dashed outline (item 19). Every value inside
-     the frames is a token of <b>_tokens.css v0.23</b> (size C, screens.md item 67) and
-     every rule follows <b>screens.md v0.60</b>. Icons are
+     the frames is a token of <b>_tokens.css v0.24</b> (size C, screens.md item 67) and
+     every rule follows <b>screens.md v0.62</b>. Icons are
      Lucide only, one symbol per maneuver (item 69). The board is rubber (item 54):
      presets <b>800 × 1333</b> (the user's tablet in portrait, the default),
      <b>720 × 1000</b> (portrait minimum), <b>1333 × 800</b> (landscape) and

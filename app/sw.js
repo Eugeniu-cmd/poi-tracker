@@ -26,9 +26,10 @@
    v0.16 2026-10-28 — a locked disc has no shadow, the test switch removed: a new cache name for app v0.16.
    v0.17 2026-10-28 — no zoom, and leaving the app cancels a half-made pass: a new cache name for app v0.17.
    v0.18 2026-10-28 — a second temporary test switch, for the dark-mode blink of the see-through panels: a new cache name for app v0.18.
+   v0.19 2026-10-30 — solid panels, the test switch removed: a new cache name for app v0.19.
 */
 'use strict';
-var CACHE = 'poi-app-v0.18';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.19';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 
