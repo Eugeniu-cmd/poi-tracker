@@ -7,14 +7,14 @@
   network: the service worker keeps these files on the tablet.
 
   The look is the approved references, copied, not redrawn:
-  - the app CSS of docs/references/main-screen.html v0.45 and the History
-    rules of docs/references/history.html v0.31, byte for byte
+  - the app CSS of docs/references/main-screen.html v0.46 and the History
+    rules of docs/references/history.html v0.32, byte for byte
   - docs/references/_tokens.css v0.24, inlined
   - the Lucide sprite of main-screen.html
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.65 and docs/data-model.md
+  The behaviour follows docs/screens.md v0.66 and docs/data-model.md
   v0.19, and much of it is the code of the working prototype v19.7. The
   look follows v0.64. Still to come: sending.
 
@@ -267,6 +267,17 @@
           before, and still creates one itself when the early creation
           failed or sound was off at start. The chime's notes and
           timing, the store and its write do not change.
+  v0.22 2026-10-30 — the app shows its version (screens.md v0.66, item
+          72, decided 2026-10-30): the "This tablet" section's title
+          line holds "THIS TABLET" on the left and "App v0.22" on the
+          right, so the user sees which version the tablet runs after an
+          update. The canon copied whole from main-screen.html v0.46 and
+          history.html v0.32, the tokens still _tokens.css v0.24. The
+          version is one constant, APP_VERSION, which a test keeps equal
+          to this header's latest entry and to the service worker's
+          cache name, so a later step cannot bump one and forget the
+          other. Settings will show it too when it is built. The APP
+          ONLY piece stays. No behaviour changes.
 -->
 <html lang="en">
 <head>
@@ -798,6 +809,13 @@
   .sline.wait .dot { background: var(--warn); }
   .sline.bad .dot { background: var(--err); }
   .sline.off .dot { background: var(--ink-3); }
+  /* the section's title line (v0.46): "THIS TABLET" on the left and the
+     app's version on the right, on the title's baseline, so the user sees
+     which version the tablet runs. The version is the title's size and
+     colour in --w-bold without the title's letter-spacing. The line is the
+     .pt itself, so the panel keeps its height */
+  .shead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); }
+  .sver { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2); letter-spacing: 0; }
 
   /* ---- body: the POI column beside the main area (items 51, 56); the
      summary under the main area in portrait (item 3) ---- */
@@ -1671,6 +1689,7 @@
   'use strict';
 
   // ================= constants (screens.md items 39, 46, 60; data-model.md) =================
+  var APP_VERSION = 'v0.22';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
   var KEY = 'poi-app:store';         // the whole store, one key, one setItem per change
   var HEADING_KEY = 'poi-app:heading';
   var SCHEMA = 1;                    // the layout of the store; migrate() brings older ones up
@@ -2623,7 +2642,7 @@
     var cls = slow === null ? ' off' : slow <= FAST ? '' : slow <= SLOW ? ' wait' : ' bad';
     var word = slow === null ? 'No pass yet' : slow <= FAST ? 'Fast' : slow <= SLOW ? 'Some taps slow' : 'Slow taps';
     function ms(v) { return v === null ? '–' : fmt(v) + ' ms'; }
-    return '<div class="sdiv"></div><div class="pt">THIS TABLET</div>' +
+    return '<div class="sdiv"></div><div class="pt shead"><span>THIS TABLET</span><span class="sver">App ' + APP_VERSION + '</span></div>' +
       '<div class="sfig"><span class="ol"><b>' + ms(last) + '</b><small>Last tap</small></span>' +
       '<span class="ol"><b>' + ms(slow) + '</b><small>Slowest of 50</small></span>' +
       '<span class="ol"><b>' + (speed.freezes === null ? '–' : fmt(speed.freezes)) + '</b><small>Freezes</small></span></div>' +

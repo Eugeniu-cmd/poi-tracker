@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.65 — 2026-10-30
+v0.66 — 2026-10-30
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -362,6 +362,11 @@ item 62 says the sound is made ready once, right after the app opens, so
 the first pass is as quick as the rest; the app created the browser's
 audio context inside the first side tap, which made the first pass of
 every start slow (speed step 2b, decided 2026-10-30). No other change.
+v0.66 2026-10-30 — the app shows its version (main-screen v0.46, frames
+O and V, history v0.32, settings v0.29, app v0.22): the "This tablet"
+section's title line carries the app's version on its right, "App
+v0.22", so the user sees which version the tablet runs after an update
+(item 72). Settings will show it too when it is built. No other change.
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -1025,7 +1030,10 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     "since" the time the app opened. Before the first pass the two times
     show dashes and the status line reads "No pass yet"; the freezes show
     as counted. The numbers live in memory only and reset when the app
-    restarts (decided 2026-10-30).
+    restarts (decided 2026-10-30). The section's title line carries the
+    app's version on its right, "App v0.22", so the user sees which
+    version the tablet runs (decided 2026-10-30). Settings will show it
+    too.
     When the tracker's script answers "auth", the access key saved on
     this tablet is not the script's. The control reads "Access key
     rejected" with its dot in the error colour, and the line under the

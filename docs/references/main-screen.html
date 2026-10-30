@@ -377,12 +377,23 @@
           "Some taps slow". The numbers live in memory only and reset
           when the app restarts (decided 2026-10-30). No token changes.
           Twenty-two states, A to V.
+  v0.46 2026-10-30 — the app's version on the "This tablet" title line
+          (screens.md v0.66, item 72): the section's title line holds
+          "THIS TABLET" on the left and the app's version, "App v0.22",
+          on the right, baseline-aligned, so the user sees which version
+          the tablet runs after an update. The version is the title's
+          size and colour, --t-small and --ink-2, in --w-bold with no
+          letter-spacing; the title keeps the panel's title style and
+          the line keeps its height. New rules .shead and .sver in the
+          shell, tokens only. Frames O and V show it. Settings will show
+          the version too when it is built (decided 2026-10-30). No
+          token changes.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.45</title>
+<title>POI Tracker — Working Screen Reference v0.46</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -571,6 +582,13 @@
   .sline.wait .dot { background: var(--warn); }
   .sline.bad .dot { background: var(--err); }
   .sline.off .dot { background: var(--ink-3); }
+  /* the section's title line (v0.46): "THIS TABLET" on the left and the
+     app's version on the right, on the title's baseline, so the user sees
+     which version the tablet runs. The version is the title's size and
+     colour in --w-bold without the title's letter-spacing. The line is the
+     .pt itself, so the panel keeps its height */
+  .shead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); }
+  .sver { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2); letter-spacing: 0; }
 
   /* ---- body: the POI column beside the main area (items 51, 56); the
      summary under the main area in portrait (item 3) ---- */
@@ -1219,7 +1237,11 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.45 — 2026-10-30.</b> The "This tablet" section of the Sync panel (item 72, frames O and
+  <p class="meta"><b>v0.46 — 2026-10-30.</b> The app's version on the "This tablet" title line (item 72, frames O and V):
+     the section's title line holds "THIS TABLET" on the left and "App v0.22" on the right, baseline-aligned, the
+     version in the title's size and colour, bold, without its letter-spacing, so the user sees which version the
+     tablet runs after an update; the panel keeps its height. Settings will show it too (decided 2026-10-30).
+     The "This tablet" section of the Sync panel (item 72, frames O and
      V), reference first for speed step 2: last in the panel, under a divider, the time from the side tap that
      records a pass until the pass is on screen ("Last tap"), the slowest of the last 50 such taps ("Slowest
      of 50") and how often the tablet was busy 50 ms or more since the app opened ("Freezes"), then a status
@@ -2168,7 +2190,7 @@
         <div class="sdiv"></div>
         <button class="opt" type="button"><span class="ol"><b>Connection</b><small>Script URL and access key for Vienna</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
         <div class="sdiv"></div>
-        <div class="pt">THIS TABLET</div>
+        <div class="pt shead"><span>THIS TABLET</span><span class="sver">App v0.22</span></div>
         <div class="sfig"><span class="ol"><b>92 ms</b><small>Last tap</small></span><span class="ol"><b>140 ms</b><small>Slowest of 50</small></span><span class="ol"><b>3</b><small>Freezes</small></span></div>
         <div class="sline"><span class="dot"></span><span>Fast · since 06:24</span></div>
       </div>
@@ -2183,6 +2205,7 @@
         <li><b>30</b> "Load from sheet" names the route and the time of the last load (item 16 timestamps).</li>
         <li><b>25</b> "Connection" opens the city's Connection screen: Script URL, access key, "Test connection". "Send now" and "Load from sheet" no longer sit there (item 29).</li>
         <li><b>72</b> Last, under a divider, "THIS TABLET": the time from the side tap that records a pass until the pass is on screen ("Last tap"), the slowest of the last 50 such taps ("Slowest of 50") and how often the tablet was busy 50 ms or more since the app opened ("Freezes"), then a status line from the slowest of 50, here "Fast · since 06:24" with the dot in --ok, "since" the time the app opened. Nothing in it can be tapped. The numbers live in memory only and reset when the app restarts (decided 2026-10-30). Frame V shows the other states.</li>
+        <li><b>72</b> The section's title line carries the app's version on its right, "App v0.22", in the title's size and colour, bold, without its letter-spacing, so the user sees which version the tablet runs after an update. The line keeps its height. Settings will show the version too when it is built (decided 2026-10-30).</li>
         <li><b>66</b> The panel closes by a choice, a tap outside or when the screen turns. A tap outside only closes it: nothing under it reacts.</li>
       </ul></aside>
     </section>
@@ -2581,7 +2604,7 @@
         <div class="sdiv"></div>
         <button class="opt" type="button"><span class="ol"><b>Connection</b><small>Script URL and access key for Vienna</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
         <div class="sdiv"></div>
-        <div class="pt">THIS TABLET</div>
+        <div class="pt shead"><span>THIS TABLET</span><span class="sver">App v0.22</span></div>
         <div class="sfig"><span class="ol"><b>180 ms</b><small>Last tap</small></span><span class="ol"><b>340 ms</b><small>Slowest of 50</small></span><span class="ol"><b>7</b><small>Freezes</small></span></div>
         <div class="sline wait"><span class="dot"></span><span>Some taps slow · since 06:24</span></div>
       </div>
@@ -2594,6 +2617,7 @@
         <li><b>72</b> Four states, from the slowest of 50: "Fast" with the dot in --ok at 200 ms or less (frame O), "Some taps slow" with the dot in --warn up to 500 ms (this frame), "Slow taps" with the dot in --err above 500 ms, and "No pass yet" with the dot in --ink-3 before the first pass, when the two times read "–" and the freezes "0". The last two change text and colour only, so they are not drawn.</li>
         <li><b>72</b> A tap is the side tap that records a pass, timed from the tap until the pass is on screen. A freeze is the tablet busy 50 ms or more, counted after the first screen is drawn. Google calls an interaction good at 200 ms or less and poor above 500 ms (web.dev/inp).</li>
         <li><b>72</b> The section takes no taps: no tap target, no focus. The numbers are kept in memory only and reset when the app restarts; nothing is written to the tablet's storage (decided 2026-10-30). The app measures and shows them in speed step 2b.</li>
+        <li><b>72</b> The title line reads "THIS TABLET" on the left and the app's version, "App v0.22", on the right, as in frame O (decided 2026-10-30).</li>
       </ul></aside>
     </section>
 

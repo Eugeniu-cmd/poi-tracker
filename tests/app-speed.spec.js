@@ -21,6 +21,9 @@
    about 300 ms in headless Chromium and made the first pass read "Some
    taps slow". The last three tests count the contexts through a wrapper
    around window.AudioContext set before the page loads.
+   The section's title line carries the app's version on its right (app
+   v0.22, item 72), so the first test reads the title from the line's
+   first span; app-version.spec.js checks the version itself.
 */
 'use strict';
 const { test, expect, text, store, layers, holdsLock, openSample, recordPass, reloadWith } = require('./fixtures');
@@ -93,9 +96,9 @@ test('Speed · a fresh app: the section last, dashes, the freezes counted, "No p
   const pop = await openPanel(page);
   // last in the panel: a divider, the title, the figures and the status line
   const tail = await pop.evaluate(function (el) {
-    return Array.prototype.slice.call(el.children, -4).map(function (c) { return c.className + (c.className === 'pt' ? ' ' + c.textContent : ''); });
+    return Array.prototype.slice.call(el.children, -4).map(function (c) { return c.className + (c.classList.contains('pt') ? ' ' + c.firstChild.textContent : ''); });
   });
-  expect(tail).toEqual(['sdiv', 'pt THIS TABLET', 'sfig', 'sline off']);
+  expect(tail).toEqual(['sdiv', 'pt shead THIS TABLET', 'sfig', 'sline off']);
   const s = await readSection(pop);
   expect(s.last).toBe('–');
   expect(s.slow).toBe('–');
