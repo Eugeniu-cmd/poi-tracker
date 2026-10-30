@@ -360,12 +360,29 @@
           --panel-strong, and the borders keep --panel-edge. The
           background gradient no longer shows through a panel. No
           frame's markup changes.
+  v0.45 2026-10-30 — the "This tablet" section of the Sync panel
+          (screens.md v0.63, item 72), reference first for speed step 2:
+          last in the panel, under a divider, a title "THIS TABLET", then
+          three figures in equal columns, a number over its label, "Last
+          tap" (the time from the side tap that records a pass until the
+          pass is on screen), "Slowest of 50" (the slowest of the last 50
+          such taps) and "Freezes" (how often the tablet was busy 50 ms
+          or more since the app opened), then a status line from the
+          slowest of 50 with the dot of the state line: "Fast" in --ok
+          at 200 ms or less, "Some taps slow" in --warn up to 500 ms,
+          "Slow taps" in --err above, "No pass yet" in --ink-3 before
+          the first pass, each "since" the time the app opened. New
+          rules .sfig and .sline in the shell, tokens only; the section
+          takes no taps. Frame O shows the "Fast" state, new frame V
+          "Some taps slow". The numbers live in memory only and reset
+          when the app restarts (decided 2026-10-30). No token changes.
+          Twenty-two states, A to V.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — Working Screen Reference v0.44</title>
+<title>POI Tracker — Working Screen Reference v0.45</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -536,6 +553,24 @@
   .sdiv { height: 1px; margin: var(--s-2); background: var(--line); }
   .syncpop .opt.off b { opacity: var(--o-off); }
   .syncpop .go { width: 1em; height: 1em; flex: none; font-size: var(--t-label); color: var(--ink-2); }
+  /* ---- "This tablet" (item 72, v0.45): the last section of the Sync panel,
+     under a divider, with a .pt title. Three figures in equal columns, each
+     a number over its label built as an option's lines, then a status line
+     with the dot of the state line and its colours. Nothing here is a tap
+     target: plain blocks, no button, nothing to focus. The numbers live in
+     memory only and reset when the app restarts ---- */
+  .sfig { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-3);
+          padding: 0 var(--s-2); }
+  .sfig .ol b { font-variant-numeric: tabular-nums; }
+  .sfig .ol small { display: block; line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .sline { display: flex; align-items: flex-start; gap: var(--s-3);
+           padding: var(--s-3) var(--s-2) var(--s-2);
+           font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
+           line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .sline .dot { margin-top: round(down, calc((round(up, calc(var(--lh-body) * var(--t-small)), 1px) - var(--s-2)) / 2), 1px); }
+  .sline.wait .dot { background: var(--warn); }
+  .sline.bad .dot { background: var(--err); }
+  .sline.off .dot { background: var(--ink-3); }
 
   /* ---- body: the POI column beside the main area (items 51, 56); the
      summary under the main area in portrait (item 3) ---- */
@@ -1184,7 +1219,15 @@
 
   <p class="eyebrow">Design Reference · docs/references/main-screen.html</p>
   <h1>POI Tracker — working screen</h1>
-  <p class="meta"><b>v0.44 — 2026-10-30.</b> Solid panels (item 68, _tokens.css v0.24): the tablet's GPU drew the
+  <p class="meta"><b>v0.45 — 2026-10-30.</b> The "This tablet" section of the Sync panel (item 72, frames O and
+     V), reference first for speed step 2: last in the panel, under a divider, the time from the side tap that
+     records a pass until the pass is on screen ("Last tap"), the slowest of the last 50 such taps ("Slowest
+     of 50") and how often the tablet was busy 50 ms or more since the app opened ("Freezes"), then a status
+     line from the slowest of 50, "Fast" at 200 ms or less, "Some taps slow" up to 500 ms, "Slow taps" above,
+     with a dot in --ok, --warn or --err, and "since" the time the app opened; "No pass yet" with the dot in
+     --ink-3 before the first pass. The section takes no taps. The numbers live in memory only and reset when
+     the app restarts (decided 2026-10-30).
+     Solid panels (item 68, _tokens.css v0.24): the tablet's GPU drew the
      see-through panels about twice too light in dark, made them blink at a pass, veiled them under an open
      menu and flipped the rail, so --panel, --panel-strong and --panel-edge are opaque, the colours the
      translucent ones gave over --bg, and a strong surface inside a panel (the mini-map, the rail, the
@@ -1245,7 +1288,7 @@
      shape: side by side when wider than tall, stacked when taller (item 51). Below
      700px of height the compact step applies: smaller display numbers, a one-line
      grid button instead of the mini-map and, in landscape, narrower margins and gaps
-     so the card keeps its paddings (item 70). Twenty-one states, A to U.</p>
+     so the card keeps its paddings (item 70). Twenty-two states, A to V.</p>
 
   <div class="tool" role="group" aria-label="Checking tool">
     <span class="lbl">Preset</span>
@@ -2124,6 +2167,10 @@
         <button class="opt" type="button"><span class="ol"><b>Load from sheet</b><small>R20890-058 · last loaded 09.10 19:20</small></span></button>
         <div class="sdiv"></div>
         <button class="opt" type="button"><span class="ol"><b>Connection</b><small>Script URL and access key for Vienna</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        <div class="sdiv"></div>
+        <div class="pt">THIS TABLET</div>
+        <div class="sfig"><span class="ol"><b>92 ms</b><small>Last tap</small></span><span class="ol"><b>140 ms</b><small>Slowest of 50</small></span><span class="ol"><b>3</b><small>Freezes</small></span></div>
+        <div class="sline"><span class="dot"></span><span>Fast · since 06:24</span></div>
       </div>
 </div>
         </div></div>
@@ -2135,6 +2182,7 @@
         <li><b>26, 27</b> "Send now" stays in place, its label dimmed, with its reason "Nothing to send" under it. Sending is automatic, the button only confirms before a shift ends (item 29).</li>
         <li><b>30</b> "Load from sheet" names the route and the time of the last load (item 16 timestamps).</li>
         <li><b>25</b> "Connection" opens the city's Connection screen: Script URL, access key, "Test connection". "Send now" and "Load from sheet" no longer sit there (item 29).</li>
+        <li><b>72</b> Last, under a divider, "THIS TABLET": the time from the side tap that records a pass until the pass is on screen ("Last tap"), the slowest of the last 50 such taps ("Slowest of 50") and how often the tablet was busy 50 ms or more since the app opened ("Freezes"), then a status line from the slowest of 50, here "Fast · since 06:24" with the dot in --ok, "since" the time the app opened. Nothing in it can be tapped. The numbers live in memory only and reset when the app restarts (decided 2026-10-30). Frame V shows the other states.</li>
         <li><b>66</b> The panel closes by a choice, a tap outside or when the screen turns. A tap outside only closes it: nothing under it reacts.</li>
       </ul></aside>
     </section>
@@ -2484,13 +2532,78 @@
       </ul></aside>
     </section>
 
+    <!-- ================= V · Sync panel, slow taps ================= -->
+    <section class="unit">
+      <div class="device">
+        <div class="frame"><div class="app" data-state="V"><div class="scr">
+<header class="topbar">
+  <span class="city">Vienna</span>
+  <span class="pickwrap"><button class="route" type="button">R20890-058<svg class="ic"><use href="#i-chev-down"/></svg></button></span>
+  <button class="sync" type="button" aria-expanded="true"><span class="dot"></span>All sent · 21:40<svg class="ic"><use href="#i-chev-up"/></svg></button>
+  <button class="gear" type="button" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
+</header>
+<div class="body">
+  <div class="colwrap"><div class="col" data-active="136"></div></div>
+  <div class="main">
+    <svg class="compass" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(40 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
+    <div class="mleft">
+    <section class="head"><div class="big">136</div><div class="hcol"><div class="plabel">POI</div><div class="cnt">41 of 70</div><div class="rest">29 to go</div></div></section>
+    <div class="typewrap"><button class="typebtn" type="button" aria-label="POI type, tap to change"><span class="ticon"><svg class="sl"><use href="#i-left"/></svg><svg class="ss"><use href="#i-straight"/></svg><svg class="sr"><use href="#i-right"/></svg></span><span class="tl"><b>Intersection</b><small><span class="iw"><svg class="ic"><use href="#i-left"/></svg><span class="tn">28</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-straight"/></svg><span class="tn">14</span> ·</span> <span class="iw"><svg class="ic"><use href="#i-right"/></svg><span class="tn">28</span></span></small></span><span class="tchg"><span>Change type</span><svg class="ic"><use href="#i-chev-down"/></svg></span></button></div>
+    <div class="card">
+      <div class="khead"><span class="spt">TO GO</span><span class="lp" role="img" aria-label="Last pass: Left from South at 21:40"><span class="spt">LAST</span><svg class="ic"><use href="#i-left"/></svg>S · 21:40</span></div>
+      <div class="two">
+        <div class="pyr">
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">12</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-left"/></svg>Left</span></div>
+          <div class="mz"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="57 100"/></svg><div class="in"><b class="rv">6</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-straight"/></svg>Straight</span></div>
+          <div class="mz low"><div class="wheel"><svg class="pg" viewBox="0 0 76 76" aria-hidden="true"><circle class="bg" cx="38" cy="38" r="33" stroke-width="6"/><circle class="fg" cx="38" cy="38" r="33" stroke-width="6" pathLength="100" stroke-dasharray="61 100"/></svg><div class="in"><b class="rv">11</b><small>more</small></div></div><span class="mn"><svg class="ic"><use href="#i-right"/></svg>Right</span></div>
+        </div>
+        <div class="rose"><div class="grid4"><div class="dm"><div class="dmi"><b class="dl">N</b><b class="dv">16</b></div></div><div class="dm z"><div class="dmi"><b class="dl">E</b><b class="dv">0</b></div></div><div class="dm"><div class="dmi"><b class="dl">W</b><b class="dv">11</b></div></div><div class="dm"><div class="dmi"><b class="dl">S</b><b class="dv">14</b></div></div></div></div>
+      </div>
+    </div>
+    </div>
+    <div class="mright">
+    <div class="stagezone"><div class="stagebox"><div class="stage">
+      <button class="disc l" type="button" aria-label="Left"><svg><use href="#i-left"/></svg></button>
+      <button class="disc st" type="button" aria-label="Straight"><svg><use href="#i-straight"/></svg></button>
+      <button class="disc r" type="button" aria-label="Right"><svg><use href="#i-right"/></svg></button>
+    </div></div></div>
+    </div>
+    <div class="bar"><button class="btn" type="button">Undo last</button><button class="btn" type="button">History</button><div class="summary sumbar" data-summary></div></div>
+  </div>
+  <div class="summary sumport" data-summary></div>
+</div>
+      <div class="pop syncpop" role="dialog" aria-label="Sync">
+        <div class="pt">SYNC · VIENNA</div>
+        <div class="sstat"><span class="dot"></span><span class="ol"><b>All sent</b><small>Last sent 21:40</small></span></div>
+        <div class="sdiv"></div>
+        <button class="opt off" type="button" aria-disabled="true"><span class="ol"><b>Send now</b><small>Nothing to send</small></span></button>
+        <button class="opt" type="button"><span class="ol"><b>Load from sheet</b><small>R20890-058 · last loaded 09.10 19:20</small></span></button>
+        <div class="sdiv"></div>
+        <button class="opt" type="button"><span class="ol"><b>Connection</b><small>Script URL and access key for Vienna</small></span><svg class="go"><use href="#i-chev-right"/></svg></button>
+        <div class="sdiv"></div>
+        <div class="pt">THIS TABLET</div>
+        <div class="sfig"><span class="ol"><b>180 ms</b><small>Last tap</small></span><span class="ol"><b>340 ms</b><small>Slowest of 50</small></span><span class="ol"><b>7</b><small>Freezes</small></span></div>
+        <div class="sline wait"><span class="dot"></span><span>Some taps slow · since 06:24</span></div>
+      </div>
+</div>
+        </div></div>
+        <p class="caption"><b>V</b> · Sync panel, slow taps</p>
+      </div>
+      <aside class="dmap"><div class="dmap-title">Decision map</div><ul>
+        <li><b>72</b> The Sync panel of frame O with "This tablet" in its "Some taps slow" state: the slowest of the last 50 taps is 340 ms, over 200 ms and up to 500 ms, so the status line reads "Some taps slow · since 06:24" with the dot in --warn. The last tap took 180 ms, and the tablet froze 7 times since the app opened at 06:24.</li>
+        <li><b>72</b> Four states, from the slowest of 50: "Fast" with the dot in --ok at 200 ms or less (frame O), "Some taps slow" with the dot in --warn up to 500 ms (this frame), "Slow taps" with the dot in --err above 500 ms, and "No pass yet" with the dot in --ink-3 before the first pass, when the two times read "–" and the freezes "0". The last two change text and colour only, so they are not drawn.</li>
+        <li><b>72</b> A tap is the side tap that records a pass, timed from the tap until the pass is on screen. A freeze is the tablet busy 50 ms or more, counted after the first screen is drawn. Google calls an interaction good at 200 ms or less and poor above 500 ms (web.dev/inp).</li>
+        <li><b>72</b> The section takes no taps: no tap target, no focus. The numbers are kept in memory only and reset when the app restarts; nothing is written to the tablet's storage (decided 2026-10-30). The app measures and shows them in speed step 2b.</li>
+      </ul></aside>
+    </section>
+
   </div>
 
 <script>
 /* Checking-tool script (screens.md item 54) and sample-data generator.
    It fills the repeated markup of every frame (mini-map squares, POI rows,
    rail labels, grid tiles, the bottom summary) from one fixed table, so all
-   twenty-one frames show the same route. No randomness: the same picture on
+   twenty-two frames show the same route. No randomness: the same picture on
    every load. It also wires the presets, the drag corner and the theme
    switch. Nothing here runs in the app. */
 (function () {

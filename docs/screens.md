@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.62 — 2026-10-30
+v0.63 — 2026-10-30
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -346,6 +346,13 @@ menu was open and flipped the rail between two shades, so --panel,
 ones gave over --bg, and a strong surface inside a panel takes the new
 --panel-inset (item 68). The test switch of app v0.18, which found it,
 is gone.
+v0.63 2026-10-30 — the "This tablet" section of the Sync panel
+(main-screen v0.45, frames O and V, history v0.31, settings v0.28),
+reference first for speed step 2: last in the panel under a divider, the
+time of the last tap, the slowest of the last 50 and the freezes over a
+status line, "Fast", "Some taps slow" or "Slow taps" from the slowest of
+50, "No pass yet" before the first pass. The numbers live in memory only
+and reset when the app restarts (item 72). The app follows in step 2b.
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -998,7 +1005,16 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     what is left to do: "1 pass to fix or delete", "1 removal to fix or
     cancel", "1 type change to fix or cancel", "2 changes to fix". The
     panel closes like a menu (item 66) and never sends or loads by
-    itself.
+    itself. Last comes a section "This tablet" under a divider, which
+    takes no taps: the time from the side tap that records a pass until
+    the pass is on screen ("Last tap"), the slowest of the last 50 such
+    taps ("Slowest of 50") and how often the tablet was busy 50 ms or
+    more since the app opened ("Freezes"), then a status line from the
+    slowest of 50: "Fast" at 200 ms or less, "Some taps slow" up to 500
+    ms, "Slow taps" above, with a dot in --ok, --warn or --err, and
+    "since" the time the app opened. Before the first pass it shows
+    dashes, 0 freezes and "No pass yet". The numbers live in memory only
+    and reset when the app restarts (decided 2026-10-30).
     When the tracker's script answers "auth", the access key saved on
     this tablet is not the script's. The control reads "Access key
     rejected" with its dot in the error colour, and the line under the

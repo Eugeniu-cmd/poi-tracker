@@ -170,12 +170,19 @@
           the panel, and the buttons "Send again" and "Delete" of a
           refused row inside it. The panel itself keeps --panel, now
           opaque. No History rule changes.
+  v0.31 2026-10-30 — the shell of main-screen v0.45 (screens.md v0.63,
+          item 72): the "This tablet" section of the Sync panel, last
+          in the panel under a divider, with the time of the last tap,
+          the slowest of the last 50 and the freezes over a status
+          line, its rules .sfig and .sline. The Sync panel opens on
+          the working screen, so no frame here shows it. No History
+          rule changes. No token changes.
   ================================================================
 -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<title>POI Tracker — History Reference v0.30</title>
+<title>POI Tracker — History Reference v0.31</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
@@ -229,7 +236,7 @@
   .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
   /* APP START */
-  /* Shared shell, copied from main-screen.html v0.44. Change it there first, then copy it here again. */
+  /* Shared shell, copied from main-screen.html v0.45. Change it there first, then copy it here again. */
   /* ============================================================
      THE APP SCREEN — canon only (screens.md item 68, CLAUDE.md rule 9).
      Every colour, size, spacing, radius, opacity, shadow, weight and
@@ -347,6 +354,24 @@
   .sdiv { height: 1px; margin: var(--s-2); background: var(--line); }
   .syncpop .opt.off b { opacity: var(--o-off); }
   .syncpop .go { width: 1em; height: 1em; flex: none; font-size: var(--t-label); color: var(--ink-2); }
+  /* ---- "This tablet" (item 72, v0.45): the last section of the Sync panel,
+     under a divider, with a .pt title. Three figures in equal columns, each
+     a number over its label built as an option's lines, then a status line
+     with the dot of the state line and its colours. Nothing here is a tap
+     target: plain blocks, no button, nothing to focus. The numbers live in
+     memory only and reset when the app restarts ---- */
+  .sfig { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-3);
+          padding: 0 var(--s-2); }
+  .sfig .ol b { font-variant-numeric: tabular-nums; }
+  .sfig .ol small { display: block; line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .sline { display: flex; align-items: flex-start; gap: var(--s-3);
+           padding: var(--s-3) var(--s-2) var(--s-2);
+           font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
+           line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .sline .dot { margin-top: round(down, calc((round(up, calc(var(--lh-body) * var(--t-small)), 1px) - var(--s-2)) / 2), 1px); }
+  .sline.wait .dot { background: var(--warn); }
+  .sline.bad .dot { background: var(--err); }
+  .sline.off .dot { background: var(--ink-3); }
 
   /* ---- body: the POI column beside the main area (items 51, 56); the
      summary under the main area in portrait (item 3) ---- */
@@ -1115,7 +1140,11 @@
 
   <p class="eyebrow">Design Reference · docs/references/history.html</p>
   <h1>POI Tracker — History panel</h1>
-  <p class="meta"><b>v0.30 — 2026-10-30.</b> The shell of main-screen v0.44: solid panels. --panel, --panel-strong
+  <p class="meta"><b>v0.31 — 2026-10-30.</b> The shell of main-screen v0.45: the "This tablet" section of the
+     Sync panel, last in the panel under a divider, with the time of the last tap, the slowest of the last 50
+     and the freezes over a status line; the Sync panel opens on the working screen, so no frame here shows
+     it (item 72, decided 2026-10-30).
+     The shell of main-screen v0.44: solid panels. --panel, --panel-strong
      and --panel-edge are opaque, the colours the translucent ones gave over --bg, since the user's tablet
      drew see-through panels too light and made them blink, flip and veil; the panel, the column beside it
      and the frame's controls draw them, and the mini-map, the rail and the buttons of a refused row take
@@ -1153,9 +1182,9 @@
      every pass this tablet recorded and every type change not yet in the sheet, newest first, with "Delete" on each pass, a deleted pass
      struck through while its removal waits, and a refused pass offering "Send again" and
      "Delete" (item 47). Every value inside the frames is a token of <b>_tokens.css v0.24</b>
-     (size C, screens.md item 67) and every rule follows <b>screens.md v0.62</b>. The shell
+     (size C, screens.md item 67) and every rule follows <b>screens.md v0.63</b>. The shell
      (top bar, POI column, presets, drag corner, light and dark) is that of
-     <b>main-screen.html v0.44</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
+     <b>main-screen.html v0.45</b>, copied unchanged: presets <b>800 × 1333</b> (the user's
      tablet in portrait, the default), <b>720 × 1000</b>, <b>1333 × 800</b> and
      <b>1000 × 600</b>; every frame also drags at its bottom-right corner. Nine states,
      A to I. The twelve proposals of v0.8 are approved (v0.12, screens.md v0.38).</p>
