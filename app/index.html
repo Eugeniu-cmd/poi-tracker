@@ -7,16 +7,16 @@
   network: the service worker keeps these files on the tablet.
 
   The look is the approved references, copied, not redrawn:
-  - the app CSS of docs/references/main-screen.html v0.44 and the History
-    rules of docs/references/history.html v0.30, byte for byte
+  - the app CSS of docs/references/main-screen.html v0.45 and the History
+    rules of docs/references/history.html v0.31, byte for byte
   - docs/references/_tokens.css v0.24, inlined
   - the Lucide sprite of main-screen.html
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.62 and docs/data-model.md
+  The behaviour follows docs/screens.md v0.64 and docs/data-model.md
   v0.19, and much of it is the code of the working prototype v19.7. The
-  look follows v0.62. Still to come: sending.
+  look follows v0.64. Still to come: sending.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -230,6 +230,30 @@
           was the one that worked, as was Test 3; Test 2, no motion,
           removed nothing. The APP ONLY piece stays. No behaviour
           changes.
+  v0.20 2026-10-30 — speed step 2b (screens.md v0.64, item 72): the Sync
+          panel's "This tablet" section measures the side taps and the
+          freezes, in memory only. The canon copied whole from
+          main-screen.html v0.45 and history.html v0.31, the tokens still
+          _tokens.css v0.24. A tap is the side tap that records a pass,
+          timed from the tap until the pass is on screen: the largest
+          duration among the browser's event timing entries of the tap's
+          interaction (a PerformanceObserver on event entries from 16 ms,
+          rounded to 8 ms), or, when no entry for it arrives within a
+          second, the app's own time from the event's timeStamp to the
+          first frame after the pass is drawn (requestAnimationFrame,
+          then a task). Only taps that recorded a pass count. "Last tap"
+          is the latest, "Slowest of 50" the largest of the last 50, and
+          "Freezes" counts the longtask entries, the tablet busy 50 ms or
+          more, from the first screen drawn. The status line comes from
+          the slowest of 50: "Fast" at 200 ms or less, "Some taps slow"
+          up to 500 ms, "Slow taps" above, "No pass yet" before the first
+          pass, then "since" the time the app opened as item 16 writes
+          it. Nothing slows a tap: record() and its store write stay as
+          they are (item 78) and the figures are computed after the
+          frame. Nothing is written to the tablet's storage, so all of
+          it resets when the app restarts. An observer type the browser
+          lacks leaves the app's own times and "–" for the freezes. The
+          APP ONLY piece stays.
 -->
 <html lang="en">
 <head>
@@ -743,6 +767,24 @@
   .sdiv { height: 1px; margin: var(--s-2); background: var(--line); }
   .syncpop .opt.off b { opacity: var(--o-off); }
   .syncpop .go { width: 1em; height: 1em; flex: none; font-size: var(--t-label); color: var(--ink-2); }
+  /* ---- "This tablet" (item 72, v0.45): the last section of the Sync panel,
+     under a divider, with a .pt title. Three figures in equal columns, each
+     a number over its label built as an option's lines, then a status line
+     with the dot of the state line and its colours. Nothing here is a tap
+     target: plain blocks, no button, nothing to focus. The numbers live in
+     memory only and reset when the app restarts ---- */
+  .sfig { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-3);
+          padding: 0 var(--s-2); }
+  .sfig .ol b { font-variant-numeric: tabular-nums; }
+  .sfig .ol small { display: block; line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .sline { display: flex; align-items: flex-start; gap: var(--s-3);
+           padding: var(--s-3) var(--s-2) var(--s-2);
+           font-size: var(--t-small); font-weight: var(--w-bold); color: var(--ink-2);
+           line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .sline .dot { margin-top: round(down, calc((round(up, calc(var(--lh-body) * var(--t-small)), 1px) - var(--s-2)) / 2), 1px); }
+  .sline.wait .dot { background: var(--warn); }
+  .sline.bad .dot { background: var(--err); }
+  .sline.off .dot { background: var(--ink-3); }
 
   /* ---- body: the POI column beside the main area (items 51, 56); the
      summary under the main area in portrait (item 3) ---- */
@@ -1367,7 +1409,6 @@
       .spt, .lp { font-size: var(--t-body); }
     }
   }
-
   /* ============================================================
      HISTORY (screens.md items 12, 13, 14, 38, 41, 44, 45, 47, 48, 61,
      63, 66). The panel fills the main area of the shell above and takes
@@ -2461,7 +2502,129 @@
       row('loadsheet', 'Load from sheet', why, true, false) +
       '<div class="sdiv"></div>' +
       row('later', c && c.mailboxUrl ? 'Connection' : 'Set up connection', 'Script URL and access key' + (c ? ' for ' + c.name : ''), true, true) +
+      tabletHtml() +
       '</div>';
+  }
+
+  // ---- "This tablet" (item 72, v0.20): the side taps and the freezes, in
+  // memory only. A tap is the side tap that records a pass, timed from the
+  // tap until the pass is on screen. The browser's own interaction timing
+  // gives it when it can: a PerformanceObserver on event entries from 16
+  // ms (durationThreshold), each starting at its event's timeStamp and
+  // lasting to the next paint, rounded to 8 ms; the tap's figure is the
+  // largest duration among the entries of its interaction (the same
+  // interactionId), found through the entry whose startTime is the tap's
+  // timeStamp. A tap under 16 ms leaves no entry, so the app also times
+  // every recorded tap itself, from the event's timeStamp to the first
+  // frame after the pass is drawn (requestAnimationFrame, then a task),
+  // and uses its own figure when no entry for the interaction arrives
+  // within a second. A tap whose frame was not drawn before the app left
+  // the screen gets no figure. A freeze is a longtask entry, the main
+  // thread busy 50 ms or more, counted from the first screen drawn so the
+  // app's own start does not count. Nothing here slows a tap: record()
+  // and its store write stay as they are (item 78), the figures are only
+  // computed after the frame, and nothing is written to the tablet's
+  // storage, so all of it resets when the app restarts (decided
+  // 2026-10-30). An observer type the browser lacks leaves the app's own
+  // times and "–" for the freezes. ----
+  var TAPS = 50;                 // item 72: the slowest of the last 50 taps
+  var ENTRY_WAIT = 1000;         // ms a tap waits for the browser's entries before its own figure counts
+  var FAST = 200, SLOW = 500;    // web.dev/inp: good up to 200 ms, poor above 500 ms
+  var SUPPORTS = (window.PerformanceObserver && PerformanceObserver.supportedEntryTypes) || [];
+  // taps: the last 50 settled taps as { at, ms } in tap order; freezes:
+  // null until the longtask observer runs; entries: the last event entries
+  // seen; pending: the recorded taps whose figure is not final yet
+  var speed = { openedAt: Date.now(), taps: [], freezes: null, entries: [], pending: [] };
+  function settleTap(p, ms) {
+    clearTimeout(p.timer);
+    speed.pending = speed.pending.filter(function (q) { return q !== p; });
+    var t = speed.taps, i = t.length;
+    while (i > 0 && t[i - 1].at > p.at) i -= 1;   // tap order, whichever settles first
+    t.splice(i, 0, { at: p.at, ms: Math.round(ms) });
+    if (t.length > TAPS) t.shift();
+    renderTablet();
+  }
+  // a pending tap settles once the entry that starts at its timeStamp is in:
+  // the largest duration of that entry's interaction
+  function matchEntries() {
+    speed.pending.slice().forEach(function (p) {
+      var id = 0, ms = 0;
+      speed.entries.forEach(function (x) {
+        if (!id && x.interactionId && (x.name === 'click' || x.name === 'pointerup') && Math.abs(x.startTime - p.at) < 1) id = x.interactionId;
+      });
+      if (!id) return;
+      speed.entries.forEach(function (x) { if (x.interactionId === id && x.duration > ms) ms = x.duration; });
+      settleTap(p, ms);
+    });
+  }
+  // from the side tap's click handler, once record() stored the pass: at
+  // is the event's timeStamp. The app's own figure is taken in a task
+  // after the next frame, and the wait for the entries ends a second
+  // after the tap.
+  function timeTap(at) {
+    var p = { at: at, own: null, timer: null };
+    speed.pending.push(p);
+    requestAnimationFrame(function () {
+      setTimeout(function () {
+        p.own = performance.now() - at;
+        if (speed.pending.indexOf(p) < 0) return;
+        matchEntries();
+        if (speed.pending.indexOf(p) < 0) return;
+        p.timer = setTimeout(function () { if (speed.pending.indexOf(p) >= 0) settleTap(p, p.own); }, Math.max(0, ENTRY_WAIT - p.own));
+      }, 0);
+    });
+  }
+  // a tap whose frame was not drawn before the app left the screen gets no
+  // figure: the frame would come only when the app is back
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') speed.pending = speed.pending.filter(function (p) { return p.own !== null; });
+  });
+  function watchSpeed() {
+    if (SUPPORTS.indexOf('event') >= 0) {
+      try {
+        new PerformanceObserver(function (list) {
+          list.getEntries().forEach(function (x) {
+            speed.entries.push({ name: x.name, startTime: x.startTime, duration: x.duration, interactionId: x.interactionId || 0 });
+          });
+          if (speed.pending.length) matchEntries();
+          if (speed.entries.length > 100) speed.entries.splice(0, speed.entries.length - 100);
+        }).observe({ type: 'event', durationThreshold: 16 });
+      } catch (err) { /* not supported: the app's own times */ }
+    }
+    // the freezes count from the first screen drawn
+    if (SUPPORTS.indexOf('longtask') >= 0) {
+      requestAnimationFrame(function () {
+        setTimeout(function () {
+          try {
+            new PerformanceObserver(function (list) { speed.freezes += list.getEntries().length; renderTablet(); }).observe({ type: 'longtask' });
+            speed.freezes = 0;
+          } catch (err) { /* not supported: "–" */ }
+        }, 0);
+      });
+    }
+  }
+  // the section's markup, main-screen.html frames O and V
+  function tabletHtml() {
+    var t = speed.taps, last = t.length ? t[t.length - 1].ms : null, slow = null;
+    t.forEach(function (x) { if (slow === null || x.ms > slow) slow = x.ms; });
+    var cls = slow === null ? ' off' : slow <= FAST ? '' : slow <= SLOW ? ' wait' : ' bad';
+    var word = slow === null ? 'No pass yet' : slow <= FAST ? 'Fast' : slow <= SLOW ? 'Some taps slow' : 'Slow taps';
+    function ms(v) { return v === null ? '–' : fmt(v) + ' ms'; }
+    return '<div class="sdiv"></div><div class="pt">THIS TABLET</div>' +
+      '<div class="sfig"><span class="ol"><b>' + ms(last) + '</b><small>Last tap</small></span>' +
+      '<span class="ol"><b>' + ms(slow) + '</b><small>Slowest of 50</small></span>' +
+      '<span class="ol"><b>' + (speed.freezes === null ? '–' : fmt(speed.freezes)) + '</b><small>Freezes</small></span></div>' +
+      '<div class="sline' + cls + '"><span class="dot"></span><span>' + word + ' · since ' + stamp(speed.openedAt) + '</span></div>';
+  }
+  // an open Sync panel follows a figure in place, its buttons untouched
+  function renderTablet() {
+    var m = find('menu'), pop = m && m.name === 'sync' ? $('overlays').querySelector('.syncpop') : null;
+    if (!pop) return;
+    var box = document.createElement('div');
+    box.innerHTML = tabletHtml();
+    var fig = pop.querySelector('.sfig'), line = pop.querySelector('.sline');
+    if (fig) setHTML(fig, box.querySelector('.sfig').innerHTML);
+    if (line) { line.className = box.querySelector('.sline').className; setHTML(line, box.querySelector('.sline').innerHTML); }
   }
 
   // ---- History (items 12, 13, 14, 38, 41, 44, 45, 47, 48) ----
@@ -2926,7 +3089,7 @@
     if (!t || !app.contains(t) || blocked) return;
     var a = t.getAttribute('data-act');
     if (t.hasAttribute('data-man')) { tapMan(t.getAttribute('data-man')); return; }
-    if (t.hasAttribute('data-side')) { record(t.getAttribute('data-side')); return; }
+    if (t.hasAttribute('data-side')) { var seq = S.seq; record(t.getAttribute('data-side')); if (S.seq !== seq) timeTap(e.timeStamp); return; }
     if (t.hasAttribute('data-poi')) { selectPoi(+t.getAttribute('data-poi'), !!find('grid')); return; }
     if (t.hasAttribute('data-type')) { pickType(t.getAttribute('data-type')); return; }
     if (t.hasAttribute('data-route')) { selectRoute(t.getAttribute('data-route')); return; }
@@ -3152,6 +3315,7 @@
   if (wantSample) { try { history.replaceState(history.state, '', location.pathname + location.hash); } catch (err) { /* fine */ } }
   applyTheme();
   render();
+  watchSpeed();
   Compass.start(drawCompass);
   keepAwake();
   takeLock(function (ok) {

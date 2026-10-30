@@ -1,6 +1,6 @@
 # Screen decision registry
 
-v0.63 — 2026-10-30
+v0.64 — 2026-10-30
 <!-- Version history (append-only, never rewrite old entries):
 v0.1 2026-09-03 — working screen and two panels; decisions carried over
 from the planning chat (interactive prototype of 2026-09-02, verified in
@@ -353,6 +353,10 @@ time of the last tap, the slowest of the last 50 and the freezes over a
 status line, "Fast", "Some taps slow" or "Slow taps" from the slowest of
 50, "No pass yet" before the first pass. The numbers live in memory only
 and reset when the app restarts (item 72). The app follows in step 2b.
+v0.64 2026-10-30 — speed step 2b, the app measures (app v0.20): item 72
+now says that before the first pass the two times show dashes and the
+status line reads "No pass yet" while the freezes show as counted, since
+the tablet can freeze before the first pass. No other change.
 -->
 
 The app is one working screen, on a tablet held either way. History
@@ -1012,9 +1016,10 @@ appears on screen. An apostrophe on screen is the typographic one (’).
     more since the app opened ("Freezes"), then a status line from the
     slowest of 50: "Fast" at 200 ms or less, "Some taps slow" up to 500
     ms, "Slow taps" above, with a dot in --ok, --warn or --err, and
-    "since" the time the app opened. Before the first pass it shows
-    dashes, 0 freezes and "No pass yet". The numbers live in memory only
-    and reset when the app restarts (decided 2026-10-30).
+    "since" the time the app opened. Before the first pass the two times
+    show dashes and the status line reads "No pass yet"; the freezes show
+    as counted. The numbers live in memory only and reset when the app
+    restarts (decided 2026-10-30).
     When the tracker's script answers "auth", the access key saved on
     this tablet is not the script's. The control reads "Access key
     rejected" with its dot in the error colour, and the line under the

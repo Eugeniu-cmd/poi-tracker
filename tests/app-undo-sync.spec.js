@@ -82,7 +82,7 @@ test('A8 · The Sync panel', async ({ page }) => {
   await page.locator('#syncBtn').click();
   const panel = page.locator('.syncpop');
   await expect(panel).toBeVisible();
-  expect(await text(panel.locator('.pt'))).toBe('SYNC · SAMPLE CITY');
+  expect(await text(panel.locator('.pt').first())).toBe('SYNC · SAMPLE CITY');   // the second title is "THIS TABLET" (item 72, v0.20)
   expect(await text(panel.locator('.sstat b'))).toBe('Connection not set up');
   expect(await text(panel.locator('.sstat small'))).toBe('1 pass is kept on this tablet until it is set up.');
   expect(await layers(page)).toBe(1);
