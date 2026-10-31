@@ -31,9 +31,10 @@
    v0.21 2026-10-30 — the ding is ready before the first pass, the audio context created right after the first screen is drawn: a new cache name for app v0.21.
    v0.22 2026-10-30 — the app shows its version on the This tablet title line: a new cache name for app v0.22.
    v0.23 2026-10-30 — speed step 3, History of the whole route shows the newest 50 rows and Show 50 more: a new cache name for app v0.23.
+   v0.24 2026-10-31 — compass step 3a, the compass of prototype v19.8 in the app and GPS starting by itself when location is allowed: a new cache name for app v0.24.
 */
 'use strict';
-var CACHE = 'poi-app-v0.23';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.24';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 

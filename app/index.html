@@ -15,8 +15,9 @@
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
   The behaviour follows docs/screens.md v0.67 and docs/data-model.md
-  v0.19, and much of it is the code of the working prototype v19.7. The
-  look follows v0.67. Still to come: sending.
+  v0.21, and much of it is the code of the working prototype v19.7; the
+  compass is the code of prototype v19.8. The look follows v0.67. Still
+  to come: sending.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -295,6 +296,26 @@
           scope draws all its rows, as before. The canon copied whole
           from main-screen.html v0.46 and history.html v0.33, the tokens
           still _tokens.css v0.24. The store and its write do not
+          change. The APP ONLY piece stays.
+  v0.24 2026-10-31 — compass step 3a (data-model.md v0.21, decided
+          2026-10-31): the compass module of prototype v19.8, approved
+          after the car test of 2026-10-27, replaces the stub of v0.1
+          behind the same interface, its rules and constants unchanged:
+          the raw gyroscope about the accelerometer's "up", the Generic
+          Sensor API first and devicemotion while it is silent, the
+          drift measured while the car stands and kept for 12 hours,
+          the GPS check on a straight road at 11 km/h or more, the
+          pauses, the watchdog and the smoothing of 0.6 s. New against
+          the prototype: GPS starts at load when location is already
+          allowed, and waits for the first touch of the screen only
+          while Chrome still has to ask (on 2026-10-30 the prototype,
+          which always waits for the touch, most likely ran without
+          GPS and its arrow pointed East while the car drove West).
+          The keys are the app's own, poi-app:heading and the new
+          poi-app:drift. No sensor log (the user dropped it after the
+          car test), no Tools texts, no GPS switch. No visual change:
+          the canon stays main-screen.html v0.46, history.html v0.33
+          and _tokens.css v0.24. The store and its write do not
           change. The APP ONLY piece stays.
 -->
 <html lang="en">
@@ -1722,9 +1743,10 @@
   'use strict';
 
   // ================= constants (screens.md items 39, 46, 60; data-model.md) =================
-  var APP_VERSION = 'v0.23';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
+  var APP_VERSION = 'v0.24';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
   var KEY = 'poi-app:store';         // the whole store, one key, one setItem per change
-  var HEADING_KEY = 'poi-app:heading';
+  var HEADING_KEY = 'poi-app:heading';   // the compass's last course, { deg, at }, written every 2 s (data-model.md "Tablet storage")
+  var DRIFT_KEY = 'poi-app:drift';       // the gyroscope's last good drift, { b: [x, y, z], at }, written when a drift is measured
   var SCHEMA = 1;                    // the layout of the store; migrate() brings older ones up
   var LIMIT = 3000;                  // item 48: pass events (passes and removals) kept
   var SAMPLE_ID = 'sample';          // the reserved id of the sample city
@@ -3291,21 +3313,499 @@
     if (find('open') && !ui.busy) { removeLayer('open'); render(); }
   });
 
-  // ================= the compass (item 19): step 2 is a stub =================
-  // The sensors of data-model.md "Heading" (prototype v19.7) come in step 3
-  // as a module with this same interface: start(onChange) and stop(), where
-  // onChange gets { deg, pale }. The stub shows the course the tablet saved
-  // last, or north when nothing is saved, pale.
+  // ================= the compass (item 19, data-model.md "Heading") =================
+  // The compass module of prototype v19.8, approved after the car test of
+  // 2026-10-27 and ported here unchanged in v0.24 (2026-10-31), behind the
+  // interface of step 2: start(onChange) and stop(), where onChange gets
+  // { deg, pale } at most once per animation frame, pale while there is no
+  // heading or the course is only the last known one. What did not come
+  // over: the prototype's sensor log (the user dropped it after the car
+  // test), its Tools texts, its GPS switch and the counters that fed them
+  // only. The keys are the app's own, poi-app:heading and poi-app:drift
+  // (data-model.md "Tablet storage"); no key of the prototype is ever read.
+  // Decided 2026-10-17 after the car tests of the Lenovo Tab M10 Plus (3rd Gen),
+  // project docs claude/tablet-sensor-test-2026-10-17.md and claude/prototype-v19.md:
+  // 1. The raw gyroscope drives the needle all the time. Its rotation about
+  //    "up" is the car's turn, "up" being a slow average of the
+  //    accelerometer, so the angle of the mount does not matter. It follows
+  //    a turn at once and drifts about 0.02 deg/s.
+  // 2. GPS tells where north is, but only while the car drives straight at
+  //    11 km/h or more (the gyroscope saw less than 3 deg in the last 2 s).
+  //    In a turn the GPS course lags the car by 2 to 3 s, and v19 took that
+  //    lag in as an error of up to 62 deg. Each straight fix pulls the
+  //    heading 30% of the way to the GPS course, a gap over 30 deg is taken
+  //    whole. Below 11 km/h the course jumps by tens of degrees, standing it
+  //    has none. With the gyroscope silent, the live GPS course is shown.
+  //    The Generic Sensor API (Gyroscope, Accelerometer) is read first and
+  //    "devicemotion" fills in while it is silent. Android's ready-made
+  //    orientation is not read: on this tablet it gives only zeros. No
+  //    magnet either: this tablet has none.
+  // 3. The motion sensors pause without an error while something else has
+  //    the focus (W3C Generic Sensor, the focus and origin check). A sensor
+  //    counts as working only if a reading came in the last second, on this
+  //    page's own clock. While they are silent the compass keeps the last
+  //    course, dimmed, and the sensors are restarted when the page is
+  //    visible and focused again. Location is asked before the motion
+  //    sensors start, because Chrome's question takes the focus.
+  // 4. Decided 2026-10-18 (v19.2): the drift is measured while the car
+  //    stands, GPS below 1 km/h, from half-second averages of the
+  //    gyroscope. With the engine running the mount shakes the readings by
+  //    about 1 deg/s each way, so v19.1, which wanted every reading of 3 s
+  //    within 2 deg/s, almost never measured it. Now the averages must
+  //    agree within 1 deg/s for 3 s, and a turn of more than 0.5 deg/s
+  //    about "up" is not drift: a replay of the 12:01 log showed the car
+  //    creeping round a corner at 2.5 deg/s while GPS read 0, and v19.1's
+  //    limit of 3 deg/s took that in as drift.
+  // 5. (The sensor log of v19.2, which did not come over: the user dropped
+  //    it after the car test of 2026-10-27.)
+  // 6. Decided 2026-10-17 (screens.md item 19, v0.42): one arrow on a fixed
+  //    dial. With only a last known course the arrow is pale.
+  // 7. Decided 2026-10-18 (v19.4, screens.md v0.45): the arrow is always on
+  //    the dial. v19.2 hid it until the first heading, and the dial looked
+  //    broken at every start. The course is saved on the tablet every 2 s
+  //    and when the page goes away. A new start takes it as north's offset,
+  //    pale ("unsure"), so the gyroscope turns it with the car until the
+  //    first GPS check makes it solid. With nothing saved it points north,
+  //    pale.
+  // 8. Decided 2026-10-19 (v19.7) after the car test of v19.6: a GPS check
+  //    also needs the GPS course itself steady, its last 3 fixes within
+  //    5 deg of the newest. Right after a slow turn the gyroscope already
+  //    read straight while the GPS course was still catching up or was
+  //    noisy below 15 km/h, and four checks moved the arrow by 31 to 57 deg
+  //    at once. The first of them pointed about 35 deg off for 15 s. A gap
+  //    over 30 deg is now taken at once only while the arrow is pale,
+  //    otherwise it is pulled 30% like any other. Replayed on that drive:
+  //    no check moved the arrow more than 7 deg after the start, and the
+  //    accuracy on straight roads stayed the same.
+  // 9. Decided 2026-10-26 (v19.8) after the compass test of 2026-10-23 in
+  //    the new car: the drift guard is 0.15 deg/s, about twice the largest
+  //    real drift (0.02 to 0.07 deg/s, measured more than 100 times in two
+  //    cars). At 0.5 a turn of 0.44 deg/s, the car creeping round a corner
+  //    while GPS read 0, passed as drift and the arrow was 12 deg off 33 s
+  //    later. The last good drift is kept on the tablet for 12 hours (one
+  //    shift): the page left the screen three times in 12 minutes, and
+  //    every new start began without a drift until the car next stood for
+  //    3 s. A start reads it, checks its turn about "up" against the guard
+  //    once "up" is known, and the first drift measured replaces it.
+  // 10. Decided 2026-10-31 (app v0.24) after the drive of 2026-10-30: GPS
+  //    starts at load when location is already allowed, and waits for the
+  //    first touch of the screen only while Chrome still has to ask, since
+  //    its question needs a gesture. The prototype starts GPS only at the
+  //    first touch, and that day it most likely ran without GPS: its arrow
+  //    pointed East while the car drove West.
+
+  // ---- the compass maths. Angles in degrees; a heading runs clockwise
+  // from north, 0 up to 360. Decided 2026-10-11 (data-model.md, Heading). ----
+  var Heading = (function () {
+    var RAD = Math.PI / 180;
+    function norm(deg) { deg = deg % 360; return deg < 0 ? deg + 360 : deg; }
+    // Exponential smoothing on the unit vector, so that 359 and 1 average
+    // to 0 and not to 180. tau is the time constant in seconds.
+    function Smoother(tau) { this.tau = tau; this.reset(); }
+    Smoother.prototype.reset = function () { this.x = 0; this.y = 0; this.t = -1; };
+    Smoother.prototype.push = function (deg, nowMs) {
+      var k = this.t < 0 ? 1 : 1 - Math.exp(-(nowMs - this.t) / 1000 / this.tau);
+      this.t = nowMs;
+      this.x += k * (Math.sin(deg * RAD) - this.x);
+      this.y += k * (Math.cos(deg * RAD) - this.y);
+      return this.value();
+    };
+    Smoother.prototype.value = function () {
+      if (Math.abs(this.x) < 1e-9 && Math.abs(this.y) < 1e-9) return null;
+      return norm(Math.atan2(this.x, this.y) / RAD);
+    };
+    // The turn from heading a to heading b, in (-180, 180].
+    function delta(a, b) { var d = norm(b - a); return d > 180 ? d - 360 : d; }
+    // The quarter a heading falls in: N, E, S or W, each 90 degrees wide
+    // and centred on its letter.
+    function cardinal(deg) { return 'NESW'[Math.round(norm(deg) / 90) % 4]; }
+    // The side a pass is recorded under: the quarter the car drives towards
+    // as it enters the intersection (the user's rule of 2026-10-18: driving
+    // north and turning right is North Right).
+    function side(deg) { return cardinal(deg); }
+    return { norm: norm, Smoother: Smoother, delta: delta, cardinal: cardinal, side: side };
+  }());
+
   var Compass = (function () {
-    function start(onChange) {
-      var deg = 0;
-      try {
-        var s = JSON.parse(localStorage.getItem(HEADING_KEY) || 'null');
-        if (s && typeof s.deg === 'number' && isFinite(s.deg)) deg = ((s.deg % 360) + 360) % 360;
-      } catch (err) { /* nothing saved: north */ }
-      onChange({ deg: deg, pale: true });
+    var MOVING = 3;             // m/s (11 km/h): the GPS course is trusted from here
+    var FRESH = 3000;           // ms: a fix older than this is not live
+    var LIVE = 1000;            // ms: a sensor silent longer than this is paused
+    var GYRO_MAX = 10 * 60000;  // ms: the turn is trusted this long after a GPS check
+    var STRAIGHT_MS = 2000;     // ms: the window that must be straight for a GPS check
+    var STRAIGHT_DEG = 3;       // deg: the most the car may turn in that window
+    var PULL = 0.3;             // the share of the gap to GPS closed at each straight fix
+    var SNAP = 30;              // deg: a gap larger than this is closed at once, only while pale
+    var STEADY_FIXES = 3;       // GPS fixes that must agree before a GPS check (v19.7)
+    var STEADY_DEG = 5;         // deg: the most each of them may differ from the newest
+    var STEADY_GAP = 1600;      // ms: the longest gap between two of them
+    var DT_MAX = 0.2;           // s: the longest step added up at once
+    var STOPPED = 0.3;          // m/s: below this the car stands, for the drift
+    var STILL_MS = 3000;        // ms: a standing car steady this long measures the drift
+    var STILL_BLOCK = 500;      // ms: the gyroscope is averaged over blocks this long
+    var STILL_SPREAD = 1;       // deg/s: averages further apart on any axis mean it moved
+    var DRIFT_MAX = 0.15;       // deg/s: a larger turn is the car creeping round a corner
+                                // while GPS still reads 0, not drift. The real drift is
+                                // 0.02 to 0.07 deg/s in both cars, and a false 0.44
+                                // passed the old 0.5 on 2026-10-23 (v19.8)
+    var RESTART_GAP = 5000;     // ms: the watchdog restarts the sensors at most this often
+    var RAD = 180 / Math.PI;
+    var car = new Heading.Smoother(0.6);
+
+    function num(v) { return typeof v === 'number' && isFinite(v) ? v : null; }
+    function now() { return performance.now(); }
+    function source(name) { return { name: name, n: 0, at: 0, prevT: null, w: null }; }
+    var gy = { api: source('api'), dm: source('dm') };
+    var acc = { v: null, up: null, apiAt: 0, first: 0, prevT: null, from: null };
+    var turn = 0, rate = 0, bias = [0, 0, 0], biasSet = false;
+    var still = { blocks: [], cur: null };
+    var motion = 'off', motionAt = 0, apiObj = { g: null, a: null };
+    var fix = null, watch = null, gps = 'off';
+    var fixes = [];             // the last GPS fixes with a course, for steady() (v19.7)
+    var off = null, checkedAt = 0, hist = [], unsure = false, heading = null, from = null, pending = false;
+    var everLive = false, paused = false, pausedAt = 0, lastRestart = 0;
+    var onChange = null, timer = null, wired = false, woke = false;
+
+    // ---- the last course, kept on the tablet (7 above) ----
+    var SAVE_EVERY = 2000;            // ms: the course is saved at most this often
+    var savedAt = 0;
+    // only a visible tab saves: a tab in the background holds an old course (v19.5)
+    function saveCourse(t, force) {
+      if (heading === null || (!force && (t - savedAt < SAVE_EVERY || document.visibilityState !== 'visible'))) return;
+      savedAt = t;
+      try { localStorage.setItem(HEADING_KEY, JSON.stringify({ deg: Math.round(heading * 10) / 10, at: Date.now() })); }
+      catch (err) { /* storage full or blocked: the next start points north */ }
     }
-    function stop() { /* nothing runs in the stub */ }
+    // at start: the course saved last is north's offset, pale until a GPS check
+    function restoreCourse() {
+      try {
+        var kept = JSON.parse(localStorage.getItem(HEADING_KEY) || 'null');
+        if (kept && num(kept.deg) !== null) { off = Heading.norm(kept.deg); unsure = true; }
+      } catch (err) { /* nothing saved: the arrow points north, pale */ }
+    }
+
+    // ---- the last good drift, kept on the tablet (9 above) ----
+    var DRIFT_KEEP = 12 * 3600000;    // ms: one shift. An older kept drift is ignored
+    var keptDrift = null;             // the kept drift in use, until the first drift measured in this drive replaces it
+    var keptChecked = false;          // whether the kept drift was checked against "up"
+    function r(v, n) { if (v === null || v === undefined) return ''; var p = Math.pow(10, n); return Math.round(v * p) / p; }
+    // written right after every drift that stillSample() accepts
+    function saveDrift() {
+      try { localStorage.setItem(DRIFT_KEY, JSON.stringify({ b: [r(bias[0], 4), r(bias[1], 4), r(bias[2], 4)], at: Date.now() })); }
+      catch (err) { /* storage full or blocked: the next start measures it again */ }
+    }
+    // at start: a drift saved less than 12 hours ago is used from the first
+    // second; an unreadable or older one is ignored
+    function restoreDrift() {
+      var k;
+      try { k = JSON.parse(localStorage.getItem(DRIFT_KEY) || 'null'); }
+      catch (err) { return; }
+      if (k === null) return;
+      if (!k.b || num(k.b[0]) === null || num(k.b[1]) === null || num(k.b[2]) === null || num(k.at) === null) return;
+      if (Date.now() - k.at >= DRIFT_KEEP) return;
+      bias = [k.b[0], k.b[1], k.b[2]]; biasSet = true; keptDrift = k;
+    }
+    // once "up" is known, the kept drift is checked as stillSample() checks
+    // a new one: a turn about "up" above DRIFT_MAX was the car creeping
+    // round a corner, not drift, and the kept drift is dropped
+    function checkKept() {
+      keptChecked = true;
+      var u = acc.up, about = Math.abs(bias[0] * u[0] + bias[1] * u[1] + bias[2] * u[2]);
+      if (about <= DRIFT_MAX) return;
+      bias = [0, 0, 0]; biasSet = false; keptDrift = null;
+      try { localStorage.removeItem(DRIFT_KEY); } catch (err) { /* the next start reads it and drops it again */ }
+    }
+
+    function live(s, t) { return s.n > 0 && t - s.at < LIVE; }
+    function alive(t) { return live(gy.api, t) || live(gy.dm, t); }
+    function gyroOk(t) { return alive(t) && !!acc.up; }
+    function gpsLive(t) {
+      return !!fix && fix.course !== null && fix.speed !== null && fix.speed >= MOVING && t - fix.at < FRESH;
+    }
+
+    // ---- the accelerometer: which way is up, in the tablet's own axes ----
+    // At rest it reads +9.8 m/s² pointing up. The tablet stands still in its
+    // mount, so a slow average of the reading is the up direction.
+    function feedAcc(v, stamp, by) {
+      var t = now();
+      if (by === 'dm' && t - acc.apiAt < LIVE) return;
+      if (by === 'api') acc.apiAt = t;
+      if (acc.from !== by) acc.prevT = null;
+      acc.from = by;
+      if (!acc.first) acc.first = t;
+      if (!acc.v) acc.v = v.slice();
+      else {
+        var dt = acc.prevT === null ? 0 : Math.min(Math.max((stamp - acc.prevT) / 1000, 0), DT_MAX);
+        var k = 1 - Math.exp(-dt / (t - acc.first < 2000 ? 0.3 : 3));
+        for (var i = 0; i < 3; i++) acc.v[i] += (v[i] - acc.v[i]) * k;
+      }
+      acc.prevT = stamp;
+      var m = Math.hypot(acc.v[0], acc.v[1], acc.v[2]);
+      if (m > 1) {
+        acc.up = [acc.v[0] / m, acc.v[1] / m, acc.v[2] / m];
+        if (keptDrift && !keptChecked) checkKept();
+      }
+    }
+
+    // ---- the gyroscope: how fast the car turns, seen from above ----
+    // w is the rotation in deg/s about the tablet's x, y and z axes, by the
+    // right-hand rule. Its part along "up" is the car's turn, positive
+    // counter-clockwise, so the minus sign makes a right turn positive, the
+    // way a heading grows. The stamp is the reading's own time, used only
+    // for the step between two readings of the same source.
+    function feedGyro(s, w, stamp) {
+      var t = now();
+      s.n += 1; s.at = t; s.w = w;
+      var lead = s === gy.api || !live(gy.api, t);
+      if (lead) {
+        stillSample(w, t);
+        if (s.prevT !== null && acc.up) {
+          var dt = Math.min(Math.max((stamp - s.prevT) / 1000, 0), DT_MAX);
+          var x = w[0] - bias[0], y = w[1] - bias[1], z = w[2] - bias[2];
+          rate = -(x * acc.up[0] + y * acc.up[1] + z * acc.up[2]);
+          turn += rate * dt;
+          if (!hist.length || t - hist[hist.length - 1].t >= 100) {
+            hist.push({ t: t, turn: turn });
+            while (hist.length && t - hist[0].t > 3 * STRAIGHT_MS) hist.shift();
+          }
+        }
+      }
+      s.prevT = stamp;
+      everLive = true;
+      if (paused) resumed(t);
+      if (lead) choose(t);
+    }
+    // the car may have turned while the gyroscope was silent: north waits for a GPS check
+    function resumed(t) {
+      paused = false;
+      if (t - pausedAt > 2000) unsure = true;
+    }
+
+    // ---- the drift: the gyroscope's reading while the car stands ----
+    function spreadOf(list) {
+      var most = 0;
+      for (var i = 0; i < 3; i++) {
+        var lo = Infinity, hi = -Infinity;
+        for (var j = 0; j < list.length; j++) { lo = Math.min(lo, list[j][i]); hi = Math.max(hi, list[j][i]); }
+        most = Math.max(most, hi - lo);
+      }
+      return most;
+    }
+    // While GPS says the car stands, the readings are averaged in blocks of
+    // half a second. The engine's shake cancels out in an average, a real
+    // movement does not. When the last 3 s of averages agree within
+    // STILL_SPREAD, their mean is the drift. A block that disagrees drops
+    // the older blocks, so the 3 s start again from the steady part.
+    function stillSample(w, t) {
+      var st = still, i;
+      var stopped = !!fix && fix.speed !== null && fix.speed < STOPPED && t - fix.at < FRESH;
+      if (!stopped) { st.blocks = []; st.cur = null; return; }
+      if (st.cur && t - st.cur.at > 2 * STILL_BLOCK) st.cur = null; // a gap in the readings
+      if (!st.cur) st.cur = { at: t, sum: [0, 0, 0], n: 0 };
+      for (i = 0; i < 3; i++) st.cur.sum[i] += w[i];
+      st.cur.n += 1;
+      if (t - st.cur.at < STILL_BLOCK) return;
+      var c = st.cur;
+      st.cur = null;
+      if (c.n < 10) return;
+      st.blocks.push([c.sum[0] / c.n, c.sum[1] / c.n, c.sum[2] / c.n]);
+      // shaky: the older blocks go until the rest agree
+      while (st.blocks.length > 1 && spreadOf(st.blocks) > STILL_SPREAD) st.blocks.shift();
+      if (st.blocks.length * STILL_BLOCK < STILL_MS) return;
+      var b = [0, 0, 0], u = acc.up;
+      for (var j = 0; j < st.blocks.length; j++) for (i = 0; i < 3; i++) b[i] += st.blocks[j][i] / st.blocks.length;
+      st.blocks = [];
+      if (u && Math.abs(b[0] * u[0] + b[1] * u[1] + b[2] * u[2]) > DRIFT_MAX) return;   // not drift: the car is turning
+      // the first drift measured in this drive replaces a kept one; later ones blend (v19.8)
+      for (i = 0; i < 3; i++) bias[i] = biasSet && !keptDrift ? bias[i] + (b[i] - bias[i]) * 0.5 : b[i];
+      biasSet = true; keptDrift = null;
+      saveDrift();
+    }
+
+    // ---- reading the sensors ----
+    function onMotion(e) {
+      var stamp = num(e.timeStamp) || now(), a = e.accelerationIncludingGravity, q = e.rotationRate;
+      if (a && num(a.x) !== null && num(a.y) !== null && num(a.z) !== null) feedAcc([a.x, a.y, a.z], stamp, 'dm');
+      // W3C: alpha is the rate about X, beta about Y, gamma about Z, in deg/s
+      if (q && num(q.alpha) !== null && num(q.beta) !== null && num(q.gamma) !== null) feedGyro(gy.dm, [q.alpha, q.beta, q.gamma], stamp);
+    }
+    function startApi() {
+      if (typeof window.Gyroscope === 'function') {
+        try {
+          var g = new window.Gyroscope({ frequency: 60 });
+          g.addEventListener('reading', function () {
+            if (apiObj.g !== g) return;
+            if (num(g.x) === null || num(g.y) === null || num(g.z) === null) return;
+            feedGyro(gy.api, [g.x * RAD, g.y * RAD, g.z * RAD], num(g.timestamp) || now());
+          });
+          apiObj.g = g;
+          g.start();
+        } catch (err) { /* blocked or broken: devicemotion fills in */ }
+      }
+      if (typeof window.Accelerometer === 'function') {
+        try {
+          var a = new window.Accelerometer({ frequency: 60 });
+          a.addEventListener('reading', function () {
+            if (apiObj.a !== a) return;
+            if (num(a.x) !== null && num(a.y) !== null && num(a.z) !== null) feedAcc([a.x, a.y, a.z], num(a.timestamp) || now(), 'api');
+          });
+          apiObj.a = a;
+          a.start();
+        } catch (err) { /* the same */ }
+      }
+    }
+    function stopApi() {
+      try { if (apiObj.g) apiObj.g.stop(); } catch (err) { /* fine */ }
+      try { if (apiObj.a) apiObj.a.stop(); } catch (err) { /* fine */ }
+      apiObj.g = null; apiObj.a = null;
+    }
+    function startMotion() {
+      if (motion === 'on') return;
+      motion = 'on'; motionAt = now();
+      startApi();
+      window.addEventListener('devicemotion', onMotion);
+    }
+    function restart() {
+      if (motion !== 'on') return;
+      lastRestart = now();
+      stopApi(); startApi();
+      window.removeEventListener('devicemotion', onMotion);
+      window.addEventListener('devicemotion', onMotion);
+    }
+    // after a focus or a return to the page: restart if the sensors stay silent
+    function checkSoon() {
+      setTimeout(function () { if (motion === 'on' && !alive(now())) restart(); }, LIVE + 200);
+    }
+    function watchdog() {
+      var t = now();
+      if (motion === 'on') {
+        if (!alive(t) && !paused && (everLive || t - motionAt > 3000)) { paused = true; pausedAt = t; }
+        if (paused && document.visibilityState === 'visible' && t - lastRestart > RESTART_GAP) restart();
+      }
+      choose(t);
+    }
+
+    // ---- GPS ----
+    function startGps() {
+      if (!navigator.geolocation) { gps = 'none'; startMotion(); return; }
+      gps = 'asking';
+      watch = navigator.geolocation.watchPosition(onFix, onFixError, { enableHighAccuracy: true, maximumAge: 0 });
+      // the motion sensors wait for the answer about location: its question takes the focus
+      try {
+        navigator.permissions.query({ name: 'geolocation' }).then(function (p) {
+          if (p.state !== 'prompt') startMotion();
+        }).catch(function () { /* the first fix or error starts them */ });
+      } catch (err) { /* the same */ }
+      setTimeout(function () { startMotion(); }, 15000);   // no answer about location in 15 s
+    }
+    function onFix(pos) {
+      var c = pos.coords, t = now();
+      fix = { course: num(c.heading) === null ? null : Heading.norm(c.heading), speed: num(c.speed), at: t };
+      gps = 'fix';
+      if (fix.course === null) fixes = [];
+      else { fixes.push({ course: fix.course, at: t }); if (fixes.length > STEADY_FIXES) fixes.shift(); }
+      startMotion();
+      if (gpsLive(t) && gyroOk(t) && straight(t) && steady()) check(t);
+      choose(t);
+    }
+    function onFixError(err) {
+      gps = err && err.code === 1 ? 'denied' : err && err.code === 2 ? 'unavailable' : fix ? 'fix' : 'asking';
+      startMotion();
+    }
+
+    // ---- the heading ----
+    // straight: the gyroscope has read the last 2 s without a gap and saw the
+    // car turn less than 3 deg in them
+    function straight(t) {
+      if (!hist.length || t - hist[hist.length - 1].t > 300) return false;
+      var old = null;
+      for (var i = hist.length - 1; i >= 0; i--) { if (t - hist[i].t >= STRAIGHT_MS) { old = hist[i]; break; } }
+      if (!old || t - old.t > STRAIGHT_MS + 300) return false;
+      for (var j = hist.indexOf(old) + 1; j < hist.length; j++) if (hist[j].t - hist[j - 1].t > 300) return false;
+      return Math.abs(turn - old.turn) < STRAIGHT_DEG;
+    }
+    // steady: the last 3 GPS courses came at most 1.6 s apart and lie within
+    // 5 deg of the newest. Right after a turn the GPS course is still
+    // catching up while the gyroscope already reads straight (v19.7).
+    function steady() {
+      if (fixes.length < STEADY_FIXES) return false;
+      var last = fixes[fixes.length - 1];
+      for (var i = 0; i < fixes.length; i++) {
+        if (i > 0 && fixes[i].at - fixes[i - 1].at > STEADY_GAP) return false;
+        if (Math.abs(Heading.delta(fixes[i].course, last.course)) > STEADY_DEG) return false;
+      }
+      return true;
+    }
+    // a GPS check: move north toward the GPS course
+    function check(t) {
+      var gap = off === null ? null : Heading.delta(Heading.norm(turn + off), fix.course);
+      if (off === null || (unsure && Math.abs(gap) > SNAP)) off = fix.course - turn;
+      else off += PULL * gap;
+      checkedAt = t; unsure = false;
+    }
+    function choose(t) {
+      var target = null;
+      if (off !== null && gyroOk(t) && !unsure && t - checkedAt < GYRO_MAX) { from = 'gyro'; target = turn + off; }
+      else if (gpsLive(t)) { from = 'gps'; target = fix.course; }
+      else if (off !== null) { from = 'stale'; target = turn + off; }
+      else from = null;
+      heading = target === null ? null : car.push(Heading.norm(target), t);
+      saveCourse(t, false);
+      draw();
+    }
+    // the arrow: onChange at most once per animation frame, pale while
+    // there is no heading or the course is only the last known one
+    function draw() {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(function () {
+        pending = false;
+        if (onChange) onChange({ deg: heading === null ? 0 : heading, pale: heading === null || from === 'stale' });
+      });
+    }
+
+    // ---- location is asked once; a no-op while the watch runs ----
+    function permit() { if (watch === null && gps === 'off') startGps(); }
+
+    // ---- the interface of step 2: start(onChange) and stop() ----
+    // start restores the saved course (pale) and the kept drift, starts the
+    // watchdog and asks whether location is already allowed: then GPS
+    // starts at once and the motion sensors follow, as in the prototype.
+    // Otherwise, or when the question cannot be asked or fails, location
+    // is asked at the first touch of the screen, and again at the first
+    // touch after the page becomes visible (10 above).
+    function start(cb) {
+      onChange = cb;
+      if (timer !== null) return;
+      if (!wired) {
+        wired = true;
+        window.addEventListener('pagehide', function () { if (document.visibilityState === 'visible') saveCourse(now(), true); });
+        document.addEventListener('visibilitychange', function () {
+          if (document.visibilityState === 'hidden') saveCourse(now(), true);
+          if (document.visibilityState === 'visible') { woke = false; checkSoon(); }
+        });
+        window.addEventListener('focus', function () { checkSoon(); });
+        document.addEventListener('pointerdown', function () { if (woke) return; woke = true; permit(); }, true);
+      }
+      restoreCourse();
+      restoreDrift();
+      timer = setInterval(watchdog, 500);
+      choose(now());   // the saved course is on the first frame, as the stub showed it (the prototype showed north until its first watchdog tick)
+      try {
+        navigator.permissions.query({ name: 'geolocation' }).then(function (p) {
+          if (p.state === 'granted') permit();
+        }).catch(function () { /* the first touch asks */ });
+      } catch (err) { /* the first touch asks */ }
+    }
+    // stop ends the watchdog, the motion sensors and the location watch
+    function stop() {
+      if (timer === null) return;
+      clearInterval(timer); timer = null;
+      stopApi();
+      window.removeEventListener('devicemotion', onMotion);
+      motion = 'off';
+      if (watch !== null) { try { navigator.geolocation.clearWatch(watch); } catch (err) { /* fine */ } }
+      watch = null; fix = null; fixes = []; gps = 'off';
+    }
     return { start: start, stop: stop };
   }());
   function drawCompass(h) {
