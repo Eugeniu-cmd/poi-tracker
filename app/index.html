@@ -15,9 +15,9 @@
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
   The behaviour follows docs/screens.md v0.67 and docs/data-model.md
-  v0.21, and much of it is the code of the working prototype v19.7; the
-  compass is the code of prototype v19.8. The look follows v0.67. Still
-  to come: sending.
+  v0.22, and much of it is the code of the working prototype v19.7; the
+  compass is the code of prototype v19.8 plus the agreement rule of
+  v0.25. The look follows v0.67. Still to come: sending.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -317,6 +317,22 @@
           the canon stays main-screen.html v0.46, history.html v0.33
           and _tokens.css v0.24. The store and its write do not
           change. The APP ONLY piece stays.
+  v0.25 2026-10-31 — compass step 3b (data-model.md v0.22, decided
+          2026-10-31): a GPS check runs only when, besides every rule of
+          v19.8, GPS and the gyroscope agree on the turn of the last 6 s:
+          since the newest fix at least 5.5 s older, the GPS course
+          changed by the same amount as the gyroscope turned, within
+          10 degrees. On the drive of 2026-10-31 three checks pulled the
+          arrow the wrong way for 10 to 20 s: right after a turn the GPS
+          course was steady but stale, and twice it was inaccurate. In a
+          replay of the three kept drives the time the arrow was more
+          than 30 degrees off fell from 11% to 4% in town and did not
+          grow elsewhere. This holds for every check: the first one, a
+          gap taken at once while the arrow is pale, and the 30% pull.
+          Every other rule and constant stays. No visual change: the
+          canon stays main-screen.html v0.46, history.html v0.33 and
+          _tokens.css v0.24. The store and its write do not change. The
+          APP ONLY piece stays.
 -->
 <html lang="en">
 <head>
@@ -1743,7 +1759,7 @@
   'use strict';
 
   // ================= constants (screens.md items 39, 46, 60; data-model.md) =================
-  var APP_VERSION = 'v0.24';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
+  var APP_VERSION = 'v0.25';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
   var KEY = 'poi-app:store';         // the whole store, one key, one setItem per change
   var HEADING_KEY = 'poi-app:heading';   // the compass's last course, { deg, at }, written every 2 s (data-model.md "Tablet storage")
   var DRIFT_KEY = 'poi-app:drift';       // the gyroscope's last good drift, { b: [x, y, z], at }, written when a drift is measured
@@ -3393,6 +3409,12 @@
   //    its question needs a gesture. The prototype starts GPS only at the
   //    first touch, and that day it most likely ran without GPS: its arrow
   //    pointed East while the car drove West.
+  // 11. Decided 2026-10-31 (app v0.25) after the drive of 2026-10-31: a GPS
+  //    check also needs GPS and the gyroscope to agree on the turn of the
+  //    last 6 s (agree() below). The steady rule of v19.7 does not catch a
+  //    course that is steady but stale: right after a turn the GPS course
+  //    once lagged the gyroscope by about 10 s, twice it was inaccurate,
+  //    and three checks pulled the arrow the wrong way for 10 to 20 s.
 
   // ---- the compass maths. Angles in degrees; a heading runs clockwise
   // from north, 0 up to 360. Decided 2026-10-11 (data-model.md, Heading). ----
@@ -3438,6 +3460,10 @@
     var STEADY_FIXES = 3;       // GPS fixes that must agree before a GPS check (v19.7)
     var STEADY_DEG = 5;         // deg: the most each of them may differ from the newest
     var STEADY_GAP = 1600;      // ms: the longest gap between two of them
+    var AGREE_MS = 6000;        // ms: GPS and the gyroscope must agree on the turn of this long before a GPS check (v0.25);
+                                // a fix counts as that old from AGREE_MS - 500
+    var AGREE_DEG = 10;         // deg: the most the GPS course's change and the gyroscope's turn may differ in it
+    var AGREE_KEEP = 14000;     // ms: how long the notes of the fixes are kept for agree()
     var DT_MAX = 0.2;           // s: the longest step added up at once
     var STOPPED = 0.3;          // m/s: below this the car stands, for the drift
     var STILL_MS = 3000;        // ms: a standing car steady this long measures the drift
@@ -3461,6 +3487,7 @@
     var motion = 'off', motionAt = 0, apiObj = { g: null, a: null };
     var fix = null, watch = null, gps = 'off';
     var fixes = [];             // the last GPS fixes with a course, for steady() (v19.7)
+    var notes = [];             // { at, course, turn } of the GPS fixes with a course of the last 14 s, for agree() (v0.25)
     var off = null, checkedAt = 0, hist = [], unsure = false, heading = null, from = null, pending = false;
     var everLive = false, paused = false, pausedAt = 0, lastRestart = 0;
     var onChange = null, timer = null, wired = false, woke = false;
@@ -3702,9 +3729,14 @@
       fix = { course: num(c.heading) === null ? null : Heading.norm(c.heading), speed: num(c.speed), at: t };
       gps = 'fix';
       if (fix.course === null) fixes = [];
-      else { fixes.push({ course: fix.course, at: t }); if (fixes.length > STEADY_FIXES) fixes.shift(); }
+      else {
+        fixes.push({ course: fix.course, at: t }); if (fixes.length > STEADY_FIXES) fixes.shift();
+        // the note stays whatever the rules below say of this fix; a fix without a course clears none
+        notes.push({ at: t, course: fix.course, turn: turn });
+        while (notes.length && t - notes[0].at > AGREE_KEEP) notes.shift();
+      }
       startMotion();
-      if (gpsLive(t) && gyroOk(t) && straight(t) && steady()) check(t);
+      if (gpsLive(t) && gyroOk(t) && straight(t) && steady() && agree(t)) check(t);
       choose(t);
     }
     function onFixError(err) {
@@ -3734,6 +3766,23 @@
         if (Math.abs(Heading.delta(fixes[i].course, last.course)) > STEADY_DEG) return false;
       }
       return true;
+    }
+    // agree: GPS and the gyroscope agree on the turn of the last 6 s. Since
+    // the newest fix at least 5.5 s older than this one, the GPS course
+    // changed by the same amount as the gyroscope turned, within 10 deg,
+    // the two changes compared round the circle. Steady alone does not
+    // catch a course that is steady but stale: on the drive of 2026-10-31
+    // the GPS course once lagged the gyroscope by about 10 s right after
+    // a turn, twice it was inaccurate, and three checks pulled the arrow
+    // the wrong way for 10 to 20 s (decided 2026-10-31, app v0.25,
+    // data-model.md v0.22 "Heading"). This holds for every check: the
+    // first one, a gap taken at once while the arrow is pale, and the
+    // 30% pull. Without a fix that old there is no check.
+    function agree(t) {
+      var old = null;
+      for (var i = notes.length - 1; i >= 0; i--) { if (t - notes[i].at >= AGREE_MS - 500) { old = notes[i]; break; } }
+      if (!old) return false;
+      return Math.abs(Heading.delta(turn - old.turn, Heading.delta(old.course, fix.course))) <= AGREE_DEG;
     }
     // a GPS check: move north toward the GPS course
     function check(t) {
@@ -3804,7 +3853,7 @@
       window.removeEventListener('devicemotion', onMotion);
       motion = 'off';
       if (watch !== null) { try { navigator.geolocation.clearWatch(watch); } catch (err) { /* fine */ } }
-      watch = null; fix = null; fixes = []; gps = 'off';
+      watch = null; fix = null; fixes = []; notes = []; gps = 'off';
     }
     return { start: start, stop: stop };
   }());
