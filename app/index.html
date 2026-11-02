@@ -14,8 +14,8 @@
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.69 and docs/data-model.md
-  v0.22, and much of it is the code of the working prototype v19.7; the
+  The behaviour follows docs/screens.md v0.70 and docs/data-model.md
+  v0.23, and much of it is the code of the working prototype v19.7; the
   compass is the code of prototype v19.8 plus the agreement rule of
   v0.25. The look follows v0.69. Still to come: sending.
 
@@ -364,6 +364,39 @@
           the rest of the light screen do not change. No markup
           changes. The store and its write do not change. The APP ONLY
           piece stays. No behaviour changes.
+  v0.28 2026-11-02 — a sensor log for the compass car tests
+          (data-model.md v0.23, screens.md v0.70, decided 2026-11-02
+          after the car test of that day: the arrow went pale after the
+          screen was off for 5 s and stayed pale, and a screen recording
+          cannot tell whether GPS sent nothing or positions without a
+          course). Until the compass is approved in the app, the compass
+          module keeps the sensor log of prototype v19.8 again, in the
+          same file format: the same 20 columns, a row every second, a
+          row at every GPS fix with its speed, course and accuracy, and
+          an event row for what the module did, with the prototype's
+          events and new ones that let a drive explain itself (the
+          location state at start, the first touch, the page hidden and
+          visible, the wake lock, a location error with its code and
+          message, and a fix refused only because GPS and the gyroscope
+          disagree, with the difference). The log lives in IndexedDB,
+          in its own database, poi-app-sensorlog, never in localStorage,
+          which holds the store: the last 3 drives, at most 20,000 rows
+          each, written every 10 s, a page opened again within 10
+          minutes continuing the drive, no coordinates. Any failure of
+          the database only stops the log from being kept: the drive
+          stays in memory, Save still gives it, and the app goes on as
+          if there were no log. A row "Save sensor log" ends the Sync
+          panel's "This tablet" section (item 72, temporary, no
+          reference frame): its small line says how much of the log the
+          tablet keeps and follows once a second, and a tap saves the
+          file poi-app-v0.28-sensors-YYYYMMDD-HHMM.csv. The heading
+          logic does not change: every constant, rule and decision of
+          the compass stays as in v0.27, the log only reads its state,
+          and the equivalence and replay tests give the same results.
+          The canon stays main-screen.html v0.48, history.html v0.35
+          and _tokens.css v0.26: the row reuses the panel's action rows,
+          no new CSS. The store and its write do not change. The APP
+          ONLY piece stays.
 -->
 <html lang="en">
 <head>
@@ -1842,7 +1875,7 @@
   'use strict';
 
   // ================= constants (screens.md items 39, 46, 60; data-model.md) =================
-  var APP_VERSION = 'v0.27';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
+  var APP_VERSION = 'v0.28';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
   var KEY = 'poi-app:store';         // the whole store, one key, one setItem per change
   var HEADING_KEY = 'poi-app:heading';   // the compass's last course, { deg, at }, written every 2 s (data-model.md "Tablet storage")
   var DRIFT_KEY = 'poi-app:drift';       // the gyroscope's last good drift, { b: [x, y, z], at }, written when a drift is measured
@@ -2689,6 +2722,10 @@
       '<div class="sdiv"></div>' +
       row('later', c && c.mailboxUrl ? 'Connection' : 'Set up connection', 'Script URL and access key' + (c ? ' for ' + c.name : ''), true, true) +
       tabletHtml() +
+      // the sensor log of the compass car tests (item 72, decided
+      // 2026-11-02, temporary): an action row like "Send now", its small
+      // line from the compass module, which renderTablet() follows
+      row('savelog', 'Save sensor log', Compass.logLine(), false, false) +
       '</div>';
   }
 
@@ -2811,7 +2848,12 @@
     var fig = pop.querySelector('.sfig'), line = pop.querySelector('.sline');
     if (fig) setHTML(fig, box.querySelector('.sfig').innerHTML);
     if (line) { line.className = box.querySelector('.sline').className; setHTML(line, box.querySelector('.sline').innerHTML); }
+    var logLine = pop.querySelector('[data-act="savelog"] small');
+    if (logLine) setHTML(logLine, esc(Compass.logLine()));
   }
+  // the sensor log's small line counts rows every second, so an open panel
+  // follows it once a second (v0.28); a closed panel costs one lookup
+  setInterval(renderTablet, 1000);
 
   // ---- History (items 12, 13, 14, 38, 41, 44, 45, 47, 48) ----
   // the reason line under a refused row, in the words of its own row (item 47)
@@ -3318,6 +3360,7 @@
       case 'sync': if (m && m.name === 'sync') removeLayer('menu'); else openMenu('sync'); render(); break;
       case 'later': removeLayer('menu'); render(); toast(LATER); break;
       case 'showhist': ui.scope = 'route'; openHistory(); render(); break;
+      case 'savelog': Compass.saveLog(); break;   // v0.28: Chrome downloads the file and shows its own message; the panel stays
       case 'grid': if (route()) { openGrid(); render(); } break;
       case 'history': openHistory(); render(); break;
       case 'close-grid': removeLayer('grid'); render(); break;
@@ -3384,15 +3427,18 @@
   });
 
   // ---- the screen stays awake (item 11): at start, on every return to view;
-  // a refusal is silent ----
+  // a refusal is silent. The sensor log of the compass notes the lock held,
+  // released and refused (v0.28), since the arrow went pale after the
+  // screen was off on 2026-11-02 ----
   var wake = null;
   function keepAwake() {
     try {
       if (wake || !navigator.wakeLock || document.visibilityState !== 'visible') return;
       navigator.wakeLock.request('screen').then(function (s) {
         wake = s;
-        s.addEventListener('release', function () { wake = null; });
-      }).catch(function () { /* refused: fine */ });
+        Compass.event('wake lock held');
+        s.addEventListener('release', function () { wake = null; Compass.event('wake lock released'); });
+      }).catch(function (err) { Compass.event('wake lock refused: ' + (err && err.name ? err.name : 'error')); });
     } catch (err) { /* not available */ }
   }
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') keepAwake(); });
@@ -3418,10 +3464,13 @@
   // interface of step 2: start(onChange) and stop(), where onChange gets
   // { deg, pale } at most once per animation frame, pale while there is no
   // heading or the course is only the last known one. What did not come
-  // over: the prototype's sensor log (the user dropped it after the car
-  // test), its Tools texts, its GPS switch and the counters that fed them
-  // only. The keys are the app's own, poi-app:heading and poi-app:drift
-  // (data-model.md "Tablet storage"); no key of the prototype is ever read.
+  // over: its Tools texts, its GPS switch and the counters that fed them
+  // only. Its sensor log did not come over either (the user dropped it
+  // after the car test), until v0.28 brought it back for the car tests of
+  // the app ("the log" below, decided 2026-11-02): since then the module
+  // also offers saveLog(), logLine() and event(). The keys are the app's
+  // own, poi-app:heading and poi-app:drift (data-model.md "Tablet
+  // storage"); no key of the prototype is ever read.
   // Decided 2026-10-17 after the car tests of the Lenovo Tab M10 Plus (3rd Gen),
   // project docs claude/tablet-sensor-test-2026-10-17.md and claude/prototype-v19.md:
   // 1. The raw gyroscope drives the needle all the time. Its rotation about
@@ -3456,7 +3505,8 @@
   //    creeping round a corner at 2.5 deg/s while GPS read 0, and v19.1's
   //    limit of 3 deg/s took that in as drift.
   // 5. (The sensor log of v19.2, which did not come over: the user dropped
-  //    it after the car test of 2026-10-27.)
+  //    it after the car test of 2026-10-27. Back since v0.28, temporary,
+  //    for the car tests of the app: see "the log" below.)
   // 6. Decided 2026-10-17 (screens.md item 19, v0.42): one arrow on a fixed
   //    dial. With only a last known course the arrow is pale.
   // 7. Decided 2026-10-18 (v19.4, screens.md v0.45): the arrow is always on
@@ -3562,11 +3612,12 @@
 
     function num(v) { return typeof v === 'number' && isFinite(v) ? v : null; }
     function now() { return performance.now(); }
-    function source(name) { return { name: name, n: 0, at: 0, prevT: null, w: null }; }
+    // hz, cnt and cntAt serve the log's api_hz and dm_hz columns only (rates() below)
+    function source(name) { return { name: name, n: 0, at: 0, prevT: null, w: null, hz: 0, cnt: 0, cntAt: 0 }; }
     var gy = { api: source('api'), dm: source('dm') };
     var acc = { v: null, up: null, apiAt: 0, first: 0, prevT: null, from: null };
     var turn = 0, rate = 0, bias = [0, 0, 0], biasSet = false;
-    var still = { blocks: [], cur: null };
+    var still = { blocks: [], cur: null, noteAt: 0 };   // noteAt: when the log last noted a shaky stand
     var motion = 'off', motionAt = 0, apiObj = { g: null, a: null };
     var fix = null, watch = null, gps = 'off';
     var fixes = [];             // the last GPS fixes with a course, for steady() (v19.7)
@@ -3604,15 +3655,17 @@
       catch (err) { /* storage full or blocked: the next start measures it again */ }
     }
     // at start: a drift saved less than 12 hours ago is used from the first
-    // second; an unreadable or older one is ignored
+    // second; an unreadable or older one is ignored. The sensor log says
+    // whether it was kept, and why not
     function restoreDrift() {
       var k;
       try { k = JSON.parse(localStorage.getItem(DRIFT_KEY) || 'null'); }
-      catch (err) { return; }
+      catch (err) { event('drift not kept: unreadable'); return; }
       if (k === null) return;
-      if (!k.b || num(k.b[0]) === null || num(k.b[1]) === null || num(k.b[2]) === null || num(k.at) === null) return;
-      if (Date.now() - k.at >= DRIFT_KEEP) return;
+      if (!k.b || num(k.b[0]) === null || num(k.b[1]) === null || num(k.b[2]) === null || num(k.at) === null) { event('drift not kept: unreadable'); return; }
+      if (Date.now() - k.at >= DRIFT_KEEP) { event('drift not kept: too old'); return; }
       bias = [k.b[0], k.b[1], k.b[2]]; biasSet = true; keptDrift = k;
+      event('drift kept from ' + minsAgo(k.at));
     }
     // once "up" is known, the kept drift is checked as stillSample() checks
     // a new one: a turn about "up" above DRIFT_MAX was the car creeping
@@ -3623,6 +3676,7 @@
       if (about <= DRIFT_MAX) return;
       bias = [0, 0, 0]; biasSet = false; keptDrift = null;
       try { localStorage.removeItem(DRIFT_KEY); } catch (err) { /* the next start reads it and drops it again */ }
+      event('kept drift dropped: ' + about.toFixed(2));
     }
 
     function live(s, t) { return s.n > 0 && t - s.at < LIVE; }
@@ -3630,6 +3684,250 @@
     function gyroOk(t) { return alive(t) && !!acc.up; }
     function gpsLive(t) {
       return !!fix && fix.course !== null && fix.speed !== null && fix.speed >= MOVING && t - fix.at < FRESH;
+    }
+
+    // ---- the log: what the sensors did, for the chat (no coordinates). The
+    // log of prototype v19.8, ported in v0.28 (decided 2026-11-02, after the
+    // car test of that day: the arrow went pale after the screen was off
+    // for 5 s and stayed pale, and a screen recording cannot tell whether
+    // GPS sent nothing or positions without a course). It is temporary:
+    // it goes once the compass is approved in the app. It lives in
+    // IndexedDB, in its own database, and must never touch localStorage,
+    // which holds the store, poi-app:store: a log there could fill its
+    // quota and stop a pass from being saved (data-model.md "Tablet
+    // storage"). Any failure of the database (missing, blocked, full, an
+    // exception) only stops the log from being kept: "log not kept" is
+    // noted in memory, the drive stays in memory so that Save still gives
+    // it, and the app goes on as if there were no log. The log only reads
+    // the compass's state: no rule or constant of the heading changes. ----
+    var LOG_MAX = 20000;        // rows in one drive: about three hours
+    var LOG_DB = 'poi-app-sensorlog'; // the log's own IndexedDB database; never a localStorage key
+    var LOG_EVERY = 10000;      // ms: new rows go to the storage this often
+    var LOG_CHUNK = 500;        // rows in one stored piece
+    var LOG_KEEP = 3;           // drives kept on the tablet
+    var LOG_JOIN = 10 * 60000;  // ms: a page opened again this soon continues the drive
+    var CREDIT = 1500;          // ms: a reading this soon after a tap or a restart is credited to it (the wording of the resume event only)
+    var COLS = ['t_s', 'kind', 'note', 'speed_kmh', 'course_deg', 'acc_m', 'heading_deg', 'from',
+      'turn_deg', 'rate_dps', 'api_hz', 'dm_hz', 'gyro_live', 'w_x', 'w_y', 'w_z', 'up_x', 'up_y', 'up_z', 'drift_dps'];
+    var t0 = now(), lastRow = 0, log = [], lastTap = 0;
+    function drift() { var u = acc.up; return u ? -(bias[0] * u[0] + bias[1] * u[1] + bias[2] * u[2]) : 0; }
+    function minsAgo(at) { return Math.round((Date.now() - at) / 60000) + ' min ago'; }
+    // A row keeps its own time in the first place and gets t_s when it is
+    // written out (line() below): t0 can still move back while the index of
+    // the kept drives is being read, when this page continues a drive. A
+    // note never carries a comma or a line break: the file is CSV
+    function row(kind, note, t) {
+      if (keep.base + log.length >= LOG_MAX) return;
+      var f = kind === 'gps' ? fix : null, s = live(gy.api, t) ? gy.api : gy.dm, up = acc.up;
+      log.push([t, kind, String(note || '').replace(/[,\r\n]+/g, ' '),
+        f && f.speed !== null ? r(f.speed * 3.6, 1) : '', f && f.course !== null ? r(f.course, 1) : '', f ? r(f.acc, 1) : '',
+        heading === null ? '' : r(heading, 1), from || '', r(turn, 2), r(rate, 3), r(gy.api.hz, 1), r(gy.dm.hz, 1),
+        alive(t) ? 1 : 0, s.w ? r(s.w[0], 3) : '', s.w ? r(s.w[1], 3) : '', s.w ? r(s.w[2], 3) : '',
+        up ? r(up[0], 3) : '', up ? r(up[1], 3) : '', up ? r(up[2], 3) : '', biasSet ? r(drift(), 3) : '']);
+    }
+    function line(x) { return [r((x[0] - t0) / 1000, 2)].concat(x.slice(1)).join(','); }
+    function event(note) { row('ev', note, now()); }
+    // the readings a second of each source, for the api_hz and dm_hz
+    // columns: counted from s.n at the watchdog's ticks, so feedGyro stays
+    // as it is
+    function rates(t) {
+      [gy.api, gy.dm].forEach(function (s) {
+        if (!s.cntAt) { s.cntAt = t; s.cnt = s.n; return; }
+        if (t - s.cntAt >= 1000) { s.hz = (s.n - s.cnt) * 1000 / (t - s.cntAt); s.cnt = s.n; s.cntAt = t; }
+      });
+    }
+
+    // ---- the log kept on the tablet ----
+    // The index lists the kept drives, oldest first, under one key of the
+    // store "index"; each drive's rows are kept in pieces of up to LOG_CHUNK
+    // rows in the store "chunks", under the drive's id and the piece's
+    // number. A page continuing a drive starts a new piece, so no stored
+    // piece is ever read back and rewritten except the open one of this
+    // page. Every write is one transaction over both stores, so a failed
+    // write leaves the index as it was. keep.list is the index as last read
+    // or written. The database is opened once, at start.
+    var keep = { ok: true, err: null, entry: null, chunk0: 0, base: 0, saved: 0, savedAt: 0, moved: false,
+                 list: [], db: null, busy: null, again: false, ready: null };
+    function full(err) { return !!err && (err.name === 'QuotaExceededError' || err.code === 22); }
+    // any failure: the log stays in memory only, noted once
+    function fail(err) {
+      if (!keep.ok) return;
+      keep.ok = false;
+      keep.err = !err ? 'error' : full(err) ? 'the storage is full' : err.name || err.message || 'error';
+      event('log not kept: ' + keep.err);
+    }
+    function openDb() {
+      return new Promise(function (resolve, reject) {
+        if (keep.db) { resolve(keep.db); return; }
+        if (!window.indexedDB) { reject({ name: 'no IndexedDB' }); return; }
+        var q = indexedDB.open(LOG_DB, 1);
+        q.onupgradeneeded = function () { q.result.createObjectStore('index'); q.result.createObjectStore('chunks'); };
+        q.onblocked = function () { reject({ name: 'blocked' }); };
+        q.onerror = function () { reject(q.error || { name: 'error' }); };
+        q.onsuccess = function () {
+          keep.db = q.result;
+          keep.db.onversionchange = function () { keep.db.close(); keep.db = null; };
+          resolve(keep.db);
+        };
+      });
+    }
+    // one read-write transaction over both stores: fn(tx, list) gets the
+    // index as stored, issues its puts and deletes and returns the index to
+    // write; nothing is kept unless all of it is
+    function transact(fn) {
+      return openDb().then(function (db) {
+        return new Promise(function (resolve, reject) {
+          var tx = db.transaction(['index', 'chunks'], 'readwrite'), out = null, failed = null;
+          tx.oncomplete = function () { keep.list = out; resolve(out); };
+          tx.onerror = function (ev) { if (!failed) failed = (ev && ev.target && ev.target.error) || tx.error; };
+          tx.onabort = function () { reject(failed || tx.error || { name: 'AbortError' }); };
+          var g = tx.objectStore('index').get('drives');
+          g.onsuccess = function () {
+            try { out = fn(tx, g.result || []); tx.objectStore('index').put(out, 'drives'); }
+            catch (err) { failed = err; try { tx.abort(); } catch (e2) { /* already aborted */ } }
+          };
+        });
+      });
+    }
+    function readIndex() {
+      return openDb().then(function (db) {
+        return new Promise(function (resolve, reject) {
+          var g = db.transaction('index').objectStore('index').get('drives');
+          g.onsuccess = function () { keep.list = g.result || []; resolve(keep.list); };
+          g.onerror = function () { reject(g.error || { name: 'error' }); };
+        });
+      });
+    }
+    function dropDrive(tx, e) { for (var k = 0; k < e.chunks; k++) tx.objectStore('chunks').delete(e.id + ':' + k); }
+    function prune(tx, list) {
+      while (list.length > LOG_KEEP) dropDrive(tx, list.shift());
+      return list;
+    }
+    function total() { return keep.base + log.length; }
+    // at start: the page continues the last kept drive when it was written
+    // within LOG_JOIN, else it starts a new one, kept once the car moves.
+    // The index comes from the database, so the continuation is noted once
+    // it is read, after "page opened"; the rows logged before keep their
+    // own time and fall into place (row() above)
+    function openDrive() {
+      t0 = now();
+      event('page opened · app ' + APP_VERSION);
+      keep.ready = readIndex().then(function (list) {
+        var last = list[list.length - 1], wall = Date.now();
+        if (last && wall - last.last < LOG_JOIN) {
+          keep.entry = last; keep.chunk0 = last.chunks; keep.base = last.rows; keep.moved = true;
+          // the drive's clock goes on from its start, never back before its last row
+          t0 = now() - 1000 * Math.max((wall - last.started) / 1000, (last.lastT || 0) + 0.01);
+          event('page opened again after ' + Math.round(Math.max(0, wall - last.last) / 1000) + ' s: the drive continues');
+        }
+      }).catch(fail);
+    }
+    // the drive is kept from the first moment the car moves
+    function startKeeping() {
+      if (keep.moved || !keep.ok) return;
+      keep.moved = true;
+      (keep.ready || Promise.resolve()).then(function () {
+        if (!keep.ok || keep.entry) return;
+        var wall = Date.now();
+        var entry = { id: 'd' + wall, started: Math.round(wall - (now() - t0)), last: wall, rows: 0, chunks: 0, lastT: 0, ver: APP_VERSION };
+        return transact(function (tx, list) { list.push(entry); return prune(tx, list); }).then(function () {
+          keep.entry = entry;
+          event('the car moved: the drive is kept on the tablet');
+          return flush();
+        });
+      }).catch(fail);
+    }
+    // the rows since the last flush go to the database: the open piece is
+    // rewritten whole and new pieces are added, and the drive's index entry
+    // follows, in one transaction. A full database makes room by dropping
+    // the oldest other drive, then tries again. One flush runs at a time;
+    // one asked for meanwhile runs after it
+    function flush() {
+      if (keep.busy) { keep.again = true; return keep.busy; }
+      if (!keep.ok || !keep.entry || keep.saved === log.length) return Promise.resolve();
+      var e = keep.entry, upto = log.length, from = Math.floor(keep.saved / LOG_CHUNK), to = Math.floor((upto - 1) / LOG_CHUNK);
+      var pieces = [];
+      for (var j = from; j <= to; j++) {
+        pieces.push({ key: e.id + ':' + (keep.chunk0 + j), text: log.slice(j * LOG_CHUNK, Math.min((j + 1) * LOG_CHUNK, upto)).map(line).join('\n') });
+      }
+      var lastT = r((log[upto - 1][0] - t0) / 1000, 2);
+      function attempt(tries) {
+        return transact(function (tx, list) {
+          var mine = null;
+          for (var i = 0; i < list.length; i++) if (list[i].id === e.id) mine = list[i];
+          if (!mine) { mine = e; list.push(mine); }
+          mine.last = Date.now(); mine.rows = keep.base + upto; mine.chunks = keep.chunk0 + to + 1; mine.lastT = lastT;
+          pieces.forEach(function (p) { tx.objectStore('chunks').put(p.text, p.key); });
+          keep.entry = mine;
+          return list;
+        }).then(function () {
+          keep.saved = upto; keep.savedAt = now();
+        }, function (err) {
+          // the storage is full: make room by dropping the oldest other drive
+          var other = keep.list.filter(function (x) { return x.id !== e.id; });
+          if (!full(err) || !other.length || tries >= LOG_KEEP) { fail(err); return; }
+          return transact(function (tx, list) {
+            dropDrive(tx, other[0]);
+            return list.filter(function (x) { return x.id !== other[0].id; });
+          }).then(function () { return attempt(tries + 1); }, fail);
+        });
+      }
+      keep.busy = attempt(0).then(function () {
+        keep.busy = null;
+        if (keep.again) { keep.again = false; return flush(); }
+      });
+      return keep.busy;
+    }
+    setInterval(flush, LOG_EVERY);
+    function drivesKept() { return keep.list.length; }
+    // the small line of the "Save sensor log" row (screens.md item 72)
+    function logLine() {
+      if (!keep.ok) return 'Not kept on this tablet: save it before you close the app';
+      if (!keep.moved) return 'Kept once the car moves · ' + drivesKept() + ' of ' + LOG_KEEP + ' drives kept';
+      return fmt(total()) + ' rows in this drive · ' + drivesKept() + ' of ' + LOG_KEEP + ' drives kept';
+    }
+    function iso(ms) { return new Date(ms).toISOString(); }
+    // one file with every kept drive, newest first, each with its own
+    // header, as the prototype wrote it, the app's version in place of the
+    // prototype's. The rows come from the database after a flush; when the
+    // log is not kept, or the database cannot be read now, the file holds
+    // this drive from memory
+    function saveLog() {
+      return flush().then(function () { return keep.ok ? readIndex() : []; }).then(function (list) {
+        return openDb().then(function (db) {
+          return new Promise(function (resolve, reject) {
+            var tx = db.transaction('chunks'), store = tx.objectStore('chunks'), texts = {};
+            list.forEach(function (e) {
+              texts[e.id] = [];
+              for (var k = 0; k < e.chunks; k++) {
+                (function (k) { var g = store.get(e.id + ':' + k); g.onsuccess = function () { if (g.result) texts[e.id][k] = g.result; }; }(k));
+              }
+            });
+            tx.oncomplete = function () { resolve({ list: list, texts: texts }); };
+            tx.onerror = tx.onabort = function () { reject(tx.error || { name: 'error' }); };
+          });
+        });
+      }).catch(function (err) { fail(err); return { list: [], texts: {} }; }).then(function (k) {
+        var parts = [], drives = 0, rows = 0, mine = keep.ok && keep.entry;
+        function section(head, body, n) { parts.push(head + '\n' + COLS.join(',') + (body ? '\n' + body : '')); drives += 1; rows += n; }
+        if (!mine) {
+          section('# POI Tracker app ' + APP_VERSION + ' sensor log · this drive, not kept on the tablet · started ' + iso(Date.now() - (now() - t0)) +
+            ' · ' + navigator.userAgent, log.map(line).join('\n'), log.length);
+        }
+        for (var i = k.list.length - 1; i >= 0; i--) {
+          var e = k.list[i];
+          section('# POI Tracker app ' + (e.ver || APP_VERSION) + ' sensor log · ' + (mine && e.id === keep.entry.id ? 'this drive' : 'an earlier drive') +
+            ' · started ' + iso(e.started) + ' · last row ' + iso(e.last) + ' · ' + e.rows + ' rows · ' + navigator.userAgent,
+            (k.texts[e.id] || []).filter(function (v) { return !!v; }).join('\n'), e.rows);
+        }
+        var text = parts.join('\n') + '\n';
+        var a = document.createElement('a'), d = new Date();
+        a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv' }));
+        a.download = 'poi-app-' + APP_VERSION + '-sensors-' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()) + '.csv';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 10000);
+        return { drives: drives, rows: rows };
+      }).catch(function () { /* the download could not be built: nothing to save */ });
     }
 
     // ---- the accelerometer: which way is up, in the tablet's own axes ----
@@ -3688,6 +3986,9 @@
     function resumed(t) {
       paused = false;
       if (t - pausedAt > 2000) unsure = true;
+      // the later of a tap and a restart gets the credit, if it was recent (the log's wording only)
+      var how = lastTap >= lastRestart ? (t - lastTap < CREDIT ? 'tap' : 'itself') : (t - lastRestart < CREDIT ? 'restart' : 'itself');
+      event('resume by ' + how + ' after ' + Math.round((t - pausedAt) / 1000) + ' s');
     }
 
     // ---- the drift: the gyroscope's reading while the car stands ----
@@ -3718,17 +4019,20 @@
       st.cur = null;
       if (c.n < 10) return;
       st.blocks.push([c.sum[0] / c.n, c.sum[1] / c.n, c.sum[2] / c.n]);
-      // shaky: the older blocks go until the rest agree
+      // shaky: the older blocks go until the rest agree (the log notes it at most every 3 s)
+      var spread = spreadOf(st.blocks);
+      if (spread > STILL_SPREAD && t - st.noteAt > 3000) { st.noteAt = t; event('still: shaky ' + spread.toFixed(1)); }
       while (st.blocks.length > 1 && spreadOf(st.blocks) > STILL_SPREAD) st.blocks.shift();
       if (st.blocks.length * STILL_BLOCK < STILL_MS) return;
       var b = [0, 0, 0], u = acc.up;
       for (var j = 0; j < st.blocks.length; j++) for (i = 0; i < 3; i++) b[i] += st.blocks[j][i] / st.blocks.length;
       st.blocks = [];
-      if (u && Math.abs(b[0] * u[0] + b[1] * u[1] + b[2] * u[2]) > DRIFT_MAX) return;   // not drift: the car is turning
+      if (u && Math.abs(b[0] * u[0] + b[1] * u[1] + b[2] * u[2]) > DRIFT_MAX) { event('not drift: turning'); return; }   // the car is turning
       // the first drift measured in this drive replaces a kept one; later ones blend (v19.8)
       for (i = 0; i < 3; i++) bias[i] = biasSet && !keptDrift ? bias[i] + (b[i] - bias[i]) * 0.5 : b[i];
       biasSet = true; keptDrift = null;
       saveDrift();
+      event('drift ' + drift().toFixed(2));
     }
 
     // ---- reading the sensors ----
@@ -3768,48 +4072,54 @@
       try { if (apiObj.a) apiObj.a.stop(); } catch (err) { /* fine */ }
       apiObj.g = null; apiObj.a = null;
     }
-    function startMotion() {
+    // why names the reason in the log, as in the prototype
+    function startMotion(why) {
       if (motion === 'on') return;
       motion = 'on'; motionAt = now();
+      event('motion sensors start: ' + why);
       startApi();
       window.addEventListener('devicemotion', onMotion);
     }
-    function restart() {
+    function restart(why) {
       if (motion !== 'on') return;
       lastRestart = now();
+      event('restart: ' + why);
       stopApi(); startApi();
       window.removeEventListener('devicemotion', onMotion);
       window.addEventListener('devicemotion', onMotion);
     }
     // after a focus or a return to the page: restart if the sensors stay silent
-    function checkSoon() {
-      setTimeout(function () { if (motion === 'on' && !alive(now())) restart(); }, LIVE + 200);
+    function checkSoon(why) {
+      setTimeout(function () { if (motion === 'on' && !alive(now())) restart(why); }, LIVE + 200);
     }
     function watchdog() {
       var t = now();
       if (motion === 'on') {
-        if (!alive(t) && !paused && (everLive || t - motionAt > 3000)) { paused = true; pausedAt = t; }
-        if (paused && document.visibilityState === 'visible' && t - lastRestart > RESTART_GAP) restart();
+        if (!alive(t) && !paused && (everLive || t - motionAt > 3000)) { paused = true; pausedAt = t; event('pause'); }
+        if (paused && document.visibilityState === 'visible' && t - lastRestart > RESTART_GAP) restart('watchdog');
       }
       choose(t);
+      rates(t);
+      if (t - lastRow >= 1000) { lastRow = t; row('s', '', t); }   // the log's row once a second
     }
 
     // ---- GPS ----
     function startGps() {
-      if (!navigator.geolocation) { gps = 'none'; startMotion(); return; }
+      if (!navigator.geolocation) { gps = 'none'; startMotion('no location in this browser'); return; }
       gps = 'asking';
       watch = navigator.geolocation.watchPosition(onFix, onFixError, { enableHighAccuracy: true, maximumAge: 0 });
       // the motion sensors wait for the answer about location: its question takes the focus
       try {
         navigator.permissions.query({ name: 'geolocation' }).then(function (p) {
-          if (p.state !== 'prompt') startMotion();
+          if (p.state !== 'prompt') startMotion('location ' + p.state);
         }).catch(function () { /* the first fix or error starts them */ });
       } catch (err) { /* the same */ }
-      setTimeout(function () { startMotion(); }, 15000);   // no answer about location in 15 s
+      setTimeout(function () { startMotion('no location answer in 15 s'); }, 15000);   // no answer about location in 15 s
     }
+    // acc, the fix's accuracy in metres, serves the log's acc_m column only
     function onFix(pos) {
       var c = pos.coords, t = now();
-      fix = { course: num(c.heading) === null ? null : Heading.norm(c.heading), speed: num(c.speed), at: t };
+      fix = { course: num(c.heading) === null ? null : Heading.norm(c.heading), speed: num(c.speed), acc: num(c.accuracy), at: t };
       gps = 'fix';
       if (fix.course === null) fixes = [];
       else {
@@ -3818,13 +4128,23 @@
         notes.push({ at: t, course: fix.course, turn: turn });
         while (notes.length && t - notes[0].at > AGREE_KEEP) notes.shift();
       }
-      startMotion();
-      if (gpsLive(t) && gyroOk(t) && straight(t) && steady() && agree(t)) check(t);
+      if (fix.speed !== null && fix.speed >= MOVING) startKeeping();
+      startMotion('location allowed');
+      // the rules of a check, in the order and with the effect of v0.27:
+      // the log's note says what the check did, or that only agree()
+      // refused the fix, with the difference it compared
+      var note = '';
+      if (gpsLive(t) && gyroOk(t) && straight(t) && steady()) {
+        if (agree(t)) note = check(t);
+        else { var d = disagreement(t); note = d === null ? '' : 'no check: GPS and gyroscope disagree ' + d.toFixed(1); }
+      }
       choose(t);
+      row('gps', note, t);
     }
     function onFixError(err) {
       gps = err && err.code === 1 ? 'denied' : err && err.code === 2 ? 'unavailable' : fix ? 'fix' : 'asking';
-      startMotion();
+      event('location error ' + (err ? err.code : '') + ' ' + (err && err.message ? err.message : ''));
+      startMotion('location answered');
     }
 
     // ---- the heading ----
@@ -3861,18 +4181,26 @@
     // data-model.md v0.22 "Heading"). This holds for every check: the
     // first one, a gap taken at once while the arrow is pale, and the
     // 30% pull. Without a fix that old there is no check.
-    function agree(t) {
+    // disagreement: the difference agree() compares, in degrees, or null
+    // without a fix that old; the log's "no check" note reports it (v0.28)
+    function disagreement(t) {
       var old = null;
       for (var i = notes.length - 1; i >= 0; i--) { if (t - notes[i].at >= AGREE_MS - 500) { old = notes[i]; break; } }
-      if (!old) return false;
-      return Math.abs(Heading.delta(turn - old.turn, Heading.delta(old.course, fix.course))) <= AGREE_DEG;
+      if (!old) return null;
+      return Math.abs(Heading.delta(turn - old.turn, Heading.delta(old.course, fix.course)));
     }
-    // a GPS check: move north toward the GPS course
+    function agree(t) {
+      var d = disagreement(t);
+      return d !== null && d <= AGREE_DEG;
+    }
+    // a GPS check: move north toward the GPS course. It answers with the
+    // log's note: the first check, or the gap it found
     function check(t) {
       var gap = off === null ? null : Heading.delta(Heading.norm(turn + off), fix.course);
       if (off === null || (unsure && Math.abs(gap) > SNAP)) off = fix.course - turn;
       else off += PULL * gap;
       checkedAt = t; unsure = false;
+      return gap === null ? 'check first' : 'check ' + gap.toFixed(1);
     }
     function choose(t) {
       var target = null;
@@ -3910,23 +4238,34 @@
       if (timer !== null) return;
       if (!wired) {
         wired = true;
-        window.addEventListener('pagehide', function () { if (document.visibilityState === 'visible') saveCourse(now(), true); });
+        window.addEventListener('pagehide', function () { if (document.visibilityState === 'visible') saveCourse(now(), true); flush(); });
         document.addEventListener('visibilitychange', function () {
-          if (document.visibilityState === 'hidden') saveCourse(now(), true);
-          if (document.visibilityState === 'visible') { woke = false; checkSoon(); }
+          event('page ' + document.visibilityState);
+          if (document.visibilityState === 'hidden') { saveCourse(now(), true); flush(); }
+          if (document.visibilityState === 'visible') { woke = false; checkSoon('visible'); }
         });
-        window.addEventListener('focus', function () { checkSoon(); });
-        document.addEventListener('pointerdown', function () { if (woke) return; woke = true; permit(); }, true);
+        window.addEventListener('focus', function () { event('focus'); checkSoon('focus'); });
+        window.addEventListener('blur', function () { event('blur'); });
+        document.addEventListener('pointerdown', function () {
+          lastTap = now();   // for the log's resume event only
+          if (woke) return;
+          woke = true;
+          if (watch === null && gps === 'off') event('first touch: GPS starts');
+          permit();
+        }, true);
       }
+      openDrive();
       restoreCourse();
       restoreDrift();
       timer = setInterval(watchdog, 500);
       choose(now());   // the saved course is on the first frame, as the stub showed it (the prototype showed north until its first watchdog tick)
+      // the log says how GPS starts: at load, or at the first touch (10 above)
       try {
         navigator.permissions.query({ name: 'geolocation' }).then(function (p) {
-          if (p.state === 'granted') permit();
-        }).catch(function () { /* the first touch asks */ });
-      } catch (err) { /* the first touch asks */ }
+          if (p.state === 'granted') { event('location granted: GPS starts at load'); permit(); }
+          else event('location ' + p.state + ': GPS waits for the first touch');
+        }).catch(function () { event('location query failed: GPS waits for the first touch'); });
+      } catch (err) { event('location query failed: GPS waits for the first touch'); }
     }
     // stop ends the watchdog, the motion sensors and the location watch
     function stop() {
@@ -3938,7 +4277,8 @@
       if (watch !== null) { try { navigator.geolocation.clearWatch(watch); } catch (err) { /* fine */ } }
       watch = null; fix = null; fixes = []; notes = []; gps = 'off';
     }
-    return { start: start, stop: stop };
+    // saveLog, logLine and event serve the sensor log (v0.28, temporary)
+    return { start: start, stop: stop, saveLog: saveLog, logLine: logLine, event: event };
   }());
   function drawCompass(h) {
     var svg = document.querySelector('.app svg.compass');
