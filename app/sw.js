@@ -36,9 +36,10 @@
    v0.26 2026-11-01 — the All POIs grid in dark mode, steps of light: a new cache name for app v0.26.
    v0.27 2026-11-01 — the All POIs grid in light mode, Done tiles in the green of the turn buttons: a new cache name for app v0.27.
    v0.28 2026-11-02 — the sensor log for the compass car tests, saved from This tablet: a new cache name for app v0.28.
+   v0.29 2026-11-02 — Settings step 1, the Settings sheet with its list, Theme, Sound and Delete all data: a new cache name for app v0.29.
 */
 'use strict';
-var CACHE = 'poi-app-v0.28';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.29';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 

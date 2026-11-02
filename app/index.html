@@ -7,17 +7,19 @@
   network: the service worker keeps these files on the tablet.
 
   The look is the approved references, copied, not redrawn:
-  - the app CSS of docs/references/main-screen.html v0.48 and the History
-    rules of docs/references/history.html v0.35, byte for byte
+  - the app CSS of docs/references/main-screen.html v0.48, the History
+    rules of docs/references/history.html v0.35 and the Settings rules
+    of docs/references/settings.html v0.32, byte for byte
   - docs/references/_tokens.css v0.26, inlined
-  - the Lucide sprite of main-screen.html
+  - the Lucide sprite of main-screen.html, plus the plus sign of
+    settings.html
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.70 and docs/data-model.md
-  v0.23, and much of it is the code of the working prototype v19.7; the
+  The behaviour follows docs/screens.md v0.71 and docs/data-model.md
+  v0.24, and much of it is the code of the working prototype v19.7; the
   compass is the code of prototype v19.8 plus the agreement rule of
-  v0.25. The look follows v0.69. Still to come: sending.
+  v0.25. The look follows v0.71. Still to come: sending.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -397,6 +399,34 @@
           and _tokens.css v0.26: the row reuses the panel's action rows,
           no new CSS. The store and its write do not change. The APP
           ONLY piece stays.
+  v0.29 2026-11-02 — Settings step 1 (settings.html v0.32, screens.md
+          v0.71, data-model.md v0.24, decided 2026-11-02): the gear
+          opens Settings, a sheet over the whole screen as frame A of
+          settings.html draws it, with the round ✕, the title
+          "Settings", CITIES (a row per city with its route count and
+          "Not connected", "In use" on the city in use, "Add city"),
+          THIS TABLET (Theme as Auto, Light and Dark, and Sound with
+          its switch) and, apart in red, "Delete all data on this
+          tablet". The ✕, the dim background and the back gesture close
+          it, one layer at a time (item 66). Theme and Sound write
+          S.device through the store's write, one write per tap, and
+          Theme applies at once. "Delete all data" asks first with the
+          dialog of item 63 (frame H): with passes not sent yet their
+          number and "Delete anyway", else "Delete all"; confirming
+          empties the store in one write and keeps Theme, Sound, the
+          compass's keys and the sensor log (data-model.md "Tablet
+          storage"), then the app shows No city (item 76). "Add your
+          first city" opens the Settings list. Until step 2 the city
+          rows and "Add city" do nothing when tapped, and in landscape
+          the page area beside the list stays empty. The Settings
+          rules of settings.html v0.32 follow the History rules, byte
+          for byte; one APP ONLY rule keeps a label of History's scope
+          control that is not chosen in --ink-2, since both references
+          name their control .seg and .sg and Settings' labels are
+          ink. The sprite gains the plus sign of settings.html for
+          "Add city". The shell stays main-screen.html v0.48, the
+          tokens _tokens.css v0.26. The plain words of v0.71 reach
+          Settings only; the other screens follow in a later step.
 -->
 <html lang="en">
 <head>
@@ -1748,6 +1778,103 @@
            white-space: nowrap; }
 
   /* ============================================================
+     SETTINGS (screens.md items 17, 18, 20 to 25, 65, 73 to 75): a sheet
+     over the screen (item 74), one column that drills down in portrait,
+     the list beside the page in landscape. Tokens only.
+     ============================================================ */
+  .set { gap: var(--s-4); }
+  .sbody { flex: 1; min-height: 0; display: grid; gap: var(--s-5);
+           grid-template-columns: var(--col-wide) minmax(0, 1fr); }
+  /* a list cut at the bottom edge fades there, as the POI list does (item 56) */
+  .slist, .sdet { min-height: 0; overflow: hidden; display: flex; flex-direction: column;
+                  mask-image: linear-gradient(var(--ink) calc(100% - var(--s-3)), transparent); }
+  @container (orientation: portrait) {
+    .sbody { grid-template-columns: minmax(0, 1fr); }
+    .sbody[data-depth="0"] .sdet, .sbody[data-depth="1"] .slist { display: none; }
+  }
+  /* in landscape the list is beside a city's page, so no link back to it */
+  @container (orientation: landscape) {
+    .back.toroot { display: none; }
+  }
+  .sgh { flex: none; padding: var(--s-5) var(--s-2) var(--s-2); font-size: var(--t-small);
+         font-weight: var(--w-heavy); letter-spacing: calc(var(--s-1) / 2); color: var(--ink-2);
+         line-height: var(--lh-tight); }
+  .sgh:first-child { padding-top: var(--s-2); }
+  .sgap { flex: none; height: var(--s-5); }
+  /* a group is drawn by its border alone: on the raised sheet a lighter fill
+     would take grey text under 4.5:1 in dark */
+  .sgroup { flex: none; border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; }
+  .srow { width: 100%; min-height: var(--row-h); display: flex; align-items: center; gap: var(--s-3);
+          padding: var(--s-2) var(--s-4); border-bottom: 1px solid var(--line); }
+  .srow:last-child { border-bottom: 0; }
+  .srow.on { background: var(--active); }
+  .srow.on .ol small { color: var(--ink); }
+  .srow.stack { flex-direction: column; align-items: stretch; gap: var(--s-2);
+                padding-top: var(--s-3); padding-bottom: var(--s-3); }
+  .srow .ol small { display: block; line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .srow.add .ol b { font-size: var(--t-body); }
+  .srow.danger .ol b { color: var(--err); }
+  .srow.off .ol b { opacity: var(--o-off); }
+  .srow .go { width: 1em; height: 1em; flex: none; font-size: var(--t-label); color: var(--ink-2); }
+  .srow .plus { width: var(--s-5); height: var(--s-5); flex: none; color: var(--ink); }
+  .inuse { flex: none; display: inline-flex; align-items: center; gap: var(--s-1);
+           padding: var(--s-1) var(--s-2); border-radius: var(--r-sm); background: var(--ok-bg);
+           color: var(--ok); font-size: var(--t-small); font-weight: var(--w-heavy);
+           line-height: var(--lh-tight); white-space: nowrap; }
+  /* Theme (item 17): the segmented control of History's scope, its labels in
+     ink as Apple's and Google's segmented controls keep them, since grey on
+     the track falls under 4.5:1 on the raised sheet in dark */
+  .seg { flex: none; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--s-2);
+         padding: var(--s-1); background: var(--man-soft); border-radius: var(--r-md); }
+  .sg { height: var(--tap-min); min-width: calc(var(--tap-min) + var(--s-6)); padding: 0 var(--s-4);
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: var(--t-body); font-weight: var(--w-heavy); color: var(--ink);
+        border-radius: calc(var(--r-md) - var(--s-1)); white-space: nowrap; }
+  .sg.on { background: var(--panel-raised); box-shadow: var(--shadow); color: var(--ink); }
+  /* a deeper page: the link back names the page above (item 74) */
+  .back { flex: none; align-self: flex-start; display: inline-flex; align-items: center; gap: var(--s-1);
+          height: var(--tap-min); padding: 0 var(--s-2); margin-left: calc(-1 * var(--s-2));
+          font-size: var(--t-body); font-weight: var(--w-bold); color: var(--ink-2); }
+  .back svg { width: var(--s-5); height: var(--s-5); }
+  .dh { flex: none; display: flex; align-items: center; gap: var(--s-3); min-height: var(--tap-min);
+        padding: 0 var(--s-2); }
+  .dh h3 { margin: 0; min-width: 0; font-size: var(--t-row); font-weight: var(--w-heavy);
+           line-height: var(--lh-tight); }
+  .usebtn { margin-left: auto; flex: none; display: inline-flex; align-items: center; height: var(--tap-min);
+            padding: 0 var(--s-4); border-radius: var(--r-sm); background: var(--disc);
+            color: var(--disc-glyph); font-size: var(--t-body); font-weight: var(--w-heavy); white-space: nowrap; }
+  .shint { flex: none; margin: 0; padding: var(--s-2) var(--s-2) 0; font-size: var(--t-small);
+           font-weight: var(--w-medium); color: var(--ink-2);
+           line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  /* fields (items 22, 25, 75) */
+  .field { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-3) var(--s-4);
+           border-bottom: 1px solid var(--line); }
+  .field:last-child { border-bottom: 0; }
+  .field label { font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2);
+                 line-height: var(--lh-tight); }
+  .fbox { display: flex; align-items: center; gap: var(--s-3); min-width: 0; min-height: var(--tap-min);
+          padding: 0 var(--s-4); border-radius: var(--r-sm); background: var(--panel-raised);
+          border: 1px solid var(--line); font-size: var(--t-body); font-weight: var(--w-medium); }
+  .fv { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fv.ph { color: var(--ink-2); }
+  .fbox b { flex: none; font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2); }
+  .field.bad .fbox { border-color: var(--err); }
+  .ferr { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--err);
+          line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .sstate { flex: none; display: flex; align-items: center; gap: var(--s-2); padding: var(--s-3) var(--s-2) 0;
+            font-size: var(--t-body); font-weight: var(--w-bold); }
+  /* the answers of "Test connection" (item 25): the dot of the sync control */
+  .sstate.bad .dot { background: var(--err); }
+  .sstate.off .dot { background: var(--ink-3); }
+  /* a field kept while passes carry its value (item 22): the box dims, its
+     label and its reason stay readable (items 26, 27) */
+  .field.off .fbox { opacity: var(--o-off); }
+  .fwhy { font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+          line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
+  .sacts { flex: none; display: flex; gap: var(--s-3); padding-top: var(--s-4); }
+  .sacts .dbtn { flex: 1; }
+
+  /* ============================================================
      APP ONLY: motion, the toast, scrolling and the states the static
      references draw as separate frames or not at all. Tokens only
      (screens.md item 68).
@@ -1807,6 +1934,12 @@
            background: var(--side); color: var(--side-glyph); font-weight: var(--w-heavy); }
   /* controls of a later build stay in place, dimmed (items 26, 77) */
   .gear.off, .colbtn.off { opacity: var(--o-off); }
+  /* History's scope control and Settings' Theme control are both .seg and
+     .sg in their references, and the Settings rules above come last, so
+     their label colour, ink, would reach History's control, whose
+     reference keeps a label that is not chosen in --ink-2 (history.html
+     v0.35). This puts that value back for History only. */
+  .hist .sg:not(.on) { color: var(--ink-2); }
   /* a dialog with one button (item 78) */
   .dbtns.one { grid-template-columns: 1fr; }
   /* item 63: the switch of the type change dialog when it is off, the knob
@@ -1835,13 +1968,14 @@
   <symbol id="i-chev-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
   <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></symbol>
   <symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
 </svg>
 <div class="host"><div class="app" id="app"><div class="scr" id="scr">
 <header class="topbar">
   <span class="city" id="city"></span>
   <span class="pickwrap"><button class="route" type="button" data-act="routes" id="routeBtn"></button></span>
   <button class="sync" type="button" data-act="sync" id="syncBtn"></button>
-  <button class="gear off" type="button" data-act="later" aria-label="Settings" aria-disabled="true"><svg><use href="#i-settings"/></svg></button>
+  <button class="gear" type="button" data-act="settings" aria-label="Settings"><svg><use href="#i-settings"/></svg></button>
 </header>
 <div class="body">
   <div class="colwrap"><div class="col" id="col"></div></div>
@@ -1875,7 +2009,7 @@
   'use strict';
 
   // ================= constants (screens.md items 39, 46, 60; data-model.md) =================
-  var APP_VERSION = 'v0.28';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
+  var APP_VERSION = 'v0.29';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
   var KEY = 'poi-app:store';         // the whole store, one key, one setItem per change
   var HEADING_KEY = 'poi-app:heading';   // the compass's last course, { deg, at }, written every 2 s (data-model.md "Tablet storage")
   var DRIFT_KEY = 'poi-app:drift';       // the gyroscope's last good drift, { b: [x, y, z], at }, written when a drift is measured
@@ -1904,7 +2038,7 @@
   var SIDE_NAME = { N: 'North', S: 'South', W: 'West', E: 'East' };
   var AT = { N: 0, S: 1, W: 2, E: 3, L: 4, St: 5, R: 6 };   // the place in the 7 counts
   var SIGN = { done: 'i-check', fix: 'i-alert', err: 'i-alert', nd: 'i-ban' }; // item 59
-  var LATER = 'Settings come in a later version';            // item 77
+  var LATER = 'Settings come in a later version';            // item 77: "Add routes in Settings" (step 2) and "Set up connection" (step 3) still show it
 
   // ================= helpers =================
   var app = document.getElementById('app');
@@ -2297,7 +2431,8 @@
   // ================= the layers of the screen and the back gesture (item 66) =================
   // ui.stack holds the layers open over the working screen, the topmost
   // last: { k: 'open', man } the open compass, { k: 'menu', name },
-  // { k: 'history' }, { k: 'grid' }, { k: 'dialog', d }. Each layer has one
+  // { k: 'history' }, { k: 'grid' }, { k: 'settings' }, { k: 'dialog', d }.
+  // Each layer has one
   // entry in the browser's history, so the Android back gesture closes
   // exactly one, the topmost, and leaves the app only when nothing is open.
   var ui = { stack: [], scope: 'poi', ring: null, railN: null, busy: false };
@@ -2310,6 +2445,7 @@
   function openMenu(name) { removeLayer('open'); removeLayer('menu'); ui.stack.push({ k: 'menu', name: name }); }
   function openHistory() { removeLayer('open'); removeLayer('menu'); if (!find('history')) ui.stack.push({ k: 'history' }); }
   function openGrid() { removeLayer('open'); removeLayer('menu'); ui.stack.push({ k: 'grid' }); }
+  function openSettings() { removeLayer('open'); removeLayer('menu'); if (!find('settings')) ui.stack.push({ k: 'settings' }); }
   function openDialog(d) { removeLayer('open'); removeLayer('menu'); removeLayer('dialog'); ui.stack.push({ k: 'dialog', d: d }); }
   function closeTop() { var l = ui.stack.pop(); if (l && l.k === 'open') clearTimeout(openTimer); }
 
@@ -2388,8 +2524,11 @@
     var col = $('col'), c = city(), r = route();
     if (!r) {
       colBuilt = null;
-      setHTML(col, '<button class="colbtn off" type="button" data-act="later" aria-disabled="true">' +
-        (c ? 'Add routes in Settings' : 'Add your first city') + icon('i-chev-right') + '</button>');
+      // item 76: "Add your first city" opens the Settings list (v0.29); item
+      // 35: "Add routes in Settings" waits for the city's page of Settings
+      // step 2 and stays a control of a later build (item 77)
+      setHTML(col, c ? '<button class="colbtn off" type="button" data-act="later" aria-disabled="true">Add routes in Settings' + icon('i-chev-right') + '</button>'
+        : '<button class="colbtn" type="button" data-act="settings">Add your first city' + icon('i-chev-right') + '</button>');
       return;
     }
     var N = r.poiCount, act = active(), tot = routeTotals(r), dots = [], rows = [];
@@ -2651,6 +2790,7 @@
         '<span class="lg"><span class="sw err">' + icon('i-alert', 'ci') + '</span>Sheet error</span><span class="lg"><span class="sw nd">' + icon('i-ban', 'ci') + '</span>Not drivable</span></div>' +
         '<div class="grid" id="grid">' + cells + '</div></div>';
     }
+    if (find('settings')) h += settingsHtml();
     var dl = find('dialog');
     if (dl) {
       var d = dl.d;
@@ -2680,6 +2820,38 @@
       if (gridKeep !== null) g.scrollTop = gridKeep;
       else centreGrid(g);
     }
+  }
+  // ---- Settings (items 17, 18, 20, 65, 66, 73, 74, 76): the sheet of
+  // settings.html frame A over the whole screen, its list alone. Interim
+  // until Settings step 2 (cities and routes) and step 3 (the connection
+  // page): the city rows and "Add city" are drawn but do nothing when
+  // tapped, every city reads "Not connected", since no city can have a
+  // connection before step 3, and in landscape the page area beside the
+  // list, .sdet, stays empty. ----
+  function settingsHtml() {
+    var cur = S.device.cityId, th = S.device.theme;
+    var rows = S.cities.map(function (c) {
+      var on = c.id === cur;
+      return '<button class="srow' + (on ? ' on' : '') + '" type="button" data-city="' + esc(c.id) + '"><span class="ol"><b>' + esc(c.name) + '</b><small>' +
+        plural(c.routes.length, 'route', 'routes') + ' · Not connected</small></span>' +
+        (on ? '<span class="inuse">' + icon('i-check') + 'In use</span>' : '') + icon('i-chev-right', 'go') + '</button>';
+    }).join('');
+    var seg = [['system', 'Auto'], ['light', 'Light'], ['dark', 'Dark']].map(function (t) {
+      return '<button class="sg' + (th === t[0] ? ' on' : '') + '" type="button" data-theme-set="' + t[0] + '">' + t[1] + '</button>';
+    }).join('');
+    return '<button class="scrim" type="button" data-act="close-settings" aria-label="Close Settings"></button>' +
+      '<div class="sheet set" role="dialog" aria-label="Settings">' +
+      '<div class="shead"><button class="xbtn" type="button" data-act="close-settings" aria-label="Close"><svg><use href="#i-x"/></svg></button><span class="stt"><span class="stitle">Settings</span></span></div>' +
+      '<div class="sbody" data-depth="0"><div class="slist">' +
+      '<div class="sgh">CITIES</div><div class="sgroup">' + rows +
+      '<button class="srow add" type="button">' + icon('i-plus', 'plus') + '<span class="ol"><b>Add city</b></span></button></div>' +
+      '<div class="sgh">THIS TABLET</div><div class="sgroup">' +
+      '<div class="srow stack"><span class="ol"><b>Theme</b></span><div class="seg" role="radiogroup" aria-label="Theme">' + seg + '</div></div>' +
+      '<div class="srow" data-sound><span class="ol"><b>Sound</b><small>A sound when you add or remove a pass</small></span>' +
+      '<span class="switch" role="switch" aria-checked="' + (S.device.sound ? 'true' : 'false') + '" aria-label="Sound"></span></div></div>' +
+      '<div class="sgap"></div><div class="sgroup">' +
+      '<button class="srow danger" type="button" data-act="delete-all"><span class="ol"><b>Delete all data on this tablet</b><small>Passes not sent yet will be lost. Other tablets and your sheets won’t change.</small></span>' + icon('i-chev-right', 'go') + '</button></div>' +
+      '</div><div class="sdet"></div></div></div>';
   }
   function centreGrid(g) {
     var cell = g.firstElementChild;
@@ -3138,6 +3310,50 @@
     var e = undoTarget();
     if (e) askRemove(e, true);
   }
+  // ---- Settings step 1 (items 17, 18, 65; v0.29) ----
+  // Theme and Sound live in S.device and go through the store's write, one
+  // write per tap; the theme applies at once (item 17). The label "Auto"
+  // stands for the stored value 'system'.
+  function setTheme(t) {
+    if (t !== 'light' && t !== 'dark') t = 'system';
+    if (change(function () { S.device.theme = t; }, 'change')) applyTheme();
+    render();
+  }
+  function setSound(on) {
+    change(function () { S.device.sound = !!on; }, 'change');
+    render();
+  }
+  // item 18: "Delete all data on this tablet" asks first with the dialog
+  // of item 63 (settings.html frame H). The number is the waiting pass
+  // events of every city; removals and type changes are not passes.
+  function waitingPasses() {
+    var n = 0;
+    S.events.forEach(function (e) { if (e.kind === 'pass' && e.delta > 0 && e.state === 'waiting') n += 1; });
+    return n;
+  }
+  function askDeleteAll() {
+    var n = waitingPasses();
+    var keep = 'All cities, routes, POI types and History will be deleted from this tablet. Other tablets and your sheets won’t change.';
+    openDialog({
+      title: 'Delete all data on this tablet?',
+      body: n ? plural(n, 'pass isn’t', 'passes aren’t') + ' sent yet and will be lost. ' + keep : keep,
+      ok: n ? 'Delete anyway' : 'Delete all', okCls: 'danger',
+      run: deleteAll
+    });
+    render();
+  }
+  // Empties the store in one write (data-model.md "Tablet storage"): the
+  // cities with their routes, connections, baselines and POI types, every
+  // event and the city in use go. Theme and Sound stay, and so do the
+  // compass's own keys and the sensor log's database, which this never
+  // touches. Then the sheet closes and the app shows No city (item 76).
+  function deleteAll() {
+    var ok = change(function () {
+      S.cities = []; S.baseline = {}; S.types = {}; S.events = []; S.dropped = {}; S.seq = 0;
+      S.device.cityId = null;
+    }, 'change');
+    if (ok) removeLayer('settings');
+  }
   // "Send again" (item 47): the same event waits again, with the same id
   function sendAgain(id) {
     var e = ix().byId[id];
@@ -3341,6 +3557,8 @@
     // item 63: a tap on the switch row of a type change dialog toggles it
     var row = e.target.closest('.drow'), dl = row && find('dialog');
     if (row && !blocked) { if (dl && dl.d.sw) { dl.d.sw.on = !dl.d.sw.on; render(); } return; }
+    // item 65: a tap on the Sound row of Settings flips its switch
+    if (e.target.closest('.srow[data-sound]') && !blocked) { setSound(!S.device.sound); return; }
     var t = e.target.closest('button');
     if (!t || !app.contains(t) || blocked) return;
     var a = t.getAttribute('data-act');
@@ -3349,6 +3567,7 @@
     if (t.hasAttribute('data-poi')) { selectPoi(+t.getAttribute('data-poi'), !!find('grid')); return; }
     if (t.hasAttribute('data-type')) { pickType(t.getAttribute('data-type')); return; }
     if (t.hasAttribute('data-route')) { selectRoute(t.getAttribute('data-route')); return; }
+    if (t.hasAttribute('data-theme-set')) { setTheme(t.getAttribute('data-theme-set')); return; }
     if (t.hasAttribute('data-scope')) { ui.scope = t.getAttribute('data-scope') === 'route' ? 'route' : 'poi'; render(); return; }
     if (t.hasAttribute('data-del')) { var x = ix().byId[t.getAttribute('data-del')]; if (x) askRemove(x, false); return; }
     if (t.hasAttribute('data-again')) { sendAgain(t.getAttribute('data-again')); return; }
@@ -3364,6 +3583,9 @@
       case 'grid': if (route()) { openGrid(); render(); } break;
       case 'history': openHistory(); render(); break;
       case 'close-grid': removeLayer('grid'); render(); break;
+      case 'settings': openSettings(); render(); break;
+      case 'close-settings': removeLayer('settings'); render(); break;
+      case 'delete-all': askDeleteAll(); break;
       case 'close-history': removeLayer('history'); render(); break;
       case 'hist-more': histShown += HIST_PAGE; render(); break;   // item 48: the next 50 rows under the ones drawn
       case 'undo': undo(); break;
