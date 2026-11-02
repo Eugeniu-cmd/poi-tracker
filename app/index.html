@@ -9,17 +9,17 @@
   The look is the approved references, copied, not redrawn:
   - the app CSS of docs/references/main-screen.html v0.48, the History
     rules of docs/references/history.html v0.35 and the Settings rules
-    of docs/references/settings.html v0.33, byte for byte
+    of docs/references/settings.html v0.34, byte for byte
   - docs/references/_tokens.css v0.26, inlined
   - the Lucide sprite of main-screen.html, plus the plus sign and the
     back chevron of settings.html
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.72 and docs/data-model.md
-  v0.25, and much of it is the code of the working prototype v19.7; the
+  The behaviour follows docs/screens.md v0.73 and docs/data-model.md
+  v0.26, and much of it is the code of the working prototype v19.7; the
   compass is the code of prototype v19.8 plus the agreement rule of
-  v0.25. The look follows v0.72. Still to come: sending.
+  v0.25. The look follows v0.73. Still to come: sending.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -473,6 +473,43 @@
           input inside a field and its focus. The sprite gains the
           back chevron of settings.html. The shell stays
           main-screen.html v0.48, the tokens _tokens.css v0.26.
+  v0.31 2026-11-02 — Settings step 3 (settings.html v0.34, screens.md
+          v0.73, data-model.md v0.26, decided 2026-11-02): the Connection
+          page (frames D and J), from a city's "Connection" row and from
+          the Sync panel's "Set up connection", which leaves item 77's
+          list: the title "Connection" with the city's name, the back
+          link naming the city, "Link" and "Password" (masked, "Show",
+          "Hide" while it shows),
+          the hint, the state line, "Test connection" and "Save". The
+          fields are checked as they are typed with the three texts of
+          item 25, spaces at the ends trimmed, both buttons dimmed while
+          a reason stands. "Test connection" posts {token, action:'ping'}
+          to the link as text/plain through post(), the one request
+          function that sending and loading will reuse (data-model.md
+          "Mailbox", mailbox/README.md), waits 15 s at most, reads
+          "Testing…" meanwhile and answers on the state line with the dot
+          of the sync control: "Connected · tested 18:20", "Wrong
+          password" with the error border on the Password box, "The
+          sheet doesn’t answer. Check the link." or "No internet". A test
+          alone stores nothing, except that a test which connects with
+          the saved values clears keyRejected in one write; a test
+          without internet changes nothing. "Save" writes the link and
+          the password in one write, with the last test's time and
+          result when that test ran on exactly these values, else the
+          city reads "Not tested yet" (the same values saved again with
+          no new answer from the sheet keep their stored test), clears
+          keyRejected and goes back to the city's page. The city's state reaches its list row and
+          its "Connection" row, beside the dot there, in the five forms
+          of items 20 and 21; the sample city's row is dimmed with "The
+          sample city has no sheet.". The Settings rules are
+          settings.html v0.34's, which now hold the five field rules the
+          APP ONLY piece kept since v0.30, so those copies are gone; APP
+          ONLY gains the "Show" button of the Password box, a tap target
+          where the reference draws a label, and the colours of the
+          "Connection" row's dot in the states the reference does not
+          draw. The service worker never caches a request to
+          script.google.com: it handles same-origin GETs only. The shell
+          stays main-screen.html v0.48, the tokens _tokens.css v0.26.
 -->
 <html lang="en">
 <head>
@@ -1879,6 +1916,7 @@
          font-size: var(--t-body); font-weight: var(--w-heavy); color: var(--ink);
          border-radius: calc(var(--r-md) - var(--s-1)); white-space: nowrap; }
   .tsg.on { background: var(--panel-raised); box-shadow: var(--shadow); color: var(--ink); }
+  .tsg { transition: background-color var(--dur-fade) var(--ease-out); }
   /* a deeper page: the link back names the page above (item 74) */
   .back { flex: none; align-self: flex-start; display: inline-flex; align-items: center; gap: var(--s-1);
           height: var(--tap-min); padding: 0 var(--s-2); margin-left: calc(-1 * var(--s-2));
@@ -1905,6 +1943,14 @@
           border: 1px solid var(--line); font-size: var(--t-body); font-weight: var(--w-medium); }
   .fv { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .fv.ph { color: var(--ink-2); }
+  /* a real field (the app) holds an input where this page draws its value
+     as text: the input takes the box's font and colour and nothing of its
+     own, its placeholder the colour of .fv.ph, and the box shows the focus
+     in its border, the error colour first (v0.34) */
+  input.fv { font: inherit; color: inherit; background: none; border: 0; border-radius: 0; padding: 0; margin: 0;
+             outline: none; -webkit-appearance: none; appearance: none; -webkit-user-select: text; user-select: text; }
+  input.fv::placeholder { color: var(--ink-2); opacity: 1; }
+  .field:not(.bad) .fbox:focus-within { border-color: var(--focus); }
   .fbox b { flex: none; font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2); }
   .field.bad .fbox { border-color: var(--err); }
   .ferr { font-size: var(--t-small); font-weight: var(--w-bold); color: var(--err);
@@ -1921,6 +1967,10 @@
           line-height: round(up, calc(var(--lh-body) * var(--t-small)), 1px); }
   .sacts { flex: none; display: flex; gap: var(--s-3); padding-top: var(--s-4); }
   .sacts .dbtn { flex: 1; }
+  /* "Save", "Add route" or "Test connection" while a field's check stands
+     (items 22, 25, 75): in place, dimmed, like any unavailable control
+     (items 26, 27) */
+  .dbtn.off { opacity: var(--o-off); }
 
   /* ============================================================
      APP ONLY: motion, the toast, scrolling and the states the static
@@ -1956,7 +2006,7 @@
   .cnt { transform-origin: left center; }
   .cnt.bump { animation: bump var(--dur-bounce) var(--ease-spring); }
   @keyframes bump { 0% { scale: 1; } 40% { scale: var(--scale-bump); } 100% { scale: 1; } }
-  .row, .cell, .opt, .ritem, .btn, .hdel, .sg, .tsg { transition: background-color var(--dur-fade) var(--ease-out); }
+  .row, .cell, .opt, .ritem, .btn, .hdel, .sg { transition: background-color var(--dur-fade) var(--ease-out); }
   /* the toast of item 36: over the working area, just above the bar */
   .toast { position: absolute; position-anchor: --main; left: anchor(center);
            top: calc(anchor(bottom) - var(--tap-min) - 2 * var(--s-2) - var(--gap) - var(--s-2));
@@ -1980,18 +2030,19 @@
   .tundo { display: inline-flex; align-items: center; justify-content: center;
            min-height: var(--tap-min); padding: 0 var(--s-5); border-radius: calc(var(--r-md) - var(--s-2));
            background: var(--side); color: var(--side-glyph); font-weight: var(--w-heavy); }
-  /* controls of a later build stay in place, dimmed (items 26, 77), and so
-     does "Save" or "Add route" while a field's check stands (items 22, 75) */
-  .gear.off, .colbtn.off, .dbtn.off { opacity: var(--o-off); }
-  /* a field of Settings (items 22, 75) holds a real input where the
-     reference draws its value as text: the input takes the box's font and
-     colour and nothing of its own, its placeholder the colour of the
-     reference's (.fv.ph), and the box shows the focus in its border, the
-     error colour first (v0.30) */
-  input.fv { font: inherit; color: inherit; background: none; border: 0; border-radius: 0; padding: 0; margin: 0;
-             outline: none; -webkit-appearance: none; appearance: none; -webkit-user-select: text; user-select: text; }
-  input.fv::placeholder { color: var(--ink-2); opacity: 1; }
-  .field:not(.bad) .fbox:focus-within { border-color: var(--focus); }
+  /* controls of a later build stay in place, dimmed (items 26, 77) */
+  .gear.off, .colbtn.off { opacity: var(--o-off); }
+  /* "Show" / "Hide" of the Password box (item 25, v0.31): a real button
+     where the reference draws a label (.fbox b), with the label's look,
+     as tall as the box and at least --tap-min wide, so it is a tap target
+     (item 31); its word stays flush right, where the label's is */
+  .fbox .fshow { flex: none; align-self: stretch; display: inline-flex; align-items: center; justify-content: flex-end;
+                 min-width: var(--tap-min); font-size: var(--t-small); font-weight: var(--w-heavy); color: var(--ink-2); }
+  /* the "Connection" row of a city's page (item 21, v0.31): its dot takes
+     the state's colour, as the sync control's does; the reference draws
+     the connected state only (frames B and C) */
+  .srow .iw.bad .dot { background: var(--err); }
+  .srow .iw.off .dot { background: var(--ink-3); }
   /* a dialog with one button (item 78) */
   .dbtns.one { grid-template-columns: 1fr; }
   /* item 63: the switch of the type change dialog when it is off, the knob
@@ -2062,7 +2113,7 @@
   'use strict';
 
   // ================= constants (screens.md items 39, 46, 60; data-model.md) =================
-  var APP_VERSION = 'v0.30';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
+  var APP_VERSION = 'v0.31';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
   var KEY = 'poi-app:store';         // the whole store, one key, one setItem per change
   var HEADING_KEY = 'poi-app:heading';   // the compass's last course, { deg, at }, written every 2 s (data-model.md "Tablet storage")
   var DRIFT_KEY = 'poi-app:drift';       // the gyroscope's last good drift, { b: [x, y, z], at }, written when a drift is measured
@@ -2091,7 +2142,6 @@
   var SIDE_NAME = { N: 'North', S: 'South', W: 'West', E: 'East' };
   var AT = { N: 0, S: 1, W: 2, E: 3, L: 4, St: 5, R: 6 };   // the place in the 7 counts
   var SIGN = { done: 'i-check', fix: 'i-alert', err: 'i-alert', nd: 'i-ban' }; // item 59
-  var LATER = 'Settings come in a later version';            // item 77: "Set up connection" in the Sync panel (step 3) still shows it
 
   // ================= helpers =================
   var app = document.getElementById('app');
@@ -2511,9 +2561,10 @@
   // The pages of Settings (items 66, 74; v0.30) are layers of their own,
   // one history entry each, so the back gesture goes up one page, then
   // closes Settings: 'city' (cityId), 'route' (cityId, routeId, form),
-  // 'addcity' (form) and 'addroute' (cityId, form). A form holds what is
-  // typed, { name } or { code, count }, and touched, the fields typed in,
-  // whose reasons show (items 22, 75). The sheet closes with its pages.
+  // 'addcity' (form), 'addroute' (cityId, form) and 'conn' (cityId, form,
+  // show, test, testing; v0.31). A form holds what is typed, { name },
+  // { code, count } or { url, token }, and touched, the fields typed in,
+  // whose reasons show (items 22, 25, 75). The sheet closes with its pages.
   function pages() { return ui.stack.filter(function (l) { return l.k === 'spage'; }); }
   function spage() { var p = pages(); return p[p.length - 1] || null; }
   function pushPage(p) { p.k = 'spage'; ui.stack.push(p); }
@@ -2539,6 +2590,17 @@
   function openRoutePage(rid) {
     var r = routeById(rid), c = cityOfRoute(rid);
     if (r && c) pushPage({ page: 'route', cityId: c.id, routeId: rid, form: { code: r.code, count: String(r.poiCount) }, touched: {} });
+  }
+  // the Connection page (item 25, frames D and J; v0.31): the city's link
+  // and password as typed, whether the password shows, the last test run
+  // on this page, { url, token, result, at }, and whether one runs now.
+  // Never for the sample city, which can never get a sheet
+  function openConnPage(cid) {
+    var c = cityById(cid);
+    if (!c || c.sample) return;
+    var p = spage();
+    if (p && p.page === 'conn' && p.cityId === cid) return;
+    pushPage({ page: 'conn', cityId: cid, form: { url: c.mailboxUrl || '', token: c.token || '' }, touched: {}, show: false, test: null, testing: false });
   }
 
   var navPending = false;
@@ -2920,14 +2982,15 @@
   // of settings.html over the whole screen: the list (frame A) and, beside
   // it in landscape or in its place in portrait (data-depth, item 74), the
   // page of the top layer: a city (frames B, C), a route (frame E), a new
-  // route (frame F without its error line) or a new city (frame G). With
-  // no page open the city in use is shown beside the list. Every city
-  // reads "Not connected" until step 3 builds the Connection page. ----
+  // route (frame F without its error line), a new city (frame G) or a
+  // city's Connection (frames D and J). With no page open the city in use
+  // is shown beside the list. A city's row carries the state of its
+  // connection (item 20), in the words of its page (connState). ----
   function settingsHtml() {
     var p = spage(), shown = shownCity(), th = S.device.theme, pc = p ? cityById(p.cityId) : null;
     var rows = S.cities.map(function (c) {
       return '<button class="srow' + (shown && c.id === shown.id ? ' on' : '') + '" type="button" data-city="' + esc(c.id) + '"><span class="ol"><b>' + esc(c.name) + '</b><small>' +
-        plural(c.routes.length, 'route', 'routes') + ' · Not connected</small></span>' +
+        plural(c.routes.length, 'route', 'routes') + ' · ' + esc(connState(c).text) + '</small></span>' +
         (c.id === S.device.cityId ? '<span class="inuse">' + icon('i-check') + 'In use</span>' : '') + icon('i-chev-right', 'go') + '</button>';
     }).join('');
     var seg = [['system', 'Auto'], ['light', 'Light'], ['dark', 'Dark']].map(function (t) {
@@ -2936,6 +2999,7 @@
     var det = !p ? (shown ? cityPageHtml(shown) : '')
       : p.page === 'addcity' ? addCityHtml(p)
       : !pc ? '' : p.page === 'city' ? cityPageHtml(pc)
+      : p.page === 'conn' ? connPageHtml(p, pc)
       : p.page === 'addroute' ? addRouteHtml(p, pc)
       : routeById(p.routeId) ? routePageHtml(p, pc) : '';
     return '<button class="scrim" type="button" data-act="close-settings" aria-label="Close Settings"></button>' +
@@ -2968,31 +3032,38 @@
       return '<button class="srow" type="button" data-rpage="' + esc(q.id) + '"><span class="ol"><b>' + esc(q.code) + '</b><small>' +
         plural(q.poiCount, 'POI', 'POIs') + ' · ' + t.poisDone + ' of ' + t.drivable + ' done</small></span>' + icon('i-chev-right', 'go') + '</button>';
     }).join('');
-    // step 3 builds the Connection page (item 25): until then the row reads
-    // "Not connected" in the state line of frame B, whose dot step 3 adds,
-    // and its tap does nothing
+    // the "Connection" row (item 21): the state beside the dot of the sync
+    // control in the state's colour, as frames B and C draw it, and it
+    // opens the Connection page (v0.31); on the sample city, which can
+    // never get a sheet, the row is dimmed with its reason and opens
+    // nothing (items 26, 27)
+    var st = connState(c);
+    var conn = c.sample ? '<div class="srow off"><span class="ol"><b>Connection</b><small>The sample city has no sheet.</small></span></div>'
+      : '<button class="srow" type="button" data-act="connection" data-cid="' + esc(c.id) + '"><span class="ol"><b>Connection</b><small><span class="iw' + (st.cls ? ' ' + st.cls : '') + '"><span class="dot"></span>' + esc(st.text) + '</span></small></span>' + icon('i-chev-right', 'go') + '</button>';
     return '<button class="back toroot" type="button" data-act="sback">' + CHEV_LEFT + 'Settings</button>' +
       '<div class="dh"><h3>' + esc(c.name) + '</h3>' + (inUse ? '<span class="inuse">' + icon('i-check') + 'In use</span>'
         : '<button class="usebtn" type="button" data-act="use-city" data-cid="' + esc(c.id) + '">Use this city</button>') + '</div>' +
       (inUse ? '' : '<p class="shint">' + esc(useLine(c)) + '</p>') +
-      '<div class="sgh">CONNECTION</div><div class="sgroup"><button class="srow" type="button" data-act="connection"><span class="ol"><b>Connection</b><small><span class="iw">Not connected</span></small></span>' + icon('i-chev-right', 'go') + '</button></div>' +
+      '<div class="sgh">CONNECTION</div><div class="sgroup">' + conn + '</div>' +
       '<div class="sgh">ROUTES</div><div class="sgroup">' + rows +
       '<button class="srow add" type="button" data-act="add-route" data-cid="' + esc(c.id) + '">' + icon('i-plus', 'plus') + '<span class="ol"><b>Add route</b></span></button></div>' +
       '<div class="sgap"></div><div class="sgroup">' + (inUse
         ? '<div class="srow danger off"><span class="ol"><b>Delete city</b><small>You can’t delete the city in use. Switch to another city first.</small></span></div>'
         : '<button class="srow danger" type="button" data-act="delete-city" data-cid="' + esc(c.id) + '"><span class="ol"><b>Delete city</b><small>' + esc(c.name) + ' will be removed from this tablet only. Other tablets and the sheet won’t change.</small></span>' + icon('i-chev-right', 'go') + '</button>') + '</div>';
   }
-  // a field (items 22, 75; frames E, F, G): its label, its box with a real
-  // input, and under it the reason in the error colour (err) or, on a
-  // field kept while passes carry its value, the box dimmed with its
-  // reason (why, items 26, 27)
+  // a field (items 22, 25, 75; frames D, E, F, G, J): its label, its box
+  // with a real input (type, the keyboard's mode, and after it the Show
+  // button of a password, v0.31), and under it the reason in the error
+  // colour (err) or, on a field kept while passes carry its value, the box
+  // dimmed with its reason (why, items 26, 27); bad gives the box the
+  // error border alone, the Password box after "Wrong password" (frame J)
   function fieldHtml(key, label, id, value, o) {
-    var bad = !!o.err, off = !!o.why;
+    var bad = !!o.err || !!o.bad, off = !!o.why;
     return '<div class="field' + (bad ? ' bad' : '') + (off ? ' off' : '') + '" data-field="' + key + '"><label for="' + id + '">' + label + '</label>' +
-      '<div class="fbox"' + (off ? ' aria-disabled="true"' : '') + '><input class="fv" id="' + id + '" data-field="' + key + '" type="text" value="' + esc(value) + '"' +
-      (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + (o.numeric ? ' inputmode="numeric"' : '') + ' autocapitalize="' + (o.caps || 'off') + '" autocomplete="off" spellcheck="false"' +
-      (off ? ' disabled' : '') + '></div>' +
-      (bad ? '<span class="ferr">' + esc(o.err) + '</span>' : '') + (off ? '<span class="fwhy">' + esc(o.why) + '</span>' : '') + '</div>';
+      '<div class="fbox"' + (off ? ' aria-disabled="true"' : '') + '><input class="fv" id="' + id + '" data-field="' + key + '" type="' + (o.type || 'text') + '" value="' + esc(value) + '"' +
+      (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + (o.numeric ? ' inputmode="numeric"' : o.mode ? ' inputmode="' + o.mode + '"' : '') + ' autocapitalize="' + (o.caps || 'off') + '" autocomplete="off" spellcheck="false"' +
+      (off ? ' disabled' : '') + '>' + (o.after || '') + '</div>' +
+      (o.err ? '<span class="ferr">' + esc(o.err) + '</span>' : '') + (off ? '<span class="fwhy">' + esc(o.why) + '</span>' : '') + '</div>';
   }
   // "Save" or "Add route", dimmed while a check stands (items 26, 27)
   function saveBtn(ok, label) {
@@ -3033,6 +3104,39 @@
         ? '<div class="srow danger off"><span class="ol"><b>Delete route</b><small>Can’t delete the route now: ' + esc(hold) + '</small></span></div>'
         : '<button class="srow danger" type="button" data-act="delete-route" data-rid="' + esc(r.id) + '"><span class="ol"><b>Delete route</b></span>' + icon('i-chev-right', 'go') + '</button>') + '</div>';
   }
+  // the Connection page (item 25, frames D and J; v0.31): "Link" and
+  // "Password" (masked, with "Show", "Hide" while it shows), the hint, the
+  // state line with the dot of the sync control, "Test connection" and
+  // "Save". The state line reads the page's last test, else the saved
+  // state (connState, "The sheet doesn’t answer. Check the link." in
+  // full); "Wrong password" gives the Password box the error border. Both
+  // buttons are dimmed while a field's reason stands, and "Test
+  // connection" reads "Testing…", dimmed, while a test runs
+  function connLine(p, c) {
+    var t = p.test;
+    if (t) {
+      if (t.result === 'ok') return { text: 'Connected · tested ' + stamp(t.at), cls: '', pw: false };
+      if (t.result === 'auth') return { text: 'Wrong password', cls: 'bad', pw: true };
+      if (t.result === 'offline') return { text: 'No internet', cls: 'off', pw: false };
+      return { text: 'The sheet doesn’t answer. Check the link.', cls: 'bad', pw: false };
+    }
+    var st = connState(c);
+    if (st.text === 'The sheet doesn’t answer') st.text += '. Check the link.';
+    st.pw = st.text === 'Wrong password';
+    return st;
+  }
+  function connPageHtml(p, c) {
+    var v = checkConn(p), line = connLine(p, c), can = v.ok && !p.testing;
+    return '<button class="back" type="button" data-act="sback">' + CHEV_LEFT + esc(c.name) + '</button><div class="dh"><h3>Connection · ' + esc(c.name) + '</h3></div>' +
+      '<div class="sgh">GOOGLE SHEET</div><div class="sgroup">' +
+      fieldHtml('url', 'Link', 'f-url', p.form.url, { err: p.touched.url ? v.errs.url : null, mode: 'url' }) +
+      fieldHtml('token', 'Password', 'f-token', p.form.token, { err: p.touched.token ? v.errs.token : null, bad: line.pw, type: p.show ? 'text' : 'password',
+        after: '<button class="fshow" type="button" data-act="conn-show">' + (p.show ? 'Hide' : 'Show') + '</button>' }) + '</div>' +
+      '<p class="shint">Get the link and the password from the person who made the sheet. They are saved on this tablet only.</p>' +
+      '<div class="sstate' + (line.cls ? ' ' + line.cls : '') + '"><span class="dot"></span>' + esc(line.text) + '</div>' +
+      '<div class="sacts"><button class="dbtn' + (can ? '' : ' off') + '" type="button" data-act="conn-test"' + (can ? '' : ' aria-disabled="true"') + '>' + (p.testing ? 'Testing…' : 'Test connection') + '</button>' +
+      '<button class="dbtn primary' + (v.ok ? '' : ' off') + '" type="button" data-act="form-save"' + (v.ok ? '' : ' aria-disabled="true"') + '>Save</button></div>';
+  }
   function centreGrid(g) {
     var cell = g.firstElementChild;
     if (!cell) return;
@@ -3072,7 +3176,10 @@
       row('sendnow', 'Send now', why, true, false) +
       row('loadsheet', 'Load from sheet', why, true, false) +
       '<div class="sdiv"></div>' +
-      row('later', c && c.mailboxUrl ? 'Connection' : 'Set up connection', 'Script URL and access key' + (c ? ' for ' + c.name : ''), true, true) +
+      // item 72: opens the Connection page of the city in use (v0.31); its
+      // words wait for the Sync panel's step; with no city, or the sample
+      // city, which can never get a sheet, it stays dimmed
+      row('conn-open', c && c.mailboxUrl ? 'Connection' : 'Set up connection', 'Script URL and access key' + (c ? ' for ' + c.name : ''), !c || !!c.sample, true) +
       tabletHtml() +
       // the sensor log of the compass car tests (item 72, decided
       // 2026-11-02, temporary): an action row like "Send now", its small
@@ -3547,6 +3654,17 @@
     else S.cities.forEach(function (c) { if (!err && c.name.trim().toLowerCase() === name.toLowerCase()) err = 'You already have a city called ' + c.name + '.'; });
     return { errs: { name: err }, ok: !err, name: name };
   }
+  // The checks of the Connection page (item 25, v0.31): the link, trimmed,
+  // must be there and start with the address Apps Script gives
+  // (mailbox/README.md); the password, trimmed, must be there
+  var LINK_START = 'https://script.google.com/';
+  function checkConn(p) {
+    var url = p.form.url.trim(), token = p.form.token.trim(), ue = null, te = null;
+    if (!url) ue = 'Paste the link first.';
+    else if (url.indexOf(LINK_START) !== 0) ue = 'This isn’t the sheet’s link. It starts with https://script.google.com/';
+    if (!token) te = 'Write the password first.';
+    return { errs: { url: ue, token: te }, ok: !ue && !te, url: url, token: token };
+  }
   // On a checked route whose events wait or were refused the text is kept,
   // dimmed with its reason (lock), and only the count is checked.
   function checkRoute(p) {
@@ -3612,26 +3730,33 @@
     var p = spage(), key = inp.getAttribute('data-field');
     if (!p || !p.form || !p.form.hasOwnProperty(key)) return;
     p.form[key] = inp.value; p.touched[key] = true;
-    var v = p.page === 'addcity' ? checkCity(p) : checkRoute(p), ov = $('overlays');
+    var v = p.page === 'addcity' ? checkCity(p) : p.page === 'conn' ? checkConn(p) : checkRoute(p), ov = $('overlays');
+    // the Password box keeps the error border of "Wrong password" until
+    // Save or the next test, as the state line keeps its words (frame J)
+    var pw = p.page === 'conn' && connLine(p, cityById(p.cityId)).pw;
     Object.keys(v.errs).forEach(function (k) {
       var f = ov.querySelector('.field[data-field="' + k + '"]');
       if (!f) return;
       var msg = p.touched[k] ? v.errs[k] : null, el = f.querySelector('.ferr');
-      f.classList.toggle('bad', !!msg);
+      f.classList.toggle('bad', !!msg || (pw && k === 'token'));
       if (msg && !el) { el = document.createElement('span'); el.className = 'ferr'; f.appendChild(el); }
       if (msg) el.textContent = msg; else if (el) el.remove();
     });
-    var b = ov.querySelector('[data-act="form-save"]');
-    if (b) { b.classList.toggle('off', !v.ok); if (v.ok) b.removeAttribute('aria-disabled'); else b.setAttribute('aria-disabled', 'true'); }
+    // "Save", "Add route" and "Test connection", which stays dimmed while a test runs
+    Array.prototype.forEach.call(ov.querySelectorAll('.sacts [data-act]'), function (b) {
+      var ok = v.ok && !(p.testing && b.getAttribute('data-act') === 'conn-test');
+      b.classList.toggle('off', !ok); if (ok) b.removeAttribute('aria-disabled'); else b.setAttribute('aria-disabled', 'true');
+    });
   }
   // "Save" or "Add route": a tap while a check stands shows every reason
   // and saves nothing (item 27)
   function saveForm() {
     var p = spage();
     if (!p || !p.form) return;
-    var v = p.page === 'addcity' ? checkCity(p) : checkRoute(p);
+    var v = p.page === 'addcity' ? checkCity(p) : p.page === 'conn' ? checkConn(p) : checkRoute(p);
     if (!v.ok) { Object.keys(p.form).forEach(function (k) { p.touched[k] = true; }); render(); return; }
     if (p.page === 'addcity') saveCity(v);
+    else if (p.page === 'conn') saveConn(p, v);
     else if (p.page === 'addroute') addRoute(p, v);
     else saveRoute(p, v);
   }
@@ -3680,6 +3805,91 @@
         r.code = v.code;
       }
       r.poiCount = v.n;
+    }, 'change');
+    if (ok) popPage();
+    render();
+  }
+  // ---- the mailbox (data-model.md "Mailbox", mailbox/README.md "Notes
+  // for the app"; v0.31): one request to a city's link. POST with the JSON
+  // as plain text, since Apps Script answers no preflight and
+  // application/json would need one; 15 s at most. The promise resolves,
+  // never rejects, to the parsed answer, or to 'no-answer' (nothing in 15
+  // s, a network error while the tablet is online, an answer that is not
+  // the mailbox's) or 'offline' (the tablet offline, or the request failed
+  // before it left). "Test connection" uses it now; sending and loading
+  // from the sheet reuse it later. ----
+  var REPLY_WAIT = 15000;
+  function post(url, body) {
+    if (navigator.onLine === false) return Promise.resolve('offline');
+    return new Promise(function (resolve) {
+      var done = false, ctl = window.AbortController ? new AbortController() : null;
+      function give(v) { if (done) return; done = true; clearTimeout(timer); resolve(v); }
+      var timer = setTimeout(function () { give('no-answer'); if (ctl) ctl.abort(); }, REPLY_WAIT);
+      var req = { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(body) };
+      if (ctl) req.signal = ctl.signal;
+      fetch(url, req).then(function (res) { return res.text(); }).then(function (t) {
+        var a = null;
+        try { a = JSON.parse(t); } catch (err) { a = null; }
+        give(a && typeof a === 'object' && typeof a.ok === 'boolean' ? a : 'no-answer');
+      }).catch(function () { give(navigator.onLine === false ? 'offline' : 'no-answer'); });
+    });
+  }
+  // the state of a city's connection on its rows (items 20, 21): the words
+  // and the class of the dot, as the sync control's ('' green, 'bad' red,
+  // 'off' muted). A password the sheet refused on a send (keyRejected,
+  // item 72) reads "Wrong password" like a failed test
+  function connState(c) {
+    if (!c.mailboxUrl) return { text: 'Not connected', cls: 'off' };
+    if (c.keyRejected) return { text: 'Wrong password', cls: 'bad' };
+    if (c.testResult === 'ok' && c.testedAt) return { text: 'Connected · tested ' + stamp(c.testedAt), cls: '' };
+    if (c.testResult === 'auth') return { text: 'Wrong password', cls: 'bad' };
+    if (c.testResult === 'no-answer') return { text: 'The sheet doesn’t answer', cls: 'bad' };
+    return { text: 'Not tested yet', cls: 'off' };
+  }
+  // "Test connection" (item 25): the values in the fields, saved or not,
+  // trimmed, posted as a ping. One test at a time: the button reads
+  // "Testing…", dimmed, and a second tap does nothing. The answer stays on
+  // the page as p.test until Save or the next test, and stores nothing,
+  // with one exception (data-model.md "Mailbox"): a test that connects
+  // with the saved values clears keyRejected, so sending starts again. A
+  // test without internet changes nothing stored. A tap while a field's
+  // reason stands shows every reason, as "Save" does (item 27)
+  function testConn() {
+    var p = spage();
+    if (!p || p.page !== 'conn' || p.testing) return;
+    var v = checkConn(p);
+    if (!v.ok) { Object.keys(p.form).forEach(function (k) { p.touched[k] = true; }); render(); return; }
+    p.testing = true;
+    render();
+    post(v.url, { token: v.token, action: 'ping' }).then(function (a) {
+      var res = a === 'offline' || a === 'no-answer' ? a : a.ok === true ? 'ok' : a.error === 'auth' ? 'auth' : 'no-answer';
+      p.testing = false;
+      p.test = { url: v.url, token: v.token, result: res, at: Date.now() };
+      var c = cityById(p.cityId);
+      if (res === 'ok' && c && c.keyRejected && c.mailboxUrl === v.url && c.token === v.token) change(function () { c.keyRejected = false; }, 'change');
+      render();
+    });
+  }
+  // "Save" (item 25, data-model.md "Cities and routes"): the link and the
+  // password, trimmed, in one write; with them the last test's time and
+  // result when that test ran on exactly these values and the sheet
+  // answered. Otherwise the city reads "Not tested yet": the values
+  // changed, or the page's last answered test ran on other values. The
+  // one exception: the same values saved again with no new answer from
+  // the sheet (no test, or "No internet") keep their stored test, which
+  // ran on exactly these values. keyRejected is cleared. Back to the
+  // city's page, whose row shows the state
+  function saveConn(p, v) {
+    var c = cityById(p.cityId);
+    if (!c || c.sample) { popPage(); render(); return; }
+    var t = p.test, answered = !!t && t.result !== 'offline';
+    var tested = answered && t.url === v.url && t.token === v.token;
+    var same = c.mailboxUrl === v.url && c.token === v.token;
+    var ok = change(function () {
+      c.mailboxUrl = v.url; c.token = v.token;
+      if (tested) { c.testedAt = t.at; c.testResult = t.result; }
+      else if (!same || answered) { c.testedAt = null; c.testResult = null; }
+      c.keyRejected = false;
     }, 'change');
     if (ok) popPage();
     render();
@@ -3979,7 +4189,9 @@
       case 'routes': if (!route()) break; if (m && m.name === 'routes') removeLayer('menu'); else openMenu('routes'); render(); break;
       case 'typemenu': if (!route()) break; if (m && m.name === 'type') removeLayer('menu'); else openMenu('type'); render(); break;
       case 'sync': if (m && m.name === 'sync') removeLayer('menu'); else openMenu('sync'); render(); break;
-      case 'later': removeLayer('menu'); render(); toast(LATER); break;
+      // item 72: "Connection" / "Set up connection" opens the Connection
+      // page of the city in use over its city page (v0.31)
+      case 'conn-open': var cc = city(); if (cc && !cc.sample) { removeLayer('menu'); openSettings(); openCityPage(cc.id); openConnPage(cc.id); render(); } break;
       case 'showhist': ui.scope = 'route'; openHistory(); render(); break;
       case 'savelog': Compass.saveLog(); break;   // v0.28: Chrome downloads the file and shows its own message; the panel stays
       case 'grid': if (route()) { openGrid(); render(); } break;
@@ -3998,7 +4210,10 @@
       case 'form-save': saveForm(); break;
       case 'delete-city': askDeleteCity(t.getAttribute('data-cid')); break;
       case 'delete-route': askDeleteRoute(t.getAttribute('data-rid')); break;
-      case 'connection': break;   // step 3 builds the Connection page (item 25); until then the row does nothing
+      // Settings step 3 (v0.31): the Connection page and its controls
+      case 'connection': openConnPage(t.getAttribute('data-cid')); render(); break;
+      case 'conn-test': testConn(); break;
+      case 'conn-show': var cp = spage(); if (cp && cp.page === 'conn') { cp.show = !cp.show; render(); } break;
       case 'close-history': removeLayer('history'); render(); break;
       case 'hist-more': histShown += HIST_PAGE; render(); break;   // item 48: the next 50 rows under the ones drawn
       case 'undo': undo(); break;
