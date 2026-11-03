@@ -39,9 +39,10 @@
    v0.29 2026-11-02 — Settings step 1, the Settings sheet with its list, Theme, Sound and Delete all data: a new cache name for app v0.29.
    v0.30 2026-11-02 — Settings step 2, cities and routes added, changed, put in use and deleted on this tablet: a new cache name for app v0.30.
    v0.31 2026-11-02 — Settings step 3, the Connection page and Test connection: a new cache name for app v0.31. The fetch handler below takes same-origin GETs only, so a request to the sheet's script (script.google.com) never passes through here and is never cached.
+   v0.32 2026-11-03 — compass step 4, a line that says why the arrow is pale, the pale arrow keeps the last GPS direction, the sensors wake on focus and the log keeps every drive by the clock: a new cache name for app v0.32.
 */
 'use strict';
-var CACHE = 'poi-app-v0.31';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.32';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 

@@ -7,19 +7,20 @@
   network: the service worker keeps these files on the tablet.
 
   The look is the approved references, copied, not redrawn:
-  - the app CSS of docs/references/main-screen.html v0.48, the History
-    rules of docs/references/history.html v0.35 and the Settings rules
-    of docs/references/settings.html v0.34, byte for byte
+  - the app CSS of docs/references/main-screen.html v0.49, the History
+    rules of docs/references/history.html v0.36 and the Settings rules
+    of docs/references/settings.html v0.35, byte for byte
   - docs/references/_tokens.css v0.26, inlined
   - the Lucide sprite of main-screen.html, plus the plus sign and the
     back chevron of settings.html
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.73 and docs/data-model.md
-  v0.26, and much of it is the code of the working prototype v19.7; the
+  The behaviour follows docs/screens.md v0.74 and docs/data-model.md
+  v0.27, and much of it is the code of the working prototype v19.7; the
   compass is the code of prototype v19.8 plus the agreement rule of
-  v0.25. The look follows v0.73. Still to come: sending.
+  v0.25 and the GPS course and focus rules of v0.32. The look follows
+  v0.74. Still to come: sending.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -510,6 +511,48 @@
           draw. The service worker never caches a request to
           script.google.com: it handles same-origin GETs only. The shell
           stays main-screen.html v0.48, the tokens _tokens.css v0.26.
+  v0.32 2026-11-03 — compass step 4 (data-model.md v0.27, screens.md
+          v0.74, main-screen.html v0.49, decided 2026-11-03 after the car
+          test of app v0.31 on 2026-11-03, the first drive with the
+          app's own sensor log): four things. The pale arrow keeps the
+          last GPS direction: while GPS is live and the arrow is not
+          yet trusted from the gyroscope, choose() takes the GPS course
+          as north's offset too, so a slowdown, or the gyroscope, goes
+          on from the last GPS course instead of an older guess (the
+          arrow jumped from 259 to 15 deg at every slowdown while the
+          sensors were asleep); unsure does not change, and every other
+          rule and constant stays. The sensors wake on focus: Chrome
+          delivers motion readings only to a page that is visible and
+          focused (for 20 min the page was visible without focus, 229
+          restarts of the watchdog did nothing and a focus event
+          brought the readings back in 0.2 s), so the module tracks
+          document.hasFocus() and the window's focus and blur, the
+          watchdog does not restart the sensors while the page has no
+          focus and logs "no focus: the sensors wait for a tap" once per
+          spell, and a focus restarts them at once when they are paused.
+          A line beside the compass says why the arrow is pale (item
+          19, frame W, the new .why rule of the shell): onChange carries
+          why, the first of 'location' ("Location is off for this app":
+          the permission query answers denied or the watch fails with
+          code 1), 'focus' ("Compass asleep. Tap the screen.": visible,
+          no focus, the sensors silent), 'sensor' ("Motion sensor off":
+          focus, the sensors silent 15 s or more since they started) and
+          'gps' ("Waiting for GPS"), or null while the arrow is solid;
+          drawCompass writes the text into #why and hides it (the hidden
+          attribute) when there is none. The log keeps every drive by
+          the clock: a drive is kept from the first of the car moving
+          and 60 s after the page opened, the event naming the reason
+          ("the car moved" or "open for 60 s"), the small line reading
+          "Kept once the car moves or after a minute" before that, and
+          every row's t_s is the wall clock since the drive started,
+          (Date.now() − started) / 1000, so the drive's clock survives
+          the tablet's sleep and a continued drive keeps one time axis
+          (the session of 06:11 to 06:25 was lost and rows written at
+          13:59 carried 11:19); the columns, kinds and notes do not
+          change. The canon copied whole from main-screen.html v0.49,
+          the History rules history.html v0.36's and the Settings rules
+          settings.html v0.35's, the tokens still _tokens.css v0.26. The
+          store and its write do not change. The APP ONLY piece stays.
 -->
 <html lang="en">
 <head>
@@ -1272,6 +1315,25 @@
   .compass.idle .halo { display: none; }
   .compass.idle .dark, .compass.idle .gold { fill: none; stroke: var(--ink-2); stroke-width: 1.4px;
                                              stroke-dasharray: 3 2.2; stroke-linejoin: round; }
+  /* the line beside the compass (item 19, v0.49): why the arrow is pale,
+     in plain words, the first of four that applies: "Location is off for
+     this app", "Compass asleep. Tap the screen.", "Motion sensor off",
+     "Waiting for GPS". Shown only while the arrow is pale and a reason is
+     known, gone the moment it turns solid. Right-aligned, its right edge
+     one --s-3 before the dial's left edge, at most two lines (16ch of
+     --t-small holds the longest text in two balanced lines), with the
+     summary's line height, so two lines read apart. It is anchored to
+     the main area as the dial is, so the head can redraw its own markup
+     without it. In portrait its bottom edge is on the dial's bottom edge,
+     below the head's text (centred on the dial it would meet the line
+     under the counter in the "to fix" and sheet error states); in
+     landscape it is centred on the dial, over the discs' zone, clear of
+     the Straight disc below it. No icon, no colour of its own. */
+  .why { position: absolute; right: calc(anchor(--main right) + var(--compass) + var(--s-3));
+         bottom: calc(anchor(--main top) - var(--compass));
+         max-width: 16ch; text-align: right; text-wrap: balance;
+         font-size: var(--t-small); font-weight: var(--w-medium); color: var(--ink-2);
+         line-height: round(up, calc(var(--lh-body) * var(--t-small)), 2px); }
 
   /* ---- type pill and its menu (items 46, 60, 69) ---- */
   .typewrap { anchor-name: --pill; }
@@ -1653,6 +1715,8 @@
     .mright { grid-area: zone; width: calc(2 * var(--side-reach) + 2 * var(--s-2) + var(--disc-man)); }
     .bar { grid-area: bar; }
     .head { padding-right: 0; min-height: 0; }
+    /* the line beside the compass is centred on the dial (item 19, v0.49) */
+    .why { bottom: auto; top: calc(anchor(--main top) + var(--compass) / 2); translate: 0 -50%; }
     /* the free space runs from the top of the main area to the bar */
     .stagebox { top: round(max(0px, min(calc((100% + var(--gap) - 2 * var(--disc-man)) / 2),
                                         calc(100% + var(--gap) - var(--s-4) - 2 * var(--disc-man)
@@ -2085,6 +2149,7 @@
   <div class="colwrap"><div class="col" id="col"></div></div>
   <div class="main" id="main">
     <svg class="compass idle" viewBox="0 0 96 96" role="img" aria-label="Heading"><circle class="edge" cx="48" cy="48" r="47.5" stroke-width="1"/><path class="minor" stroke-width="1.5" d="M69.5 10.76L67.75 13.79M85.24 26.5L82.21 28.25M85.24 69.5L82.21 67.75M69.5 85.24L67.75 82.21M26.5 85.24L28.25 82.21M10.76 69.5L13.79 67.75M10.76 26.5L13.79 28.25M26.5 10.76L28.25 13.79"/><path class="major" stroke-width="2" d="M48 5v5M91 48h-5M48 91v-5M5 48h5"/><text class="cn" x="48" y="18.5">N</text><text x="77.5" y="48">E</text><text x="48" y="77.5">S</text><text x="18.5" y="48">W</text><g class="arrow" transform="rotate(0 48 48)"><path class="halo" stroke-width="4" d="M48 27 58.5 58.5 48 52.1 37.5 58.5Z"/><path class="dark" d="M48 27 48 52.1 37.5 58.5Z"/><path class="gold" d="M48 27 58.5 58.5 48 52.1Z"/></g></svg>
+    <div class="why" id="why" hidden></div>
     <div class="mleft">
       <section class="head" id="head"></section>
       <div class="typewrap"><button class="typebtn" type="button" data-act="typemenu" id="pill"></button></div>
@@ -2113,7 +2178,7 @@
   'use strict';
 
   // ================= constants (screens.md items 39, 46, 60; data-model.md) =================
-  var APP_VERSION = 'v0.31';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
+  var APP_VERSION = 'v0.32';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
   var KEY = 'poi-app:store';         // the whole store, one key, one setItem per change
   var HEADING_KEY = 'poi-app:heading';   // the compass's last course, { deg, at }, written every 2 s (data-model.md "Tablet storage")
   var DRIFT_KEY = 'poi-app:drift';       // the gyroscope's last good drift, { b: [x, y, z], at }, written when a drift is measured
@@ -4317,8 +4382,9 @@
   // The compass module of prototype v19.8, approved after the car test of
   // 2026-10-27 and ported here unchanged in v0.24 (2026-10-31), behind the
   // interface of step 2: start(onChange) and stop(), where onChange gets
-  // { deg, pale } at most once per animation frame, pale while there is no
-  // heading or the course is only the last known one. What did not come
+  // { deg, pale, why } at most once per animation frame, pale while there
+  // is no heading or the course is only the last known one, and why the
+  // reason the arrow is pale (12 below), null while it is solid. What did not come
   // over: its Tools texts, its GPS switch and the counters that fed them
   // only. Its sensor log did not come over either (the user dropped it
   // after the car test), until v0.28 brought it back for the car tests of
@@ -4403,6 +4469,29 @@
   //    course that is steady but stale: right after a turn the GPS course
   //    once lagged the gyroscope by about 10 s, twice it was inaccurate,
   //    and three checks pulled the arrow the wrong way for 10 to 20 s.
+  // 12. Decided 2026-11-03 (app v0.32) after the car test of app v0.31 on
+  //    2026-11-03, the first drive with the app's own log: (a) while GPS
+  //    is live and the arrow is not yet trusted from the gyroscope,
+  //    choose() takes the GPS course as north's offset too, so a slowdown,
+  //    or the gyroscope, goes on from the last GPS course instead of an
+  //    older guess (the arrow jumped from 259 to 15 deg at every slowdown
+  //    while the sensors were asleep); unsure does not change. (b) Chrome
+  //    delivers motion readings only to a page that is visible and
+  //    focused: for 20 min the page was visible without focus, 229
+  //    restarts of the watchdog did nothing, and a focus event brought the
+  //    readings back in 0.2 s. So the module tracks the focus, the
+  //    watchdog waits while the page has no focus, and a focus restarts
+  //    the sensors at once. (c) A line beside the compass says why the
+  //    arrow is pale (screens.md item 19), as why of onChange, the first
+  //    reason that applies: location refused ('location'), the page
+  //    visible without focus and the sensors silent ('focus'), the page
+  //    focused and the sensors silent 15 s or more since they started
+  //    ('sensor'), else 'gps'. (d) The log keeps a drive from the car
+  //    moving or 60 s after the page opened, whichever is first (the
+  //    session of 06:11 to 06:25 never reached 11 km/h and was lost), and
+  //    every row's t_s is the wall clock since the drive started, since
+  //    performance.now() does not count the tablet's sleep (rows written
+  //    at 13:59 carried 11:19).
 
   // ---- the compass maths. Angles in degrees; a heading runs clockwise
   // from north, 0 up to 360. Decided 2026-10-11 (data-model.md, Heading). ----
@@ -4462,6 +4551,7 @@
                                 // 0.02 to 0.07 deg/s in both cars, and a false 0.44
                                 // passed the old 0.5 on 2026-10-23 (v19.8)
     var RESTART_GAP = 5000;     // ms: the watchdog restarts the sensors at most this often
+    var SENSOR_OFF = 15000;     // ms: with focus, the sensors silent this long since they started read "Motion sensor off" (12c)
     var RAD = 180 / Math.PI;
     var car = new Heading.Smoother(0.6);
 
@@ -4473,12 +4563,19 @@
     var acc = { v: null, up: null, apiAt: 0, first: 0, prevT: null, from: null };
     var turn = 0, rate = 0, bias = [0, 0, 0], biasSet = false;
     var still = { blocks: [], cur: null, noteAt: 0 };   // noteAt: when the log last noted a shaky stand
-    var motion = 'off', motionAt = 0, apiObj = { g: null, a: null };
+    var motion = 'off', motionAt = 0, silentFrom = 0, apiObj = { g: null, a: null };   // silentFrom: the sensors' start, or the last focus (12c)
     var fix = null, watch = null, gps = 'off';
     var fixes = [];             // the last GPS fixes with a course, for steady() (v19.7)
     var notes = [];             // { at, course, turn } of the GPS fixes with a course of the last 14 s, for agree() (v0.25)
-    var off = null, checkedAt = 0, hist = [], unsure = false, heading = null, from = null, pending = false;
+    // unsure starts true: the arrow is not trusted from the gyroscope until a
+    // check, whether it starts from a saved course or from nothing. Before
+    // 12a off stayed null until the first check, so the start value did not
+    // matter; now the GPS course fills off first (the spec review of 2026-11-03)
+    var off = null, checkedAt = 0, hist = [], unsure = true, heading = null, from = null, pending = false;
+    var north = false;          // whether off ever came from a saved course or a check; a GPS course taken under 12a is neither
     var everLive = false, paused = false, pausedAt = 0, lastRestart = 0;
+    var focused = true, waiting = false;   // 12b: whether the page has the focus; whether the sensors wait for it (the log's event once per spell)
+    var locDenied = false;                 // 12c: location refused, by the permission query or the watch's error 1
     var onChange = null, timer = null, wired = false, woke = false;
 
     // ---- the last course, kept on the tablet (7 above) ----
@@ -4495,7 +4592,7 @@
     function restoreCourse() {
       try {
         var kept = JSON.parse(localStorage.getItem(HEADING_KEY) || 'null');
-        if (kept && num(kept.deg) !== null) { off = Heading.norm(kept.deg); unsure = true; }
+        if (kept && num(kept.deg) !== null) { off = Heading.norm(kept.deg); unsure = true; north = true; }
       } catch (err) { /* nothing saved: the arrow points north, pale */ }
     }
 
@@ -4561,26 +4658,29 @@
     var LOG_CHUNK = 500;        // rows in one stored piece
     var LOG_KEEP = 3;           // drives kept on the tablet
     var LOG_JOIN = 10 * 60000;  // ms: a page opened again this soon continues the drive
+    var KEEP_AFTER = 60000;     // ms: a drive is kept this long after the page opened when the car has not moved by then (12d)
     var CREDIT = 1500;          // ms: a reading this soon after a tap or a restart is credited to it (the wording of the resume event only)
     var COLS = ['t_s', 'kind', 'note', 'speed_kmh', 'course_deg', 'acc_m', 'heading_deg', 'from',
       'turn_deg', 'rate_dps', 'api_hz', 'dm_hz', 'gyro_live', 'w_x', 'w_y', 'w_z', 'up_x', 'up_y', 'up_z', 'drift_dps'];
-    var t0 = now(), lastRow = 0, log = [], lastTap = 0;
+    var started = Date.now(), lastRow = 0, log = [], lastTap = 0;   // started: the drive's start on the wall clock (12d)
     function drift() { var u = acc.up; return u ? -(bias[0] * u[0] + bias[1] * u[1] + bias[2] * u[2]) : 0; }
     function minsAgo(at) { return Math.round((Date.now() - at) / 60000) + ' min ago'; }
-    // A row keeps its own time in the first place and gets t_s when it is
-    // written out (line() below): t0 can still move back while the index of
-    // the kept drives is being read, when this page continues a drive. A
+    // A row keeps its own wall-clock time in the first place and gets t_s
+    // when it is written out (line() below): started can still move back
+    // to the kept drive's start while the index of the kept drives is being
+    // read, when this page continues a drive. The wall clock, not the
+    // page's: performance.now() does not count the tablet's sleep (12d). A
     // note never carries a comma or a line break: the file is CSV
     function row(kind, note, t) {
       if (keep.base + log.length >= LOG_MAX) return;
       var f = kind === 'gps' ? fix : null, s = live(gy.api, t) ? gy.api : gy.dm, up = acc.up;
-      log.push([t, kind, String(note || '').replace(/[,\r\n]+/g, ' '),
+      log.push([Date.now(), kind, String(note || '').replace(/[,\r\n]+/g, ' '),
         f && f.speed !== null ? r(f.speed * 3.6, 1) : '', f && f.course !== null ? r(f.course, 1) : '', f ? r(f.acc, 1) : '',
         heading === null ? '' : r(heading, 1), from || '', r(turn, 2), r(rate, 3), r(gy.api.hz, 1), r(gy.dm.hz, 1),
         alive(t) ? 1 : 0, s.w ? r(s.w[0], 3) : '', s.w ? r(s.w[1], 3) : '', s.w ? r(s.w[2], 3) : '',
         up ? r(up[0], 3) : '', up ? r(up[1], 3) : '', up ? r(up[2], 3) : '', biasSet ? r(drift(), 3) : '']);
     }
-    function line(x) { return [r((x[0] - t0) / 1000, 2)].concat(x.slice(1)).join(','); }
+    function line(x) { return [r((x[0] - started) / 1000, 2)].concat(x.slice(1)).join(','); }
     function event(note) { row('ev', note, now()); }
     // the readings a second of each source, for the api_hz and dm_hz
     // columns: counted from s.n at the watchdog's ticks, so feedGyro stays
@@ -4660,34 +4760,37 @@
     }
     function total() { return keep.base + log.length; }
     // at start: the page continues the last kept drive when it was written
-    // within LOG_JOIN, else it starts a new one, kept once the car moves.
-    // The index comes from the database, so the continuation is noted once
-    // it is read, after "page opened"; the rows logged before keep their
-    // own time and fall into place (row() above)
+    // within LOG_JOIN, else it starts a new one, kept once the car moves or
+    // KEEP_AFTER after the page opened, whichever is first (12d). The index
+    // comes from the database, so the continuation is noted once it is
+    // read, after "page opened"; the rows logged before keep their own
+    // time and fall into place (row() above). A continued drive keeps the
+    // entry's start, so its rows and the first page's share one time axis
     function openDrive() {
-      t0 = now();
+      started = Date.now();
       event('page opened · app ' + APP_VERSION);
       keep.ready = readIndex().then(function (list) {
         var last = list[list.length - 1], wall = Date.now();
         if (last && wall - last.last < LOG_JOIN) {
           keep.entry = last; keep.chunk0 = last.chunks; keep.base = last.rows; keep.moved = true;
-          // the drive's clock goes on from its start, never back before its last row
-          t0 = now() - 1000 * Math.max((wall - last.started) / 1000, (last.lastT || 0) + 0.01);
+          started = last.started;
           event('page opened again after ' + Math.round(Math.max(0, wall - last.last) / 1000) + ' s: the drive continues');
         }
       }).catch(fail);
+      setTimeout(function () { startKeeping('open for 60 s'); }, KEEP_AFTER);
     }
-    // the drive is kept from the first moment the car moves
-    function startKeeping() {
+    // the drive is kept from the first moment the car moves, or 60 s after
+    // the page opened; why names the reason in the log's event
+    function startKeeping(why) {
       if (keep.moved || !keep.ok) return;
       keep.moved = true;
       (keep.ready || Promise.resolve()).then(function () {
         if (!keep.ok || keep.entry) return;
         var wall = Date.now();
-        var entry = { id: 'd' + wall, started: Math.round(wall - (now() - t0)), last: wall, rows: 0, chunks: 0, lastT: 0, ver: APP_VERSION };
+        var entry = { id: 'd' + wall, started: started, last: wall, rows: 0, chunks: 0, lastT: 0, ver: APP_VERSION };
         return transact(function (tx, list) { list.push(entry); return prune(tx, list); }).then(function () {
           keep.entry = entry;
-          event('the car moved: the drive is kept on the tablet');
+          event(why + ': the drive is kept on the tablet');
           return flush();
         });
       }).catch(fail);
@@ -4705,7 +4808,7 @@
       for (var j = from; j <= to; j++) {
         pieces.push({ key: e.id + ':' + (keep.chunk0 + j), text: log.slice(j * LOG_CHUNK, Math.min((j + 1) * LOG_CHUNK, upto)).map(line).join('\n') });
       }
-      var lastT = r((log[upto - 1][0] - t0) / 1000, 2);
+      var lastT = r((log[upto - 1][0] - started) / 1000, 2);
       function attempt(tries) {
         return transact(function (tx, list) {
           var mine = null;
@@ -4738,7 +4841,7 @@
     // the small line of the "Save sensor log" row (screens.md item 72)
     function logLine() {
       if (!keep.ok) return 'Not kept on this tablet: save it before you close the app';
-      if (!keep.moved) return 'Kept once the car moves · ' + drivesKept() + ' of ' + LOG_KEEP + ' drives kept';
+      if (!keep.moved) return 'Kept once the car moves or after a minute';   // alone: with the drives kept the row wrapped to two lines (12d)
       return fmt(total()) + ' rows in this drive · ' + drivesKept() + ' of ' + LOG_KEEP + ' drives kept';
     }
     function iso(ms) { return new Date(ms).toISOString(); }
@@ -4766,7 +4869,7 @@
         var parts = [], drives = 0, rows = 0, mine = keep.ok && keep.entry;
         function section(head, body, n) { parts.push(head + '\n' + COLS.join(',') + (body ? '\n' + body : '')); drives += 1; rows += n; }
         if (!mine) {
-          section('# POI Tracker app ' + APP_VERSION + ' sensor log · this drive, not kept on the tablet · started ' + iso(Date.now() - (now() - t0)) +
+          section('# POI Tracker app ' + APP_VERSION + ' sensor log · this drive, not kept on the tablet · started ' + iso(started) +
             ' · ' + navigator.userAgent, log.map(line).join('\n'), log.length);
         }
         for (var i = k.list.length - 1; i >= 0; i--) {
@@ -4839,7 +4942,7 @@
     }
     // the car may have turned while the gyroscope was silent: north waits for a GPS check
     function resumed(t) {
-      paused = false;
+      paused = false; waiting = false;
       if (t - pausedAt > 2000) unsure = true;
       // the later of a tap and a restart gets the credit, if it was recent (the log's wording only)
       var how = lastTap >= lastRestart ? (t - lastTap < CREDIT ? 'tap' : 'itself') : (t - lastRestart < CREDIT ? 'restart' : 'itself');
@@ -4930,7 +5033,7 @@
     // why names the reason in the log, as in the prototype
     function startMotion(why) {
       if (motion === 'on') return;
-      motion = 'on'; motionAt = now();
+      motion = 'on'; motionAt = now(); silentFrom = motionAt;
       event('motion sensors start: ' + why);
       startApi();
       window.addEventListener('devicemotion', onMotion);
@@ -4951,7 +5054,12 @@
       var t = now();
       if (motion === 'on') {
         if (!alive(t) && !paused && (everLive || t - motionAt > 3000)) { paused = true; pausedAt = t; event('pause'); }
-        if (paused && document.visibilityState === 'visible' && t - lastRestart > RESTART_GAP) restart('watchdog');
+        // a page visible without focus gets no readings from Chrome, however
+        // often the sensors restart: the watchdog waits for a focus (12b)
+        if (paused && document.visibilityState === 'visible') {
+          if (!focused) { if (!waiting) { waiting = true; event('no focus: the sensors wait for a tap'); } }
+          else if (t - lastRestart > RESTART_GAP) restart('watchdog');
+        }
       }
       choose(t);
       rates(t);
@@ -4966,6 +5074,7 @@
       // the motion sensors wait for the answer about location: its question takes the focus
       try {
         navigator.permissions.query({ name: 'geolocation' }).then(function (p) {
+          if (p.state === 'denied') locDenied = true;
           if (p.state !== 'prompt') startMotion('location ' + p.state);
         }).catch(function () { /* the first fix or error starts them */ });
       } catch (err) { /* the same */ }
@@ -4975,7 +5084,7 @@
     function onFix(pos) {
       var c = pos.coords, t = now();
       fix = { course: num(c.heading) === null ? null : Heading.norm(c.heading), speed: num(c.speed), acc: num(c.accuracy), at: t };
-      gps = 'fix';
+      gps = 'fix'; locDenied = false;
       if (fix.course === null) fixes = [];
       else {
         fixes.push({ course: fix.course, at: t }); if (fixes.length > STEADY_FIXES) fixes.shift();
@@ -4983,7 +5092,7 @@
         notes.push({ at: t, course: fix.course, turn: turn });
         while (notes.length && t - notes[0].at > AGREE_KEEP) notes.shift();
       }
-      if (fix.speed !== null && fix.speed >= MOVING) startKeeping();
+      if (fix.speed !== null && fix.speed >= MOVING) startKeeping('the car moved');
       startMotion('location allowed');
       // the rules of a check, in the order and with the effect of v0.27:
       // the log's note says what the check did, or that only agree()
@@ -4998,6 +5107,7 @@
     }
     function onFixError(err) {
       gps = err && err.code === 1 ? 'denied' : err && err.code === 2 ? 'unavailable' : fix ? 'fix' : 'asking';
+      if (gps === 'denied') locDenied = true;
       event('location error ' + (err ? err.code : '') + ' ' + (err && err.message ? err.message : ''));
       startMotion('location answered');
     }
@@ -5049,32 +5159,55 @@
       return d !== null && d <= AGREE_DEG;
     }
     // a GPS check: move north toward the GPS course. It answers with the
-    // log's note: the first check, or the gap it found
+    // log's note: the first check, or the gap it found. The first check
+    // sets north whole, as in v0.31, when no saved course and no check
+    // came before: the GPS course taken under 12a fills off but is no
+    // north of its own, so the note stays "check first"
     function check(t) {
-      var gap = off === null ? null : Heading.delta(Heading.norm(turn + off), fix.course);
-      if (off === null || (unsure && Math.abs(gap) > SNAP)) off = fix.course - turn;
+      var first = !north, gap = first ? null : Heading.delta(Heading.norm(turn + off), fix.course);
+      if (first || (unsure && Math.abs(gap) > SNAP)) off = fix.course - turn;
       else off += PULL * gap;
-      checkedAt = t; unsure = false;
-      return gap === null ? 'check first' : 'check ' + gap.toFixed(1);
+      checkedAt = t; unsure = false; north = true;
+      return first ? 'check first' : 'check ' + gap.toFixed(1);
     }
     function choose(t) {
       var target = null;
       if (off !== null && gyroOk(t) && !unsure && t - checkedAt < GYRO_MAX) { from = 'gyro'; target = turn + off; }
-      else if (gpsLive(t)) { from = 'gps'; target = fix.course; }
+      // 12a: the GPS course is north's offset too, so the 'stale' fallback and
+      // the gyroscope go on from the last GPS course; unsure does not change
+      else if (gpsLive(t)) { from = 'gps'; target = fix.course; off = fix.course - turn; }
       else if (off !== null) { from = 'stale'; target = turn + off; }
       else from = null;
       heading = target === null ? null : car.push(Heading.norm(target), t);
       saveCourse(t, false);
       draw();
     }
+    // why the arrow is pale (12c, screens.md item 19): the first reason that
+    // applies. 'location': location refused. 'focus': the page visible
+    // without focus and the started sensors silent, a tap gives the focus.
+    // 'sensor': the page focused and the sensors silent for SENSOR_OFF
+    // since they started, last read or were given the focus (a focus
+    // restarts them, so a tap gives them SENSOR_OFF to answer). 'gps':
+    // every other reason, no GPS check yet or the last one older than
+    // GYRO_MAX
+    function reason(t) {
+      if (locDenied) return 'location';
+      if (motion === 'on' && !alive(t)) {
+        if (document.visibilityState === 'visible' && !focused) return 'focus';
+        if (focused && t - Math.max(silentFrom, gy.api.at, gy.dm.at) >= SENSOR_OFF) return 'sensor';
+      }
+      return 'gps';
+    }
     // the arrow: onChange at most once per animation frame, pale while
-    // there is no heading or the course is only the last known one
+    // there is no heading or the course is only the last known one, and
+    // why it is pale, null while it is solid
     function draw() {
       if (pending) return;
       pending = true;
       requestAnimationFrame(function () {
         pending = false;
-        if (onChange) onChange({ deg: heading === null ? 0 : heading, pale: heading === null || from === 'stale' });
+        var pale = heading === null || from === 'stale';
+        if (onChange) onChange({ deg: heading === null ? 0 : heading, pale: pale, why: pale ? reason(now()) : null });
       });
     }
 
@@ -5093,14 +5226,23 @@
       if (timer !== null) return;
       if (!wired) {
         wired = true;
+        focused = document.hasFocus();
         window.addEventListener('pagehide', function () { if (document.visibilityState === 'visible') saveCourse(now(), true); flush(); });
         document.addEventListener('visibilitychange', function () {
           event('page ' + document.visibilityState);
-          if (document.visibilityState === 'hidden') { saveCourse(now(), true); flush(); }
+          if (document.visibilityState === 'hidden') { waiting = false; saveCourse(now(), true); flush(); }
           if (document.visibilityState === 'visible') { woke = false; checkSoon('visible'); }
         });
-        window.addEventListener('focus', function () { event('focus'); checkSoon('focus'); });
-        window.addEventListener('blur', function () { event('blur'); });
+        // a focus ends a spell without readings (12b): paused sensors restart
+        // at once, and checkSoon restarts them again if they stay silent
+        window.addEventListener('focus', function () {
+          focused = true; waiting = false; silentFrom = now();
+          event('focus');
+          if (paused) restart('focus');
+          checkSoon('focus');
+          draw();
+        });
+        window.addEventListener('blur', function () { focused = false; event('blur'); draw(); });
         document.addEventListener('pointerdown', function () {
           lastTap = now();   // for the log's resume event only
           if (woke) return;
@@ -5119,6 +5261,7 @@
         navigator.permissions.query({ name: 'geolocation' }).then(function (p) {
           if (p.state === 'granted') { event('location granted: GPS starts at load'); permit(); }
           else event('location ' + p.state + ': GPS waits for the first touch');
+          if (p.state === 'denied') { locDenied = true; draw(); }   // the line reads "Location is off for this app" (12c)
         }).catch(function () { event('location query failed: GPS waits for the first touch'); });
       } catch (err) { event('location query failed: GPS waits for the first touch'); }
     }
@@ -5135,6 +5278,9 @@
     // saveLog, logLine and event serve the sensor log (v0.28, temporary)
     return { start: start, stop: stop, saveLog: saveLog, logLine: logLine, event: event };
   }());
+  // the line beside the compass (item 19, v0.32): the four texts, one per
+  // reason of why; shown only while the arrow is pale, hidden otherwise
+  var WHY = { location: 'Location is off for this app', focus: 'Compass asleep. Tap the screen.', sensor: 'Motion sensor off', gps: 'Waiting for GPS' };
   function drawCompass(h) {
     var svg = document.querySelector('.app svg.compass');
     if (!svg) return;
@@ -5142,6 +5288,10 @@
     svg.querySelector('.arrow').setAttribute('transform', 'rotate(' + deg + ' 48 48)');
     svg.classList.toggle('idle', !!h.pale);
     svg.setAttribute('aria-label', 'Heading ' + Math.round(h.deg) + ' degrees' + (h.pale ? ', not checked yet' : ''));
+    var why = $('why'), text = h.pale && h.why && WHY[h.why] ? WHY[h.why] : '';
+    if (!why) return;
+    if (why.textContent !== text) why.textContent = text;
+    why.hidden = !text;
   }
 
   // ================= the sample city: only through ?sample =================
