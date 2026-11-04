@@ -7,20 +7,20 @@
   network: the service worker keeps these files on the tablet.
 
   The look is the approved references, copied, not redrawn:
-  - the app CSS of docs/references/main-screen.html v0.49, the History
-    rules of docs/references/history.html v0.36 and the Settings rules
-    of docs/references/settings.html v0.35, byte for byte
+  - the app CSS of docs/references/main-screen.html v0.50, the History
+    rules of docs/references/history.html v0.37 and the Settings rules
+    of docs/references/settings.html v0.36, byte for byte
   - docs/references/_tokens.css v0.26, inlined
   - the Lucide sprite of main-screen.html, plus the plus sign and the
     back chevron of settings.html
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.74 and docs/data-model.md
-  v0.27, and much of it is the code of the working prototype v19.7; the
+  The behaviour follows docs/screens.md v0.75 and docs/data-model.md
+  v0.28, and much of it is the code of the working prototype v19.7; the
   compass is the code of prototype v19.8 plus the agreement rule of
   v0.25 and the GPS course and focus rules of v0.32. The look follows
-  v0.74. Still to come: sending.
+  v0.75. Still to come: sending.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -553,6 +553,37 @@
           the History rules history.html v0.36's and the Settings rules
           settings.html v0.35's, the tokens still _tokens.css v0.26. The
           store and its write do not change. The APP ONLY piece stays.
+  v0.33 2026-11-04 — plain words for the rest of the app (screens.md
+          v0.75, data-model.md v0.28, main-screen.html v0.50,
+          history.html v0.37, settings.html v0.36, decided 2026-11-04:
+          the user approved, text by text, the plain words for every
+          screen but Settings, which v0.29 to v0.31 did). Every text of
+          the sync control and the Sync panel, the caption under the
+          turn buttons, History's states, buttons, reasons and lines,
+          the delete, type change, storage-full and blocking dialogs
+          and the toasts takes them: "delete", never "removal"; where a
+          pass is ("not in the sheet yet", "In sheet"); who refused
+          what ("Sheet refused 3 passes"); no technical word (script,
+          URL, access key, tab, network, export). The sync control
+          names one kind, or "changes" when they are mixed, and the
+          Sync panel's line lists the kinds (waitingWords, refusedWords
+          and keptLine replace changes()). The type change dialog's
+          body is rebuilt short on the same numbers: what the type
+          allows against what the POI has, per maneuver, then the
+          passes typed into the sheet by hand; its switch reads "Also
+          delete the N passes made on this tablet" with "Sent ones are
+          deleted from the sheet too." only when one of them was sent,
+          and its small line is left out otherwise. One rule changes:
+          the compass line's 'gps' reason splits in two, 'drive'
+          ("Compass sets once you drive") while the module holds a GPS
+          fix fresh by FRESH, whatever its speed or course, and 'gps'
+          ("Waiting for GPS") without one; 'sensor' reads "Motion
+          sensor not working". No layout, colour or token changes. The
+          canon copied whole from main-screen.html v0.50 (only its
+          comment on the line's texts changed), the History rules
+          history.html v0.37's and the Settings rules settings.html
+          v0.36's, the tokens still _tokens.css v0.26. The store and
+          its write do not change. The APP ONLY piece stays.
 -->
 <html lang="en">
 <head>
@@ -1316,10 +1347,11 @@
   .compass.idle .dark, .compass.idle .gold { fill: none; stroke: var(--ink-2); stroke-width: 1.4px;
                                              stroke-dasharray: 3 2.2; stroke-linejoin: round; }
   /* the line beside the compass (item 19, v0.49): why the arrow is pale,
-     in plain words, the first of four that applies: "Location is off for
-     this app", "Compass asleep. Tap the screen.", "Motion sensor off",
-     "Waiting for GPS". Shown only while the arrow is pale and a reason is
-     known, gone the moment it turns solid. Right-aligned, its right edge
+     in plain words, the first of five that applies (v0.50): "Location is
+     off for this app", "Compass asleep. Tap the screen.", "Motion sensor
+     not working", "Compass sets once you drive", "Waiting for GPS". Shown
+     only while the arrow is pale and a reason is known, gone the moment
+     it turns solid. Right-aligned, its right edge
      one --s-3 before the dial's left edge, at most two lines (16ch of
      --t-small holds the longest text in two balanced lines), with the
      summary's line height, so two lines read apart. It is anchored to
@@ -1879,7 +1911,7 @@
           color: var(--err); background: var(--err-bg); border: 1px solid var(--line);
           border-radius: var(--r-sm); white-space: nowrap; }
   /* a deleted pass (items 12, 13, 38): struck through, labelled, not dimmed,
-     with "Cancel removal" under it while its removal waits */
+     with "Undo delete" under it while its removal waits */
   .hr.del .htm, .hr.del .hmv { text-decoration: line-through; }
   /* a refused pass (item 47): three lines with --s-3 above and below, the
      reason as a sentence, its two actions at the right edge, never on the
@@ -2178,7 +2210,7 @@
   'use strict';
 
   // ================= constants (screens.md items 39, 46, 60; data-model.md) =================
-  var APP_VERSION = 'v0.32';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
+  var APP_VERSION = 'v0.33';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
   var KEY = 'poi-app:store';         // the whole store, one key, one setItem per change
   var HEADING_KEY = 'poi-app:heading';   // the compass's last course, { deg, at }, written every 2 s (data-model.md "Tablet storage")
   var DRIFT_KEY = 'poi-app:drift';       // the gyroscope's last good drift, { b: [x, y, z], at }, written when a drift is measured
@@ -2525,13 +2557,13 @@
     k = k || counts(rid, n);
     var st = statusOf(rid, n, k);
     if (st === 'nd') return { cls: 'info', text: 'This POI is not drivable', all: true };
-    if (st === 'err') return { cls: 'err', text: 'Sheet error: sides and maneuvers disagree', all: true };
+    if (st === 'err') return { cls: 'err', text: 'Sheet error: sides and maneuvers don’t match', all: true };
     // every ring closed and passes still to fix (item 46): where they are
     if (st === 'fix') return { cls: 'fix', text: toFixText(rid, n, k, T), all: true };
     if (st === 'done') return { cls: 'ok', text: 'This POI is done: ' + fitFix(k, T).fit + ' of ' + T.target, all: true };
     if (man) {
       if (!T.split[man]) return { cls: 'info', text: T.cap, rank: 3 };
-      if (k.m[man] > T.split[man]) return { cls: 'info', text: MAN_NAME[man] + ' is over its share: ' + k.m[man] + ' of ' + T.split[man], rank: 1 };
+      if (k.m[man] > T.split[man]) return { cls: 'info', text: 'Too many ' + MAN_NAME[man] + ': ' + k.m[man] + ' of ' + T.split[man], rank: 1 };
       if (k.m[man] === T.split[man]) return { cls: 'info', text: MAN_NAME[man] + ' is done: ' + k.m[man] + ' of ' + T.split[man], rank: 2 };
     }
     return null;
@@ -2547,7 +2579,7 @@
   function captionOf(rid, n, k) {
     var T = TYPES[typeOf(rid, n)];
     k = k || counts(rid, n);
-    if (k.err) return { cls: 'err', text: 'Sheet error: sides and maneuvers disagree' };
+    if (k.err) return { cls: 'err', text: 'Sheet error: sides and maneuvers don’t match' };
     var f = fitFix(k, T);
     if (f.fit === T.target) {
       // every ring closed; on a not drivable POI every pass is to fix
@@ -2593,13 +2625,34 @@
     q.refused = q.rp + q.rr + q.rt;
     return q;
   }
-  // "12 passes", "1 removal", "1 type change", "3 changes" when mixed (item 33)
-  function changes(p, r, t) {
+  // the sync control's words (items 33, 47, v0.33): what is not in the
+  // sheet yet, one kind named, or "changes" when they are mixed, since the
+  // button has no room for two kinds; the Sync panel lists them (keptLine)
+  function waitingWords(p, r, t) {
     var n = p + r + t;
-    if (p === n) return plural(n, 'pass', 'passes');
-    if (r === n) return plural(n, 'removal', 'removals');
-    if (t === n) return plural(n, 'type change', 'type changes');
-    return plural(n, 'change', 'changes');
+    if (r === n) return plural(n, 'pass', 'passes') + ' to delete in the sheet';
+    return (p === n ? plural(n, 'pass', 'passes') : t === n ? plural(n, 'POI type change', 'POI type changes') : plural(n, 'change', 'changes')) + ' not in the sheet yet';
+  }
+  // what the sheet refused, after who refused it ("Sheet" on the control,
+  // "The sheet" in the panel): "Sheet refused 3 passes", "Sheet refused to
+  // delete 1 pass", "Sheet refused 2 changes" when mixed
+  function refusedWords(p, r, t, who) {
+    var n = p + r + t;
+    return who + ' refused ' + (p === n ? plural(n, 'pass', 'passes') : r === n ? 'to delete ' + plural(n, 'pass', 'passes')
+      : t === n ? plural(n, 'POI type change', 'POI type changes') : plural(n, 'change', 'changes'));
+  }
+  // the Sync panel's line under "Not connected" with changes waiting (item
+  // 34): one kind in its own sentence, or the kinds present, in this order,
+  // joined with ", " and a final " and "
+  function keptLine(q) {
+    if (q.adds === q.waiting) return plural(q.adds, 'pass', 'passes') + (q.adds === 1 ? ' is' : ' are') + ' saved on this tablet until you connect the sheet.';
+    if (q.rems === q.waiting) return plural(q.rems, 'pass', 'passes') + ' will be deleted in the sheet once you connect it.';
+    if (q.types === q.waiting) return plural(q.types, 'POI type change', 'POI type changes') + (q.types === 1 ? ' is' : ' are') + ' saved on this tablet until you connect the sheet.';
+    var parts = [];
+    if (q.adds) parts.push(plural(q.adds, 'pass', 'passes'));
+    if (q.rems) parts.push(plural(q.rems, 'pass to delete', 'passes to delete'));
+    if (q.types) parts.push(plural(q.types, 'POI type change', 'POI type changes'));
+    return parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1] + ' are saved on this tablet until you connect the sheet.';
   }
 
   // ================= the layers of the screen and the back gesture (item 66) =================
@@ -2704,11 +2757,11 @@
 
   function syncState() {
     var c = city(), q = c ? queueOf(c.id) : queueOf(null);
-    if (!c || !c.mailboxUrl) return { cls: 'off', text: 'Connection not set up', q: q, noConn: true };
-    if (c.keyRejected) return { cls: 'bad', text: 'Access key rejected', q: q };
-    if (q.refused) return { cls: 'bad', text: changes(q.rp, q.rr, q.rt) + ' not accepted', q: q };
-    if (navigator.onLine === false) return { cls: 'off', text: 'No connection', q: q };
-    if (q.waiting) return { cls: 'wait', text: changes(q.adds, q.rems, q.types) + ' waiting for network', q: q };
+    if (!c || !c.mailboxUrl) return { cls: 'off', text: 'Not connected', q: q, noConn: true };
+    if (c.keyRejected) return { cls: 'bad', text: 'Wrong password', q: q };
+    if (q.refused) return { cls: 'bad', text: refusedWords(q.rp, q.rr, q.rt, 'Sheet'), q: q };
+    if (navigator.onLine === false) return { cls: 'off', text: 'No internet', q: q };
+    if (q.waiting) return { cls: 'wait', text: waitingWords(q.adds, q.rems, q.types), q: q };
     return { cls: '', text: c.sentAt ? 'All sent · ' + stamp(c.sentAt) : 'All sent', q: q };
   }
 
@@ -3015,7 +3068,7 @@
       h += '<button class="scrim top" type="button" data-act="dlg-cancel" aria-label="Cancel"></button>' +
         '<div class="dlg" role="alertdialog" aria-modal="true" aria-label="' + esc(d.title) + '"><div class="dtitle">' + esc(d.title) + '</div>' +
         (d.chip ? '<div class="dchip">' + d.chip + '</div>' : '') + '<div class="dbody">' + esc(d.body) + '</div>' +
-        (d.sw ? '<div class="drow"><span class="ol"><b>' + esc(d.sw.label) + '</b><small>' + esc(d.sw.line) + '</small></span>' +
+        (d.sw ? '<div class="drow"><span class="ol"><b>' + esc(d.sw.label) + '</b>' + (d.sw.line ? '<small>' + esc(d.sw.line) + '</small>' : '') + '</span>' +
           '<span class="switch" role="switch" aria-checked="' + (d.sw.on ? 'true' : 'false') + '" aria-label="' + esc(d.sw.label) + '"></span></div>' : '') +
         (d.one ? '<div class="dbtns one"><button class="dbtn ' + d.okCls + '" type="button" data-act="dlg-ok">' + esc(d.ok) + '</button></div>'
           : '<div class="dbtns"><button class="dbtn" type="button" data-act="dlg-cancel">Cancel</button>' +
@@ -3023,9 +3076,9 @@
     }
     if (blocked) {
       var B = {
-        tab: ['The app is open in another tab.', 'Close this one: passes are recorded in the other.'],
-        newer: ['The data on this tablet comes from a newer version of the app.', 'Reload the page. Nothing is recorded until then, so the data stays as it is.'],
-        broken: ['The data on this tablet could not be read.', 'Nothing is recorded, so it stays as it is.']
+        tab: ['The app is already open in another tab.', 'Close this tab. Passes are saved in the other one.'],
+        newer: ['This tablet’s data was saved by a newer version of the app.', 'Close the app and open it again. Until then nothing is saved, so no data is lost.'],
+        broken: ['The app can’t read the data on this tablet.', 'Nothing will be saved, so the data stays as it is.']
       }[blocked];
       h += '<div class="scrim top"></div><div class="dlg" role="alertdialog" aria-modal="true" aria-label="' + esc(B[0]) + '">' +
         '<div class="dtitle">' + esc(B[0]) + '</div><div class="dbody">' + esc(B[1]) + '</div></div>';
@@ -3215,25 +3268,16 @@
   function syncHtml() {
     var c = city(), s = syncState(), q = s.q;
     var title = s.text, line;
-    if (s.noConn) {
-      line = q.waiting ? changes(q.adds, q.rems, q.types) + (q.waiting === 1 ? ' is' : ' are') + ' kept on this tablet until it is set up.'
-        : 'Passes will be kept on this tablet until it is set up.';
-    } else if (s.cls === 'bad' && c.keyRejected) line = 'The sheet’s script refused the key. Passes wait on this tablet until it is fixed.';
-    else if (s.cls === 'bad') line = 'The sheet refused ' + (q.refused === 1 ? 'it' : 'them') + '. Fix the cause in the sheet, then send ' + (q.refused === 1 ? 'it' : 'them') + ' again from History.';
+    if (s.noConn) line = q.waiting ? keptLine(q) : 'Passes will be saved on this tablet until you connect the sheet.';
+    else if (s.cls === 'bad' && c.keyRejected) line = 'The sheet refused the password. Passes stay on this tablet until you fix it in Settings.';
+    else if (s.cls === 'bad') line = refusedWords(q.rp, q.rr, q.rt, 'The sheet') + '. History shows why and how to fix it.';
     else line = c.sentAt ? 'Last sent ' + stamp(c.sentAt) : 'Nothing sent yet';
     function row(act, label, small, off, go) {
       return '<button class="opt' + (off ? ' off' : '') + '" type="button" data-act="' + act + '"' + (off ? ' aria-disabled="true"' : '') + '>' +
         '<span class="ol"><b>' + label + '</b><small>' + esc(small) + '</small></span>' + (go ? icon('i-chev-right', 'go') : '') + '</button>';
     }
-    var refusedRow = '';
-    if (q.refused) {
-      var todo = q.rp === q.refused ? plural(q.rp, 'pass', 'passes') + ' to fix or delete'
-        : q.rr === q.refused ? plural(q.rr, 'removal', 'removals') + ' to fix or cancel'
-        : q.rt === q.refused ? plural(q.rt, 'type change', 'type changes') + ' to fix or cancel'
-        : plural(q.refused, 'change', 'changes') + ' to fix';
-      refusedRow = row('showhist', 'Show in History', todo, false, true);
-    }
-    var why = 'Connection not set up';   // the reason of every sending control in this build
+    var refusedRow = q.refused ? row('showhist', 'Show in History', 'See what the sheet refused and fix it', false, true) : '';
+    var why = 'Comes in a later version';   // the reason of every sending control in this build (item 77)
     return '<div class="pop syncpop" role="dialog" aria-label="Sync">' +
       '<div class="pt">SYNC' + (c ? ' · ' + esc(c.name.toUpperCase()) : '') + '</div>' +
       '<div class="sstat' + (s.cls ? ' ' + s.cls : '') + '"><span class="dot"></span><span class="ol"><b>' + esc(title) + '</b><small>' + esc(line) + '</small></span></div>' +
@@ -3241,10 +3285,10 @@
       row('sendnow', 'Send now', why, true, false) +
       row('loadsheet', 'Load from sheet', why, true, false) +
       '<div class="sdiv"></div>' +
-      // item 72: opens the Connection page of the city in use (v0.31); its
-      // words wait for the Sync panel's step; with no city, or the sample
-      // city, which can never get a sheet, it stays dimmed
-      row('conn-open', c && c.mailboxUrl ? 'Connection' : 'Set up connection', 'Script URL and access key' + (c ? ' for ' + c.name : ''), !c || !!c.sample, true) +
+      // item 72: opens the Connection page of the city in use (v0.31); with
+      // no city, or the sample city, which can never get a sheet, it stays
+      // dimmed
+      row('conn-open', c && c.mailboxUrl ? 'Connection' : 'Connect the sheet', 'Link and password of ' + (c ? c.name + '’s sheet' : 'the sheet'), !c || !!c.sample, true) +
       tabletHtml() +
       // the sensor log of the compass car tests (item 72, decided
       // 2026-11-02, temporary): an action row like "Send now", its small
@@ -3382,17 +3426,19 @@
   // ---- History (items 12, 13, 14, 38, 41, 44, 45, 47, 48) ----
   // the reason line under a refused row, in the words of its own row (item 47)
   function reasonLine(e, kind) {
-    var c = cityById(e.city), r = routeById(e.routeId), name = c ? c.name : 'This city';
-    var undoWords = kind === 'pass' ? 'delete this pass' : kind === 'removal' ? 'cancel the removal' : 'cancel the change';
+    var c = cityById(e.city), r = routeById(e.routeId), whose = c ? c.name + '’s' : 'this city’s';
+    var undoWords = kind === 'pass' ? 'delete this pass' : kind === 'removal' ? 'tap Undo delete' : 'undo the type change';
     switch (e.reason) {
-      case 'text-in-cell': return 'The sheet has text in a cell this ' + (kind === 'removal' ? 'removal takes from' : 'pass adds to') + '. Fix the cell, then send again.';
-      case 'no-route': return r && !r.checked ? name + '’s sheet has no tab named ' + e.route + '. Correct the route code in Settings.'
-        : name + '’s sheet has no tab named ' + e.route + '. Rename the route’s tab to ' + e.route + ', then send again.';
-      case 'no-poi': return 'Tab ' + e.route + ' has no row for POI ' + e.poi + '. Add the row in the sheet, then send again, or ' + undoWords + '.';
-      case 'below-zero': return 'The sheet’s count is already 0, so there is nothing left to remove.';
-      case 'already-removed': return 'The sheet already took this pass out. Cancel this removal.';
-      case 'bad-request': case 'bad-target': return 'The sheet could not read this change. Send it again or ' + (kind === 'pass' ? 'delete it' : undoWords) + '.';
-      default: return 'The sheet could not write this change. Send it again.';
+      case 'text-in-cell': return 'POI ' + e.poi + '’s row in the sheet has text where a number should be. Put the number back, then tap Send again.';
+      case 'no-route': return r && !r.checked ? 'Route ' + e.route + ' is not in ' + whose + ' sheet. Check how you wrote it in Settings.'
+        : 'Route ' + e.route + ' is missing from ' + whose + ' sheet. Put it back with the same name, then tap Send again.';
+      case 'no-poi': return 'Route ' + e.route + ' in the sheet has no POI ' + e.poi + '. Add POI ' + e.poi + ' in the sheet, then tap Send again, or ' + undoWords + '.';
+      case 'below-zero': return 'POI ' + e.poi + ' already shows 0 in the sheet, so this pass can’t be deleted there.';
+      case 'already-removed': return 'This pass is already gone from the sheet.';
+      // could not read (bad-request, bad-target), could not write and any other code
+      default: return kind === 'pass' ? 'The sheet couldn’t save this pass. Tap Send again, or delete it.'
+        : kind === 'removal' ? 'The sheet couldn’t delete this pass. Tap Send again, or tap Undo delete.'
+        : 'The sheet couldn’t save this POI type change. Tap Send again, or undo it.';
     }
   }
   var HIST_PAGE = 50;               // item 48: Route scope draws this many rows first, and this many more per tap on "Show more"
@@ -3423,33 +3469,33 @@
     var rows = list.slice(0, shown).map(function (e) {
       var num = scope === 'route' ? '<span class="hn">' + e.poi + '</span>' : '';
       var tm = '<span class="htm">' + stamp(e.ts) + '</span>';
-      var wait = '<span class="hst wait"><span class="dot"></span>Waiting</span>', no = '<span class="hst rej">Not accepted</span>';
+      var wait = '<span class="hst wait"><span class="dot"></span>Not in sheet yet</span>', no = '<span class="hst rej">Sheet refused</span>';
       if (e.kind === 'target') {
-        var mv = '<span class="hmv ty">Type: <span>' + TYPES[typeOf(e.routeId, e.poi)].label + '</span></span>';
+        var mv = '<span class="hmv ty">POI type: <span>' + TYPES[typeOf(e.routeId, e.poi)].label + '</span></span>';
         if (e.state === 'waiting') return '<div class="hr"><div class="hl1"><div class="htx">' + num + tm + mv + wait + '</div></div></div>';
         return '<div class="hr rej"><div class="hl1"><div class="htx">' + num + tm + mv + no + '</div></div>' +
           '<p class="hwhy">' + esc(reasonLine(e, 'type')) + '</p><div class="hacts"><button class="btn" type="button" data-again="' + e.id + '">Send again</button>' +
-          '<button class="btn" type="button" data-cancel="' + e.id + '">Cancel change</button></div></div>';
+          '<button class="btn" type="button" data-cancel="' + e.id + '">Undo type change</button></div></div>';
       }
       var pmv = '<span class="hmv">' + icon(MAN_ICON[e.man]) + SIDE_NAME[e.side] + '</span>';
       var del = '<button class="hdel" type="button" data-del="' + e.id + '" aria-label="Delete this pass">Delete</button>';
       var rm = I.rem[e.id];
-      // items 12, 13: a pass whose removal waits carries "Cancel removal"
+      // items 12, 13: a pass whose removal waits carries "Undo delete"
       // under its row (history.html frame C)
       if (rm && rm.state === 'waiting') {
-        return '<div class="hr del"><div class="hl1"><div class="htx">' + num + tm + pmv + '<span class="hst wait"><span class="dot"></span>Removal waiting</span></div></div>' +
-          '<div class="hacts"><button class="btn" type="button" data-cancel="' + rm.id + '">Cancel removal</button></div></div>';
+        return '<div class="hr del"><div class="hl1"><div class="htx">' + num + tm + pmv + '<span class="hst wait"><span class="dot"></span>Still in the sheet</span></div></div>' +
+          '<div class="hacts"><button class="btn" type="button" data-cancel="' + rm.id + '">Undo delete</button></div></div>';
       }
       if (rm && rm.state === 'rejected') {
         return '<div class="hr rej del"><div class="hl1"><div class="htx">' + num + tm + pmv + no + '</div></div>' +
           '<p class="hwhy">' + esc(reasonLine(rm, 'removal')) + '</p><div class="hacts"><button class="btn" type="button" data-again="' + rm.id + '">Send again</button>' +
-          '<button class="btn" type="button" data-cancel="' + rm.id + '">Cancel removal</button></div></div>';
+          '<button class="btn" type="button" data-cancel="' + rm.id + '">Undo delete</button></div></div>';
       }
       if (e.state === 'rejected') {
         return '<div class="hr rej"><div class="hl1"><div class="htx">' + num + tm + pmv + no + '</div></div>' +
           '<p class="hwhy">' + esc(reasonLine(e, 'pass')) + '</p><div class="hacts"><button class="btn" type="button" data-again="' + e.id + '">Send again</button>' + del + '</div></div>';
       }
-      return '<div class="hr"><div class="hl1"><div class="htx">' + num + tm + pmv + (e.state === 'waiting' ? wait : '<span class="hst">Sent</span>') + '</div>' + del + '</div></div>';
+      return '<div class="hr"><div class="hl1"><div class="htx">' + num + tm + pmv + (e.state === 'waiting' ? wait : '<span class="hst">In sheet</span>') + '</div>' + del + '</div></div>';
     }).join('');
     var dropped = r && S.dropped[r.id] && (scope === 'route' ? Object.keys(S.dropped[r.id]).length > 0 : !!S.dropped[r.id][n]);
     var body;
@@ -3457,8 +3503,8 @@
       var k = r && scope === 'poi' ? counts(r.id, n) : null, msg;
       if (scope === 'route' && r) msg = '<b>No passes on this route yet</b>';
       else if (k && k.total > 0) {
-        msg = '<b>No passes from this tablet</b><p>' + (k.total === 1 ? 'The pass of POI ' + n + ' reached the sheet another way, typed in by hand. Correct it in the sheet.'
-          : 'The ' + fmt(k.total) + ' passes of POI ' + n + ' reached the sheet another way, typed in by hand. Correct them in the sheet.') + '</p>';
+        msg = '<b>No passes from this tablet</b><p>' + (k.total === 1 ? 'The pass of POI ' + n + ' was typed into the sheet by hand. Fix it in the sheet.'
+          : 'The ' + fmt(k.total) + ' passes of POI ' + n + ' were typed into the sheet by hand. Fix them in the sheet.') + '</p>';
       } else msg = '<b>No passes yet</b>';
       body = '<div class="hlist empty"><div class="hempty">' + msg + '</div></div>';
     } else {
@@ -3466,7 +3512,7 @@
       // remain, else the line of item 48 once a pass has been dropped
       body = '<div class="hlist" data-scope="' + scope + '">' + rows +
         (left ? '<p class="hshown">' + fmt(shown) + ' of ' + fmt(list.length) + ' shown</p><button class="hmore" type="button" data-act="hist-more">Show ' + fmt(Math.min(left, HIST_PAGE)) + ' more</button>'
-          : dropped ? '<p class="hend"><span>This tablet keeps its newest 3,000 passes and removals.</span><span>Older sent ones are no longer listed.</span></p>' : '') + '</div>';
+          : dropped ? '<p class="hend"><span>This tablet lists only its newest 3,000 passes.</span><span>Older ones are already in the sheet.</span></p>' : '') + '</div>';
     }
     var sub = !r ? '<span class="hctx">' + esc(c ? c.name : 'No city') + '</span>'
       : scope === 'poi' ? '<span class="chip gold">POI ' + n + '</span><span class="hctx">' + esc(r.code) + ' · ' + esc(c.name) + '</span>'
@@ -3475,7 +3521,7 @@
       '<div class="seg" role="tablist" aria-label="Scope"><button class="sg' + (scope === 'poi' ? ' on' : '') + '" type="button" role="tab" aria-selected="' + (scope === 'poi') + '" data-scope="poi">POI</button>' +
       '<button class="sg' + (scope === 'route' ? ' on' : '') + '" type="button" role="tab" aria-selected="' + (scope === 'route') + '" data-scope="route">Route</button></div></header>' +
       '<div class="hsub">' + sub + '<span class="chip">' + plural(counted, 'pass', 'passes') + '</span></div>' +
-      (removals ? '<div class="hq"><span class="dot"></span>' + plural(removals, 'removal', 'removals') + ' waiting to be sent</div>' : '') +
+      (removals ? '<div class="hq"><span class="dot"></span>' + plural(removals, 'pass', 'passes') + ' still to delete in the sheet</div>' : '') +
       body + '<p class="hfoot">History shows only what this tablet recorded</p>';
     var sec = old || document.createElement('section');
     sec.className = 'hist'; sec.setAttribute('aria-label', 'History');
@@ -3557,9 +3603,9 @@
   function passWords(e) { return icon(MAN_ICON[e.man]) + esc(SIDE_NAME[e.side]); }
   // item 78: the store is full, nothing was saved
   function full(what) {
-    openDialog({ title: 'Nothing recorded', one: true, ok: 'OK', okCls: 'primary',
-      body: what === 'pass' ? 'This tablet’s storage is full, so the pass was not saved. Free space on the tablet, then tap again.'
-        : 'This tablet’s storage is full, so the change was not saved. Free space on the tablet, then try again.' });
+    openDialog({ title: 'Not saved', one: true, ok: 'OK', okCls: 'primary',
+      body: what === 'pass' ? 'The app’s memory on this tablet is full, so the pass was not saved. Send your passes to the sheet, then tap again.'
+        : 'The app’s memory on this tablet is full, so your change was not saved. Send your passes to the sheet, then try again.' });
   }
 
   // ================= actions =================
@@ -3573,7 +3619,7 @@
     if (t && t.man === m) { removeLayer('open'); render(); return; }   // the same maneuver closes it (item 8)
     if (t) t.man = m; else ui.stack.push({ k: 'open', man: m });
     openTimer = setTimeout(function () {
-      if (find('open') && !ui.busy) { removeLayer('open'); render(); toast('Closed after 12 s: nothing recorded'); }
+      if (find('open') && !ui.busy) { removeLayer('open'); render(); toast('No side tapped in 12 s: nothing saved'); }
     }, OPEN_TIMEOUT);
     render();
   }
@@ -3631,12 +3677,12 @@
   // items 9, 13, 63: removing a pass asks first
   function askRemove(e, viaUndo) {
     openDialog({
-      title: viaUndo ? 'Remove the last pass?' : 'Delete this pass?',
+      title: viaUndo ? 'Delete the last pass?' : 'Delete this pass?',
       chip: passChip(e),
-      body: e.state === 'delivered' ? 'It is already in the sheet, so a removal is sent with the next sync.'
-        : e.state === 'rejected' ? 'The sheet refused it, so it is simply dropped from this tablet.'
-        : 'It has not been sent yet, so it is simply dropped from this tablet.',
-      ok: viaUndo ? 'Remove' : 'Delete', okCls: 'danger',
+      body: e.state === 'delivered' ? 'It’s already in the sheet. The app will delete it there too.'
+        : e.state === 'rejected' ? 'The sheet refused it, so it will only be deleted from this tablet.'
+        : 'It’s not in the sheet yet, so it will only be deleted from this tablet.',
+      ok: 'Delete', okCls: 'danger',
       run: function () { removePass(e.id); }
     });
     render();
@@ -3656,7 +3702,7 @@
     }, 'change');
     if (!ok) return;
     chime(false);
-    toast((queued ? 'Removal queued:' : 'Removed:') + passWords(e) + ' · ' + tally(e.routeId, e.poi));
+    toast('Deleted:' + passWords(e) + ' · ' + tally(e.routeId, e.poi));
   }
   function undo() {
     var e = undoTarget();
@@ -4036,7 +4082,7 @@
     change(function () { e.state = 'waiting'; delete e.reason; }, 'change');
     render();
   }
-  // "Cancel removal" and "Cancel change" (items 12, 13, 47): the event
+  // "Undo delete" and "Undo type change" (items 12, 13, 47): the event
   // leaves the tablet, nothing changed in the sheet. A removal that waits
   // is dropped like a refused one, with no dialog and no toast, and its
   // pass counts again (data-model.md "Event": a waiting event may be
@@ -4084,72 +4130,56 @@
       if ((e.state === 'waiting' || e.state === 'delivered') && !I.rem[e.id]) mine[e.man].push(e);
     });
     MANS.forEach(function (m) { mine[m].sort(function (x, y) { return y.seq - x.seq; }); });   // newest first
-    // "26 Left and 27 Right passes in the sheet": the maneuvers with passes
-    var group = function (ms, arr, where) {
-      var sum = 0, words = [];
-      ms.forEach(function (m) { if (arr[AT[m]] > 0) { sum += arr[AT[m]]; words.push(fmt(arr[AT[m]]) + ' ' + MAN_NAME[m]); } });
-      if (!words.length) return null;
-      return (words.length > 1 ? words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1] : words[0]) + (sum === 1 ? ' pass ' : ' passes ') + where;
-    };
-    var has = function (ms) { return 'It has ' + [group(ms, sheet, 'in the sheet'), group(ms, wait, 'waiting on this tablet')].filter(Boolean).join(' and ') + '.'; };
-    // The sentences, in one order for every type (item 64, v0.10): the
-    // passes that do not fit and where they are; that the app stops
-    // counting them and, when some of them are in the sheet, that the sheet
-    // keeps them; who put the ones in the sheet there; last, that the ones
-    // waiting on this tablet are still sent unless the switch deletes them.
+    // The sentences (items 63, 64, v0.33), each only when it applies: on
+    // Not drivable the sheet error, then what the type allows against what
+    // the POI has, in the sheet plus waiting on this tablet, for the
+    // maneuvers the type does not allow and for each allowed maneuver past
+    // its share; last the passes typed into the sheet by hand among those
+    // that do not fit, which only the sheet can delete.
     var lines = [], del = [], fix = 0;
     if (t === 'nd') {
       var inSheet = Math.max(sheet[0] + sheet[1] + sheet[2] + sheet[3], sheet[4] + sheet[5] + sheet[6]);
       var waiting = Math.max(wait[0] + wait[1] + wait[2] + wait[3], wait[4] + wait[5] + wait[6]);
       fix = inSheet + waiting;
       if (fix <= 0) return null;
-      if (counts(rid, n).err) lines.push('The sheet shows an error at this POI: its sides and maneuvers disagree.');
-      lines.push('It has ' + [inSheet > 0 ? plural(inSheet, 'pass', 'passes') + ' in the sheet' : null,
-        waiting > 0 ? plural(waiting, 'pass', 'passes') + ' waiting on this tablet' : null].filter(Boolean).join(' and ') + '.');
+      if (counts(rid, n).err) lines.push('The sheet has an error at this POI.');
+      lines.push('With Not drivable, no passes count. This POI has ' + fmt(fix) + '.');
       MANS.forEach(function (m) { del = del.concat(mine[m]); });
     } else {
       var off = MANS.filter(function (m) { return !T.split[m] && sheet[AT[m]] + wait[AT[m]] > 0; });
       if (off.length) {
-        lines.push(has(off) + ' ' + T.label + ' does not allow ' + off.map(function (m) { return MAN_NAME[m]; }).join(' or ') + '.');
-        off.forEach(function (m) { fix += sheet[AT[m]] + wait[AT[m]]; del = del.concat(mine[m]); });
+        var offN = 0;
+        off.forEach(function (m) { offN += sheet[AT[m]] + wait[AT[m]]; del = del.concat(mine[m]); });
+        fix += offN;
+        lines.push('With ' + T.label + ', a POI has no ' + off.map(function (m) { return MAN_NAME[m]; }).join(' or ') + ' passes. This POI has ' + fmt(offN) + '.');
       }
       MANS.forEach(function (m) {
         var extra = T.split[m] ? sheet[AT[m]] + wait[AT[m]] - T.split[m] : 0;
         if (extra <= 0) return;
-        lines.push(has([m]) + ' ' + T.label + ' allows ' + fmt(T.split[m]) + ', so ' + fmt(extra) + (extra === 1 ? ' does not fit.' : ' do not fit.'));
+        lines.push('With ' + T.label + ', a POI needs ' + fmt(T.split[m]) + ' ' + MAN_NAME[m] + ' passes. This POI has ' + fmt(sheet[AT[m]] + wait[AT[m]]) + ': ' + fmt(extra) + ' too many.');
         fix += extra; del = del.concat(mine[m].slice(0, extra));
       });
       if (fix <= 0) return null;
     }
-    // where the passes that do not fit are: waiting on this tablet, or in
-    // the sheet, the switch's sent ones and those typed in by hand
-    var waitingHere = del.filter(function (e) { return e.state === 'waiting'; }).length;
+    // the passes typed into the sheet by hand among those that do not fit:
+    // "of them" when some of them are this tablet's, else they are all
     var sent = del.filter(function (e) { return e.state === 'delivered'; }).length, hand = Math.max(0, fix - del.length);
-    var keeps = sent + hand > 0;   // some of them are in the sheet
-    if (t === 'nd') lines.push((fix === 1 ? 'Not drivable does not count it.' : 'Not drivable counts none of them.') +
-      (!keeps ? '' : fix === 1 ? ' The sheet keeps it and the export sends it to the client until it is deleted.'
-        : ' The sheet keeps them and the export sends them to the client until they are deleted.'));
-    else lines.push((fix === 1 ? 'The app stops counting it' : 'The app stops counting them') +
-      (!keeps ? '.' : fix === 1 ? ', but the sheet keeps it and the export sends it to the client until it is deleted.'
-        : ', but the sheet keeps them and the export sends them to the client until they are deleted.'));
-    if (sent > 0 && hand > 0) lines.push((sent === 1 ? '1 of them was' : fmt(sent) + ' of them were') + ' sent from this tablet, the other' +
-      (hand === 1 ? ' was typed in by hand: delete it in the sheet.' : ' ' + fmt(hand) + ' were typed in by hand: delete those in the sheet.'));
-    else if (hand > 0) lines.push(hand === 1 ? 'It was typed in by hand: delete it in the sheet.' : 'They were typed in by hand: delete them in the sheet.');
-    else if (sent > 0) lines.push(sent === 1 ? 'It was sent from this tablet.' : 'They were sent from this tablet.');
-    if (waitingHere > 0) lines.push(waitingHere === 1 ? 'The pass waiting on this tablet is still sent unless the switch below deletes it.'
-      : 'Passes waiting on this tablet are still sent unless the switch below deletes them.');
+    if (hand > 0 && del.length) lines.push(hand === 1 ? '1 of them was typed into the sheet by hand: delete it in the sheet yourself, or it goes to the client.'
+      : fmt(hand) + ' of them were typed into the sheet by hand: delete those in the sheet yourself, or they go to the client.');
+    else if (hand > 0) lines.push(hand === 1 ? 'It was typed into the sheet by hand: delete it in the sheet yourself, or it goes to the client.'
+      : 'They were typed into the sheet by hand: delete them in the sheet yourself, or they go to the client.');
+    // the switch: its small line only when one of its passes was sent
     var k = del.length, sw = null;
-    if (k) sw = { on: true, label: k === 1 ? 'Also delete the pass of this tablet' : 'Also delete the ' + fmt(k) + ' passes of this tablet',
-                  line: (t === 'nd' ? (k === 1 ? 'Not drivable does not count it.' : 'Not drivable counts none of them.')
-                    : (k === 1 ? 'It does not fit ' : 'They do not fit ') + T.label + '.') + ' A waiting pass is dropped, a sent one gets a removal.' };
+    if (k) sw = { on: true, label: k === 1 ? 'Also delete the pass made on this tablet' : 'Also delete the ' + fmt(k) + ' passes made on this tablet',
+                  line: !sent ? '' : k === 1 ? 'If it was sent, it is deleted from the sheet too.' : 'Sent ones are deleted from the sheet too.' };
     return { body: lines.join(' '), del: del.map(function (e) { return e.id; }), sw: sw };
   }
-  // A change of the active POI's type, or the type Undo or Cancel change
-  // puts back: at once with the toast when every pass fits, else after
-  // the dialog of items 63 and 64. "Change" applies the type and, with
-  // the switch on, deletes the switch's passes inside the same change(),
-  // so the store is written once. pre runs first inside it (Cancel change
-  // drops its refused event there). With undo, a change the passenger
+  // A change of the active POI's type, or the type Undo or Undo type
+  // change puts back: at once with the toast when every pass fits, else
+  // after the dialog of items 63 and 64. "Change" applies the type and,
+  // with the switch on, deletes the switch's passes inside the same
+  // change(), so the store is written once. pre runs first inside it (Undo
+  // type change drops its refused event there). With undo, a change the passenger
   // made from the pill or its dialog, the toast carries "Undo" with the
   // type the change replaced (item 36, v0.13).
   function changeType(rid, n, t, pre, undo) {
@@ -4161,7 +4191,7 @@
         IX = null;
         setType(rid, n, t);
         if (q && q.sw && q.sw.on) deletePasses(q.del);
-      }, 'change')) toast('Type set: ' + esc(TYPES[t].label), undo ? { rid: rid, n: n, t: from } : null);
+      }, 'change')) toast('POI ' + n + ' is now ' + esc(TYPES[t].label), undo ? { rid: rid, n: n, t: from } : null);
     };
     if (!q) { go(); render(); return; }
     openDialog({ title: 'Change POI ' + n + ' to ' + TYPES[t].label + '?', body: q.body, sw: q.sw, ok: 'Change', okCls: 'danger', run: go });
@@ -4254,7 +4284,7 @@
       case 'routes': if (!route()) break; if (m && m.name === 'routes') removeLayer('menu'); else openMenu('routes'); render(); break;
       case 'typemenu': if (!route()) break; if (m && m.name === 'type') removeLayer('menu'); else openMenu('type'); render(); break;
       case 'sync': if (m && m.name === 'sync') removeLayer('menu'); else openMenu('sync'); render(); break;
-      // item 72: "Connection" / "Set up connection" opens the Connection
+      // item 72: "Connection" / "Connect the sheet" opens the Connection
       // page of the city in use over its city page (v0.31)
       case 'conn-open': var cc = city(); if (cc && !cc.sample) { removeLayer('menu'); openSettings(); openCityPage(cc.id); openConnPage(cc.id); render(); } break;
       case 'showhist': ui.scope = 'route'; openHistory(); render(); break;
@@ -4551,7 +4581,7 @@
                                 // 0.02 to 0.07 deg/s in both cars, and a false 0.44
                                 // passed the old 0.5 on 2026-10-23 (v19.8)
     var RESTART_GAP = 5000;     // ms: the watchdog restarts the sensors at most this often
-    var SENSOR_OFF = 15000;     // ms: with focus, the sensors silent this long since they started read "Motion sensor off" (12c)
+    var SENSOR_OFF = 15000;     // ms: with focus, the sensors silent this long since they started read "Motion sensor not working" (12c)
     var RAD = 180 / Math.PI;
     var car = new Heading.Smoother(0.6);
 
@@ -5187,16 +5217,18 @@
     // without focus and the started sensors silent, a tap gives the focus.
     // 'sensor': the page focused and the sensors silent for SENSOR_OFF
     // since they started, last read or were given the focus (a focus
-    // restarts them, so a tap gives them SENSOR_OFF to answer). 'gps':
-    // every other reason, no GPS check yet or the last one older than
-    // GYRO_MAX
+    // restarts them, so a tap gives them SENSOR_OFF to answer). Then, the
+    // arrow being pale (no GPS check yet or the last one older than
+    // GYRO_MAX), 'drive': the module holds a GPS fix fresh by FRESH,
+    // whatever its speed and even with no course, so the compass sets once
+    // the car drives; 'gps': no fresh fix (v0.33)
     function reason(t) {
       if (locDenied) return 'location';
       if (motion === 'on' && !alive(t)) {
         if (document.visibilityState === 'visible' && !focused) return 'focus';
         if (focused && t - Math.max(silentFrom, gy.api.at, gy.dm.at) >= SENSOR_OFF) return 'sensor';
       }
-      return 'gps';
+      return fix && t - fix.at < FRESH ? 'drive' : 'gps';
     }
     // the arrow: onChange at most once per animation frame, pale while
     // there is no heading or the course is only the last known one, and
@@ -5278,9 +5310,10 @@
     // saveLog, logLine and event serve the sensor log (v0.28, temporary)
     return { start: start, stop: stop, saveLog: saveLog, logLine: logLine, event: event };
   }());
-  // the line beside the compass (item 19, v0.32): the four texts, one per
-  // reason of why; shown only while the arrow is pale, hidden otherwise
-  var WHY = { location: 'Location is off for this app', focus: 'Compass asleep. Tap the screen.', sensor: 'Motion sensor off', gps: 'Waiting for GPS' };
+  // the line beside the compass (item 19, v0.32): the five texts, one per
+  // reason of why (v0.33: 'drive' and 'gps' split the old 'gps'); shown
+  // only while the arrow is pale, hidden otherwise
+  var WHY = { location: 'Location is off for this app', focus: 'Compass asleep. Tap the screen.', sensor: 'Motion sensor not working', drive: 'Compass sets once you drive', gps: 'Waiting for GPS' };
   function drawCompass(h) {
     var svg = document.querySelector('.app svg.compass');
     if (!svg) return;
