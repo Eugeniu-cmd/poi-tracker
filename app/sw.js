@@ -42,9 +42,10 @@
    v0.32 2026-11-03 — compass step 4, a line that says why the arrow is pale, the pale arrow keeps the last GPS direction, the sensors wake on focus and the log keeps every drive by the clock: a new cache name for app v0.32.
    v0.33 2026-11-04 — plain words for the rest of the app: a new cache name for app v0.33.
    v0.34 2026-11-05 — compass step 5, the GPS takes the pale arrow only after three readings agree: a new cache name for app v0.34.
+   v0.35 2026-11-06 — the compass line names the speed, and the blurred resting shadows go, with the test link ?shadow=1: a new cache name for app v0.35.
 */
 'use strict';
-var CACHE = 'poi-app-v0.34';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.35';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 
