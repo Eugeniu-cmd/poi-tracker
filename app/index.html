@@ -17,10 +17,10 @@
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
   The behaviour follows docs/screens.md v0.75 and docs/data-model.md
-  v0.28, and much of it is the code of the working prototype v19.7; the
+  v0.29, and much of it is the code of the working prototype v19.7; the
   compass is the code of prototype v19.8 plus the agreement rule of
-  v0.25 and the GPS course and focus rules of v0.32. The look follows
-  v0.75. Still to come: sending.
+  v0.25, the focus rules of v0.32 and the confirmed GPS of v0.34. The
+  look follows v0.75. Still to come: sending.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -584,6 +584,36 @@
           history.html v0.37's and the Settings rules settings.html
           v0.36's, the tokens still _tokens.css v0.26. The store and
           its write do not change. The APP ONLY piece stays.
+  v0.34 2026-11-05 — compass step 5 (data-model.md v0.29, decided
+          2026-11-05 after the car test of app v0.33 on 2026-11-05): the
+          GPS takes the pale arrow only after three readings agree
+          (decision 13 of the compass module). While the arrow is not
+          trusted from the gyroscope, one fast fix no longer carries it:
+          the newest three fixes must all have a course and 11 km/h or
+          more, each within 3 s of the one before, and agree, with the
+          gyroscope working on their offsets (course minus the
+          gyroscope's turn, within 10 degrees round the circle, the car
+          driving straight), without it on their courses. A confirming
+          fix sets north's offset to the mean of the three offsets; from
+          it the source is 'gps', solid, and the arrow is turn + off, so
+          the gyroscope turns it through a turn while the GPS course
+          lags. The GPS lets go only when no fix at 7 km/h or more
+          (ROLLING, the new constant) has come for 3 s, or no fix at
+          all; then the arrow is pale and goes on from the offset.
+          'gyro' keeps its priority, and a confirming fix leaves a
+          trusted arrow's offset to the checks. The log notes "gps
+          confirms: offsets within N" and "gps lets go: slow" or "no
+          fix", once per change. On the drive of 2026-11-05 one noisy
+          fix at 11.7 km/h had turned the arrow by 110 degrees and left
+          it 80 degrees off for 4.5 minutes, the switch to one fix and
+          back made the compass blink four times, and through a U-turn
+          the raw course pointed the arrow backwards for 8 s. The
+          checks, the drift, the focus handling, the line beside the
+          compass and the look do not change. The canon copied whole
+          from main-screen.html v0.50, the History rules history.html
+          v0.37's and the Settings rules settings.html v0.36's, the
+          tokens still _tokens.css v0.26. The store and its write do not
+          change. The APP ONLY piece stays.
 -->
 <html lang="en">
 <head>
@@ -2210,7 +2240,7 @@
   'use strict';
 
   // ================= constants (screens.md items 39, 46, 60; data-model.md) =================
-  var APP_VERSION = 'v0.33';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
+  var APP_VERSION = 'v0.34';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
   var KEY = 'poi-app:store';         // the whole store, one key, one setItem per change
   var HEADING_KEY = 'poi-app:heading';   // the compass's last course, { deg, at }, written every 2 s (data-model.md "Tablet storage")
   var DRIFT_KEY = 'poi-app:drift';       // the gyroscope's last good drift, { b: [x, y, z], at }, written when a drift is measured
@@ -4434,7 +4464,9 @@
   //    lag in as an error of up to 62 deg. Each straight fix pulls the
   //    heading 30% of the way to the GPS course, a gap over 30 deg is taken
   //    whole. Below 11 km/h the course jumps by tens of degrees, standing it
-  //    has none. With the gyroscope silent, the live GPS course is shown.
+  //    has none. With the gyroscope silent, the live GPS course is shown
+  //    (until 13: since 2026-11-05 the GPS carries the arrow only confirmed
+  //    by three fixes, with the gyroscope or without it).
   //    The Generic Sensor API (Gyroscope, Accelerometer) is read first and
   //    "devicemotion" fills in while it is silent. Android's ready-made
   //    orientation is not read: on this tablet it gives only zeros. No
@@ -4505,7 +4537,9 @@
   //    choose() takes the GPS course as north's offset too, so a slowdown,
   //    or the gyroscope, goes on from the last GPS course instead of an
   //    older guess (the arrow jumped from 259 to 15 deg at every slowdown
-  //    while the sensors were asleep); unsure does not change. (b) Chrome
+  //    while the sensors were asleep); unsure does not change (13 replaced
+  //    this on 2026-11-05: one fix no longer carries the arrow, three
+  //    confirming ones do). (b) Chrome
   //    delivers motion readings only to a page that is visible and
   //    focused: for 20 min the page was visible without focus, 229
   //    restarts of the watchdog did nothing, and a focus event brought the
@@ -4522,6 +4556,35 @@
   //    every row's t_s is the wall clock since the drive started, since
   //    performance.now() does not count the tablet's sleep (rows written
   //    at 13:59 carried 11:19).
+  // 13. Decided 2026-11-05 (app v0.34) after the car test of app v0.33 on
+  //    2026-11-05, an hour of screen recording and the sensor log, which
+  //    showed three faults of 12a: one noisy fix at 11.7 km/h among slow
+  //    ones turned the arrow by 110 deg (07:45) and left it about 80 deg
+  //    off for 4.5 minutes; the switch to a single fix's course and back
+  //    made the compass blink for a second, four times; and through a
+  //    U-turn (08:11) the raw course lagged the car, so the arrow pointed
+  //    backwards for 8 s. The GPS now carries a pale arrow only confirmed:
+  //    (a) the newest three fixes all have a course and a speed of MOVING
+  //    or more, each at most FRESH after the one before, and, with the
+  //    gyroscope working, the car drives straight (the test a check uses)
+  //    and their three offsets, course minus turn at each fix, lie within
+  //    AGREE_DEG of each other round the circle; with the gyroscope not
+  //    working, their three courses do. A fix that confirms sets north's
+  //    offset to the mean of the three offsets, averaged round the
+  //    circle; one that does not leaves it. (b) From the first confirming
+  //    fix the source is 'gps' (solid, as before) and the arrow is
+  //    turn + off, so the gyroscope turns it between fixes and through
+  //    turns; with the gyroscope not working the turn stands still and
+  //    the arrow is the last confirmed course. unsure does not change
+  //    (only a check makes the arrow trusted), north does not change.
+  //    (c) The source stays 'gps' until no fix has had a speed of ROLLING
+  //    (2 m/s, 7 km/h) or more for FRESH, or no fix has come for FRESH;
+  //    then it is 'stale' (pale) and goes on from off. (d) 'gyro' keeps
+  //    its priority over 'gps', and a confirming fix leaves a trusted
+  //    arrow's offset to the checks. (e) The log notes "gps confirms:
+  //    offsets within N" and "gps lets go: slow" (or "no fix"), once per
+  //    change. The checks, the drift, the focus handling and the line
+  //    beside the compass do not change.
 
   // ---- the compass maths. Angles in degrees; a heading runs clockwise
   // from north, 0 up to 360. Decided 2026-10-11 (data-model.md, Heading). ----
@@ -4557,6 +4620,11 @@
 
   var Compass = (function () {
     var MOVING = 3;             // m/s (11 km/h): the GPS course is trusted from here
+    var ROLLING = 2;            // m/s (7 km/h): a confirmed GPS lets go of the arrow once no fix this fast has come for FRESH (13c).
+                                // Below MOVING on purpose: a car slowing into an intersection reads 7 to 11 km/h for a few
+                                // fixes, and taking the arrow at MOVING and letting go below it switched it solid and pale
+                                // again at every fix (the compass blinked four times on 2026-11-05). The course itself is
+                                // not read below MOVING: while the GPS carries the arrow the gyroscope turns it
     var FRESH = 3000;           // ms: a fix older than this is not live
     var LIVE = 1000;            // ms: a sensor silent longer than this is paused
     var GYRO_MAX = 10 * 60000;  // ms: the turn is trusted this long after a GPS check
@@ -4595,14 +4663,16 @@
     var still = { blocks: [], cur: null, noteAt: 0 };   // noteAt: when the log last noted a shaky stand
     var motion = 'off', motionAt = 0, silentFrom = 0, apiObj = { g: null, a: null };   // silentFrom: the sensors' start, or the last focus (12c)
     var fix = null, watch = null, gps = 'off';
-    var fixes = [];             // the last GPS fixes with a course, for steady() (v19.7)
+    var fixes = [];             // the last GPS fixes with a course, for steady() (v19.7); with their speed and turn, for confirming() (13a)
     var notes = [];             // { at, course, turn } of the GPS fixes with a course of the last 14 s, for agree() (v0.25)
     // unsure starts true: the arrow is not trusted from the gyroscope until a
     // check, whether it starts from a saved course or from nothing. Before
     // 12a off stayed null until the first check, so the start value did not
-    // matter; now the GPS course fills off first (the spec review of 2026-11-03)
+    // matter; 12a let the GPS course fill off first (the spec review of
+    // 2026-11-03), and since 13 only three confirming fixes fill it
     var off = null, checkedAt = 0, hist = [], unsure = true, heading = null, from = null, pending = false;
-    var north = false;          // whether off ever came from a saved course or a check; a GPS course taken under 12a is neither
+    var north = false;          // whether off ever came from a saved course or a check; an offset the GPS set (one fix under 12a, three confirming fixes under 13) is neither
+    var held = false, fastAt = 0;   // 13: whether a confirmed GPS carries the arrow, and when the last fix at ROLLING or more came
     var everLive = false, paused = false, pausedAt = 0, lastRestart = 0;
     var focused = true, waiting = false;   // 12b: whether the page has the focus; whether the sensors wait for it (the log's event once per spell)
     var locDenied = false;                 // 12c: location refused, by the permission query or the watch's error 1
@@ -5117,11 +5187,12 @@
       gps = 'fix'; locDenied = false;
       if (fix.course === null) fixes = [];
       else {
-        fixes.push({ course: fix.course, at: t }); if (fixes.length > STEADY_FIXES) fixes.shift();
+        fixes.push({ course: fix.course, at: t, speed: fix.speed, turn: turn }); if (fixes.length > STEADY_FIXES) fixes.shift();
         // the note stays whatever the rules below say of this fix; a fix without a course clears none
         notes.push({ at: t, course: fix.course, turn: turn });
         while (notes.length && t - notes[0].at > AGREE_KEEP) notes.shift();
       }
+      if (fix.speed !== null && fix.speed >= ROLLING) fastAt = t;   // 13c: the hold counts from the last fix this fast
       if (fix.speed !== null && fix.speed >= MOVING) startKeeping('the car moved');
       startMotion('location allowed');
       // the rules of a check, in the order and with the effect of v0.27:
@@ -5132,7 +5203,17 @@
         if (agree(t)) note = check(t);
         else { var d = disagreement(t); note = d === null ? '' : 'no check: GPS and gyroscope disagree ' + d.toFixed(1); }
       }
+      // 13a: the newest three fixes confirm the GPS. North's offset becomes
+      // the mean of their offsets, averaged round the circle, unless a check
+      // made the arrow trusted, when the checks keep it (13d); the GPS holds
+      // the arrow from here (13b), the log's event once per hold
+      var spread = confirming(t), confirms = false;
+      if (spread !== null) {
+        if (!trusted(t)) off = meanAngle(fixes.map(function (f) { return f.course - f.turn; }));
+        if (!held) { held = true; confirms = true; }
+      }
       choose(t);
+      if (confirms) event('gps confirms: offsets within ' + spread.toFixed(1));
       row('gps', note, t);
     }
     function onFixError(err) {
@@ -5188,10 +5269,39 @@
       var d = disagreement(t);
       return d !== null && d <= AGREE_DEG;
     }
+    // confirming (13a): the newest three fixes all have a course and a speed
+    // of MOVING or more, each at most FRESH after the one before (fixes holds
+    // only such a run: a fix without a course clears it), and, with the
+    // gyroscope working, the car drives straight (the test a check uses) and
+    // the three offsets, course minus turn at each fix, lie within AGREE_DEG
+    // of each other round the circle; with the gyroscope not working, the
+    // three courses do. Answers with the spread it found, in degrees, or
+    // null when the newest fix does not confirm. A single fix, however fast,
+    // confirms nothing: on 2026-11-05 one noisy fix at 11.7 km/h among slow
+    // ones turned the arrow by 110 deg
+    function confirming(t) {
+      if (fixes.length < STEADY_FIXES) return null;
+      var i, j, gyro = gyroOk(t), vals = [], spread = 0;
+      for (i = 0; i < fixes.length; i++) {
+        if (fixes[i].speed === null || fixes[i].speed < MOVING) return null;
+        if (i > 0 && fixes[i].at - fixes[i - 1].at > FRESH) return null;
+        vals.push(gyro ? fixes[i].course - fixes[i].turn : fixes[i].course);
+      }
+      if (gyro && !straight(t)) return null;
+      for (i = 0; i < vals.length; i++) for (j = i + 1; j < vals.length; j++) spread = Math.max(spread, Math.abs(Heading.delta(vals[i], vals[j])));
+      return spread <= AGREE_DEG ? spread : null;
+    }
+    // the mean of headings round the circle, so that 359 and 1 give 0
+    function meanAngle(list) {
+      var x = 0, y = 0;
+      for (var i = 0; i < list.length; i++) { x += Math.sin(list[i] / RAD); y += Math.cos(list[i] / RAD); }
+      return Heading.norm(Math.atan2(x, y) * RAD);
+    }
     // a GPS check: move north toward the GPS course. It answers with the
     // log's note: the first check, or the gap it found. The first check
     // sets north whole, as in v0.31, when no saved course and no check
-    // came before: the GPS course taken under 12a fills off but is no
+    // came before: an offset the GPS set (one fix's course under 12a,
+    // the mean of three confirming fixes under 13) fills off but is no
     // north of its own, so the note stays "check first"
     function check(t) {
       var first = !north, gap = first ? null : Heading.delta(Heading.norm(turn + off), fix.course);
@@ -5200,12 +5310,21 @@
       checkedAt = t; unsure = false; north = true;
       return first ? 'check first' : 'check ' + gap.toFixed(1);
     }
+    // trusted: a check made the arrow trusted from the gyroscope less than
+    // GYRO_MAX ago, and the gyroscope works (the first choice below)
+    function trusted(t) { return off !== null && gyroOk(t) && !unsure && t - checkedAt < GYRO_MAX; }
     function choose(t) {
       var target = null;
-      if (off !== null && gyroOk(t) && !unsure && t - checkedAt < GYRO_MAX) { from = 'gyro'; target = turn + off; }
-      // 12a: the GPS course is north's offset too, so the 'stale' fallback and
-      // the gyroscope go on from the last GPS course; unsure does not change
-      else if (gpsLive(t)) { from = 'gps'; target = fix.course; off = fix.course - turn; }
+      // 13c: a confirmed GPS lets go once no fix at ROLLING or more has come
+      // for FRESH, or no fix at all; the log's event once per hold
+      if (held && (!fix || t - fix.at >= FRESH || t - fastAt >= FRESH)) { held = false; event('gps lets go: ' + (!fix || t - fix.at >= FRESH ? 'no fix' : 'slow')); }
+      if (trusted(t)) { from = 'gyro'; target = turn + off; }
+      // 13b: a confirmed GPS carries the arrow, solid, from the offset it set,
+      // so the gyroscope turns it between fixes and through a turn the GPS
+      // course lags, or it stands still while the gyroscope does not work;
+      // unsure does not change. 12a took one live fix here and showed its
+      // raw course, which 13 replaced on 2026-11-05
+      else if (held) { from = 'gps'; target = turn + off; }
       else if (off !== null) { from = 'stale'; target = turn + off; }
       else from = null;
       heading = target === null ? null : car.push(Heading.norm(target), t);
@@ -5305,7 +5424,7 @@
       window.removeEventListener('devicemotion', onMotion);
       motion = 'off';
       if (watch !== null) { try { navigator.geolocation.clearWatch(watch); } catch (err) { /* fine */ } }
-      watch = null; fix = null; fixes = []; notes = []; gps = 'off';
+      watch = null; fix = null; fixes = []; notes = []; gps = 'off'; held = false; fastAt = 0;
     }
     // saveLog, logLine and event serve the sensor log (v0.28, temporary)
     return { start: start, stop: stop, saveLog: saveLog, logLine: logLine, event: event };
