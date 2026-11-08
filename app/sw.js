@@ -43,9 +43,10 @@
    v0.33 2026-11-04 — plain words for the rest of the app: a new cache name for app v0.33.
    v0.34 2026-11-05 — compass step 5, the GPS takes the pale arrow only after three readings agree: a new cache name for app v0.34.
    v0.35 2026-11-06 — the compass line names the speed, and the blurred resting shadows go, with the test link ?shadow=1: a new cache name for app v0.35.
+   v0.36 2026-11-08 — the canon of U-turn, the type Free and the type Other team copied into the app's CSS, tokens and sprite, nothing built: a new cache name for app v0.36.
 */
 'use strict';
-var CACHE = 'poi-app-v0.35';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.36';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 
