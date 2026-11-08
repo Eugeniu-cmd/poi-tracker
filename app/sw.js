@@ -45,9 +45,11 @@
    v0.35 2026-11-06 — the compass line names the speed, and the blurred resting shadows go, with the test link ?shadow=1: a new cache name for app v0.35.
    v0.36 2026-11-08 — the canon of U-turn, the type Free and the type Other team copied into the app's CSS, tokens and sprite, nothing built: a new cache name for app v0.36.
    v0.37 2026-11-08 — U-turn, the type Free and the type Other team built, with the second sample city and the smaller four discs in landscape: a new cache name for app v0.37.
+   v0.38 2026-11-08 — U-turns for every new city, no switch: a new cache name for app v0.38.
+   v0.39 2026-11-08 — a Free POI's rings fill gold to the client's guide: a new cache name for app v0.39.
 */
 'use strict';
-var CACHE = 'poi-app-v0.37';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.39';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 

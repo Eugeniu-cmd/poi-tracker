@@ -9,18 +9,18 @@
   The look is the approved references, copied, not redrawn:
   - the app CSS of docs/references/main-screen.html v0.53, the History
     rules of docs/references/history.html v0.40 and the Settings rules
-    of docs/references/settings.html v0.39, byte for byte
+    of docs/references/settings.html v0.40, byte for byte
   - docs/references/_tokens.css v0.29, inlined
   - the Lucide sprite of main-screen.html, plus the plus sign and the
     back chevron of settings.html
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.78 and docs/data-model.md
-  v0.32, and much of it is the code of the working prototype v19.7; the
+  The behaviour follows docs/screens.md v0.79 and docs/data-model.md
+  v0.33, and much of it is the code of the working prototype v19.7; the
   compass is the code of prototype v19.8 plus the agreement rule of
   v0.25, the focus rules of v0.32 and the confirmed GPS of v0.34. The
-  look follows v0.78 through main-screen v0.53. Still to come: sending.
+  look follows v0.79 through main-screen v0.53. Still to come: sending.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -706,6 +706,49 @@
           v0.39 and _tokens.css v0.29. The APP ONLY piece gains one
           rule: the U-turn disc, in the app's markup always, is hidden
           outside a four-disc stage.
+  v0.38 2026-11-08 — U-turns for every new city, no switch (screens.md
+          v0.79 item 21, data-model.md v0.33 "Cities and routes",
+          settings.html v0.40; decided 2026-11-08). The user found no
+          U-turn on the tablet because the switch of v0.37 was off, and
+          decided that every city added from now on has U-turns, with no
+          switch, while the cities already on the tablet keep what they
+          have. The store: a city saved by "Add city" carries uturns
+          true, so its new POIs start as Free and its working screen
+          shows four discs; a city stored before keeps its value
+          exactly, false or true, and a city without the field reads as
+          false, as before; nothing changes stored data at a start. The
+          city page loses its heading and the "U-turns" row with its
+          refusal, and the code the switch ran goes with it (uturnHold,
+          uturnRow, setUturns and the tap on the row). The Settings
+          rules are settings.html v0.40's: the rule that faded a dimmed
+          row's switch goes, since no dimmed row holds a switch now;
+          frames K and L are gone there and frames A, B, C, H and I draw
+          the city page without the row. The sample cities do not
+          change: the Sample city without U-turns, the Sample U-turn
+          city with them. The canon stays main-screen.html v0.53,
+          history.html v0.40 and _tokens.css v0.29. The store's layout,
+          the queue, the types, the compass and the sending do not
+          change. The APP ONLY piece stays.
+  v0.39 2026-11-08 — a Free POI's rings fill gold to the client's guide
+          (screens.md v0.80 item 39, data-model.md v0.34 "Targets per
+          POI", main-screen.html v0.54 frames X, Z and AB; decided
+          2026-11-08 on mock-ups drawn on the real app). The user found
+          the gold missing from a Free POI's plain rings and chose that
+          each ring fills to the client's guide for its maneuver, 40, 15,
+          40 and 5 percent of 70: Left 28, Straight 11, Right 28, U-turn
+          3, held once on the Free type in TYPES as guide. The part
+          filled is the passes of the maneuver over its guide, at most
+          full; the number inside stays the passes driven and the
+          heading PASSES. At and past the guide the ring is full gold
+          with no "Done", no "more" and no "over", in neither the done
+          nor the warning colour, since passes past a guide are not wrong
+          on a Free POI. The guide is a hint: the counter, the discs and
+          every lock stay as before, done at 70 and to fix past 70. The
+          other seven types' rings, the rose, the store, the queue and
+          the sending do not change. The canon does not change:
+          main-screen.html v0.54 keeps v0.53's shell, and history.html
+          v0.40, settings.html v0.40 and _tokens.css v0.29 stay. The APP
+          ONLY piece stays.
 -->
 <html lang="en">
 <head>
@@ -2251,9 +2294,6 @@
   .srow.add .ol b { font-size: var(--t-body); }
   .srow.danger .ol b { color: var(--err); }
   .srow.off .ol b { opacity: var(--o-off); }
-  /* a dimmed row's switch fades with its label, its line staying legible
-     (the "U-turns" switch, items 21, 26, 27, v0.38) */
-  .srow.off .switch { opacity: var(--o-off); }
   .srow .go { width: 1em; height: 1em; flex: none; font-size: var(--t-label); color: var(--ink-2); }
   .srow .plus { width: var(--s-5); height: var(--s-5); flex: none; color: var(--ink); }
   .inuse { flex: none; display: inline-flex; align-items: center; gap: var(--s-1);
@@ -2487,7 +2527,7 @@
   'use strict';
 
   // ================= constants (screens.md items 39, 46, 60; data-model.md) =================
-  var APP_VERSION = 'v0.37';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
+  var APP_VERSION = 'v0.39';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
   var KEY = 'poi-app:store';         // the whole store, one key, one setItem per change
   var HEADING_KEY = 'poi-app:heading';   // the compass's last course, { deg, at }, written every 2 s (data-model.md "Tablet storage")
   var DRIFT_KEY = 'poi-app:drift';       // the gyroscope's last good drift, { b: [x, y, z], at }, written when a drift is measured
@@ -2504,8 +2544,11 @@
   // like Not drivable, only on a POI with no passes. None of the six
   // types allows U-turn: U is missing from their splits. line is the
   // second line of the pill and the menu for a type with no split.
+  // guide (v0.39) is the client's guide for a Free POI, 40, 15, 40 and
+  // 5 percent of 70: Left 28, Straight 11, Right 28, U-turn 3. A hint
+  // only: the card's rings fill to it (renderCard), nothing locks before 70.
   var TYPES = {
-    free: { label: 'Free',          target: 70, split: { L: 70, St: 70, R: 70, U: 70 }, free: true, line: '70 passes · no limits' },
+    free: { label: 'Free',          target: 70, split: { L: 70, St: 70, R: 70, U: 70 }, free: true, line: '70 passes · no limits', guide: { L: 28, St: 11, R: 28, U: 3 } },
     int:  { label: 'Intersection',  target: 70, split: { L: 28, St: 14, R: 28 } },
     nost: { label: 'No straight',   target: 70, split: { L: 35, St: 0, R: 35 }, cap: 'No straight at this POI' },
     nol:  { label: 'No left',       target: 70, split: { L: 0, St: 14, R: 56 }, cap: 'No left turn at this POI' },
@@ -2759,8 +2802,9 @@
     return { fit: fit, fix: fix, toGo: Math.max(0, T.target - fit) };
   }
   // whether a route's city is a U-turn city (data-model.md "Cities and
-  // routes"): its uturns, false when missing, as on every city stored
-  // before the field existed
+  // routes"): its uturns, true on every city added from v0.38 (saveCity),
+  // kept as stored on a city from before, and false when missing, as on
+  // every city stored before the field existed
   function uturnsOf(rid) {
     var c = cityOfRoute(rid);
     return !!(c && c.uturns);
@@ -3271,8 +3315,9 @@
   // In a U-turn city (item 39, frames X, Y, AA) the rings form a diamond
   // (.two.four): Left, Straight and Right as in the pyramid and U-turn
   // under Straight (.mz.u). On a Free POI the heading reads "PASSES" and
-  // each ring shows the count driven, a plain ring with no fill and no
-  // "more", since Free has no shares.
+  // each ring shows the count driven and fills gold to the client's guide
+  // for its maneuver (TYPES.free.guide, v0.39), at most full, with no
+  // "more", no "Done" and no "over": the guide is a hint, nothing locks.
   function renderCard() {
     var r = route(), n = r ? active() : 0, four = r ? uturnsOf(r.id) : false;
     var k = r ? counts(r.id, n) : counts(null, 0), T = r ? TYPES[typeOf(r.id, n)] : null;
@@ -3287,7 +3332,7 @@
       // item 39: a maneuver the type does not allow fades with a dash on an
       // empty track while it has no passes; with passes it reads "+26 over"
       // below, like a count past a share (frames S and T)
-      if (T && T.free) { val = '<b class="rv">' + have + '</b>'; fill = 0; }
+      if (T && T.free) { val = '<b class="rv">' + have + '</b>'; fill = Math.round(Math.min(Math.max(have, 0), T.guide[m]) / T.guide[m] * 100); }
       else if (!share && !(have > 0)) { cls += ' off'; val = '<b class="rv">—</b>'; fill = 0; }
       else if (have < share) { val = '<b class="rv">' + (share - have) + '</b><small>more</small>'; fill = Math.round(Math.max(have, 0) / share * 100); }
       else if (have === share) { cls += ' ok'; val = '<b class="dn">Done</b>'; fill = 100; }
@@ -3516,41 +3561,11 @@
         : '<button class="usebtn" type="button" data-act="use-city" data-cid="' + esc(c.id) + '">Use this city</button>') + '</div>' +
       (inUse ? '' : '<p class="shint">' + esc(useLine(c)) + '</p>') +
       '<div class="sgh">CONNECTION</div><div class="sgroup">' + conn + '</div>' +
-      '<div class="sgh">MANEUVERS</div><div class="sgroup">' + uturnRow(c) + '</div>' +
       '<div class="sgh">ROUTES</div><div class="sgroup">' + rows +
       '<button class="srow add" type="button" data-act="add-route" data-cid="' + esc(c.id) + '">' + icon('i-plus', 'plus') + '<span class="ol"><b>Add route</b></span></button></div>' +
       '<div class="sgap"></div><div class="sgroup">' + (inUse
         ? '<div class="srow danger off"><span class="ol"><b>Delete city</b><small>You can’t delete the city in use. Switch to another city first.</small></span></div>'
         : '<button class="srow danger" type="button" data-act="delete-city" data-cid="' + esc(c.id) + '"><span class="ol"><b>Delete city</b><small>' + esc(c.name) + ' will be removed from this tablet only. Other tablets and the sheet won’t change.</small></span>' + icon('i-chev-right', 'go') + '</button>') + '</div>';
-  }
-  // the POIs of a city that keep its "U-turns" switch on (item 21,
-  // data-model.md "Cities and routes"): a POI stored as Free, a POI that
-  // reads Free and has passes, or a POI that holds U-turn passes on this
-  // tablet, in the baseline or in a waiting event. A POI Free by the
-  // city's default alone, with no passes, does not count: the switch
-  // turned off makes it an Intersection again with nothing to re-read.
-  function uturnHold(c) {
-    var n = 0, I = ix();
-    c.routes.forEach(function (r) {
-      var ty = S.types[r.id] || {}, w = I.w[r.id] || {};
-      for (var p = 1; p <= r.poiCount; p++) {
-        var k = counts(r.id, p), d = w[p];
-        var free = ty[p] === 'free' || (typeOf(r.id, p) === 'free' && (k.total > 0 || k.mt > 0));
-        if (free || k.m.U > 0 || (d && d[7] !== 0)) n += 1;
-      }
-    });
-    return n;
-  }
-  // the "U-turns" row of a city's page (item 21, frames K and L): the
-  // switch of the Sound row with the line on what On means; while a POI
-  // keeps it on the row is dimmed with the reason and the switch takes no
-  // tap (items 26, 27)
-  function uturnRow(c) {
-    var on = !!c.uturns, held = on ? uturnHold(c) : 0;
-    var line = held ? 'Can’t turn off: ' + plural(held, 'POI is', 'POIs are') + ' Free or ' + (held === 1 ? 'has' : 'have') + ' U-turns.'
-      : 'On: this city’s sheet has a U-turn column. New POIs start as Free.';
-    return '<div class="srow' + (held ? ' off' : '') + '" data-uturns="' + esc(c.id) + '"><span class="ol"><b>U-turns</b><small>' + esc(line) + '</small></span>' +
-      '<span class="switch" role="switch" aria-checked="' + (on ? 'true' : 'false') + '"' + (held ? ' aria-disabled="true"' : '') + ' aria-label="U-turns"></span></div>';
   }
   // a field (items 22, 25, 75; frames D, E, F, G, J): its label, its box
   // with a real input (type, the keyboard's mode, and after it the Show
@@ -4105,30 +4120,6 @@
     change(function () { S.device.sound = !!on; }, 'change');
     render();
   }
-  // the "U-turns" switch of a city (item 21, data-model.md "Cities and
-  // routes"): one write; refused, with nothing changed, while a POI of
-  // the city keeps it on (uturnHold). Turning it on changes no POI that
-  // already has a type: a POI with passes and no stored type keeps the
-  // type it reads as, Intersection, stored now, so only POIs without
-  // passes start as Free and the switch can go off again without a
-  // re-reading of any pass.
-  function setUturns(cid, on) {
-    var c = cityById(cid);
-    if (!c || !!c.uturns === !!on) return;
-    if (!on && uturnHold(c)) return;
-    change(function () {
-      if (on) c.routes.forEach(function (r) {
-        var ty = S.types[r.id] || {};
-        for (var p = 1; p <= r.poiCount; p++) {
-          if (ty[p] && TYPES[ty[p]]) continue;
-          var k = counts(r.id, p);
-          if ((k.total > 0 || k.mt > 0) && defaultType(baseTarget(r.id, p), false) === 'int') { ty[p] = 'int'; S.types[r.id] = ty; }
-        }
-      });
-      c.uturns = !!on;
-    }, 'change');
-    render();
-  }
   // item 18: "Delete all data on this tablet" asks first with the dialog
   // of item 63 (settings.html frame H). The number is the waiting pass
   // events of every city; removals and type changes are not passes.
@@ -4281,10 +4272,13 @@
   }
   // "Add city" saved (item 75): the city with no connection, in one write;
   // the first city on a tablet with none becomes the city in use, a later
-  // one does not; its page opens in place of the form
+  // one does not; its page opens in place of the form. Every city added
+  // from v0.38 on has U-turns, uturns true with no switch (item 21,
+  // data-model.md "Cities and routes"): its tracker has a U-turn column,
+  // so its new POIs start as Free; a city stored before keeps its value
   function saveCity(v) {
     var c = { id: uuid(), name: v.name, sample: false, mailboxUrl: null, token: null, routes: [], lastRoute: null,
-              testedAt: null, testResult: null, sentAt: null, keyRejected: false, uturns: false };
+              testedAt: null, testResult: null, sentAt: null, keyRejected: false, uturns: true };
     var first = S.cities.length === 0;
     if (change(function () { S.cities.push(c); if (first) S.device.cityId = c.id; }, 'change')) { popPage(); pushPage({ page: 'city', cityId: c.id }); }
     render();
@@ -4693,9 +4687,6 @@
     if (row && !blocked) { if (dl && dl.d.sw) { dl.d.sw.on = !dl.d.sw.on; render(); } return; }
     // item 65: a tap on the Sound row of Settings flips its switch
     if (e.target.closest('.srow[data-sound]') && !blocked) { setSound(!S.device.sound); return; }
-    // item 21: a tap on a city's "U-turns" row flips its switch, unless the row is dimmed
-    var ur = e.target.closest('.srow[data-uturns]');
-    if (ur && !blocked) { var uc = cityById(ur.getAttribute('data-uturns')); if (uc) setUturns(uc.id, !uc.uturns); return; }
     var t = e.target.closest('button');
     if (!t || !app.contains(t) || blocked) return;
     var a = t.getAttribute('data-act');
