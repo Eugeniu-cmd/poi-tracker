@@ -47,9 +47,10 @@
    v0.37 2026-11-08 — U-turn, the type Free and the type Other team built, with the second sample city and the smaller four discs in landscape: a new cache name for app v0.37.
    v0.38 2026-11-08 — U-turns for every new city, no switch: a new cache name for app v0.38.
    v0.39 2026-11-08 — a Free POI's rings fill gold to the client's guide: a new cache name for app v0.39.
+   v0.40 2026-11-09 — U-turn on the types of a U-turn city, the client's integer targets per POI: a new cache name for app v0.40.
 */
 'use strict';
-var CACHE = 'poi-app-v0.39';   // a new name per version; the old caches are deleted
+var CACHE = 'poi-app-v0.40';   // a new name per version; the old caches are deleted
 var FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-512.png'];
 var WAIT = 3000;              // ms the network has before the cached page is shown
 

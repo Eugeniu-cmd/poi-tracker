@@ -7,20 +7,20 @@
   network: the service worker keeps these files on the tablet.
 
   The look is the approved references, copied, not redrawn:
-  - the app CSS of docs/references/main-screen.html v0.53, the History
-    rules of docs/references/history.html v0.40 and the Settings rules
-    of docs/references/settings.html v0.40, byte for byte
+  - the app CSS of docs/references/main-screen.html v0.55, the History
+    rules of docs/references/history.html v0.41 and the Settings rules
+    of docs/references/settings.html v0.41, byte for byte
   - docs/references/_tokens.css v0.29, inlined
   - the Lucide sprite of main-screen.html, plus the plus sign and the
     back chevron of settings.html
   - Manrope 600, 700 and 800, latin, inlined below as WOFF2 (SIL Open
     Font License 1.1, from the @fontsource/manrope package), so no font
     is fetched from the web
-  The behaviour follows docs/screens.md v0.79 and docs/data-model.md
-  v0.33, and much of it is the code of the working prototype v19.7; the
+  The behaviour follows docs/screens.md v0.81 and docs/data-model.md
+  v0.35, and much of it is the code of the working prototype v19.7; the
   compass is the code of prototype v19.8 plus the agreement rule of
   v0.25, the focus rules of v0.32 and the confirmed GPS of v0.34. The
-  look follows v0.79 through main-screen v0.53. Still to come: sending.
+  look follows v0.81 through main-screen v0.55. Still to come: sending.
 
   v0.1 2026-10-19 — chapter 6 step 2, a build that sends nothing: the
           working screen, the store on the tablet (one key written in one
@@ -749,6 +749,43 @@
           main-screen.html v0.54 keeps v0.53's shell, and history.html
           v0.40, settings.html v0.40 and _tokens.css v0.29 stay. The APP
           ONLY piece stays.
+  v0.40 2026-11-09 — U-turn on the types of a U-turn city (screens.md
+          v0.81 items 5, 39, 46, 60 and 64, data-model.md v0.35 "Targets
+          per POI" and "Cities and routes", main-screen.html v0.55 frames
+          X, Y, Z and AB; decided 2026-11-09: the user found it confusing
+          that only Free allowed U-turn). In a U-turn city the typed
+          POIs take the client's integer targets with U-turn, held once
+          in U_SPLIT and read through spec() and typeAt() by every
+          reader of a type's numbers (fitFix, statusOf, the locks and
+          captions of the discs, the card's rings, the tile, the split
+          line of the pill and the menu, the dialog's sentences, Free's
+          guide): Intersection 28 · 11 · 28 · 3 on an odd POI and
+          28 · 10 · 28 · 4 on an even one, the client's numbers, which
+          alternate by POI number; No straight 33 · 33 · 4, No left
+          17 · 47 · 6 and No right 47 · 17 · 6 on every POI; Straight
+          only, Not drivable and Other team as before, without U-turn;
+          Free at 70 with no locks, its guide Intersection's numbers for
+          the POI. A city without U-turns reads TYPES itself, today's
+          values. The menu lists Free last (TYPE_ORDER_U). A target of 70
+          reads as Intersection in every city (defaultType), so new POIs
+          of a U-turn city start as Intersection, and the sample stores
+          Free where it means Free; a stored Free in a city without
+          U-turns reads as the sheet's target does (typeOf). One-time
+          keep-Free (keepFree): the first time this version reads a
+          U-turn city without the mark keptFree, every POI of it with
+          passes and no stored type stores Free, since it was driven as
+          Free, an untouched POI starts as Intersection, and the city
+          takes the mark; a city saved by "Add city" and the seeded
+          Sample U-turn city carry the mark from the start, so it never
+          runs on them. The targets do not change, so no type change
+          among the four types at 70 and Free sends a target event. The
+          canon copied whole from main-screen.html v0.55, history.html
+          v0.41, settings.html v0.41 and _tokens.css v0.29: two shell
+          rules, the pill's split never wraps and a four-place pill
+          drops the word "Change type" below a left group of 480px,
+          where four numbers wrapped under the word. The store's layout
+          gains the city field keptFree; the queue, the compass and the
+          sending do not change. The APP ONLY piece stays.
 -->
 <html lang="en">
 <head>
@@ -1655,7 +1692,7 @@
      baseline (item 60). The pill and the menu show no passes (v0.36). The
      menu keeps its grey split. The split's arrows are gold, --card-glyph, as
      the icons on the card (v0.41). */
-  .tl small { align-items: baseline; }
+  .tl small { align-items: baseline; flex-wrap: nowrap; }
   .tl small .tn { font-size: var(--t-label); font-weight: var(--w-heavy); color: var(--ink);
                   line-height: var(--lh-tight); }
   .tl small .ic { color: var(--card-glyph); }
@@ -2064,6 +2101,14 @@
   @container info (max-width: 400px) {
     .card { --pad: var(--s-3); }
     .tchg span { display: none; }
+  }
+  /* a four-place pill (item 60, v0.55): its split of four numbers is 182px
+     of ink and never wraps (.tl small above), so below a left group of
+     480px the word goes and the chevron stands alone, as on every pill
+     below 400px; at 1000 × 600 and 720 × 1000 the four-disc layouts give
+     the group 446 to 464px, where the word would wrap the split */
+  @container info (max-width: 480px) {
+    .typebtn:has(.ticon.four) .tchg span { display: none; }
   }
   /* ---- the compact step (item 70): on a short screen display text shrinks
      and the mini-map becomes a one-line grid button; discs, the compass and
@@ -2527,7 +2572,7 @@
   'use strict';
 
   // ================= constants (screens.md items 39, 46, 60; data-model.md) =================
-  var APP_VERSION = 'v0.39';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
+  var APP_VERSION = 'v0.40';         // item 72: shown on the "This tablet" title line; the header's latest entry and sw.js's cache name agree with it, a test checks
   var KEY = 'poi-app:store';         // the whole store, one key, one setItem per change
   var HEADING_KEY = 'poi-app:heading';   // the compass's last course, { deg, at }, written every 2 s (data-model.md "Tablet storage")
   var DRIFT_KEY = 'poi-app:drift';       // the gyroscope's last good drift, { b: [x, y, z], at }, written when a drift is measured
@@ -2541,12 +2586,14 @@
   // passes over all four maneuvers with no share, only in a U-turn city;
   // its split marks every maneuver allowed and fitFix() counts its total.
   // Other team (v0.37): another team drives the POI, target 0, locked
-  // like Not drivable, only on a POI with no passes. None of the six
-  // types allows U-turn: U is missing from their splits. line is the
-  // second line of the pill and the menu for a type with no split.
-  // guide (v0.39) is the client's guide for a Free POI, 40, 15, 40 and
-  // 5 percent of 70: Left 28, Straight 11, Right 28, U-turn 3. A hint
-  // only: the card's rings fill to it (renderCard), nothing locks before 70.
+  // like Not drivable, only on a POI with no passes. These are the values
+  // of a city without U-turns, where none of the six types allows U-turn:
+  // U is missing from their splits. line is the second line of the pill
+  // and the menu for a type with no split. guide (v0.39) is the client's
+  // guide for a Free POI, 40, 15, 40 and 5 percent of 70: Left 28,
+  // Straight 11, Right 28, U-turn 3. A hint only: the card's rings fill
+  // to it (renderCard), nothing locks before 70. In a U-turn city the
+  // typed POIs take U_SPLIT below instead (spec()).
   var TYPES = {
     free: { label: 'Free',          target: 70, split: { L: 70, St: 70, R: 70, U: 70 }, free: true, line: '70 passes · no limits', guide: { L: 28, St: 11, R: 28, U: 3 } },
     int:  { label: 'Intersection',  target: 70, split: { L: 28, St: 14, R: 28 } },
@@ -2557,11 +2604,42 @@
     nd:   { label: 'Not drivable',  target: 0,  split: { L: 0, St: 0, R: 0 }, line: 'Not counted' },
     team: { label: 'Other team',    target: 0,  split: { L: 0, St: 0, R: 0 }, line: 'Another team drives it' }
   };
+  // In a U-turn city (item 46, data-model.md "Targets per POI", decided
+  // 2026-11-09: the user found it confusing that only Free allowed U-turn)
+  // the typed POIs take the client's integer targets with U-turn, held
+  // here once and read through spec(): Intersection at the client's
+  // numbers, which alternate by POI number, odd 28 · 11 · 28 · 3, even
+  // 28 · 10 · 28 · 4; No straight, No left and No right at the client's
+  // mix, Right 40, Left 40, Straight 15 and U-turn 5 percent, shared over
+  // the maneuvers left and rounded by the largest remainder, the same on
+  // every POI. Free's guide is Intersection's numbers for the POI.
+  // Straight only, Not drivable, Other team and every target stay as in
+  // TYPES, so no change among the types at 70 sends a target event.
+  var U_SPLIT = {
+    odd:  { int: { L: 28, St: 11, R: 28, U: 3 } },
+    even: { int: { L: 28, St: 10, R: 28, U: 4 } },
+    any:  { nost: { L: 33, St: 0, R: 33, U: 4 }, nol: { L: 0, St: 17, R: 47, U: 6 }, nor: { L: 47, St: 17, R: 0, U: 6 } }
+  };
+  // the eight types' records in a U-turn city, per parity of the POI
+  // number: copies of TYPES with the splits of U_SPLIT and Free's guide
+  function withSplits(parity) {
+    var out = {};
+    Object.keys(TYPES).forEach(function (t) {
+      var T = {}, k;
+      for (k in TYPES[t]) T[k] = TYPES[t][k];
+      if (U_SPLIT[parity][t]) T.split = U_SPLIT[parity][t];
+      else if (U_SPLIT.any[t]) T.split = U_SPLIT.any[t];
+      if (t === 'free') T.guide = U_SPLIT[parity].int;
+      out[t] = T;
+    });
+    return out;
+  }
+  var TYPES_U = { odd: withSplits('odd'), even: withSplits('even') };
   // item 60: the menu's order, the six types then Other team; in a U-turn
-  // city Free first
+  // city Free last (decided 2026-11-09)
   var TYPE_ORDER = ['int', 'nost', 'nol', 'nor', 'str', 'nd', 'team'];
-  var TYPE_ORDER_U = ['free'].concat(TYPE_ORDER);
-  var BY_TARGET = { 70: 'int', 40: 'str', 0: 'nd' };   // the type a sheet target reads as; in a U-turn city 70 reads as Free (defaultType)
+  var TYPE_ORDER_U = TYPE_ORDER.concat(['free']);
+  var BY_TARGET = { 70: 'int', 40: 'str', 0: 'nd' };   // the type a sheet target reads as, in every city (defaultType)
   var MANS = ['L', 'St', 'R', 'U'];                   // every maneuver, for the arithmetic; mansOf() gives a city's own
   var MANS_THREE = MANS.slice(0, 3);
   var MAN_NAME = { L: 'Left', St: 'Straight', R: 'Right', U: 'U-turn' };
@@ -2811,19 +2889,30 @@
   }
   // the maneuvers a route's city drives: four in a U-turn city, else three
   function mansOf(rid) { return uturnsOf(rid) ? MANS : MANS_THREE; }
-  // the type a sheet target reads as (data-model.md "Targets per POI"): 70
-  // Intersection, in a U-turn city Free; 40 Straight only; 0 Not drivable;
-  // any other target as 70
-  function defaultType(target, uturns) {
-    var t = BY_TARGET[target] || 'int';
-    return t === 'int' && uturns ? 'free' : t;
-  }
-  // The stored type, else the type the sheet's target reads as
+  // the type a sheet target reads as, in every city (data-model.md "Targets
+  // per POI"; since v0.40 a target of 70 reads as Intersection in a U-turn
+  // city too, no longer as Free, decided 2026-11-09): 70 Intersection, 40
+  // Straight only, 0 Not drivable, any other target as 70
+  function defaultType(target) { return BY_TARGET[target] || 'int'; }
+  // The stored type, else the type the sheet's target reads as. A stored
+  // Free counts only in a U-turn city, the one place the type exists (item
+  // 46): elsewhere it reads as the sheet's target does.
   function typeOf(rid, n) {
     var t = S.types[rid] && S.types[rid][n];
-    if (t && TYPES[t]) return t;
-    return defaultType(baseTarget(rid, n), uturnsOf(rid));
+    if (t && TYPES[t] && !(t === 'free' && !uturnsOf(rid))) return t;
+    return defaultType(baseTarget(rid, n));
   }
+  // The numbers of type t at POI n of route rid (item 46, data-model.md
+  // "Targets per POI", v0.40): the type's record with its split and, on
+  // Free, its guide for that POI. In a U-turn city they are TYPES_U's by
+  // the parity of the POI number; elsewhere TYPES itself, today's values.
+  // Every reader of a type's numbers goes through here or typeAt().
+  function spec(t, rid, n) {
+    if (!uturnsOf(rid)) return TYPES[t];
+    return TYPES_U[n % 2 ? 'odd' : 'even'][t];
+  }
+  // the POI's own type with its numbers
+  function typeAt(rid, n) { return spec(typeOf(rid, n), rid, n); }
   // 'err' first, on a not-drivable POI too, since a sheet error is never
   // hidden (item 46); 'nd' on a Not drivable POI and 'team' on an Other
   // team POI, both locked at once; 'done' only when every ring is closed
@@ -2831,7 +2920,7 @@
   // still to fix, 'part' while a ring still asks, with or without passes
   // to fix (decision D1)
   function statusOf(rid, n, k) {
-    var type = typeOf(rid, n), T = TYPES[type];
+    var type = typeOf(rid, n), T = spec(type, rid, n);
     k = k || counts(rid, n);
     if (k.err) return 'err';
     if (!T.target) return type === 'team' ? 'team' : 'nd';
@@ -2879,7 +2968,7 @@
   function routeTotals(r) {
     var done = 0, togo = 0, poisDone = 0, errs = 0, drivable = 0, toFix = 0;
     for (var n = 1; n <= r.poiCount; n++) {
-      var T = TYPES[typeOf(r.id, n)], k = counts(r.id, n);
+      var T = typeAt(r.id, n), k = counts(r.id, n);
       // item 46: a not-drivable POI with passes is a POI with passes to fix;
       // it stays out of drivable, done and to go, and its sheet error counts
       // as any other POI's
@@ -2915,7 +3004,7 @@
   // which disc locks. The caption under the discs is captionOf's, and a
   // maneuver's own reason carries its rank there
   function lockOf(rid, n, man, k) {
-    var type = typeOf(rid, n), T = TYPES[type];
+    var type = typeOf(rid, n), T = spec(type, rid, n);
     k = k || counts(rid, n);
     var st = statusOf(rid, n, k);
     if (st === 'nd') return { cls: 'info', text: 'This POI is not drivable', all: true };
@@ -2942,7 +3031,7 @@
   // and Straight before Right. The class follows the reason (err, fix, ok,
   // info). The locks are lockOf's and do not change with the caption.
   function captionOf(rid, n, k) {
-    var type = typeOf(rid, n), T = TYPES[type];
+    var type = typeOf(rid, n), T = spec(type, rid, n);
     k = k || counts(rid, n);
     if (k.err) return { cls: 'err', text: 'Sheet error: sides and maneuvers don’t match' };
     var f = fitFix(k, T);
@@ -2972,6 +3061,33 @@
     var c = countsOf(base(rid, n)), I = ix(), i;
     for (i = 0; i < 8; i++) if (c[i] > 0) return false;
     return !S.events.some(function (e) { return e.routeId === rid && e.poi === n && counting(e, I); });
+  }
+  // One-time keep-Free (v0.40, data-model.md "Targets per POI", decided
+  // 2026-11-09): until v0.39 a POI of a U-turn city with no stored type was
+  // Free and was driven that way; since v0.40 it is an Intersection, with
+  // numbers of its own. So the first time this version reads a U-turn city
+  // without the mark keptFree, every POI of it with passes (not untouched)
+  // and no stored type stores Free, so no POI's numbers change by
+  // surprise; a POI with no passes starts as Intersection; the city takes
+  // the mark, so this never runs on it again, and a type the user sets
+  // afterwards stays. A city saved by "Add city" and the Sample U-turn city
+  // carry the mark from the start (saveCity, seedSample); a city without
+  // U-turns never had Free and is left as it is. One write for all cities.
+  function keepFree() {
+    var todo = S.cities.filter(function (c) { return c.uturns && !c.keptFree; });
+    if (!todo.length) return;
+    change(function () {
+      todo.forEach(function (c) {
+        c.routes.forEach(function (r) {
+          for (var n = 1; n <= r.poiCount; n++) {
+            var t = S.types[r.id] && S.types[r.id][n];
+            if ((t && TYPES[t]) || untouched(r.id, n)) continue;
+            (S.types[r.id] || (S.types[r.id] = {}))[n] = 'free';
+          }
+        });
+        c.keptFree = true;
+      });
+    }, 'change');
   }
   // Undo last (item 9): the most recent pass of the POI, by seq, that counts
   // and carries no removal at all
@@ -3179,7 +3295,7 @@
     }
     var N = r.poiCount, act = active(), tot = routeTotals(r), dots = [], rows = [];
     for (var n = 1; n <= N; n++) {
-      var k = counts(r.id, n), st = statusOf(r.id, n, k), T = TYPES[typeOf(r.id, n)], f = fitFix(k, T);
+      var k = counts(r.id, n), st = statusOf(r.id, n, k), T = typeAt(r.id, n), f = fitFix(k, T);
       // the dots have no colour for passes to fix: the part colour (item 58)
       dots.push(n === act ? 'act' : st === 'fix' ? 'part' : st);
       // item 40: a row with passes to fix carries a warning triangle before
@@ -3251,7 +3367,7 @@
   function renderHead() {
     var r = route();
     if (!r) { setHTML($('head'), '<div class="big dash">—</div><div class="hcol"><div class="plabel">POI</div></div>'); return; }
-    var n = active(), k = counts(r.id, n), type = typeOf(r.id, n), T = TYPES[type], st = statusOf(r.id, n, k), f = fitFix(k, T);
+    var n = active(), k = counts(r.id, n), type = typeOf(r.id, n), T = spec(type, r.id, n), st = statusOf(r.id, n, k), f = fitFix(k, T);
     // item 4: the counter counts the passes that fit, and reads "Not
     // drivable" on a not-drivable POI and "Other team" on an Other team
     // POI, with "Another team drives it" under it; passes that do not fit
@@ -3273,16 +3389,20 @@
   // the type's tile (item 60): on the Not drivable and the Other team pill
   // the button carries the class nd (frames G, AA), in the menu the tile
   // does (frames H, Z); in a U-turn city the tile has four places (four),
-  // each maneuver in its own, the U-turn place filled by Free alone
-  function ticon(type, inPill, four) {
+  // each maneuver in its own, the U-turn place filled where the type's
+  // split sp, the POI's own (spec), allows U-turn: Free and, since v0.40,
+  // Intersection, No straight, No left and No right
+  function ticon(type, sp, inPill, four) {
     var cls = 'ticon' + (four ? ' four' : '');
     if (type === 'nd' || type === 'team') return '<span class="' + cls + (inPill ? '' : ' nd') + '"><svg class="sb"><use href="#' + (type === 'team' ? 'i-users' : 'i-ban') + '"/></svg></span>';
-    var sp = TYPES[type].split, h = '<span class="' + cls + '">';
+    var h = '<span class="' + cls + '">';
     MANS.forEach(function (m) { if (sp[m]) h += '<svg class="' + SLOT[m] + '"><use href="#' + MAN_ICON[m] + '"/></svg>'; });
     return h + '</span>';
   }
-  function splitLine(type, inPill) {
-    var T = TYPES[type];
+  // the second line of the pill and of a menu row: the split of T, the
+  // type's record with the POI's own numbers (spec), with the U-turn icon
+  // and number where the type allows U-turn (frames Y, Z)
+  function splitLine(T, inPill) {
     if (T.line) return T.line;   // Free, Not drivable and Other team have no split (items 46, 60)
     var parts = MANS.filter(function (m) { return T.split[m]; });
     // the pill's numbers are in ink (.tn, item 60), the menu keeps its grey split
@@ -3299,10 +3419,10 @@
       setHTML(b, '<span class="ticon nd"></span><span class="tl"><b>No POI</b></span><span class="tchg"><span>Change type</span>' + icon('i-chev-down') + '</span>');
       return;
     }
-    var type = typeOf(r.id, active());
+    var n = active(), type = typeOf(r.id, n), T = spec(type, r.id, n);
     b.className = 'typebtn' + (type === 'nd' || type === 'team' ? ' nd' : '');
     b.setAttribute('aria-label', 'POI type, tap to ' + (open ? 'close' : 'change'));
-    setHTML(b, ticon(type, true, uturnsOf(r.id)) + '<span class="tl"><b>' + TYPES[type].label + '</b><small>' + splitLine(type, true) +
+    setHTML(b, ticon(type, T.split, true, uturnsOf(r.id)) + '<span class="tl"><b>' + T.label + '</b><small>' + splitLine(T, true) +
       '</small></span><span class="tchg"><span>Change type</span>' + icon(open ? 'i-chev-up' : 'i-chev-down') + '</span>');
   }
 
@@ -3316,11 +3436,12 @@
   // (.two.four): Left, Straight and Right as in the pyramid and U-turn
   // under Straight (.mz.u). On a Free POI the heading reads "PASSES" and
   // each ring shows the count driven and fills gold to the client's guide
-  // for its maneuver (TYPES.free.guide, v0.39), at most full, with no
-  // "more", no "Done" and no "over": the guide is a hint, nothing locks.
+  // for its maneuver (T.guide, v0.39; since v0.40 Intersection's numbers
+  // for the POI, spec), at most full, with no "more", no "Done" and no
+  // "over": the guide is a hint, nothing locks.
   function renderCard() {
     var r = route(), n = r ? active() : 0, four = r ? uturnsOf(r.id) : false;
-    var k = r ? counts(r.id, n) : counts(null, 0), T = r ? TYPES[typeOf(r.id, n)] : null;
+    var k = r ? counts(r.id, n) : counts(null, 0), T = r ? typeAt(r.id, n) : null;
     var last = undoTarget(), head = '<span class="spt">' + (T && T.free ? 'PASSES' : 'TO GO') + '</span>';
     if (last) {
       var when = stamp(last.ts);
@@ -3328,7 +3449,8 @@
         '<span class="spt">LAST</span>' + icon(MAN_ICON[last.man]) + last.side + ' · ' + when + '</span>';
     }
     var rings = (four ? MANS : MANS_THREE).map(function (m) {
-      var share = T ? T.split[m] : 0, have = k.m[m], cls = 'mz' + (m === 'St' ? '' : m === 'U' ? ' u' : ' low'), val, fill;
+      // a maneuver missing from the split, U-turn on Straight only, has the share 0 (v0.40: it read NaN over)
+      var share = T ? (T.split[m] || 0) : 0, have = k.m[m], cls = 'mz' + (m === 'St' ? '' : m === 'U' ? ' u' : ' low'), val, fill;
       // item 39: a maneuver the type does not allow fades with a dash on an
       // empty track while it has no passes; with passes it reads "+26 over"
       // below, like a count past a share (frames S and T)
@@ -3429,23 +3551,23 @@
       }).join('') + '</div>';
     }
     if (m && m.name === 'type' && r) {
-      // item 60: in a U-turn city Free first, then the six types, then
-      // Other team, every tile with four places; elsewhere the six types,
-      // then Other team. Other team is dimmed with "Only on a POI with no
-      // passes" on a POI that has passes (frame Z), and a tap on it does
-      // nothing (pickType)
+      // item 60: in a U-turn city the six types, Other team, then Free last
+      // (v0.40), every tile with four places and every line the POI's own
+      // numbers (spec, frame Z); elsewhere the six types, then Other team.
+      // Other team is dimmed with "Only on a POI with no passes" on a POI
+      // that has passes (frame Z), and a tap on it does nothing (pickType)
       var n = active(), cur = typeOf(r.id, n), four = uturnsOf(r.id), may = untouched(r.id, n);
       h += '<div class="pop" role="dialog" aria-label="POI type"><div class="pt">POI ' + n + ' TYPE</div>' + (four ? TYPE_ORDER_U : TYPE_ORDER).map(function (t) {
-        var off = t === 'team' && !may;
-        return '<button class="opt' + (t === cur ? ' on' : '') + (off ? ' off' : '') + '" type="button" data-type="' + t + '">' + ticon(t, false, four) +
-          '<span class="ol"><b>' + TYPES[t].label + '</b><small>' + (off ? 'Only on a POI with no passes' : splitLine(t, false)) + '</small></span>' + icon('i-check', 'chk') + '</button>';
+        var off = t === 'team' && !may, T = spec(t, r.id, n);
+        return '<button class="opt' + (t === cur ? ' on' : '') + (off ? ' off' : '') + '" type="button" data-type="' + t + '">' + ticon(t, T.split, false, four) +
+          '<span class="ol"><b>' + T.label + '</b><small>' + (off ? 'Only on a POI with no passes' : splitLine(T, false)) + '</small></span>' + icon('i-check', 'chk') + '</button>';
       }).join('') + '</div>';
     }
     if (m && m.name === 'sync') h += syncHtml();
     if (find('grid') && r) {
       var cells = '', act = active();
       for (var i = 1; i <= r.poiCount; i++) {
-        var k = counts(r.id, i), st = statusOf(r.id, i, k), T = TYPES[typeOf(r.id, i)], f = fitFix(k, T);
+        var k = counts(r.id, i), st = statusOf(r.id, i, k), T = typeAt(r.id, i), f = fitFix(k, T);
         var pct = T.target ? Math.round(Math.min(f.fit, T.target) / T.target * 100) : 0;
         cells += '<button class="cell' + (st ? ' ' + st : '') + (i === act ? ' active' : '') + '" type="button" data-poi="' + i + '" aria-label="POI ' + i + '">' +
           '<span class="cn">' + i + '</span>' + (SIGN[st] ? icon(SIGN[st], 'ci') : '<span class="cb"><i style="width: ' + pct + '%"></i></span>') + '</button>';
@@ -3995,7 +4117,7 @@
   // "57 of 70" after a change, as the counter reads it (item 36): the
   // passes that fit the POI's type (item 4)
   function tally(rid, n) {
-    var T = TYPES[typeOf(rid, n)];
+    var T = typeAt(rid, n);
     return T.target ? fitFix(counts(rid, n), T).fit + ' of ' + T.target : T.label;
   }
   function passWords(e) { return icon(MAN_ICON[e.man]) + esc(SIDE_NAME[e.side]); }
@@ -4274,11 +4396,13 @@
   // the first city on a tablet with none becomes the city in use, a later
   // one does not; its page opens in place of the form. Every city added
   // from v0.38 on has U-turns, uturns true with no switch (item 21,
-  // data-model.md "Cities and routes"): its tracker has a U-turn column,
-  // so its new POIs start as Free; a city stored before keeps its value
+  // data-model.md "Cities and routes"): its tracker has a U-turn column;
+  // a city stored before keeps its value. Its new POIs start as
+  // Intersection (v0.40), so it carries the mark keptFree from the start
+  // and the one-time keep-Free never runs on it (keepFree)
   function saveCity(v) {
     var c = { id: uuid(), name: v.name, sample: false, mailboxUrl: null, token: null, routes: [], lastRoute: null,
-              testedAt: null, testResult: null, sentAt: null, keyRejected: false, uturns: true };
+              testedAt: null, testResult: null, sentAt: null, keyRejected: false, uturns: true, keptFree: true };
     var first = S.cities.length === 0;
     if (change(function () { S.cities.push(c); if (first) S.device.cityId = c.id; }, 'change')) { popPage(); pushPage({ page: 'city', cityId: c.id }); }
     render();
@@ -4504,7 +4628,7 @@
     if (e.kind !== 'target' || e.state !== 'rejected') return;
     // the type the change replaced, else the type the sheet's target reads
     // as, which queues nothing (finding A3 of the type change audit)
-    var rid = e.routeId, n = e.poi, t = TYPES[e.fromType] ? e.fromType : defaultType(baseTarget(rid, n), uturnsOf(rid));
+    var rid = e.routeId, n = e.poi, t = TYPES[e.fromType] ? e.fromType : defaultType(baseTarget(rid, n));
     changeType(rid, n, t, function () { S.events = S.events.filter(function (x) { return x.id !== id; }); });
   }
 
@@ -4522,16 +4646,21 @@
   // rest that do not fit were typed into the sheet by hand. Not drivable
   // counts every pass, the larger of the sides' and the maneuvers'
   // totals, so a POI with a sheet error asks too and names it first.
-  // U-turn passes count as a maneuver the new type does not allow, for every
-  // type but Free: "With Intersection, a POI has no U-turn passes. This POI
-  // has 3." On a change to Free the passes past 70 are too many: "With
-  // Free, a POI takes 70 passes. This POI has 73: 3 too many.", and the
-  // switch takes this tablet's newest passes of any maneuver, as many as
-  // are past 70 (item 64, v0.37). Other team is offered only on a POI with
-  // no passes (item 60), so it never asks; it is counted like Not drivable
-  // all the same.
+  // The numbers are the POI's own (spec, v0.40): in a U-turn city
+  // Intersection, No straight, No left and No right allow U-turn at the
+  // POI's number, so U-turn passes past it are too many, "With
+  // Intersection, a POI needs 3 U-turn passes. This POI has 5: 2 too
+  // many.", while on Straight only, Not drivable and Other team, and on
+  // every type in a city without U-turns, U-turn passes count as a
+  // maneuver the type does not allow: "With Straight only, a POI has no
+  // Left or Right or U-turn passes. This POI has 3." On a change to Free
+  // the passes past 70 are too many: "With Free, a POI takes 70 passes.
+  // This POI has 73: 3 too many.", and the switch takes this tablet's
+  // newest passes of any maneuver, as many as are past 70 (item 64,
+  // v0.37). Other team is offered only on a POI with no passes (item 60),
+  // so it never asks; it is counted like Not drivable all the same.
   function consequences(rid, n, t) {
-    var T = TYPES[t], b = base(rid, n), I = ix();
+    var T = spec(t, rid, n), b = base(rid, n), I = ix();
     var sheet = countsOf(b), wait = zeros(), mine = { L: [], St: [], R: [], U: [] };
     S.events.forEach(function (e) {
       if (e.routeId !== rid || e.poi !== n || e.kind !== 'pass') return;
@@ -5893,18 +6022,19 @@
     return { t: 'free', c: 1 + ((n * 11) % 69) };
   }
   function sample202(n) { return { t: 'free', c: n <= 20 ? 70 : 0 }; }
-  // fills a route's baseline, eight counts per POI, and stores the types
-  // the city's default does not give (defaultType); uturns is the city's
-  function fillRoute(r, gen, uturns) {
+  // fills a route's baseline, eight counts per POI, spread by the POI's own
+  // numbers (spec), and stores the types the sheet's target does not give
+  // (defaultType), Free among them since v0.40; the route is in its city
+  function fillRoute(r, gen) {
     var bl = S.baseline[r.id] = {}, ty = S.types[r.id] = {};
     for (var n = 1; n <= r.poiCount; n++) {
-      var p = gen(n), T = TYPES[p.t];
+      var p = gen(n), T = spec(p.t, r.id, n);
       var m = p.m || spread(p.c, MANS, T.free ? FREE_SPREAD : T.split);
       if (m.U === undefined) m.U = 0;
       var c = m.L + m.St + m.R + m.U;
       var s = p.s || spread(c, SIDES, { N: 3 + (n * 7) % 5, S: 3 + (n * 3) % 4, W: 2 + (n * 5) % 4, E: 1 + (n * 11) % 3 });
       bl[n] = { c: [s.N, s.S, s.W, s.E, m.L, m.St, m.R, m.U], target: T.target };
-      if (defaultType(T.target, uturns) !== p.t) ty[n] = p.t;
+      if (defaultType(T.target) !== p.t) ty[n] = p.t;
     }
   }
   // seeds whichever of the two sample cities is missing, in one write, and
@@ -5918,8 +6048,8 @@
         var r2 = { id: uuid(), code: 'SAMPLE-002', poiCount: 150, checked: true, loadedAt: now - 29 * 60 * MIN, lastPoi: null };
         S.cities.push({ id: SAMPLE_ID, name: 'Sample city', sample: true, mailboxUrl: null, token: null, routes: [r1, r2],
                         lastRoute: r1.id, testedAt: null, testResult: null, sentAt: null, keyRejected: false, uturns: false });
-        fillRoute(r1, sample001, false);
-        fillRoute(r2, sample002, false);
+        fillRoute(r1, sample001);
+        fillRoute(r2, sample002);
         // passes this tablet recorded earlier, all delivered and inside the
         // baseline already (history.html frame A)
         [[136, 'L', 'S', 2], [136, 'R', 'N', 4], [136, 'St', 'W', 11], [136, 'L', 'N', 15], [136, 'R', 'S', 20],
@@ -5935,13 +6065,15 @@
       }
       if (!haveU) {
         // the second sample city, with U-turns on and no events of its own:
-        // its History fills as passes are recorded
+        // its History fills as passes are recorded. Its Free POIs are
+        // stored as Free (fillRoute), so it carries the mark keptFree and
+        // the one-time keep-Free never runs on it (keepFree)
         var u1 = { id: uuid(), code: 'SAMPLE-201', poiCount: 120, checked: true, loadedAt: now - 29 * 60 * MIN, lastPoi: 56 };
         var u2 = { id: uuid(), code: 'SAMPLE-202', poiCount: 58, checked: true, loadedAt: now - 29 * 60 * MIN, lastPoi: null };
         S.cities.push({ id: SAMPLE_U_ID, name: 'Sample U-turn city', sample: true, mailboxUrl: null, token: null, routes: [u1, u2],
-                        lastRoute: u1.id, testedAt: null, testResult: null, sentAt: null, keyRejected: false, uturns: true });
-        fillRoute(u1, sample201, true);
-        fillRoute(u2, sample202, true);
+                        lastRoute: u1.id, testedAt: null, testResult: null, sentAt: null, keyRejected: false, uturns: true, keptFree: true });
+        fillRoute(u1, sample201);
+        fillRoute(u2, sample202);
       }
       S.device.cityId = SAMPLE_ID;
     }, 'change');
@@ -5985,6 +6117,7 @@
     writable = ok && !blocked;
     if (writable) {
       try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () { /* fine */ }); } catch (err) { /* fine */ }
+      keepFree();   // v0.40: once per U-turn city stored before, before the sample is seeded with its mark
       if (wantSample) seedSample();
     }
     render();
